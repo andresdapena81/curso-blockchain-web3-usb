@@ -1,0 +1,11 @@
+node_modules/
+artifacts/
+cache/
+types/
+coverage/
+_qa/
+__pycache__/
+.pytest_cache/
+ignition/deployments/
+.env
+*.log

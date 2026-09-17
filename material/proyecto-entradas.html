@@ -1,0 +1,1079 @@
+<title>Proyecto · Entradas con reventa controlada</title>
+
+<style>
+/* ============================================================
+   SISTEMA DE TOKENS
+   Paleta derivada de las variables CSS oficiales de usbmed.edu.co
+   ============================================================ */
+
+:root{
+  /* --- Marca institucional --- */
+  --usb-naranja:    #F07F06;   /* --color-primary   */
+  --usb-naranja-2:  #F86F03;   /* --color-secondary */
+  --usb-ambar:      #FFA41B;   /* --color-tertiary  */
+  --usb-violeta:    #7152E9;   /* --color-tertiary-2 */
+  --usb-ocre:       #A35604;   /* --color-dark      */
+  --usb-gris:       #6F6B80;   /* --color-body      */
+
+  /* --- Superficies y tinta (TEMA CLARO) --- */
+  --ground:      #FFFFFF;
+  --surface:     #FAF9FB;
+  --surface-alt: #F2F0F5;
+  --ink:         #0F0F11;
+  --ink-soft:    #3A3844;
+  --muted:       #6F6B80;
+  --rule:        #0F0F11;
+  --rule-soft:   #D9D6E0;
+
+  /* --- Acentos legibles por tema --- */
+  --accent:      #F07F06;   /* relleno / reglas / bloques */
+  --accent-ink:  #A35604;   /* texto sobre fondo claro    */
+  --accent-on:   #0F0F11;   /* tinta sobre relleno naranja*/
+  --violet:      #7152E9;
+  --violet-ink:  #5638C9;
+  --shadow:      #0F0F11;
+
+  /* --- Tipografía --- */
+  --font-display: "Arial Black","Helvetica Neue","Segoe UI Black",Impact,system-ui,sans-serif;
+  --font-body:    Georgia,"Iowan Old Style","Times New Roman",serif;
+  --font-mono:    ui-monospace,"Cascadia Mono","Segoe UI Mono",Consolas,"SF Mono",Menlo,monospace;
+
+  /* --- Métrica --- */
+  --rail: 190px;
+  --gap: 44px;
+  --maxw: 1240px;
+}
+
+@media (prefers-color-scheme: dark){
+  :root:not([data-theme="light"]){
+    --ground:      #0F0F11;
+    --surface:     #17161A;
+    --surface-alt: #201E25;
+    --ink:         #F4F2F7;
+    --ink-soft:    #CFCBD8;
+    --muted:       #9A95A8;
+    --rule:        #F4F2F7;
+    --rule-soft:   #35323D;
+    --accent:      #F07F06;
+    --accent-ink:  #F5A03F;
+    --accent-on:   #0F0F11;
+    --violet:      #8F76FF;
+    --violet-ink:  #A794FF;
+    --shadow:      #F07F06;
+  }
+}
+
+:root[data-theme="dark"]{
+  --ground:      #0F0F11;
+  --surface:     #17161A;
+  --surface-alt: #201E25;
+  --ink:         #F4F2F7;
+  --ink-soft:    #CFCBD8;
+  --muted:       #9A95A8;
+  --rule:        #F4F2F7;
+  --rule-soft:   #35323D;
+  --accent:      #F07F06;
+  --accent-ink:  #F5A03F;
+  --accent-on:   #0F0F11;
+  --violet:      #8F76FF;
+  --violet-ink:  #A794FF;
+  --shadow:      #F07F06;
+}
+
+/* ============================================================
+   BASE
+   ============================================================ */
+
+*{ box-sizing:border-box; }
+
+body{
+  background: var(--ground);
+  color: var(--ink);
+  font-family: var(--font-body);
+  font-size: 17px;
+  line-height: 1.72;
+  margin: 0;
+  padding: 0 24px 120px;
+  -webkit-font-smoothing: antialiased;
+}
+
+.wrap{ max-width: var(--maxw); margin: 0 auto; }
+
+p{ margin: 0 0 1.1em; max-width: 68ch; }
+strong{ font-weight:700; color: var(--ink); }
+em{ font-style: italic; }
+
+a{ color: var(--accent-ink); text-underline-offset: 3px; text-decoration-thickness: 2px; }
+a:focus-visible, button:focus-visible{
+  outline: 3px solid var(--violet); outline-offset: 3px;
+}
+
+hr{ border:0; border-top:2px solid var(--rule); margin: 56px 0; }
+
+/* ============================================================
+   PORTADA
+   ============================================================ */
+
+.cover{
+  border: 3px solid var(--rule);
+  margin: 32px 0 0;
+  background: var(--ground);
+}
+
+.cover-top{
+  display: flex;
+  flex-wrap: wrap;
+  align-items: stretch;
+  border-bottom: 3px solid var(--rule);
+}
+
+.cover-num{
+  font-family: var(--font-display);
+  font-size: clamp(90px, 17vw, 200px);
+  line-height: .78;
+  letter-spacing: -.05em;
+  padding: 26px 30px 20px;
+  background: var(--accent);
+  color: var(--accent-on);
+  border-right: 3px solid var(--rule);
+  display: flex; align-items: flex-end;
+}
+
+.cover-head{ padding: 26px 30px; flex: 1 1 420px; display:flex; flex-direction:column; justify-content:space-between; gap: 18px; }
+
+.eyebrow{
+  font-family: var(--font-mono);
+  font-size: 11.5px;
+  letter-spacing: .16em;
+  text-transform: uppercase;
+  color: var(--muted);
+  margin: 0;
+}
+
+h1{
+  font-family: var(--font-display);
+  font-size: clamp(28px, 4.4vw, 52px);
+  line-height: 1.02;
+  letter-spacing: -.035em;
+  text-transform: uppercase;
+  text-wrap: balance;
+  margin: 0;
+  color: var(--ink);
+}
+
+.cover-meta{
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(160px,1fr));
+  font-family: var(--font-mono);
+  font-size: 12px;
+}
+.cover-meta div{
+  padding: 14px 18px;
+  border-right: 2px solid var(--rule-soft);
+}
+.cover-meta div:last-child{ border-right: 0; }
+.cover-meta b{ display:block; font-size:10.5px; letter-spacing:.14em; text-transform:uppercase; color: var(--muted); font-weight:400; margin-bottom:4px; }
+
+/* ============================================================
+   REJILLA CON RIEL
+   ============================================================ */
+
+.grid{
+  display: grid;
+  grid-template-columns: var(--rail) minmax(0,1fr);
+  gap: var(--gap);
+  align-items: start;
+}
+.rail{
+  font-family: var(--font-mono);
+  font-size: 11.5px;
+  line-height: 1.55;
+  color: var(--muted);
+  letter-spacing: .04em;
+  position: sticky;
+  top: 24px;
+  border-top: 3px solid var(--rule);
+  padding-top: 12px;
+}
+.rail b{ display:block; text-transform:uppercase; letter-spacing:.14em; color: var(--ink); font-weight:700; font-size:11px; }
+.rail .tick{ color: var(--accent-ink); font-weight:700; }
+
+@media (max-width: 900px){
+  .grid{ grid-template-columns: 1fr; gap: 14px; }
+  .rail{ position: static; }
+}
+
+/* ============================================================
+   TÍTULOS DE SECCIÓN
+   ============================================================ */
+
+section{ margin-top: 64px; scroll-margin-top: 20px; }
+
+h2{
+  font-family: var(--font-display);
+  font-size: clamp(24px, 3.4vw, 38px);
+  line-height: 1.06;
+  letter-spacing: -.03em;
+  text-transform: uppercase;
+  text-wrap: balance;
+  margin: 0 0 20px;
+  padding-bottom: 14px;
+  border-bottom: 3px solid var(--rule);
+}
+
+h3{
+  font-family: var(--font-display);
+  font-size: clamp(17px, 2vw, 22px);
+  line-height: 1.18;
+  letter-spacing: -.015em;
+  text-transform: uppercase;
+  margin: 44px 0 12px;
+  text-wrap: balance;
+}
+
+h4{
+  font-family: var(--font-mono);
+  font-size: 12.5px;
+  letter-spacing: .13em;
+  text-transform: uppercase;
+  color: var(--accent-ink);
+  margin: 32px 0 10px;
+  font-weight: 700;
+}
+
+/* Marcador de bloque de clase */
+.bloque{
+  display:flex; flex-wrap:wrap; align-items:baseline; gap: 14px;
+  background: var(--ink);
+  color: var(--ground);
+  padding: 12px 18px;
+  font-family: var(--font-mono);
+  font-size: 12px;
+  letter-spacing: .12em;
+  text-transform: uppercase;
+  margin-bottom: 0;
+}
+.bloque .b-min{ color: var(--accent); font-weight:700; }
+.bloque .b-tipo{ margin-left:auto; color: var(--ground); opacity:.62; }
+
+/* ============================================================
+   SIGLAS EN LÍNEA  — expansión siempre visible
+   ============================================================ */
+
+.sigla{
+  font-family: var(--font-mono);
+  font-weight: 700;
+  font-size: .92em;
+  color: var(--ink);
+  white-space: nowrap;
+  border-bottom: 2px solid var(--violet);
+}
+.sigla > i{
+  font-style: normal;
+  font-weight: 400;
+  font-size: .84em;
+  color: var(--violet-ink);
+  letter-spacing: .01em;
+}
+.sigla > i::before{ content:" ["; }
+.sigla > i::after{ content:"]"; }
+
+/* ============================================================
+   FICHAS (cajas brutalistas)
+   ============================================================ */
+
+.ficha{
+  border: 2px solid var(--rule);
+  background: var(--surface);
+  padding: 20px 22px;
+  margin: 26px 0;
+}
+.ficha > :last-child{ margin-bottom:0; }
+
+.ficha-tit{
+  font-family: var(--font-mono);
+  font-size: 11px;
+  letter-spacing: .15em;
+  text-transform: uppercase;
+  font-weight: 700;
+  margin: 0 0 12px;
+  padding-bottom: 8px;
+  border-bottom: 2px solid var(--rule-soft);
+  color: var(--muted);
+  max-width: none;
+  display: flex; flex-wrap: wrap; gap: 10px; align-items: baseline;
+}
+.ficha-tit span{ color: var(--ink); }
+
+/* variantes */
+.ficha--termino{ border-color: var(--violet); box-shadow: 6px 6px 0 var(--violet); background: var(--ground); }
+.ficha--termino .ficha-tit{ color: var(--violet-ink); border-bottom-color: var(--violet); }
+
+.ficha--profundidad{ border-left-width: 10px; }
+
+.ficha--alerta{ border-color: var(--accent); box-shadow: 6px 6px 0 var(--accent); background: var(--ground); }
+.ficha--alerta .ficha-tit{ color: var(--accent-ink); border-bottom-color: var(--accent); }
+
+.ficha--docente{ background: var(--surface-alt); border-style: dashed; }
+
+.ficha--pregunta{ border-width: 3px; background: var(--ground); }
+.ficha--pregunta p{ font-family: var(--font-display); font-size: clamp(17px,2.2vw,23px); line-height:1.25; letter-spacing:-.02em; text-transform: none; }
+
+/* Definición formal dentro de ficha de término */
+.def{
+  font-family: var(--font-mono);
+  font-size: 13px;
+  line-height: 1.6;
+  background: var(--surface-alt);
+  border-left: 4px solid var(--violet);
+  padding: 12px 14px;
+  margin: 0 0 14px;
+  max-width: none;
+  color: var(--ink-soft);
+}
+.def b{ color: var(--ink); }
+
+/* ============================================================
+   LISTAS
+   ============================================================ */
+
+ul, ol{ max-width: 68ch; padding-left: 1.25em; margin: 0 0 1.2em; }
+li{ margin-bottom: .55em; }
+li::marker{ color: var(--accent-ink); font-weight:700; }
+
+ul.plain{ list-style:none; padding-left:0; }
+ul.plain > li{
+  border-top: 2px solid var(--rule-soft);
+  padding: 12px 0 12px 0;
+  margin: 0;
+}
+ul.plain > li:last-child{ border-bottom: 2px solid var(--rule-soft); }
+
+/* Pasos numerados del laboratorio */
+ol.pasos{ list-style: none; padding-left:0; counter-reset: paso; max-width:none; }
+ol.pasos > li{
+  counter-increment: paso;
+  display: grid;
+  grid-template-columns: 62px minmax(0,1fr);
+  gap: 20px;
+  border-top: 2px solid var(--rule);
+  padding: 20px 0;
+  margin: 0;
+}
+ol.pasos > li::before{
+  content: counter(paso, decimal-leading-zero);
+  font-family: var(--font-display);
+  font-size: 34px;
+  line-height: .9;
+  letter-spacing: -.04em;
+  color: var(--accent);
+}
+ol.pasos > li:last-child{ border-bottom: 2px solid var(--rule); }
+ol.pasos h4{ margin-top: 0; }
+
+/* ============================================================
+   TABLAS
+   ============================================================ */
+
+.tabla-wrap{ overflow-x: auto; margin: 26px 0; border: 2px solid var(--rule); }
+table{
+  border-collapse: collapse;
+  width: 100%;
+  min-width: 620px;
+  font-family: var(--font-mono);
+  font-size: 13px;
+  line-height: 1.5;
+  font-variant-numeric: tabular-nums;
+}
+th{
+  background: var(--ink);
+  color: var(--ground);
+  text-align: left;
+  font-weight: 700;
+  font-size: 10.5px;
+  letter-spacing: .12em;
+  text-transform: uppercase;
+  padding: 11px 14px;
+  vertical-align: bottom;
+}
+td{
+  padding: 12px 14px;
+  border-top: 2px solid var(--rule-soft);
+  vertical-align: top;
+  color: var(--ink-soft);
+}
+td:first-child{ color: var(--ink); font-weight:700; }
+tbody tr:nth-child(even) td{ background: var(--surface); }
+
+/* ============================================================
+   CÓDIGO / DATOS
+   ============================================================ */
+
+code{
+  font-family: var(--font-mono);
+  font-size: .88em;
+  background: var(--surface-alt);
+  padding: 2px 6px;
+  border: 1px solid var(--rule-soft);
+  word-break: break-word;
+}
+pre{
+  font-family: var(--font-mono);
+  font-size: 12.5px;
+  line-height: 1.6;
+  background: var(--ink);
+  color: #F4F2F7;
+  border: 2px solid var(--rule);
+  padding: 16px 18px;
+  overflow-x: auto;
+  margin: 20px 0;
+}
+pre code{ background: none; border: 0; padding: 0; color: inherit; font-size: inherit; }
+pre .c{ color: #9A95A8; }
+pre .k{ color: var(--usb-ambar); }
+
+/* ============================================================
+   ÍNDICE
+   ============================================================ */
+
+.toc{ border: 2px solid var(--rule); }
+.toc ol{ list-style:none; margin:0; padding:0; max-width:none; counter-reset: toc; }
+.toc li{ margin:0; border-top: 2px solid var(--rule-soft); }
+.toc li:first-child{ border-top:0; }
+.toc a{
+  display:flex; gap:16px; align-items:baseline;
+  padding: 13px 18px;
+  font-family: var(--font-mono);
+  font-size: 13px;
+  text-decoration:none;
+  color: var(--ink);
+}
+.toc a:hover{ background: var(--accent); color: var(--accent-on); }
+.toc a .n{ color: var(--muted); font-size:11px; letter-spacing:.1em; min-width: 46px; }
+.toc a:hover .n{ color: var(--accent-on); }
+.toc a .t{ flex:1; }
+.toc a .m{ color: var(--muted); font-size:11px; }
+.toc a:hover .m{ color: var(--accent-on); }
+
+/* ============================================================
+   LÍNEA DE TIEMPO DE LA SESIÓN
+   ============================================================ */
+
+.timeline{ display:grid; gap:0; border:2px solid var(--rule); margin: 26px 0; }
+.tl-row{
+  display:grid;
+  grid-template-columns: 96px 1fr;
+  border-top: 2px solid var(--rule-soft);
+}
+.tl-row:first-child{ border-top:0; }
+.tl-min{
+  font-family: var(--font-mono);
+  font-size: 12px;
+  font-weight:700;
+  padding: 14px;
+  background: var(--surface-alt);
+  border-right: 2px solid var(--rule-soft);
+  color: var(--accent-ink);
+  font-variant-numeric: tabular-nums;
+}
+.tl-body{ padding: 14px 18px; }
+.tl-body b{ display:block; font-family: var(--font-mono); font-size:12px; letter-spacing:.08em; text-transform:uppercase; }
+.tl-body span{ font-size:15px; color: var(--ink-soft); }
+
+/* ============================================================
+   BARRA SUPERIOR
+   ============================================================ */
+
+.topbar{
+  display:flex; flex-wrap:wrap; gap:12px; align-items:center;
+  font-family: var(--font-mono);
+  font-size: 11px;
+  letter-spacing:.12em;
+  text-transform: uppercase;
+  color: var(--muted);
+  padding: 14px 0 0;
+}
+.topbar .dot{ width:10px; height:10px; background: var(--accent); display:inline-block; }
+.topbar .sep{ margin-left:auto; }
+
+/* ============================================================
+   GLOSARIO
+   ============================================================ */
+
+.glos{ border:2px solid var(--rule); }
+.glos-row{
+  display:grid;
+  grid-template-columns: minmax(150px, 220px) minmax(0,1fr);
+  border-top: 2px solid var(--rule-soft);
+}
+.glos-row:first-child{ border-top:0; }
+.glos-k{
+  padding: 14px 16px;
+  font-family: var(--font-mono);
+  font-size: 13px;
+  font-weight: 700;
+  background: var(--surface);
+  border-right: 2px solid var(--rule-soft);
+  color: var(--ink);
+  word-break: break-word;
+}
+.glos-k em{ display:block; font-style:normal; font-weight:400; font-size:11px; color: var(--muted); margin-top:4px; letter-spacing:.03em; }
+.glos-v{ padding: 14px 18px; font-size: 15.5px; line-height:1.62; color: var(--ink-soft); }
+.glos-v p{ margin:0; max-width:none; }
+@media (max-width:700px){
+  .glos-row{ grid-template-columns: 1fr; }
+  .glos-k{ border-right:0; border-bottom:2px solid var(--rule-soft); }
+}
+
+/* ============================================================
+   PIE
+   ============================================================ */
+
+footer{
+  margin-top: 80px;
+  border-top: 3px solid var(--rule);
+  padding-top: 20px;
+  font-family: var(--font-mono);
+  font-size: 11.5px;
+  line-height: 1.7;
+  color: var(--muted);
+  letter-spacing: .04em;
+}
+
+@media (prefers-reduced-motion: reduce){
+  *{ animation: none !important; transition: none !important; }
+}
+
+/* ============================================================
+   SISTEMA DE ICONOGRAFÍA
+   Iconos monolineales de 2px, trazo recto y uniones en inglete,
+   coherentes con el tratamiento brutalista del documento.
+   Se aplican por máscara CSS para que hereden el color del tema.
+   ============================================================ */
+
+.ficha{ --icon: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%23000' stroke-width='2' stroke-linecap='square'%3E%3Cpath d='M9 4H4v16h5M15 4h5v16h-5M10.5 12h3'/%3E%3C/svg%3E"); }
+.ficha--profundidad{ --icon: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%23000' stroke-width='2' stroke-linecap='square'%3E%3Cpath d='M12 3 2 8l10 5 10-5-10-5zM2 14l10 5 10-5'/%3E%3C/svg%3E"); }
+.ficha--alerta{ --icon: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%23000' stroke-width='2' stroke-linecap='square'%3E%3Cpath d='M12 3 22 20H2zM12 10v4M12 16.5v1'/%3E%3C/svg%3E"); }
+.ficha--docente{ --icon: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%23000' stroke-width='2' stroke-linecap='square'%3E%3Cpath d='M3 4h18v12H3zM12 16v4M8 20h8'/%3E%3C/svg%3E"); }
+.ficha--pregunta{ --icon: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%23000' stroke-width='2' stroke-linecap='square'%3E%3Cpath d='M4 4h16v12H9l-5 4z'/%3E%3C/svg%3E"); }
+
+.ficha-tit{ align-items: center; }
+.ficha-tit::before{
+  content:"";
+  flex: 0 0 auto;
+  width: 17px; height: 17px;
+  background-color: currentColor;
+  -webkit-mask: var(--icon) center/contain no-repeat;
+  mask: var(--icon) center/contain no-repeat;
+}
+
+/* --- Iconos de sección --- */
+h2::before{
+  content:"";
+  display:inline-block;
+  vertical-align: -0.06em;
+  width: .78em; height: .78em;
+  margin-right: .44em;
+  background-color: var(--accent);
+  -webkit-mask: var(--icon, none) center/contain no-repeat;
+  mask: var(--icon, none) center/contain no-repeat;
+}
+#uso     { --icon: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%23000' stroke-width='2' stroke-linecap='square'%3E%3Cpath d='M4 4h7v16H4zM13 4h7v16h-7z'/%3E%3C/svg%3E"); }
+#mapa    { --icon: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%23000' stroke-width='2' stroke-linecap='square'%3E%3Cpath d='M3 3h7v7H3zM14 3h7v7h-7zM3 14h7v7H3zM14 14h7v7h-7z'/%3E%3C/svg%3E"); }
+#a1      { --icon: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%23000' stroke-width='2' stroke-linecap='square'%3E%3Cpath d='M2 12h8M10 12 20 6M20 6l-5 1M20 6l-1 5M10 12 20 18M20 18l-5-1M20 18l-1-5'/%3E%3C/svg%3E"); }
+#a2      { --icon: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%23000' stroke-width='2' stroke-linecap='square'%3E%3Cpath d='M12 3 3 7v5c0 5 4 8 9 9 5-1 9-4 9-9V7z'/%3E%3C/svg%3E"); }
+#a3      { --icon: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%23000' stroke-width='2' stroke-linecap='square'%3E%3Cpath d='M12 3a9 9 0 100 18 9 9 0 000-18zM12 7v5l4 2'/%3E%3C/svg%3E"); }
+#a4      { --icon: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%23000' stroke-width='2' stroke-linecap='square'%3E%3Cpath d='M4 4v6a4 4 0 004 4h12M16 10l4 4-4 4'/%3E%3C/svg%3E"); }
+#a5      { --icon: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%23000' stroke-width='2' stroke-linecap='square'%3E%3Cpath d='M3 8h5v8H3zM11 8h5v8h-5zM19 8h2v8h-2zM8 12h3M16 12h3'/%3E%3C/svg%3E"); }
+#a6      { --icon: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%23000' stroke-width='2' stroke-linecap='square'%3E%3Cpath d='M9 3h6v4H9zM2 17h6v4H2zM16 17h6v4h-6zM12 7v3M5 17v-3h14v3'/%3E%3C/svg%3E"); }
+#a7      { --icon: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%23000' stroke-width='2' stroke-linecap='square'%3E%3Cpath d='M12 2 22 12 12 22 2 12zM12 8v4M12 15.5v1'/%3E%3C/svg%3E"); }
+#b1      { --icon: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%23000' stroke-width='2' stroke-linecap='square'%3E%3Cpath d='M12 3a2 2 0 100 4 2 2 0 000-4zM5 17a2 2 0 100 4 2 2 0 000-4zM19 17a2 2 0 100 4 2 2 0 000-4zM12 7v3M11 11 6.5 15.5M13 11l4.5 4.5'/%3E%3C/svg%3E"); }
+#b2      { --icon: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%23000' stroke-width='2' stroke-linecap='square'%3E%3Cpath d='M3 6l6-3 6 3 6-3v15l-6 3-6-3-6 3zM9 3v15M15 6v15'/%3E%3C/svg%3E"); }
+#b3      { --icon: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%23000' stroke-width='2' stroke-linecap='square'%3E%3Cpath d='M3 3v18h18M7 17v-4M12 17V9M17 17v-7'/%3E%3C/svg%3E"); }
+#b4      { --icon: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%23000' stroke-width='2' stroke-linecap='square'%3E%3Cpath d='M3 20v-2a3 3 0 013-3h4a3 3 0 013 3v2M8 5a3 3 0 106 0 3 3 0 00-6 0M16 20v-2a3 3 0 00-1.5-2.6M15.5 5.3a3 3 0 010 5.4'/%3E%3C/svg%3E"); }
+#cierre  { --icon: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%23000' stroke-width='2' stroke-linecap='square'%3E%3Cpath d='M5 21V4h14l-3 4 3 4H5'/%3E%3C/svg%3E"); }
+#falsos  { --icon: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%23000' stroke-width='2' stroke-linecap='square'%3E%3Cpath d='M12 3a9 9 0 100 18 9 9 0 000-18zM8.5 8.5l7 7M15.5 8.5l-7 7'/%3E%3C/svg%3E"); }
+#glosario{ --icon: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%23000' stroke-width='2' stroke-linecap='square'%3E%3Cpath d='M3 6h2M8 6h13M3 12h2M8 12h13M3 18h2M8 18h13'/%3E%3C/svg%3E"); }
+#fuentes { --icon: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%23000' stroke-width='2' stroke-linecap='square'%3E%3Cpath d='M6 3h9l4 4v14H6zM15 3v4h4M9 12h7M9 16h7'/%3E%3C/svg%3E"); }
+
+/* --- Icono del marcador de bloque --- */
+.bloque::before{
+  content:"";
+  width: 15px; height: 15px;
+  background-color: var(--accent);
+  -webkit-mask: var(--icon) center/contain no-repeat;
+  mask: var(--icon) center/contain no-repeat;
+  flex: 0 0 auto;
+}
+.bloque--a{ --icon: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%23000' stroke-width='2' stroke-linecap='square'%3E%3Cpath d='M12 3a9 9 0 100 18 9 9 0 000-18zM12 8v1M12 12v4'/%3E%3C/svg%3E"); }
+.bloque--b{ --icon: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%23000' stroke-width='2' stroke-linecap='square'%3E%3Cpath d='M12 3 2 8l10 5 10-5-10-5zM2 14l10 5 10-5'/%3E%3C/svg%3E"); }
+.bloque--c{ --icon: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%23000' stroke-width='2' stroke-linecap='square'%3E%3Cpath d='M5 21V4h14l-3 4 3 4H5'/%3E%3C/svg%3E"); }
+
+/* --- Icono de la barra superior: eslabones --- */
+.topbar .dot{
+  width: 16px; height: 16px;
+  background-color: var(--accent);
+  -webkit-mask: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%23000' stroke-width='2' stroke-linecap='square'%3E%3Cpath d='M9 12h6M10 8H8a4 4 0 000 8h2M14 8h2a4 4 0 010 8h-2'/%3E%3C/svg%3E") center/contain no-repeat;
+  mask: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%23000' stroke-width='2' stroke-linecap='square'%3E%3Cpath d='M9 12h6M10 8H8a4 4 0 000 8h2M14 8h2a4 4 0 010 8h-2'/%3E%3C/svg%3E") center/contain no-repeat;
+}
+
+/* --- Icono en los pasos de la demostración --- */
+.tl-body b::before{
+  content:"";
+  display:inline-block;
+  width: 11px; height: 11px;
+  margin-right: 8px;
+  vertical-align: 0;
+  background-color: var(--accent);
+  -webkit-mask: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='%23000'%3E%3Cpath d='M4 4h16v16H4z'/%3E%3C/svg%3E") center/contain no-repeat;
+  mask: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='%23000'%3E%3Cpath d='M4 4h16v16H4z'/%3E%3C/svg%3E") center/contain no-repeat;
+}
+
+/* ============================================================
+   DIAGRAMAS
+   ============================================================ */
+
+figure{ margin: 30px 0; border: 2px solid var(--rule); background: var(--ground); }
+figure .fig-scroll{ overflow-x: auto; }
+figure svg{ display:block; width:100%; min-width: 560px; height:auto; }
+figcaption{
+  font-family: var(--font-mono);
+  font-size: 11px;
+  letter-spacing: .1em;
+  text-transform: uppercase;
+  color: var(--muted);
+  padding: 12px 16px;
+  border-top: 2px solid var(--rule-soft);
+  background: var(--surface);
+}
+
+.dgm-box   { fill: var(--surface); stroke: var(--ink); stroke-width: 2; }
+.dgm-box-a { fill: none; stroke: var(--accent); stroke-width: 2; }
+.dgm-box-v { fill: none; stroke: var(--violet); stroke-width: 2; }
+.dgm-fill  { fill: var(--ink); }
+.dgm-line  { stroke: var(--ink); stroke-width: 2; fill: none; }
+.dgm-line-a{ stroke: var(--accent); stroke-width: 2; fill: none; }
+.dgm-dash  { stroke: var(--muted); stroke-width: 2; fill: none; stroke-dasharray: 6 5; }
+.dgm-h     { font-family: var(--font-mono); font-size: 12.5px; font-weight: 700; letter-spacing: .1em; fill: var(--ink); }
+.dgm-t     { font-family: var(--font-mono); font-size: 12.5px; fill: var(--ink-soft); }
+.dgm-s     { font-family: var(--font-mono); font-size: 11px; letter-spacing: .06em; fill: var(--muted); }
+.dgm-a     { font-family: var(--font-mono); font-size: 11.5px; font-weight: 700; letter-spacing: .08em; fill: var(--accent-ink); }
+.dgm-inv   { fill: var(--ground); }
+
+/* ============================================================
+   GUION DE DEMOSTRACIÓN
+   ============================================================ */
+
+.dm{ margin-bottom: .75em; }
+.dm-l{
+  display: inline-block;
+  font-family: var(--font-mono);
+  font-size: 10px;
+  font-weight: 700;
+  letter-spacing: .13em;
+  text-transform: uppercase;
+  color: var(--accent-on);
+  background: var(--accent);
+  padding: 2px 7px;
+  margin-right: 9px;
+  vertical-align: .1em;
+}
+.dm-min{
+  font-family: var(--font-mono);
+  font-size: 10.5px;
+  font-weight: 400;
+  letter-spacing: .1em;
+  color: var(--muted);
+  text-transform: none;
+  margin-left: 10px;
+  white-space: nowrap;
+}
+ol.pasos h4{ display: block; }
+</style>
+
+<style>
+#problema { --icon: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%23000' stroke-width='2' stroke-linecap='square'%3E%3Cpath d='M12 3 22 20H2zM12 10v4M12 16.5v1'/%3E%3C/svg%3E"); }
+#alcance  { --icon: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%23000' stroke-width='2' stroke-linecap='square'%3E%3Cpath d='M3 3h7v7H3zM14 3h7v7h-7zM3 14h7v7H3zM14 14h7v7h-7z'/%3E%3C/svg%3E"); }
+#arq      { --icon: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%23000' stroke-width='2' stroke-linecap='square'%3E%3Cpath d='M4 4h16v6H4zM4 14h16v6H4z'/%3E%3C/svg%3E"); }
+#decisiones { --icon: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%23000' stroke-width='2' stroke-linecap='square'%3E%3Cpath d='M12 2 22 12 12 22 2 12zM12 8v4M12 15.5v1'/%3E%3C/svg%3E"); }
+#fuera    { --icon: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%23000' stroke-width='2' stroke-linecap='square'%3E%3Cpath d='M12 3a9 9 0 100 18 9 9 0 000-18zM8.5 8.5l7 7M15.5 8.5l-7 7'/%3E%3C/svg%3E"); }
+#entregas { --icon: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%23000' stroke-width='2' stroke-linecap='square'%3E%3Cpath d='M6 3h9l4 4v14H6zM15 3v4h4M9 12h7M9 16h7'/%3E%3C/svg%3E"); }
+#rubrica  { --icon: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%23000' stroke-width='2' stroke-linecap='square'%3E%3Cpath d='M12 3 3 7v5c0 5 4 8 9 9 5-1 9-4 9-9V7zM8.5 12l2.5 2.5L16 10'/%3E%3C/svg%3E"); }
+#calendario { --icon: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%23000' stroke-width='2' stroke-linecap='square'%3E%3Cpath d='M12 3a9 9 0 100 18 9 9 0 000-18zM12 7v5l4 2'/%3E%3C/svg%3E"); }
+#defensa  { --icon: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%23000' stroke-width='2' stroke-linecap='square'%3E%3Cpath d='M4 4h16v12H9l-5 4z'/%3E%3C/svg%3E"); }
+</style>
+
+<div class="wrap">
+
+<div class="topbar">
+  <span class="dot"></span>
+  <span>Universidad de San Buenaventura Medellín</span>
+  <span class="sep">Blockchain y Web 3.0 · Proyecto integrador</span>
+</div>
+
+<header class="cover">
+  <div class="cover-top">
+    <div class="cover-num">05</div>
+    <div class="cover-head">
+      <p class="eyebrow">Enunciado de proyecto · equipo de tres</p>
+      <h1>Entradas con reventa controlada</h1>
+      <p class="eyebrow">Versión 1.0 · se ajusta con el docente en el anteproyecto</p>
+    </div>
+  </div>
+  <div class="cover-meta">
+    <div><b>Equipo</b>3 estudiantes</div>
+    <div><b>Peso</b>40 % del curso</div>
+    <div><b>Entregas</b>4, por corte</div>
+    <div><b>Red</b>Solo de prueba</div>
+    <div><b>Habilita</b>S6 · S11 · S13</div>
+  </div>
+</header>
+
+<section id="problema">
+<div class="grid">
+  <div class="rail"><b>01</b>El problema</div>
+  <div>
+    <h2>El problema, acotado</h2>
+
+    <p>En los eventos universitarios y culturales de la ciudad ocurren dos cosas a la vez, y ambas por la misma razón: <strong>la entrada es un dato que se puede copiar y una promesa que nadie puede hacer cumplir</strong>.</p>
+
+    <ul class="plain">
+      <li><b>Falsificación</b> — una imagen con un código se reenvía por mensajería y varias personas llegan a la puerta con la misma entrada. En el mejor caso entra una y las demás perdieron su dinero.</li>
+      <li><b>Reventa a sobreprecio</b> — el organizador anuncia que está prohibida, y no tiene forma de impedirla. La prohibición vive en unos términos y condiciones que nadie puede ejecutar.</li>
+    </ul>
+
+    <p>Las dos son consecuencia de lo mismo. Quien emite la entrada pierde el control sobre ella en el momento en que la entrega, y a partir de ahí solo puede confiar.</p>
+
+    <div class="ficha ficha--pregunta">
+      <p class="ficha-tit"><span>Por qué este caso sobrevive el árbol de decisión</span></p>
+      <p><strong>Paso 1 y 2.</strong> Hay tres partes con intereses divergentes: el organizador quiere controlar el precio, quien revende quiere maximizarlo, y quien compra en segunda mano quiere garantía de que la entrada es real.</p>
+      <p><strong>Paso 3.</strong> No hay tercero aceptable para todos. La plataforma de venta es parte interesada: cobra comisión por cada reventa, así que es el actor con menos incentivo para limitarla.</p>
+      <p><strong>Paso 4.</strong> El dato que va a la cadena no es personal: es un identificador de entrada y una dirección. Nada que colisione con la Ley 1581.</p>
+    </div>
+
+    <div class="ficha ficha--alerta">
+      <p class="ficha-tit"><span>Lo primero que hay que acotar</span></p>
+      <p>«Eventos culturales» es demasiado amplio. <strong>Escojan un evento concreto y real</strong> —una obra de la facultad, un festival estudiantil, un concierto de una sala de la ciudad— con un aforo concreto y un precio concreto. Todo lo demás del proyecto se decide a partir de ahí: cuántas entradas, si hay categorías, cuánto es «sobreprecio».</p>
+      <p>Un proyecto que dice «para cualquier evento» acaba sin decidir nada.</p>
+    </div>
+  </div>
+</div>
+</section>
+
+<hr>
+
+<section id="alcance">
+<div class="grid">
+  <div class="rail"><b>02</b>Qué hay<br>que construir</div>
+  <div>
+    <h2>Alcance mínimo</h2>
+
+    <p>Cuatro capacidades. Si alguna falta, el proyecto no está completo; si sobra cualquier otra cosa antes de que estas cuatro funcionen, está mal priorizado.</p>
+
+    <div class="tabla-wrap">
+    <table>
+      <thead><tr><th>#</th><th>Capacidad</th><th>Qué significa que funciona</th></tr></thead>
+      <tbody>
+        <tr><td>01</td><td><strong>Emisión</strong></td><td>El organizador emite un lote de entradas para un evento con aforo definido. No se pueden emitir más de las declaradas.</td></tr>
+        <tr><td>02</td><td><strong>Compra</strong></td><td>Una persona compra una entrada desde su billetera y queda registrada como propietaria.</td></tr>
+        <tr><td>03</td><td><strong>Reventa con tope</strong></td><td>La entrada se puede transferir a otra persona <em>solo</em> a través del contrato y <em>solo</em> por debajo del precio tope. Un intento por encima del tope debe fallar.</td></tr>
+        <tr><td>04</td><td><strong>Validación en puerta</strong></td><td>El personal del evento comprueba que quien se presenta es realmente el propietario, y que esa entrada no ha entrado ya.</td></tr>
+      </tbody>
+    </table>
+    </div>
+
+    <div class="ficha ficha--termino">
+      <p class="ficha-tit"><span>La prueba que define el proyecto</span></p>
+      <p class="def">Un intento de transferir la entrada <b>sin pasar por el contrato</b>, o de venderla <b>por encima del tope</b>, debe fallar — aunque quien lo intente escriba su propio programa y no use la interfaz que ustedes construyeron.</p>
+      <p>Si esa prueba pasa, el proyecto cumplió su tesis. Si la regla solo la aplica el frontend, no construyeron nada que no se pudiera hacer con una base de datos.</p>
+    </div>
+  </div>
+</div>
+</section>
+
+<hr>
+
+<section id="arq">
+<div class="grid">
+  <div class="rail"><b>03</b>Arquitectura<br><br>Dos interfaces,<br>un contrato</div>
+  <div>
+    <h2>Arquitectura</h2>
+
+    <p>Dos aplicaciones y un contrato. La separación no es cosmética: son dos roles con permisos, contextos y dispositivos distintos.</p>
+
+    <figure>
+      <div class="fig-scroll">
+      <svg viewBox="0 0 720 360" role="img" aria-label="Dos aplicaciones —la del asistente y la de puerta— hablan con el mismo contrato, donde vive la regla de reventa. Abajo, el flujo de reto y respuesta en tres pasos.">
+        <rect class="dgm-box" x="16" y="30" width="200" height="96"/>
+        <text class="dgm-s" x="32" y="52">APP DEL ASISTENTE</text>
+        <text class="dgm-t" x="32" y="74">compra · reventa</text>
+        <text class="dgm-t" x="32" y="94">firma en la puerta</text>
+        <text class="dgm-s" x="32" y="114">necesita billetera</text>
+
+        <rect class="dgm-box-v" x="260" y="30" width="200" height="96"/>
+        <text class="dgm-s" x="276" y="52">EL CONTRATO</text>
+        <text class="dgm-t" x="276" y="74">aforo · propiedad</text>
+        <text class="dgm-t" x="276" y="94">tope de reventa</text>
+        <text class="dgm-a" x="276" y="114">AQUÍ VIVE LA REGLA</text>
+
+        <rect class="dgm-box" x="504" y="30" width="200" height="96"/>
+        <text class="dgm-s" x="520" y="52">APP DE PUERTA</text>
+        <text class="dgm-t" x="520" y="74">solo lee</text>
+        <text class="dgm-t" x="520" y="94">no firma nada</text>
+        <text class="dgm-s" x="520" y="114">sin billetera</text>
+
+        <path class="dgm-line" d="M216 78h30"/>
+        <polygon class="dgm-fill" points="252,78 242,73 242,83"/>
+        <path class="dgm-line" d="M460 78h30"/>
+        <polygon class="dgm-fill" points="496,78 486,73 486,83"/>
+
+        <path class="dgm-dash" d="M16 158h688"/>
+        <text class="dgm-a" x="16" y="184">RETO Y RESPUESTA · por qué un pantallazo no sirve</text>
+
+        <rect class="dgm-box" x="16" y="200" width="212" height="78"/>
+        <text class="dgm-h" x="32" y="224">1 · LA PUERTA</text>
+        <text class="dgm-t" x="32" y="246">muestra un número</text>
+        <text class="dgm-t" x="32" y="264">aleatorio de un solo uso</text>
+
+        <path class="dgm-line" d="M228 239h28"/>
+        <polygon class="dgm-fill" points="262,239 252,234 252,244"/>
+
+        <rect class="dgm-box-a" x="268" y="200" width="212" height="78"/>
+        <text class="dgm-h" x="284" y="224">2 · EL ASISTENTE</text>
+        <text class="dgm-t" x="284" y="246">firma ese número</text>
+        <text class="dgm-t" x="284" y="264">con su clave privada</text>
+
+        <path class="dgm-line" d="M480 239h28"/>
+        <polygon class="dgm-fill" points="514,239 504,234 504,244"/>
+
+        <rect class="dgm-box" x="520" y="200" width="184" height="78"/>
+        <text class="dgm-h" x="536" y="224">3 · LA PUERTA</text>
+        <text class="dgm-t" x="536" y="246">recupera la dirección</text>
+        <text class="dgm-t" x="536" y="264">y consulta al contrato</text>
+
+        <path class="dgm-line-a" d="M16 300h688"/>
+        <text class="dgm-s" x="16" y="322">Un pantallazo ya no sirve: la firma es de ESE reto, y el siguiente será otro.</text>
+        <text class="dgm-s" x="16" y="342">Es el mismo mecanismo de recuperación de clave pública que se ve en la Sesión 13.</text>
+      </svg>
+      </div>
+      <figcaption>Fig. 1 — La regla vive en el contrato, no en la interfaz. Las dos apps solo lo consultan.</figcaption>
+    </figure>
+
+    <h3>Por qué la regla tiene que estar en el contrato</h3>
+
+    <p>La app de reventa <strong>no decide</strong> el precio tope: solo lo muestra. Si alguien escribe su propio programa saltándose la interfaz de ustedes, el contrato lo rechaza igual.</p>
+
+    <p>En la práctica eso significa <strong>bloquear la transferencia directa</strong> del token y dejar una sola puerta de salida: una función de reventa que verifica el tope antes de mover la entrada. Un token que se puede transferir libremente no cumple el enunciado, por mucho que la interfaz diga otra cosa.</p>
+
+    <div class="ficha ficha--profundidad">
+      <p class="ficha-tit"><span>Sobre la app de puerta</span></p>
+      <p>Conviene que <strong>no tenga billetera ni escriba en la cadena</strong>. Es un dispositivo que se presta, que se pierde y que manejan varias personas durante una noche. Si además firmara transacciones, sería el punto más débil del sistema.</p>
+    </div>
+  </div>
+</div>
+</section>
+
+<hr>
+
+<section id="decisiones">
+<div class="grid">
+  <div class="rail"><b>04</b>Lo que hay<br>que resolver<br><br>Y justificar por<br>escrito
+  </div>
+  <div>
+    <h2>Las cuatro decisiones</h2>
+
+    <p>Ninguna tiene una respuesta única. Lo que se evalúa no es qué eligieron, sino <strong>que hayan visto el problema y sostengan su elección</strong>.</p>
+
+    <ol class="pasos">
+      <li>
+        <h4>Cómo se marca una entrada como usada</h4>
+        <p>Si se registra en la cadena, cada persona en la fila espera una confirmación. Inviable en una puerta con gente esperando.</p>
+        <p>La salida habitual es una <strong>lista de asistencia fuera de la cadena</strong>, donde la firma del asistente queda como evidencia de que entró. La cadena dice quién <em>podía</em> entrar; el registro local dice quién entró. Si eligen esto, expliquen qué pasa si el dispositivo de la puerta se pierde con la lista dentro.</p>
+      </li>
+      <li>
+        <h4>Qué hacer sin conectividad</h4>
+        <p>Los auditorios y las salas tienen mala señal justo donde está la puerta. Una app que necesita consultar la cadena en tiempo real no funciona.</p>
+        <p>La alternativa es <strong>descargar la lista de propietarios antes de abrir</strong> y validar contra esa copia. Eso abre un hueco: alguien que revende en los últimos minutos. Se cierra <strong>cerrando la reventa</strong> con antelación — decidan cuánta y justifíquenlo.</p>
+      </li>
+      <li>
+        <h4>Qué pasa si alguien pierde su billetera</h4>
+        <p>Pierde la entrada. No hay «olvidé mi contraseña».</p>
+        <p><strong>Aquí no hay solución bonita, y reconocerlo vale más que inventarse una.</strong> Las salidas posibles —que el organizador pueda reemitir, que exista una lista de recuperación— todas reintroducen a un tercero de confianza. Elijan una, digan qué garantía sacrifican, y no pretendan que no sacrificaron ninguna.</p>
+      </li>
+      <li>
+        <h4>Qué hace alguien que no tiene billetera</h4>
+        <p>Es la mayoría del público real de un evento cultural. Si la respuesta es «que se instale una», el proyecto funciona en la demostración y no en la vida.</p>
+        <p>Basta con que <strong>describan</strong> una vía —una billetera creada por la aplicación, un enlace por correo, la entrada custodiada hasta que el usuario la reclame— y digan qué se pierde en cada caso. No hace falta implementarla.</p>
+      </li>
+    </ol>
+
+    <div class="ficha ficha--alerta">
+      <p class="ficha-tit"><span>El error que hunde este proyecto</span></p>
+      <p>Poner la validación del tope <strong>únicamente en el frontend</strong>. Se ve idéntico en la demostración y no vale nada: es exactamente el sistema de términos y condiciones que se quería reemplazar, con más pasos.</p>
+      <p>En la sustentación se probará escribiendo una transacción a mano, sin usar su interfaz.</p>
+    </div>
+  </div>
+</div>
+</section>
+
+<hr>
+
+<section id="fuera">
+<div class="grid">
+  <div class="rail"><b>05</b>Fuera<br>de alcance</div>
+  <div>
+    <h2>Lo que NO hay que construir</h2>
+
+    <p>Se dice explícitamente para que nadie gaste el semestre en ello. Nada de esto suma en la calificación.</p>
+
+    <ul class="plain">
+      <li><b>Pasarela de pago con dinero real</b> — todo ocurre en red de prueba, con moneda sin valor. La regla del curso no admite excepción.</li>
+      <li><b>Aplicación móvil nativa</b> — dos páginas web bastan. La de puerta puede ser un teléfono con la cámara.</li>
+      <li><b>Diseño gráfico elaborado</b> — que se entienda qué está pasando basta. La rúbrica no premia lo bonito.</li>
+      <li><b>Categorías de entrada, mapas de asientos, descuentos</b> — solo si las cuatro capacidades del alcance mínimo ya funcionan y sobra tiempo. No antes.</li>
+      <li><b>Recuperación de cuentas</b> — hay que <em>describirla</em> como decisión, no implementarla.</li>
+    </ul>
+
+    <div class="ficha ficha--docente">
+      <p class="ficha-tit"><span>Nota</span></p>
+      <p>Este proyecto se evalúa en red de prueba y no está pensado para operar un evento real. Si el equipo quisiera llevarlo a producción, faltarían al menos: una auditoría externa del contrato, el análisis regulatorio de la venta de entradas, y el tratamiento de datos de los asistentes.</p>
+    </div>
+  </div>
+</div>
+</section>
+
+<hr>
+
+<section id="entregas">
+<div class="grid">
+  <div class="rail"><b>06</b>Entregas<br><br>40 % del curso</div>
+  <div>
+    <h2>Entregas por corte</h2>
+
+    <div class="tabla-wrap">
+    <table>
+      <thead><tr><th>Entrega</th><th>Sesión</th><th>Qué se entrega</th><th>Peso</th></tr></thead>
+      <tbody>
+        <tr>
+          <td>Anteproyecto</td><td>S6</td>
+          <td>Máximo 3 páginas. El evento concreto elegido con su aforo y precio; el recorrido por el árbol de decisión; <strong>quién introduce los datos y por qué habría que creerle</strong>; la arquitectura elegida y por qué; y una primera respuesta a las cuatro decisiones.</td>
+          <td>5 %</td>
+        </tr>
+        <tr>
+          <td>Avance 1</td><td>S13</td>
+          <td>Contrato desplegado y verificado en red de prueba. Suite de pruebas con cobertura ≥ 80 %, incluyendo <strong>las pruebas de reversión</strong>: transferir sin pasar por el contrato falla, vender por encima del tope falla, emitir más del aforo falla. Repositorio documentado.</td>
+          <td>10 %</td>
+        </tr>
+        <tr>
+          <td>Avance 2</td><td>S16</td>
+          <td>Las dos aplicaciones funcionando contra el contrato. Flujo completo: comprar, revender dentro del tope, y validar en puerta con reto y respuesta.</td>
+          <td>10 %</td>
+        </tr>
+        <tr>
+          <td>Entrega final</td><td>S17</td>
+          <td>Producto completo, documentación técnica, video de 3 minutos como respaldo, y sustentación de 15 minutos con demostración en vivo.</td>
+          <td>15 %</td>
+        </tr>
+      </tbody>
+    </table>
+    </div>
+
+    <div class="ficha ficha--pregunta">
+      <p class="ficha-tit"><span>La entrega que más se subestima</span></p>
+      <p>El <strong>anteproyecto</strong>. Vale solo un 5 %, pero es donde el docente aprueba o recorta el alcance. Un anteproyecto vago produce un semestre entero mal dirigido, y eso sí se cobra en las tres entregas siguientes.</p>
+    </div>
+  </div>
+</div>
+</section>
+
+<hr>
+
+<section id="rubrica">
+<div class="grid">
+  <div class="rail"><b>07</b>Cómo se<br>califica</div>
+  <div>
+    <h2>Rúbrica, aplicada a este proyecto</h2>
+
+    <p>Es la rúbrica general del curso, con los descriptores traducidos a este caso.</p>
+
+    <div class="tabla-wrap">
+    <table>
+      <thead><tr><th>Criterio</th><th>Peso</th><th>Qué se mira aquí</th></tr></thead>
+      <tbody>
+        <tr><td>Pertinencia</td><td>15 %</td><td>Que sostengan por qué una base de datos del organizador no resuelve esto. La respuesta correcta es que el organizador es parte interesada — pero tienen que decirla ellos.</td></tr>
+        <tr><td>Calidad del contrato</td><td>25 %</td><td>Estándar de token no fungible aplicado correctamente, transferencia bloqueada salvo por la función de reventa, control de acceso para la emisión, eventos bien diseñados, gas razonable.</td></tr>
+        <tr><td>Pruebas y despliegue</td><td>20 %</td><td>Cobertura ≥ 80 % y, sobre todo, <strong>las pruebas de lo que debe fallar</strong>. Un proyecto que solo prueba el camino feliz pierde este criterio completo.</td></tr>
+        <tr><td>Seguridad</td><td>20 %</td><td>Manejo seguro de los fondos de la reventa —quien vende retira, no se le envía—, protección contra reentrada, y análisis estático sin hallazgos críticos.</td></tr>
+        <tr><td>Integración e interfaz</td><td>10 %</td><td>Que el reto y respuesta funcione de verdad en la demostración, y que los estados de la transacción se manejen: pendiente, confirmada, rechazada.</td></tr>
+        <tr><td>Sustentación</td><td>10 %</td><td>Que respondan las cuatro decisiones sin titubear y reconozcan lo que no resolvieron.</td></tr>
+      </tbody>
+    </table>
+    </div>
+  </div>
+</div>
+</section>
+
+<hr>
+
+<section id="calendario">
+<div class="grid">
+  <div class="rail"><b>08</b>Qué sesión<br>habilita qué</div>
+  <div>
+    <h2>Encaje con el calendario</h2>
+
+    <p>Este proyecto está elegido, entre otras cosas, porque cada pieza que necesita llega justo cuando la necesita.</p>
+
+    <div class="timeline">
+      <div class="tl-row"><div class="tl-min">S6</div><div class="tl-body"><b>Solidity I</b><span>Primer contrato desplegado. Aquí nace el esqueleto: emisión y aforo.</span></div></div>
+      <div class="tl-row"><div class="tl-min">S7</div><div class="tl-body"><b>Solidity II</b><span>Patrones. El manejo del dinero de la reventa: quien vende retira, no se le envía.</span></div></div>
+      <div class="tl-row"><div class="tl-min">S8</div><div class="tl-body"><b>Entorno profesional</b><span>Las pruebas de reversión y el despliegue verificado del Avance 1.</span></div></div>
+      <div class="tl-row"><div class="tl-min">S9</div><div class="tl-body"><b>Seguridad</b><span>Auditoría del propio contrato. La reventa mueve fondos: es superficie de ataque.</span></div></div>
+      <div class="tl-row"><div class="tl-min">S11</div><div class="tl-body"><b>ERC-721</b><span>La entrada como token no fungible, con su metadata. El corazón del proyecto.</span></div></div>
+      <div class="tl-row"><div class="tl-min">S12</div><div class="tl-body"><b>Frontend</b><span>Las dos aplicaciones conectadas al contrato.</span></div></div>
+      <div class="tl-row"><div class="tl-min">S13</div><div class="tl-body"><b>Firma fuera de cadena</b><span>El reto y respuesta de la puerta. Es la sesión que hace posible la validación.</span></div></div>
+      <div class="tl-row"><div class="tl-min">S16</div><div class="tl-body"><b>Capa 2</b><span>Comparar el costo de una compra en capa base y en capa 2. Con aforo de mil entradas, la diferencia decide si el sistema es viable.</span></div></div>
+    </div>
+
+    <div class="ficha ficha--alerta">
+      <p class="ficha-tit"><span>Antes de la Sesión 11</span></p>
+      <p>El estándar de token no fungible no se ve hasta la Sesión 11, pero el <strong>Avance 1 es en la Sesión 13</strong>. Eso deja dos semanas para el contrato completo. Empiecen el esqueleto desde la Sesión 6 con lo que tengan y refactoricen después: esperar a la S11 para escribir la primera línea es llegar tarde.</p>
+    </div>
+  </div>
+</div>
+</section>
+
+<hr>
+
+<section id="defensa">
+<div class="grid">
+  <div class="rail"><b>09</b>La<br>sustentación</div>
+  <div>
+    <h2>Preguntas que deben poder responder</h2>
+
+    <p>Se harán en la sustentación, y algunas antes. Si el equipo puede responderlas hoy, el proyecto va bien encaminado.</p>
+
+    <ul class="plain">
+      <li><b>Sobre la tesis</b> — ¿Por qué una base de datos del organizador no resuelve esto? Y si el organizador fuera de fiar, ¿su proyecto seguiría teniendo sentido?</li>
+      <li><b>Sobre el contrato</b> — Escribo una transacción a mano, sin usar su aplicación, para transferir una entrada al doble del tope. ¿Qué pasa exactamente y en qué línea del contrato pasa?</li>
+      <li><b>Sobre la puerta</b> — Le tomo un pantallazo a la pantalla de un asistente y me presento con él. ¿Por qué no entro?</li>
+      <li><b>Sobre el dinero</b> — Alguien revende y la transacción del comprador falla a la mitad. ¿Dónde quedó el dinero?</li>
+      <li><b>Sobre lo perdido</b> — Alguien perdió su billetera con la entrada dentro dos horas antes del evento. ¿Qué le dicen?</li>
+      <li><b>Sobre el costo</b> — Con mil entradas, ¿cuánto costaría emitirlas y validarlas? ¿Y en capa 2?</li>
+      <li><b>Sobre los límites</b> — ¿Qué parte de este problema NO resolvieron, y por qué está fuera del alcance de la tecnología?</li>
+    </ul>
+
+    <div class="ficha ficha--pregunta">
+      <p class="ficha-tit"><span>La última pregunta es la que más pesa</span></p>
+      <p>Un equipo que reconoce con precisión lo que su solución no resuelve demuestra que entendió la herramienta. Un equipo que afirma haberlo resuelto todo demuestra lo contrario.</p>
+    </div>
+  </div>
+</div>
+</section>
+
+<footer>
+  <p>Universidad de San Buenaventura Medellín · Facultad de Ingeniería<br>
+  Blockchain y Web 3.0 · Enunciado de proyecto integrador · Entradas con reventa controlada · v1.0<br>
+  El alcance definitivo se fija en el anteproyecto de la Sesión 6.</p>
+</footer>
+
+</div>

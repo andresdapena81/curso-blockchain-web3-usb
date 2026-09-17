@@ -1,0 +1,856 @@
+<title>Guía de demostración · Sesión 02 · Blockchain y Web 3.0</title>
+
+<style>
+/* ============================================================
+   TOKENS — mismos que el material de sesión
+   ============================================================ */
+:root{
+  --usb-naranja:#F07F06; --usb-violeta:#7152E9; --usb-ocre:#A35604;
+  --ground:#FFFFFF; --surface:#FAF9FB; --surface-alt:#F2F0F5;
+  --ink:#0F0F11; --ink-soft:#3A3844; --muted:#6F6B80;
+  --rule:#0F0F11; --rule-soft:#D9D6E0;
+  --accent:#F07F06; --accent-ink:#A35604; --accent-on:#0F0F11;
+  --violet:#7152E9; --violet-ink:#5638C9;
+  --verde:#1F7A4D; --verde-soft:#E8F4EE;
+  --font-display:"Arial Black","Helvetica Neue","Segoe UI Black",Impact,system-ui,sans-serif;
+  --font-body:Georgia,"Iowan Old Style","Times New Roman",serif;
+  --font-mono:ui-monospace,"Cascadia Mono","Segoe UI Mono",Consolas,"SF Mono",Menlo,monospace;
+  --maxw:1080px;
+}
+@media (prefers-color-scheme: dark){
+  :root:not([data-theme="light"]){
+    --ground:#0F0F11; --surface:#17161A; --surface-alt:#201E25;
+    --ink:#F4F2F7; --ink-soft:#CFCBD8; --muted:#9A95A8;
+    --rule:#F4F2F7; --rule-soft:#35323D;
+    --accent:#F07F06; --accent-ink:#F5A03F;
+    --violet:#8F76FF; --violet-ink:#A794FF;
+    --verde:#5FD39B; --verde-soft:#16241D;
+  }
+}
+:root[data-theme="dark"]{
+  --ground:#0F0F11; --surface:#17161A; --surface-alt:#201E25;
+  --ink:#F4F2F7; --ink-soft:#CFCBD8; --muted:#9A95A8;
+  --rule:#F4F2F7; --rule-soft:#35323D;
+  --accent:#F07F06; --accent-ink:#F5A03F;
+  --violet:#8F76FF; --violet-ink:#A794FF;
+  --verde:#5FD39B; --verde-soft:#16241D;
+}
+
+*{box-sizing:border-box}
+body{
+  background:var(--ground); color:var(--ink);
+  font-family:var(--font-body); font-size:17px; line-height:1.68;
+  margin:0; padding:0 22px 100px; -webkit-font-smoothing:antialiased;
+}
+.wrap{max-width:var(--maxw); margin:0 auto}
+p{margin:0 0 1em; max-width:70ch}
+strong{font-weight:700; color:var(--ink)}
+hr{border:0; border-top:2px solid var(--rule); margin:52px 0}
+
+/* ---------- Portada ---------- */
+.cover{border:3px solid var(--rule); margin-top:28px}
+.cover-top{display:flex; flex-wrap:wrap; border-bottom:3px solid var(--rule)}
+.cover-badge{
+  background:var(--accent); color:var(--accent-on);
+  font-family:var(--font-display); font-size:clamp(30px,5vw,48px);
+  letter-spacing:-.03em; line-height:1;
+  padding:26px 28px; display:flex; align-items:center;
+  border-right:3px solid var(--rule);
+}
+.cover-head{padding:24px 28px; flex:1 1 380px}
+.eyebrow{
+  font-family:var(--font-mono); font-size:11px; letter-spacing:.16em;
+  text-transform:uppercase; color:var(--muted); margin:0 0 10px;
+}
+h1{
+  font-family:var(--font-display); font-size:clamp(25px,4vw,40px);
+  line-height:1.04; letter-spacing:-.03em; text-transform:uppercase;
+  text-wrap:balance; margin:0;
+}
+.cover-meta{display:grid; grid-template-columns:repeat(auto-fit,minmax(150px,1fr)); font-family:var(--font-mono); font-size:12px}
+.cover-meta div{padding:13px 18px; border-right:2px solid var(--rule-soft)}
+.cover-meta div:last-child{border-right:0}
+.cover-meta b{display:block; font-size:10px; letter-spacing:.14em; text-transform:uppercase; color:var(--muted); font-weight:400; margin-bottom:3px}
+
+/* ---------- Títulos ---------- */
+h2{
+  font-family:var(--font-display); font-size:clamp(22px,3.2vw,32px);
+  line-height:1.08; letter-spacing:-.028em; text-transform:uppercase;
+  text-wrap:balance; margin:0 0 18px; padding-bottom:12px;
+  border-bottom:3px solid var(--rule);
+}
+h3{
+  font-family:var(--font-display); font-size:clamp(16px,2vw,20px);
+  line-height:1.2; letter-spacing:-.015em; text-transform:uppercase;
+  margin:38px 0 12px; text-wrap:balance;
+}
+h4{
+  font-family:var(--font-mono); font-size:12px; letter-spacing:.13em;
+  text-transform:uppercase; color:var(--accent-ink); margin:26px 0 9px; font-weight:700;
+}
+section{margin-top:56px; scroll-margin-top:16px}
+
+/* ---------- Índice ---------- */
+.toc{border:2px solid var(--rule); margin-top:26px}
+.toc a{
+  display:flex; gap:14px; align-items:baseline; padding:12px 18px;
+  font-family:var(--font-mono); font-size:13px; text-decoration:none; color:var(--ink);
+  border-top:2px solid var(--rule-soft);
+}
+.toc a:first-child{border-top:0}
+.toc a:hover{background:var(--accent); color:var(--accent-on)}
+.toc a .n{color:var(--muted); min-width:64px; font-size:11px; letter-spacing:.1em}
+.toc a:hover .n{color:var(--accent-on)}
+.toc a .t{flex:1}
+.toc a .m{color:var(--muted); font-size:11px}
+.toc a:hover .m{color:var(--accent-on)}
+
+/* ---------- Listas de verificación ---------- */
+.check{list-style:none; padding:0; margin:20px 0; border:2px solid var(--rule)}
+.check li{
+  display:grid; grid-template-columns:46px 1fr; gap:0;
+  border-top:2px solid var(--rule-soft); align-items:start;
+}
+.check li:first-child{border-top:0}
+.check li > label.box{
+  display:flex; align-items:center; justify-content:center;
+  padding:14px 0 0; cursor:pointer; border-right:2px solid var(--rule-soft); align-self:stretch;
+  padding-top:15px;
+}
+.check input[type=checkbox]{
+  appearance:none; -webkit-appearance:none;
+  width:19px; height:19px; border:2px solid var(--ink);
+  background:var(--ground); cursor:pointer; margin:0; flex:0 0 auto;
+}
+.check input[type=checkbox]:checked{background:var(--accent); border-color:var(--accent)}
+.check input[type=checkbox]:checked::after{
+  content:"✓"; display:block; color:var(--accent-on);
+  font-family:var(--font-mono); font-size:14px; font-weight:700;
+  line-height:15px; text-align:center;
+}
+.check input:focus-visible{outline:3px solid var(--violet); outline-offset:2px}
+.check .body{padding:12px 18px 14px}
+.check .body b{display:block; font-family:var(--font-mono); font-size:12.5px; letter-spacing:.04em; margin-bottom:3px}
+.check .body span{font-size:15px; color:var(--ink-soft); display:block}
+.check li:has(input:checked) .body b{color:var(--muted); text-decoration:line-through}
+
+/* ---------- Bloques de guion ---------- */
+.paso{border:2px solid var(--rule); margin:26px 0; background:var(--ground)}
+.paso-head{
+  display:flex; flex-wrap:wrap; gap:14px; align-items:center;
+  background:var(--ink); color:var(--ground);
+  padding:12px 18px; font-family:var(--font-mono); font-size:12px;
+  letter-spacing:.12em; text-transform:uppercase;
+}
+.paso-head .num{
+  font-family:var(--font-display); font-size:20px; letter-spacing:-.03em;
+  color:var(--accent); line-height:1;
+}
+.paso-head .tit{font-weight:700; letter-spacing:.06em}
+.paso-head .min{margin-left:auto; color:var(--accent)}
+.paso-body{padding:20px 22px}
+.paso-body > :last-child{margin-bottom:0}
+
+.lane{display:grid; grid-template-columns:112px 1fr; gap:16px; margin:0 0 16px; align-items:start}
+.lane .tag{
+  font-family:var(--font-mono); font-size:10px; font-weight:700;
+  letter-spacing:.13em; text-transform:uppercase;
+  padding:5px 8px; text-align:center; align-self:start;
+}
+.lane .txt{font-size:15.5px; line-height:1.62; color:var(--ink-soft)}
+.lane .txt > :last-child{margin-bottom:0}
+.lane .txt p{max-width:none}
+.tag-hacer{background:var(--ink); color:var(--ground)}
+.tag-decir{background:var(--accent); color:var(--accent-on)}
+.tag-mostrar{background:var(--violet); color:#fff}
+.tag-ojo{background:var(--ground); color:var(--accent-ink); border:2px solid var(--accent)}
+.tag-preg{background:var(--ground); color:var(--ink); border:2px solid var(--ink)}
+
+@media (max-width:640px){
+  .lane{grid-template-columns:1fr; gap:6px}
+  .lane .tag{justify-self:start}
+}
+
+/* Guion hablado */
+.decir{
+  font-family:var(--font-body); font-style:italic;
+  font-size:16.5px; line-height:1.6; color:var(--ink);
+  border-left:5px solid var(--accent); padding:2px 0 2px 16px; margin:0 0 10px;
+}
+.decir:last-child{margin-bottom:0}
+
+/* Ruta de clics */
+.ruta{
+  font-family:var(--font-mono); font-size:13px; line-height:1.7;
+  background:var(--surface-alt); border:1px solid var(--rule-soft);
+  padding:10px 13px; margin:0 0 10px; color:var(--ink);
+  overflow-x:auto;
+}
+.ruta b{color:var(--accent-ink)}
+
+/* ---------- Fichas ---------- */
+.ficha{border:2px solid var(--rule); background:var(--surface); padding:18px 20px; margin:24px 0}
+.ficha > :last-child{margin-bottom:0}
+.ficha-tit{
+  font-family:var(--font-mono); font-size:11px; letter-spacing:.15em;
+  text-transform:uppercase; font-weight:700; margin:0 0 11px; padding-bottom:8px;
+  border-bottom:2px solid var(--rule-soft); color:var(--muted); max-width:none;
+}
+.ficha-tit span{color:var(--ink)}
+.ficha--alerta{border-color:var(--accent); box-shadow:6px 6px 0 var(--accent); background:var(--ground)}
+.ficha--alerta .ficha-tit{color:var(--accent-ink); border-bottom-color:var(--accent)}
+.ficha--ok{border-color:var(--verde); background:var(--verde-soft)}
+.ficha--ok .ficha-tit{color:var(--verde); border-bottom-color:var(--verde)}
+.ficha--nota{background:var(--surface-alt); border-style:dashed; border-color:var(--muted)}
+
+/* ---------- Tablas ---------- */
+.tabla-wrap{overflow-x:auto; margin:24px 0; border:2px solid var(--rule)}
+table{border-collapse:collapse; width:100%; min-width:580px; font-size:14.5px; line-height:1.5}
+th{
+  background:var(--ink); color:var(--ground); text-align:left;
+  font-family:var(--font-mono); font-weight:700; font-size:10.5px;
+  letter-spacing:.12em; text-transform:uppercase; padding:11px 14px;
+}
+td{padding:12px 14px; border-top:2px solid var(--rule-soft); vertical-align:top; color:var(--ink-soft)}
+td:first-child{color:var(--ink); font-weight:700; font-family:var(--font-mono); font-size:13px}
+tbody tr:nth-child(even) td{background:var(--surface)}
+
+/* ---------- Diagrama ---------- */
+figure{margin:28px 0; border:2px solid var(--rule); background:var(--ground)}
+figure .scroll{overflow-x:auto}
+figure svg{display:block; width:100%; min-width:620px; height:auto}
+figcaption{
+  font-family:var(--font-mono); font-size:11px; letter-spacing:.1em;
+  text-transform:uppercase; color:var(--muted); padding:11px 16px;
+  border-top:2px solid var(--rule-soft); background:var(--surface);
+}
+.d-box{fill:var(--surface); stroke:var(--ink); stroke-width:2}
+.d-box-a{fill:none; stroke:var(--accent); stroke-width:2}
+.d-box-v{fill:none; stroke:var(--violet); stroke-width:2}
+.d-fill{fill:var(--ink)}
+.d-line{stroke:var(--ink); stroke-width:2; fill:none}
+.d-dash{stroke:var(--accent); stroke-width:2; fill:none; stroke-dasharray:6 5}
+.d-h{font-family:var(--font-mono); font-size:12.5px; font-weight:700; letter-spacing:.09em; fill:var(--ink)}
+.d-t{font-family:var(--font-mono); font-size:12px; fill:var(--ink-soft)}
+.d-s{font-family:var(--font-mono); font-size:11px; letter-spacing:.05em; fill:var(--muted)}
+.d-a{font-family:var(--font-mono); font-size:11.5px; font-weight:700; letter-spacing:.07em; fill:var(--accent-ink)}
+
+/* ---------- Tarjeta de bolsillo ---------- */
+.tarjeta{border:3px solid var(--rule); padding:0; margin:26px 0}
+.tarjeta-h{
+  background:var(--accent); color:var(--accent-on);
+  font-family:var(--font-mono); font-size:12px; font-weight:700;
+  letter-spacing:.15em; text-transform:uppercase; padding:12px 18px;
+}
+.tarjeta-row{
+  display:grid; grid-template-columns:74px 1fr 96px;
+  border-top:2px solid var(--rule-soft); align-items:center;
+}
+.tarjeta-row:first-of-type{border-top:0}
+.tarjeta-row .n{
+  font-family:var(--font-display); font-size:19px; color:var(--accent);
+  padding:11px 0 11px 18px; letter-spacing:-.02em;
+}
+.tarjeta-row .q{padding:11px 10px; font-size:15px; color:var(--ink)}
+.tarjeta-row .m{
+  font-family:var(--font-mono); font-size:11.5px; color:var(--muted);
+  padding:11px 18px 11px 0; text-align:right;
+}
+
+ul,ol{max-width:70ch; padding-left:1.2em; margin:0 0 1.1em}
+li{margin-bottom:.5em}
+li::marker{color:var(--accent-ink); font-weight:700}
+code{font-family:var(--font-mono); font-size:.88em; background:var(--surface-alt); padding:2px 5px; border:1px solid var(--rule-soft)}
+a{color:var(--accent-ink); text-underline-offset:3px}
+
+footer{
+  margin-top:70px; border-top:3px solid var(--rule); padding-top:18px;
+  font-family:var(--font-mono); font-size:11px; line-height:1.7; color:var(--muted); letter-spacing:.04em;
+}
+
+@media print{
+  body{padding:0; font-size:11pt}
+  .paso, .check, .ficha, figure, .tarjeta{break-inside:avoid}
+  h2{break-after:avoid}
+  .toc{display:none}
+}
+@media (prefers-reduced-motion:reduce){*{animation:none!important;transition:none!important}}
+</style>
+
+<div class="wrap">
+
+<header class="cover">
+  <div class="cover-top">
+    <div class="cover-badge">GUÍA<br>DEMO</div>
+    <div class="cover-head">
+      <p class="eyebrow">Sesión 02 · demostración de apertura · min 0–50</p>
+      <h1>Guía paso a paso de la demostración en vivo</h1>
+    </div>
+  </div>
+  <div class="cover-meta">
+    <div><b>Duración</b>48 min de 50</div>
+    <div><b>Demostraciones</b>7 encadenadas</div>
+    <div><b>Navegadores</b>2</div>
+    <div><b>Billeteras</b>2 desechables</div>
+    <div><b>Entregable</b>Ninguno</div>
+  </div>
+</header>
+
+<nav class="toc">
+  <a href="#montaje"><span class="n">MONTAJE</span><span class="t">Dos navegadores, dos billeteras</span><span class="m">leer primero</span></a>
+  <a href="#semana"><span class="n">PREP 1</span><span class="t">Una semana antes</span><span class="m">30 min</span></a>
+  <a href="#vispera"><span class="n">PREP 2</span><span class="t">La víspera · ensayo completo</span><span class="m">45 min</span></a>
+  <a href="#antes"><span class="n">PREP 3</span><span class="t">Quince minutos antes de clase</span><span class="m">15 min</span></a>
+  <a href="#guion"><span class="n">GUION</span><span class="t">Las siete demostraciones</span><span class="m">48 min</span></a>
+  <a href="#planb"><span class="n">PLAN B</span><span class="t">Qué hacer cuando algo falla</span><span class="m">—</span></a>
+  <a href="#tarjeta"><span class="n">TARJETA</span><span class="t">Referencia de bolsillo · imprimir</span><span class="m">1 hoja</span></a>
+</nav>
+
+<hr>
+
+<!-- ================= MONTAJE ================= -->
+<section id="montaje">
+  <h2>El montaje: dos navegadores, dos billeteras</h2>
+
+  <p>Toda la demostración descansa sobre este montaje. Si lo entiendes, las siete demostraciones se encadenan solas; si lo improvisas, te quedas sin fondos en la demostración 5 y la clase se cae.</p>
+
+  <div class="ficha ficha--alerta">
+    <p class="ficha-tit"><span>Cambio respecto al guion original</span></p>
+    <p>El guion original de la demostración dice «borrar la extensión y restaurar». <strong>No lo hagas.</strong> Borrar una extensión en vivo y depender de que la restauración funcione delante de treinta personas es un riesgo innecesario, y si falla pierdes la demostración más importante del bloque.</p>
+    <p>La versión de esta guía consigue el mismo efecto —y es más contundente— <strong>restaurando la billetera en un segundo navegador y mostrando los dos lado a lado</strong>: misma dirección, mismo saldo, sin contraseña. Nada se destruye y el resultado visual es mejor, porque las dos ventanas se ven al tiempo.</p>
+  </div>
+
+  <figure>
+    <div class="scroll">
+    <svg viewBox="0 0 720 330" role="img" aria-label="Montaje: navegador principal con la billetera CURSO precargada, y navegador secundario limpio donde se crea la billetera NUEVA en vivo y luego se restaura CURSO.">
+      <!-- Navegador 1 -->
+      <rect class="d-box" x="16" y="40" width="320" height="120"/>
+      <rect class="d-fill" x="16" y="40" width="320" height="26"/>
+      <text x="30" y="58" style="font-family:var(--font-mono);font-size:11px;font-weight:700;letter-spacing:.12em" fill="var(--ground)">NAVEGADOR 1 · PRINCIPAL</text>
+      <text class="d-h" x="30" y="90">BILLETERA «CURSO»</text>
+      <text class="d-s" x="30" y="110">desechable · precargada con fondos de prueba</text>
+      <text class="d-s" x="30" y="130">frase semilla anotada en papel</text>
+      <text class="d-a" x="30" y="150">DEMOS 3 · 4 · 5 · 6 · 7</text>
+
+      <!-- Navegador 2 -->
+      <rect class="d-box" x="384" y="40" width="320" height="120"/>
+      <rect class="d-fill" x="384" y="40" width="320" height="26"/>
+      <text x="398" y="58" style="font-family:var(--font-mono);font-size:11px;font-weight:700;letter-spacing:.12em" fill="var(--ground)">NAVEGADOR 2 · LIMPIO</text>
+      <text class="d-h" x="398" y="90">SIN METAMASK AL EMPEZAR</text>
+      <text class="d-s" x="398" y="110">aquí se instala y se crea todo en vivo</text>
+      <text class="d-s" x="398" y="130">perfil nuevo o navegador distinto</text>
+      <text class="d-a" x="398" y="150">DEMOS 1 · 2</text>
+
+      <!-- Flujo -->
+      <text class="d-s" x="16" y="196">EL RECORRIDO DE LA CLASE</text>
+      <rect class="d-box-v" x="16" y="206" width="212" height="52"/>
+      <text class="d-t" x="30" y="228">DEMO 1 · se crea «NUEVA»</text>
+      <text class="d-s" x="30" y="246">en el navegador 2, en vivo</text>
+
+      <path class="d-line" d="M228 232h30"/>
+      <polygon class="d-fill" points="264,232 254,227 254,237"/>
+
+      <rect class="d-box-v" x="264" y="206" width="212" height="52"/>
+      <text class="d-t" x="278" y="228">DEMO 2 · se restaura «CURSO»</text>
+      <text class="d-s" x="278" y="246">con sus 12 palabras, al lado</text>
+
+      <path class="d-line" d="M476 232h30"/>
+      <polygon class="d-fill" points="512,232 502,227 502,237"/>
+
+      <rect class="d-box-a" x="512" y="206" width="192" height="52"/>
+      <text class="d-t" x="526" y="228">DEMO 5 · «CURSO» envía</text>
+      <text class="d-s" x="526" y="246">a la dirección de «NUEVA»</text>
+
+      <path class="d-dash" d="M120 258v34h490v-34"/>
+      <text class="d-a" x="360" y="312" text-anchor="middle">LA TRANSACCIÓN LLEGA A LA BILLETERA QUE LA CLASE VIO NACER</text>
+    </svg>
+    </div>
+    <figcaption>Montaje de la demostración. Las siete piezas se encadenan: nada aparece de la nada.</figcaption>
+  </figure>
+
+  <h3>Por qué este montaje y no otro</h3>
+
+  <div class="tabla-wrap">
+  <table>
+    <thead><tr><th>Decisión</th><th>Razón</th></tr></thead>
+    <tbody>
+      <tr><td>La billetera CURSO va precargada</td><td>No se puede precargar una billetera que se crea en vivo: su dirección no existe hasta ese momento. Y los faucets fallan justo cuando los necesitas.</td></tr>
+      <tr><td>La billetera NUEVA se crea en el navegador 2</td><td>El navegador 1 ya tiene MetaMask instalado. Para mostrar la instalación desde cero necesitas un entorno limpio.</td></tr>
+      <tr><td>Se restaura CURSO, no NUEVA</td><td>CURSO tiene saldo. Ver aparecer una cuenta vacía no impresiona a nadie; ver aparecer una cuenta <em>con fondos</em> a partir de doce palabras escritas en un papel, sí.</td></tr>
+      <tr><td>El envío va de CURSO a NUEVA</td><td>Cierra el círculo narrativo. El dinero llega a la cuenta que el grupo vio nacer diez minutos antes.</td></tr>
+      <tr><td>Las dos billeteras son desechables</td><td>Las dos frases semilla quedan expuestas en pantalla. Ninguna vuelve a usarse después de la clase, nunca, bajo ningún concepto.</td></tr>
+    </tbody>
+  </table>
+  </div>
+
+  <div class="ficha ficha--alerta">
+    <p class="ficha-tit"><span>Regla absoluta</span></p>
+    <p>Ninguna de las dos billeteras puede ser la tuya, ni contener fondos reales, ni volver a usarse jamás. Se crean para esta clase y se abandonan. Si alguna vez sientes la tentación de reutilizar la de CURSO «porque ya tiene fondos de prueba», recuerda que treinta personas fotografiaron su frase semilla.</p>
+  </div>
+</section>
+
+<hr>
+
+<!-- ================= PREP 1 ================= -->
+<section id="semana">
+  <h2>Preparación 1 · Una semana antes</h2>
+  <p>Media hora de trabajo. Lo importante es hacerlo con margen: si algo está bloqueado en la red del campus, necesitas tiempo para escalarlo a la dirección de tecnología.</p>
+
+  <ul class="check">
+    <li>
+      <label class="box"><input type="checkbox"></label>
+      <div class="body"><b>01 · Confirmar la red de prueba vigente</b>
+      <span>Verifica cuál es la red de prueba pública recomendada en este momento y que su explorador de bloques funcione. La disponibilidad de las testnets cambia con las actualizaciones del protocolo, y una red que servía el semestre pasado puede estar retirada. Anota el nombre exacto en tu guion.</span></div>
+    </li>
+    <li>
+      <label class="box"><input type="checkbox"></label>
+      <div class="body"><b>02 · Probar la red del campus desde una máquina del aula</b>
+      <span>No desde tu oficina: desde la sala donde vas a dictar. Comprueba que puedes abrir la tienda de extensiones del navegador, instalar una extensión, y llegar al explorador de bloques y al faucet. Si algo está bloqueado, este es el momento de pedirlo.</span></div>
+    </li>
+    <li>
+      <label class="box"><input type="checkbox"></label>
+      <div class="body"><b>03 · Crear la billetera CURSO</b>
+      <span>En el navegador 1, instala MetaMask y crea una billetera nueva. <strong>Anota las doce palabras en papel, en orden, con letra grande y legible.</strong> Ese papel es tu material de clase para la demostración 2. Guárdalo con el resto del material de la sesión.</span></div>
+    </li>
+    <li>
+      <label class="box"><input type="checkbox"></label>
+      <div class="body"><b>04 · Cargar fondos de prueba en CURSO</b>
+      <span>Pide al faucet varias veces a lo largo de la semana si hace falta. Necesitas saldo suficiente para hacer varios envíos sin quedarte corto: apunta a tener margen para al menos diez transacciones, contando los ensayos.</span></div>
+    </li>
+    <li>
+      <label class="box"><input type="checkbox"></label>
+      <div class="body"><b>05 · Preparar el navegador 2</b>
+      <span>Un perfil de navegador nuevo, o directamente otro navegador (si usas Chrome para el 1, usa Edge o Firefox para el 2). Debe estar <strong>sin MetaMask</strong>: la demostración 1 consiste precisamente en instalarlo.</span></div>
+    </li>
+  </ul>
+</section>
+
+<hr>
+
+<!-- ================= PREP 2 ================= -->
+<section id="vispera">
+  <h2>Preparación 2 · La víspera</h2>
+
+  <div class="ficha ficha--alerta">
+    <p class="ficha-tit"><span>Esto no es opcional</span></p>
+    <p><strong>Haz el ensayo completo, de principio a fin, cronometrado.</strong> La interfaz de MetaMask cambia entre versiones: los nombres de menú y el orden de las pantallas que describe esta guía pueden no coincidir exactamente con lo que veas. El ensayo es lo que convierte esta guía en <em>tu</em> guion. Corrige a mano las rutas que hayan cambiado.</p>
+    <p>Un ensayo también te dice lo único que ninguna guía puede: cuánto tardas <em>tú</em> haciendo cada paso mientras hablas.</p>
+  </div>
+
+  <ul class="check">
+    <li>
+      <label class="box"><input type="checkbox"></label>
+      <div class="body"><b>06 · Ensayo completo cronometrado</b>
+      <span>Las siete demostraciones seguidas, hablando en voz alta. Anota tus tiempos reales al margen de la tarjeta de bolsillo. Si te pasas de 48 minutos, la demostración 7 es la que se sacrifica.</span></div>
+    </li>
+    <li>
+      <label class="box"><input type="checkbox"></label>
+      <div class="body"><b>07 · Restablecer el navegador 2 después del ensayo</b>
+      <span>El ensayo deja MetaMask instalado en el navegador 2. <strong>Desinstálalo</strong> para que la demostración 1 vuelva a empezar desde cero. Es el error de preparación más fácil de cometer.</span></div>
+    </li>
+    <li>
+      <label class="box"><input type="checkbox"></label>
+      <div class="body"><b>08 · Capturar el plan B en imágenes</b>
+      <span>Durante el ensayo, captura pantalla de cada paso: instalación, frase semilla, dirección, selector de red, pantalla de firma, transacción en el explorador, historial de una cuenta ajena. Guárdalas numeradas en una carpeta o pégalas en un documento. Si la red del campus falla, dictas la demostración con estas capturas y nadie nota la diferencia.</span></div>
+    </li>
+    <li>
+      <label class="box"><input type="checkbox"></label>
+      <div class="body"><b>09 · Anotar dos direcciones de respaldo</b>
+      <span>Copia dos direcciones cualesquiera con historial abundante que veas en el explorador. Te sirven para la demostración 7 si el bloque del día sale vacío o poco interesante.</span></div>
+    </li>
+    <li>
+      <label class="box"><input type="checkbox"></label>
+      <div class="body"><b>10 · Verificar el saldo de CURSO</b>
+      <span>Después del ensayo el saldo bajó. Recárgalo.</span></div>
+    </li>
+  </ul>
+</section>
+
+<hr>
+
+<!-- ================= PREP 3 ================= -->
+<section id="antes">
+  <h2>Preparación 3 · Quince minutos antes</h2>
+  <p>Esta lista es corta a propósito. Se hace con el aula ya abierta y el proyector encendido.</p>
+
+  <ul class="check">
+    <li>
+      <label class="box"><input type="checkbox"></label>
+      <div class="body"><b>11 · Silenciar las notificaciones del sistema</b>
+      <span>Activa el modo concentración o no molestar. Un mensaje personal apareciendo sobre la pantalla proyectada es el accidente más común y el más incómodo. Cierra también los clientes de correo y de mensajería.</span></div>
+    </li>
+    <li>
+      <label class="box"><input type="checkbox"></label>
+      <div class="body"><b>12 · Cerrar pestañas y ocultar la barra de marcadores</b>
+      <span>Deja solo lo que vas a usar. Tus marcadores son información personal proyectada a treinta personas.</span></div>
+    </li>
+    <li>
+      <label class="box"><input type="checkbox"></label>
+      <div class="body"><b>13 · Subir el zoom del navegador a 150 % o más</b>
+      <span><code>Ctrl</code> + <code>+</code> varias veces. Compruébalo <strong>desde la última fila del salón</strong>, no desde tu puesto. Las direcciones hexadecimales son ilegibles al tamaño por defecto.</span></div>
+    </li>
+    <li>
+      <label class="box"><input type="checkbox"></label>
+      <div class="body"><b>14 · Dejar abiertas las pestañas de trabajo</b>
+      <span>En el navegador 1: el explorador de bloques y el faucet. En el navegador 2: la tienda de extensiones, ya con MetaMask buscado pero <strong>sin instalar</strong>.</span></div>
+    </li>
+    <li>
+      <label class="box"><input type="checkbox"></label>
+      <div class="body"><b>15 · Tener el papel de la frase semilla a mano</b>
+      <span>El de la billetera CURSO. Lo necesitas en la demostración 2 y no quieres buscarlo en ese momento.</span></div>
+    </li>
+    <li>
+      <label class="box"><input type="checkbox"></label>
+      <div class="body"><b>16 · Verificar el saldo de CURSO una última vez</b>
+      <span>Diez segundos. Si está en cero, pasas al plan B de la demostración 4 y avisas antes, no en mitad del envío.</span></div>
+    </li>
+  </ul>
+
+  <div class="ficha ficha--ok">
+    <p class="ficha-tit"><span>Listo para empezar cuando</span></p>
+    <p>Las dos ventanas están abiertas y puedes alternar entre ellas sin buscar; el zoom se lee desde atrás; el papel con las doce palabras está sobre la mesa; y CURSO tiene saldo. Con eso, todo lo demás es guion.</p>
+  </div>
+</section>
+
+<hr>
+
+<!-- ================= GUION ================= -->
+<section id="guion">
+  <h2>El guion · siete demostraciones</h2>
+
+  <p>Cada demostración trae cuatro carriles. <strong>HACER</strong> es la acción exacta sobre la pantalla. <strong>DECIR</strong> es texto que puedes leer casi literal —no hace falta memorizarlo, pero está escrito para decirse en voz alta—. <strong>SEÑALAR</strong> es lo que apuntas con el cursor. <strong>OJO</strong> son las trampas que se cobran a quien improvisa.</p>
+
+  <p>Los minutos son los del ensayo tipo. Ajusta con los tuyos.</p>
+
+  <!-- DEMO 1 -->
+  <div class="paso">
+    <p class="paso-head"><span class="num">01</span> <span class="tit">Crear una identidad desde cero</span> <span class="min">5 MIN · min 0–5</span></p>
+    <div class="paso-body">
+      <div class="lane"><span class="tag tag-hacer">Hacer</span><div class="txt">
+        <p>Pásate al <strong>navegador 2</strong>. Anuncia que vas a cronometrar.</p>
+        <div class="ruta"><b>1.</b> Tienda de extensiones → buscar «MetaMask» → <b>Añadir al navegador</b><br>
+        <b>2.</b> Se abre la pantalla de bienvenida → <b>Crear una billetera nueva</b><br>
+        <b>3.</b> Definir contraseña (escribe algo simple; lo comentas después)<br>
+        <b>4.</b> Aparecen las 12 palabras → confirmar las que pide → listo</div>
+        <p>Di el tiempo en voz alta al terminar. Suele quedar por debajo del minuto.</p>
+      </div></div>
+
+      <div class="lane"><span class="tag tag-decir">Decir</span><div class="txt">
+        <p class="decir">Voy a crear una cuenta capaz de recibir dinero desde cualquier lugar del mundo. Miren el reloj.</p>
+        <p class="decir">Listo. Cuarenta segundos. No me pidieron el nombre, ni la cédula, ni el correo. Nadie me aprobó nada. No hubo un formulario, ni una verificación, ni una espera. Esto es lo que significa «sin permiso», y lo acaban de ver.</p>
+      </div></div>
+
+      <div class="lane"><span class="tag tag-mostrar">Señalar</span><div class="txt">
+        <p>Antes de instalar, detente un segundo en la lista de resultados de la tienda y apunta a las extensiones parecidas: <em>«fíjense cuántas se llaman casi igual y tienen casi el mismo ícono»</em>.</p>
+        <p class="decir">Toda la criptografía del mundo no me protege si me equivoco al elegir en esta lista. En estos sistemas el eslabón débil casi nunca es la matemática.</p>
+      </div></div>
+
+      <div class="lane"><span class="tag tag-preg">Al grupo</span><div class="txt">
+        <p>¿Cuántos trámites habría exigido abrir una cuenta bancaria capaz de recibir un pago internacional? ¿Qué ganamos y qué perdimos en el cambio?</p>
+        <p>Recoge dos o tres respuestas. Alguien dirá «perdimos la protección» — es la respuesta que quieres, y la retomas en la demostración 5.</p>
+      </div></div>
+
+      <div class="lane"><span class="tag tag-ojo">Ojo</span><div class="txt">
+        <p>No pases todavía a la siguiente pantalla ni cierres nada: <strong>la dirección de esta billetera NUEVA la necesitas en la demostración 5</strong>. Cópiala ahora mismo y pégala en un bloc de notas, o déjala a la vista.</p>
+      </div></div>
+    </div>
+  </div>
+
+  <!-- DEMO 2 -->
+  <div class="paso">
+    <p class="paso-head"><span class="num">02</span> <span class="tit">La frase semilla, en pantalla</span> <span class="min">8 MIN · min 5–13</span></p>
+    <div class="paso-body">
+      <div class="lane"><span class="tag tag-hacer">Hacer</span><div class="txt">
+        <p>Sigues en el navegador 2. Ahora restauras la billetera CURSO con el papel que tienes en la mano.</p>
+        <div class="ruta"><b>1.</b> Menú de cuentas de MetaMask → <b>Bloquear</b> (o cerrar sesión)<br>
+        <b>2.</b> En la pantalla de bloqueo → <b>¿Olvidaste tu contraseña?</b> / <b>Importar con frase de recuperación</b><br>
+        <b>3.</b> Escribir las 12 palabras del papel, en orden<br>
+        <b>4.</b> Definir una contraseña nueva → aparece la cuenta CURSO <strong>con su saldo</strong></div>
+        <p>Coloca las dos ventanas <strong>lado a lado</strong>: navegador 1 y navegador 2 mostrando la misma dirección y el mismo saldo.</p>
+      </div></div>
+
+      <div class="lane"><span class="tag tag-decir">Decir</span><div class="txt">
+        <p class="decir">Esto es un papel. Tiene doce palabras escritas a mano. Voy a escribirlas en un navegador que nunca ha visto esta cuenta.</p>
+        <p class="decir">Miren las dos ventanas. Misma dirección. Mismo saldo. No usé contraseña, no me conecté a ningún servidor, no había una cuenta esperándome en ningún lado. Estas doce palabras no <em>dan acceso</em> a la billetera. Estas doce palabras <em>son</em> la billetera.</p>
+      </div></div>
+
+      <div class="lane"><span class="tag tag-mostrar">Señalar</span><div class="txt">
+        <p>Vuelve a la contraseña que definiste en la demostración 1 y aclara la confusión número uno de los principiantes:</p>
+        <p class="decir">Esa contraseña que puse hace un rato solo cifra un archivo dentro de <em>este</em> navegador. No es la cuenta. Si me robo su computador, la contraseña me estorba. Si me robo su papel, la contraseña no me sirve de nada, porque ya no la necesito.</p>
+      </div></div>
+
+      <div class="lane"><span class="tag tag-preg">Al grupo</span><div class="txt">
+        <p>Si estas doce palabras equivalen a la cuenta completa, <strong>¿dónde se guardan?</strong></p>
+        <p>Deja que propongan y ve descartando en voz alta: foto en el teléfono <em>(está en la nube y en la galería que le muestran a todo el mundo)</em>; correo a sí mismo <em>(el correo se hackea)</em>; nota del teléfono <em>(se sincroniza)</em>; gestor de contraseñas <em>(mejor, pero también se sincroniza)</em>. La respuesta seria es papel, o metal, y en más de un sitio físico.</p>
+      </div></div>
+
+      <div class="lane"><span class="tag tag-ojo">Ojo</span><div class="txt">
+        <p>Esta es la demostración que hay que clavar. Si solo te alcanza el tiempo para una, es esta. Si el grupo se queda callado, no sigas: pregunta directamente <em>«¿qué acaba de pasar aquí?»</em> y espera.</p>
+        <p>Y dilo explícitamente, porque alguien va a fotografiar la pantalla: <strong>esta billetera queda quemada y no volveré a usarla nunca.</strong> Es parte de la lección.</p>
+      </div></div>
+    </div>
+  </div>
+
+  <!-- DEMO 3 -->
+  <div class="paso">
+    <p class="paso-head"><span class="num">03</span> <span class="tit">Anatomía de una dirección</span> <span class="min">6 MIN · min 13–19</span></p>
+    <div class="paso-body">
+      <div class="lane"><span class="tag tag-hacer">Hacer</span><div class="txt">
+        <p>Vuelve al <strong>navegador 1</strong>. Copia la dirección de CURSO y pégala en un editor de texto con la letra bien grande.</p>
+        <div class="ruta"><b>1.</b> Clic en el nombre de la cuenta, arriba en MetaMask → se copia la dirección<br>
+        <b>2.</b> Pegar en el bloc de notas → subir el tamaño de letra a 28 pt o más<br>
+        <b>3.</b> Contar los caracteres en voz alta, señalando con el cursor</div>
+      </div></div>
+
+      <div class="lane"><span class="tag tag-decir">Decir</span><div class="txt">
+        <p class="decir">Cuarenta y dos caracteres. Los dos primeros, cero equis, no son parte de la dirección: son la etiqueta que dice «lo que sigue está en hexadecimal». Quedan cuarenta dígitos, que son veinte bytes. Eso es todo lo que hace falta para recibir dinero de cualquier parte del planeta.</p>
+      </div></div>
+
+      <div class="lane"><span class="tag tag-mostrar">Señalar</span><div class="txt">
+        <p>Proyecta el diagrama de derivación de claves —clave privada → clave pública → dirección— y recorre las tres cajas con el cursor mientras explicas de dónde salió esa cadena. Detente en la flecha tachada.</p>
+        <p>Luego vuelve al texto y apunta a las mayúsculas y minúsculas mezcladas:</p>
+        <p class="decir">Estas mayúsculas no son decorativas. Codifican una suma de verificación. Si ustedes transcriben mal un carácter, el software lo detecta antes de que el dinero salga. Es un estándar, se llama EIP-55, y lo vamos a implementar en la Sesión 2.</p>
+      </div></div>
+
+      <div class="lane"><span class="tag tag-preg">Al grupo</span><div class="txt">
+        <p>Si la dirección se deriva de la clave pública, y la pública de la privada, <strong>¿por qué puedo publicar esto sin riesgo?</strong></p>
+      </div></div>
+    </div>
+  </div>
+
+  <!-- DEMO 4 -->
+  <div class="paso">
+    <p class="paso-head"><span class="num">04</span> <span class="tit">Redes: cambiar de mundo con un menú</span> <span class="min">4 MIN · min 19–23</span></p>
+    <div class="paso-body">
+      <div class="lane"><span class="tag tag-hacer">Hacer</span><div class="txt">
+        <div class="ruta"><b>1.</b> Selector de red, arriba a la izquierda en MetaMask<br>
+        <b>2.</b> Si no aparecen las de prueba: <b>Configuración → Avanzado → Mostrar redes de prueba</b><br>
+        <b>3.</b> Alternar entre la red principal y la red de prueba, <b>despacio</b>, dos o tres veces</div>
+        <p>Que el grupo vea el saldo cambiar mientras la dirección de arriba se queda idéntica.</p>
+      </div></div>
+
+      <div class="lane"><span class="tag tag-decir">Decir</span><div class="txt">
+        <p class="decir">Fíjense en dos cosas al tiempo: la dirección de arriba no cambió, y el saldo sí. Son dos libros contables distintos, independientes, corriendo el mismo software. La misma dirección existe en los dos.</p>
+        <p class="decir">Y de aquí sale una de las formas más comunes de perder dinero para siempre: mandar fondos reales a una dirección que solo existe en otra red.</p>
+      </div></div>
+
+      <div class="lane"><span class="tag tag-mostrar">Señalar</span><div class="txt">
+        <p>Abre la pestaña del faucet, muéstrala tres segundos y ciérrala.</p>
+        <p class="decir">De aquí salió este saldo. Gratis, pidiéndolo. Por eso no vale nada. Y esto conecta con lo que vimos la sesión pasada: el valor de estos sistemas no está en el software, que es público y cualquiera lo copia. Está en cuánto cuesta atacarlos.</p>
+      </div></div>
+
+      <div class="lane"><span class="tag tag-ojo">Ojo</span><div class="txt">
+        <p>No pidas fondos al faucet en vivo. Enséñalo y ciérralo. Si te pones a esperar una transacción de faucet delante del grupo, pierdes cinco minutos y la mitad de las veces falla.</p>
+      </div></div>
+    </div>
+  </div>
+
+  <!-- DEMO 5 -->
+  <div class="paso">
+    <p class="paso-head"><span class="num">05</span> <span class="tit">Firmar: la pantalla que nadie lee</span> <span class="min">8 MIN · min 23–31</span></p>
+    <div class="paso-body">
+      <div class="lane"><span class="tag tag-hacer">Hacer</span><div class="txt">
+        <p>Desde CURSO, en el navegador 1, prepara un envío a la dirección de <strong>NUEVA</strong> —la que copiaste en la demostración 1—.</p>
+        <div class="ruta"><b>1.</b> <b>Enviar</b> → pegar la dirección de NUEVA<br>
+        <b>2.</b> Escribir una cantidad pequeña → <b>Siguiente</b><br>
+        <b>3.</b> Aparece la pantalla de confirmación → <span style="color:var(--accent-ink);font-weight:700">DETENTE AQUÍ</span></div>
+        <p>Quédate en esa pantalla un minuto largo. Es el corazón de la demostración.</p>
+      </div></div>
+
+      <div class="lane"><span class="tag tag-decir">Decir</span><div class="txt">
+        <p class="decir">Voy a mandarle dinero a la cuenta que ustedes vieron nacer hace diez minutos. Antes de confirmar, vamos a leer esta pantalla, porque es la pantalla que nadie lee.</p>
+        <p>Recorre los campos uno por uno con el cursor: destinatario, cantidad, comisión estimada, total.</p>
+        <p class="decir">Cuando yo apriete este botón no hay vuelta atrás. No hay servicio al cliente. No hay una oficina donde reclamar. Si la dirección está mal, el dinero se fue y se acabó.</p>
+        <p class="decir">La inmensa mayoría de los robos en este mundo no rompen ninguna criptografía. Lo que hacen es conseguir que la víctima firme esto voluntariamente, sin leerlo. Leer antes de firmar es lo único que separa a un usuario seguro de una víctima.</p>
+      </div></div>
+
+      <div class="lane"><span class="tag tag-hacer">Hacer</span><div class="txt">
+        <p>Ahora sí, confirma. Narra los estados en tiempo real mientras ocurren:</p>
+        <p class="decir">Pendiente… ya salió de mi computador y está esperando en la mempool… la incluyeron en un bloque… y ahora empiezan a acumularse confirmaciones encima.</p>
+        <p>Pásate al <strong>navegador 2</strong> y muestra el saldo de NUEVA. Llegó.</p>
+      </div></div>
+
+      <div class="lane"><span class="tag tag-preg">Al grupo</span><div class="txt">
+        <p>Nadie autorizó esta transferencia salvo yo. No hubo aprobación de nadie, ni horario bancario, ni país. <strong>¿En qué casos eso es exactamente lo que se necesita, y en qué casos es aterrador?</strong></p>
+        <p>Aquí retomas la respuesta de la demostración 1 sobre «perdimos la protección». Es el mejor momento de la sesión para esa discusión.</p>
+      </div></div>
+
+      <div class="lane"><span class="tag tag-ojo">Ojo</span><div class="txt">
+        <p>Si la red está lenta y la transacción se demora, <strong>no te quedes mirando la pantalla en silencio</strong>. Es el momento perfecto para lanzar la pregunta al grupo: la discusión llena el tiempo de espera y la confirmación llega sola mientras hablan.</p>
+      </div></div>
+    </div>
+  </div>
+
+  <!-- DEMO 6 -->
+  <div class="paso">
+    <p class="paso-head"><span class="num">06</span> <span class="tit">El explorador de bloques, campo por campo</span> <span class="min">12 MIN · min 31–43</span></p>
+    <div class="paso-body">
+      <div class="lane"><span class="tag tag-hacer">Hacer</span><div class="txt">
+        <div class="ruta"><b>1.</b> En MetaMask → pestaña <b>Actividad</b> → clic en la transacción<br>
+        <b>2.</b> <b>Ver en el explorador de bloques</b><br>
+        <b>3.</b> Recorrer los campos con el cursor, uno por uno, sin prisa</div>
+        <p>Esta es la demostración central. Las cinco anteriores existen para poder llegar aquí. Tiene doce minutos porque los necesita.</p>
+      </div></div>
+
+      <div class="lane"><span class="tag tag-decir">Decir</span><div class="txt">
+        <p class="decir">Todo lo que discutimos la sesión pasada está en esta pantalla. Ya no es teoría, son datos.</p>
+        <p>Recorre en este orden, apoyándote en la tabla de la lámina de respaldo:</p>
+        <ul>
+          <li><strong>Transaction Hash</strong> — el identificador. Con esto cualquiera en el mundo audita esta operación.</li>
+          <li><strong>Status</strong> — <em>«ojo con esto: una transacción puede entrar al bloque y aun así fallar. Y le cobran igual».</em></li>
+          <li><strong>Block y confirmaciones</strong> — <em>«esto es la inmutabilidad de la que hablábamos, en vivo. Cada bloque que se acumula encima la hace más cara de revertir».</em></li>
+          <li><strong>Timestamp</strong> — <em>«la declara quien propone el bloque. No es un reloj confiable, y eso tiene consecuencias de seguridad que veremos en la Sesión 9».</em></li>
+          <li><strong>From / To</strong> — <em>«seudónimos, no anónimos. Sin nombre, pero todo enlazado y para siempre».</em></li>
+          <li><strong>Value y Transaction Fee</strong> — <em>«la comisión es el precio del espacio en el bloque. Todo el modelo económico de la Sesión 5 arranca de este renglón».</em></li>
+          <li><strong>Nonce</strong> — <em>«esta palabra ya la vimos hoy con otro significado. Aquí es un contador por cuenta. Son dos cosas distintas con el mismo nombre; no se confundan en la Sesión 5».</em></li>
+          <li><strong>Input Data</strong> — <em>«está vacío porque esto fue una transferencia simple. Aquí es donde va a vivir todo el código que ustedes escriban a partir de la Sesión 6».</em></li>
+        </ul>
+      </div></div>
+
+      <div class="lane"><span class="tag tag-hacer">Hacer</span><div class="txt">
+        <p>Sube un nivel: clic en el número del bloque. Muestra las otras transacciones que viajaron en él.</p>
+        <p class="decir">Mi transacción viajó acompañada. Estas otras son de gente de todo el mundo que no conozco, metida en el mismo bloque, en el mismo segundo.</p>
+        <p>Ve a la vista de bloques recientes y déjala actualizándose unos segundos, en silencio.</p>
+      </div></div>
+
+      <div class="lane"><span class="tag tag-ojo">Ojo</span><div class="txt">
+        <p>La tentación es correr. No corras: doce minutos en esta pantalla valen más que las seis demostraciones anteriores juntas, porque es donde la abstracción se vuelve concreta.</p>
+        <p>El campo <strong>Input Data</strong> es el puente al resto del semestre. No lo pases de largo.</p>
+      </div></div>
+    </div>
+  </div>
+
+  <!-- DEMO 7 -->
+  <div class="paso">
+    <p class="paso-head"><span class="num">07</span> <span class="tit">Mirar la cuenta de un desconocido</span> <span class="min">5 MIN · min 43–48 · opcional</span></p>
+    <div class="paso-body">
+      <div class="lane"><span class="tag tag-hacer">Hacer</span><div class="txt">
+        <div class="ruta"><b>1.</b> Desde el bloque que abriste, clic en cualquier dirección que aparezca<br>
+        <b>2.</b> Se abre su página: saldo e historial completo<br>
+        <b>3.</b> Desplázate por el historial hacia abajo, despacio</div>
+        <p>Si el bloque salió pobre, usa una de las dos direcciones de respaldo que anotaste en la víspera.</p>
+      </div></div>
+
+      <div class="lane"><span class="tag tag-decir">Decir</span><div class="txt">
+        <p class="decir">No sé quién es esta persona. No le pedí permiso. No me autentiqué. Y estoy viendo cuánto tiene y todo lo que ha hecho, desde el primer día.</p>
+        <p class="decir">Esto no es un anonimato. Es un seudónimo: no hay un nombre, pero todo está enlazado. Y basta un solo punto de contacto con el mundo real —una compra, un registro, un envío a una plataforma que pide identificación— para que todo este historial hacia atrás quede con nombre propio.</p>
+      </div></div>
+
+      <div class="lane"><span class="tag tag-preg">Al grupo</span><div class="txt">
+        <p>¿Es esto un defecto del sistema o es su propósito?</p>
+        <p>Y la incómoda, que es la buena: <strong>¿aceptarían que su nómina se pagara en un sistema así?</strong></p>
+        <p>Con esa pregunta cierras la demostración y pasas al bloque de criptografía aplicada.</p>
+      </div></div>
+    </div>
+  </div>
+</section>
+
+<hr>
+
+<!-- ================= PLAN B ================= -->
+<section id="planb">
+  <h2>Plan B · qué hacer cuando algo falla</h2>
+
+  <p>Lo importante no es evitar el fallo: es que el grupo no perciba improvisación. En todos los casos, <strong>anuncia el problema, aplica el plan B y sigue</strong>. Un docente que dice «se cayó la red, seguimos con capturas» transmite control; uno que recarga la pantalla en silencio durante tres minutos, no.</p>
+
+  <div class="tabla-wrap">
+  <table>
+    <thead><tr><th>Si falla</th><th>Qué haces</th></tr></thead>
+    <tbody>
+      <tr>
+        <td>La red del campus bloquea todo</td>
+        <td>Pasas a las capturas del ensayo y dictas la demostración completa sobre ellas, con el mismo guion. Anúncialo sin dramatismo: <em>«la red del campus no nos deja, así que lo vemos con las capturas que hice ayer»</em>. Se pierde el efecto de lo vivo, no el contenido.</td>
+      </tr>
+      <tr>
+        <td>No puedes instalar la extensión</td>
+        <td>Te saltas la demostración 1 como acción y la cuentas con capturas. Empiezas directamente por la demostración 2 con la billetera CURSO, que ya está instalada en el navegador 1.</td>
+      </tr>
+      <tr>
+        <td>CURSO se quedó sin saldo</td>
+        <td>Haces la demostración 5 «en seco»: llegas a la pantalla de confirmación, la lees campo por campo —que es la parte valiosa— y explicas que no vas a confirmar por falta de fondos. Luego abres en el explorador cualquier transacción reciente para la demostración 6.</td>
+      </tr>
+      <tr>
+        <td>La transacción se queda pendiente</td>
+        <td>No esperes en silencio. Lanza la pregunta de discusión de la demostración 5 y deja que la conversación corra. Vuelves a mirar la pantalla dos minutos después. Si sigue pendiente, usas una transacción anterior tuya para la demostración 6.</td>
+      </tr>
+      <tr>
+        <td>El explorador de bloques no carga</td>
+        <td>Es lo más grave, porque la demostración 6 es el núcleo. Prueba un explorador alterno de la misma red; si tampoco, vas a las capturas. Por eso la captura del explorador es la más importante de todas las que tomas en la víspera.</td>
+      </tr>
+      <tr>
+        <td>La interfaz no coincide con esta guía</td>
+        <td>Pasa: MetaMask cambia. Si hiciste el ensayo, ya lo corregiste. Si no lo hiciste y te encuentras perdido en vivo, di en voz alta lo que estás buscando —<em>«busco dónde se importan las frases de recuperación»</em>—. Buscar en voz alta se lee como transparencia; buscar en silencio se lee como no saber.</td>
+      </tr>
+      <tr>
+        <td>Vas retrasado en el tiempo</td>
+        <td>Sacrifica la demostración 7, que es la única marcada como opcional. Si el retraso es grande, recorta también la 3, que es la más fácil de contar sin pantalla. <strong>Nunca recortes la 2 ni la 6.</strong></td>
+      </tr>
+    </tbody>
+  </table>
+  </div>
+
+  <div class="ficha ficha--nota">
+    <p class="ficha-tit"><span>Después de clase</span></p>
+    <p>Guarda el papel de la frase semilla de CURSO con el material de la sesión, para poder repetir la demostración el próximo semestre — pero <strong>no uses esa billetera para nada más</strong>. Y anota al margen de esta guía qué se demoró más de lo previsto y qué pregunta funcionó mejor. La segunda vez que dictes esto, esas notas valen más que la guía.</p>
+  </div>
+</section>
+
+<hr>
+
+<!-- ================= TARJETA ================= -->
+<section id="tarjeta">
+  <h2>Tarjeta de bolsillo</h2>
+  <p>Imprime esta sección y tenla al lado del teclado. Es lo único que necesitas mirar durante la clase.</p>
+
+  <div class="tarjeta">
+    <p class="tarjeta-h">Secuencia · 48 minutos</p>
+    <div class="tarjeta-row"><span class="n">01</span><span class="q">Instalar y crear billetera NUEVA — <b>navegador 2</b>. Copiar su dirección.</span><span class="m">5 min</span></div>
+    <div class="tarjeta-row"><span class="n">02</span><span class="q">Restaurar CURSO con el papel — <b>navegador 2</b>. Dos ventanas lado a lado.</span><span class="m">8 min</span></div>
+    <div class="tarjeta-row"><span class="n">03</span><span class="q">Dirección de CURSO en letra grande — <b>navegador 1</b>. Proyectar el diagrama de claves.</span><span class="m">6 min</span></div>
+    <div class="tarjeta-row"><span class="n">04</span><span class="q">Alternar red principal ↔ red de prueba. Enseñar el faucet y cerrarlo.</span><span class="m">4 min</span></div>
+    <div class="tarjeta-row"><span class="n">05</span><span class="q">Enviar de CURSO a NUEVA. <b>Parar en la confirmación.</b> Leer campo por campo.</span><span class="m">8 min</span></div>
+    <div class="tarjeta-row"><span class="n">06</span><span class="q">Explorador: 8 campos, luego el bloque, luego bloques recientes.</span><span class="m">12 min</span></div>
+    <div class="tarjeta-row"><span class="n">07</span><span class="q">Abrir la cuenta de un desconocido. Seudónimo ≠ anónimo.</span><span class="m">5 min</span></div>
+  </div>
+
+  <div class="tarjeta">
+    <p class="tarjeta-h">Las cuatro frases que no se pueden olvidar</p>
+    <div class="tarjeta-row"><span class="n">02</span><span class="q">Estas doce palabras no dan acceso a la billetera: <b>son</b> la billetera.</span><span class="m">demo 2</span></div>
+    <div class="tarjeta-row"><span class="n">04</span><span class="q">Misma dirección, distinto saldo: son dos libros contables independientes.</span><span class="m">demo 4</span></div>
+    <div class="tarjeta-row"><span class="n">05</span><span class="q">Los robos no rompen criptografía: consiguen que la víctima firme.</span><span class="m">demo 5</span></div>
+    <div class="tarjeta-row"><span class="n">07</span><span class="q">Seudónimo no es anónimo: sin nombre, pero todo enlazado y para siempre.</span><span class="m">demo 7</span></div>
+  </div>
+
+  <div class="tarjeta">
+    <p class="tarjeta-h">Si se acaba el tiempo</p>
+    <div class="tarjeta-row"><span class="n">↓</span><span class="q">Recorta primero la <b>07</b>, después la <b>03</b>.</span><span class="m">sacrificables</span></div>
+    <div class="tarjeta-row"><span class="n">✱</span><span class="q">Nunca recortes la <b>02</b> ni la <b>06</b>.</span><span class="m">intocables</span></div>
+  </div>
+</section>
+
+<footer>
+  <p>Universidad de San Buenaventura Medellín · Facultad de Ingeniería<br>
+  Blockchain y Web 3.0 · Sesión 02 · Guía de demostración de apertura para el docente · v2.0<br>
+  Las rutas de menú describen el flujo estándar de MetaMask y pueden variar entre versiones: el ensayo de la víspera es lo que las confirma.</p>
+</footer>
+
+</div>
+
+<script>
+/* Persistencia de las casillas de verificación entre sesiones del navegador.
+   Si el almacenamiento no está disponible, las casillas siguen funcionando
+   dentro de la página; solo se pierde el estado al recargar. */
+(function () {
+  var cajas = document.querySelectorAll('.check input[type=checkbox]');
+  var clave = 'guia-demo-s02';
+  var estado = {};
+  try { estado = JSON.parse(localStorage.getItem(clave) || '{}'); } catch (e) { estado = {}; }
+  cajas.forEach(function (c, i) {
+    if (estado[i]) c.checked = true;
+    c.addEventListener('change', function () {
+      estado[i] = c.checked;
+      try { localStorage.setItem(clave, JSON.stringify(estado)); } catch (e) {}
+    });
+  });
+})();
+</script>

@@ -1,0 +1,20 @@
+{
+  "name": "laboratorios-evm-usb",
+  "version": "1.0.0",
+  "description": "Laboratorios de Solidity del curso Blockchain y Web 3.0 · USB Medellín · Sesiones 5 a 16",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "compilar": "hardhat compile",
+    "probar": "hardhat test",
+    "cobertura": "hardhat test --coverage",
+    "nodo": "hardhat node"
+  },
+  "devDependencies": {
+    "@nomicfoundation/hardhat-toolbox-mocha-ethers": "3.0.7",
+    "hardhat": "3.16.0"
+  },
+  "dependencies": {
+    "@openzeppelin/contracts": "5.6.1"
+  }
+}

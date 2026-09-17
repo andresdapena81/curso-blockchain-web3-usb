@@ -1,0 +1,644 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<title>Actividad 4 · El caso Estonia</title>
+<style>
+  @page { size: A4; margin: 16mm 14mm 18mm 14mm; }
+
+  :root{
+    --naranja:#F07F06;
+    --ocre:#A35604;
+    --violeta:#7152E9;
+    --violeta-os:#4A32B0;
+    --tinta:#0F0F11;
+    --tinta-suave:#2B2A31;
+    --gris:#6F6B80;
+    --gris-claro:#D9D6E0;
+    --superf:#F4F2F7;
+    --blanco:#FFFFFF;
+  }
+
+  *{ box-sizing:border-box; }
+
+  html,body{ margin:0; padding:0; }
+  body{
+    font-family: Arial, "Helvetica Neue", Helvetica, sans-serif;
+    font-size: 10pt;
+    line-height: 1.5;
+    color: var(--tinta-suave);
+    background: var(--blanco);
+    -webkit-print-color-adjust: exact;
+    print-color-adjust: exact;
+  }
+
+  h1,h2,h3,h4{ font-family:"Arial Black", Arial, sans-serif; margin:0; color:var(--tinta); line-height:1.05; }
+
+  .mono{ font-family:"Courier New", Courier, monospace; }
+
+  /* El pie de página se dibuja sobre el PDF ya generado (ver construir.py):
+     Chrome/Edge no numera páginas desde CSS y el pie fijo colisiona con
+     los encabezados de sección. */
+
+  /* ---------- portada ---------- */
+  .portada{ break-after: page; }
+  .portada-barra{ background:var(--tinta); padding:9mm 8mm; margin-bottom:7mm; }
+  .portada-kicker{
+    font-family:"Courier New", Courier, monospace; font-size:8pt; letter-spacing:.18em;
+    color:var(--naranja); margin-bottom:5mm;
+  }
+  .portada h1{ font-size:30pt; color:var(--blanco); letter-spacing:-.01em; }
+  .portada h1 em{ font-style:normal; color:var(--naranja); }
+  .portada-sub{ color:#B9B4C4; font-size:11pt; margin-top:4mm; line-height:1.4; }
+
+  .datos{ display:grid; grid-template-columns:repeat(4,1fr); gap:0; border:2px solid var(--tinta); }
+  .datos div{ padding:4mm 4mm; border-right:1.5px solid var(--gris-claro); }
+  .datos div:last-child{ border-right:0; }
+  .datos dt{ font-family:"Courier New",monospace; font-size:7pt; letter-spacing:.12em; color:var(--gris); margin-bottom:2mm; }
+  .datos dd{ margin:0; font-family:"Arial Black",Arial,sans-serif; font-size:10pt; color:var(--tinta); line-height:1.25; }
+
+  /* ---------- secciones ---------- */
+  .sec{ margin-top:8mm; }
+  .sec-cab{ border-bottom:2.5px solid var(--tinta); padding-bottom:2.5mm; margin-bottom:5mm; display:flex; align-items:baseline; gap:4mm; }
+  .sec-num{
+    font-family:"Arial Black",Arial,sans-serif; font-size:17pt; color:var(--naranja);
+    line-height:1; letter-spacing:-.02em;
+  }
+  .sec-cab h2{ font-size:15pt; }
+  .sec-cab .lead{ margin-left:auto; font-family:"Courier New",monospace; font-size:7.5pt; letter-spacing:.12em; color:var(--gris); }
+
+  p{ margin:0 0 3.2mm 0; }
+  .intro{ font-size:11pt; color:var(--tinta); line-height:1.45; }
+
+  strong{ color:var(--tinta); }
+  .ocre{ color:var(--ocre); font-weight:bold; }
+
+  blockquote{
+    margin:4mm 0; padding:3.5mm 5mm; background:var(--superf);
+    border-left:3px solid var(--naranja); font-size:10pt; color:var(--tinta);
+  }
+  blockquote cite{ display:block; margin-top:2mm; font-style:normal; font-family:"Courier New",monospace; font-size:7.5pt; color:var(--gris); letter-spacing:.05em; }
+
+  /* ---------- cajas ---------- */
+  .caja{ border:2px solid var(--tinta); background:var(--blanco); box-shadow:4px 4px 0 var(--tinta); padding:5mm; margin:5mm 0 7mm 0; break-inside:avoid; }
+  .caja.alerta{ border-color:var(--naranja); box-shadow:4px 4px 0 var(--naranja); }
+  .caja.clave{ border-color:var(--violeta); box-shadow:4px 4px 0 var(--violeta); }
+  .caja-et{ font-family:"Courier New",monospace; font-size:7.5pt; font-weight:bold; letter-spacing:.13em; margin-bottom:3mm; }
+  .caja.alerta .caja-et{ color:var(--ocre); }
+  .caja.clave .caja-et{ color:var(--violeta-os); }
+  .caja .caja-et{ color:var(--tinta); }
+  .caja p:last-child{ margin-bottom:0; }
+
+  /* ---------- tareas ---------- */
+  .tarea{ border:2px solid var(--tinta); margin:0 0 4mm 0; break-inside:avoid; }
+  .tarea-cab{ display:flex; align-items:stretch; border-bottom:1.5px solid var(--gris-claro); }
+  .tarea-n{
+    background:var(--tinta); color:var(--naranja); font-family:"Arial Black",Arial,sans-serif;
+    font-size:13pt; padding:3mm 4mm; display:flex; align-items:center; min-width:16mm; justify-content:center;
+  }
+  .tarea-t{ padding:3mm 4mm; flex:1; }
+  .tarea-t h3{ font-size:11pt; margin-bottom:1mm; }
+  .tarea-t .et{ font-family:"Courier New",monospace; font-size:7pt; letter-spacing:.12em; color:var(--gris); }
+  .tarea-c{ padding:4mm; font-size:9.5pt; }
+  .tarea-c p:last-child{ margin-bottom:0; }
+  .tarea .noia{ background:var(--naranja); color:var(--tinta); font-family:"Courier New",monospace;
+    font-size:6.5pt; font-weight:bold; letter-spacing:.1em; padding:1mm 2mm; display:inline-block; margin-left:3mm; vertical-align:middle; }
+  .entrega{ margin-top:3mm; padding-top:2.5mm; border-top:1.5px dashed var(--gris-claro);
+    font-family:"Courier New",monospace; font-size:8pt; color:var(--ocre); }
+  .entrega b{ color:var(--ocre); letter-spacing:.06em; }
+
+  /* ---------- fuentes ---------- */
+  .fuente{ border:2px solid var(--gris-claro); border-left:5px solid var(--violeta); padding:4mm 5mm; margin-bottom:4mm; break-inside:avoid; }
+  .fuente h3{ font-size:10.5pt; margin-bottom:1.5mm; }
+  .fuente .ref{ font-size:9pt; color:var(--gris); margin-bottom:2.5mm; }
+  .fuente .url{ font-family:"Courier New",monospace; font-size:7.5pt; color:var(--violeta-os); word-break:break-all; margin-bottom:3mm; }
+  .fuente .mirar{ font-size:9.5pt; }
+  .fuente .mirar b{ color:var(--ocre); }
+  .etiquetas{ margin-bottom:2.5mm; }
+  .tag{ display:inline-block; font-family:"Courier New",monospace; font-size:6.5pt; font-weight:bold;
+    letter-spacing:.1em; padding:1mm 2mm; margin-right:1.5mm; border:1.5px solid var(--tinta); color:var(--tinta); }
+  .tag.parte{ background:var(--naranja); border-color:var(--naranja); }
+  .tag.indep{ background:var(--blanco); }
+  .tag.arb{ background:var(--tinta); color:var(--blanco); }
+
+  /* ---------- tablas ---------- */
+  table{ width:100%; border-collapse:collapse; margin:4mm 0 6mm 0; font-size:9pt; break-inside:avoid; }
+  th{ background:var(--tinta); color:var(--blanco); font-family:"Courier New",monospace; font-size:7.5pt;
+    letter-spacing:.1em; text-align:left; padding:2.5mm 3mm; font-weight:bold; }
+  td{ border-bottom:1.5px solid var(--gris-claro); padding:2.5mm 3mm; vertical-align:top; }
+  tr:last-child td{ border-bottom:2px solid var(--tinta); }
+  td.pk{ font-family:"Courier New",monospace; font-size:8pt; color:var(--ocre); font-weight:bold; }
+
+  ul,ol{ margin:0 0 3.5mm 0; padding-left:5mm; }
+  li{ margin-bottom:1.8mm; }
+  ul.limpia{ list-style:none; padding-left:0; }
+  ul.limpia li{ padding-left:6mm; position:relative; }
+  ul.limpia li::before{ content:"—"; position:absolute; left:0; color:var(--naranja); font-weight:bold; }
+
+  .salto{ break-before: page; }
+  .nowrap{ break-inside:avoid; }
+</style>
+</head>
+<body>
+
+<!-- ============================ PORTADA ============================ -->
+<section class="portada">
+  <div class="portada-barra">
+    <div class="portada-kicker">ACTIVIDAD EN EQUIPO · SESIÓN 4 · TRABAJO AUTÓNOMO</div>
+    <h1>¿ESTONIA ESTÁ<br>DE VERDAD EN LA<br><em>CADENA DE BLOQUES?</em></h1>
+    <div class="portada-sub">
+      Un país entero repetido como caso de éxito. Una afirmación que casi nadie<br>
+      ha ido a verificar. Ustedes van a ir.
+    </div>
+  </div>
+
+  <dl class="datos">
+    <div><dt>MODALIDAD</dt><dd>Equipos<br>de proyecto</dd></div>
+    <div><dt>ENTREGA</dt><dd>Documento<br>+ exposición</dd></div>
+    <div><dt>EXPOSICIÓN</dt><dd>5 minutos<br>por equipo</dd></div>
+    <div><dt>CUÁNDO</dt><dd>Sesión 5<br>_____ / _____</dd></div>
+  </dl>
+
+  <div class="caja alerta" style="margin-top:7mm">
+    <div class="caja-et">LO QUE ESTA ACTIVIDAD NO ES</div>
+    <p>No es un resumen sobre Estonia. No es un ensayo de opinión sobre si la cadena de bloques
+    es buena o mala. Y no es algo que un asistente de inteligencia artificial pueda resolver por
+    ustedes: las tareas centrales exigen <strong>abrir documentos, buscar dentro de ellos y comparar
+    versiones que solo existen en la web</strong>. Un modelo de lenguaje no puede hacer eso, y cuando lo
+    intenta, inventa. Parte de lo que van a aprender aquí es a notar exactamente eso.</p>
+  </div>
+
+  <p class="mono" style="font-size:8pt; letter-spacing:.1em; color:var(--gris); margin-top:6mm">
+    ESTE DOCUMENTO CONTIENE: EL CASO · EL ENCARGO · CINCO FUENTES VERIFICADAS ·<br>
+    LAS TRES QUE DEBEN CONSEGUIR · CÓMO SE CITA · CÓMO SE EVALÚA
+  </p>
+</section>
+
+<!-- ============================ 1 · EL CASO ============================ -->
+<section class="sec">
+  <div class="sec-cab">
+    <span class="sec-num">01</span>
+    <h2>El caso</h2>
+    <span class="lead">LEER ANTES DE EMPEZAR</span>
+  </div>
+
+  <p class="intro">En cualquier lista de «casos de éxito de la cadena de bloques en el sector
+  público», Estonia aparece de primera. La frase circula con variaciones menores y siempre con el
+  mismo tono de hecho consumado: <strong>Estonia puso sus registros públicos en blockchain.</strong>
+  A veces se añade que fue el primer país del mundo en hacerlo. A veces, que las historias clínicas
+  de sus ciudadanos están en la cadena. Casi siempre, que lleva haciéndolo desde antes de que
+  existiera Bitcoin.</p>
+
+  <p>La afirmación aparece en presentaciones corporativas, en notas de prensa, en trabajos de grado,
+  en informes de consultoría y en el material de cursos como este. Se ha repetido tanto que dejó de
+  examinarse. Cuando algo se repite lo suficiente, deja de necesitar prueba: se convierte en
+  paisaje.</p>
+
+  <p>Conviene empezar por lo que no está en discusión, porque es mucho y es admirable. Estonia
+  construyó, a lo largo de dos décadas, una administración pública digital que funciona: documento
+  de identidad electrónico con capacidad de firma, una infraestructura de intercambio de datos entre
+  entidades del Estado, registros civiles, judiciales, de propiedad y de salud interconectados, y
+  trámites que en la mayoría de los países todavía exigen fila y papel. Nada de eso está en duda, y
+  nada de eso requiere una cadena de bloques.</p>
+
+  <p>La pieza que sí está en duda es otra, y es más pequeña. Se llama <strong>KSI</strong>
+  —<span class="mono">Keyless Signature Infrastructure</span>, infraestructura de firma sin
+  llaves—, la desarrolla una empresa estonia llamada <strong>Guardtime</strong>, y su función es
+  detectar si un dato guardado en esos registros fue alterado. Es un sistema de
+  <strong>integridad</strong>: no guarda el dato, guarda una huella del dato, y permite demostrar
+  después que la huella coincide.</p>
+
+  <p>Hasta aquí, todo el mundo está de acuerdo. El desacuerdo empieza en el nombre.</p>
+
+  <div class="caja clave">
+    <div class="caja-et">LA TENSIÓN, EN UNA LÍNEA</div>
+    <p><strong>Estonia y Guardtime llaman «blockchain» a KSI. Varios investigadores independientes
+    sostienen que KSI es un sistema de sellado de tiempo por encadenamiento de hashes —una técnica
+    de 1991— y que llamarlo cadena de bloques es una decisión de mercadeo, no una descripción
+    técnica.</strong></p>
+  </div>
+
+  <p>El propio material oficial estonio es, curiosamente, el mejor punto de partida para entender
+  la discusión. Su documento de preguntas frecuentes sobre la tecnología reconoce que empezaron a
+  probarla en 2008 y que, en ese momento, ellos mismos la llamaban de otra manera:</p>
+
+  <blockquote>
+    «<span class="mono">hash-linked time-stamping</span>» — sellado de tiempo por encadenamiento de hashes.
+    <cite>e-Estonia · FAQ oficial sobre la tecnología estonia de blockchain</cite>
+  </blockquote>
+
+  <p>El mismo documento afirma, en esa misma frase, que empezaron <span class="ocre">antes de que
+  se publicara el whitepaper de Bitcoin, «que fue el que acuñó el término blockchain»</span>. Esa
+  afirmación es verificable en treinta segundos, y verificarla es la primera tarea del encargo. No
+  les voy a decir el resultado.</p>
+
+  <p>Del lado independiente, un estudio arbitrado publicado en 2022 en la revista
+  <em>Policy and Society</em> entrevistó a actores de ambos bandos. Un criptógrafo consultado
+  sostiene que lo de Estonia «<span class="mono">no es blockchain en términos de criptomonedas</span>».
+  Un responsable de proyecto describe el sistema como una <strong>cadena de hashes</strong> que
+  necesita «<span class="mono">un cuerpo responsable que almacene esos hashes</span>». Un funcionario
+  del gobierno, en cambio, defiende que llevaban haciéndolo desde antes de que Nakamoto publicara.</p>
+
+  <p>Y hay un detalle técnico que ustedes ya tienen herramientas para evaluar, porque lo trabajaron
+  en las sesiones anteriores. En la documentación técnica del propio proveedor, la raíz de confianza
+  del sistema —el ancla que impide reescribir la historia— no es una competencia de trabajo
+  computacional ni un mecanismo de consenso entre nodos anónimos. Es
+  <strong>la publicación periódica del hash en periódicos de circulación mundial</strong>. Eso no lo
+  dice un crítico: lo dice una presentación de un ingeniero de Guardtime en un taller del organismo
+  europeo de estandarización.</p>
+
+  <div class="caja">
+    <div class="caja-et">POR QUÉ ESTO NO ES UNA DISCUSIÓN DE PALABRAS</div>
+    <p>Podría parecer pedantería terminológica. No lo es, y la razón importa más que el caso.</p>
+    <p>Cuando alguien dice «esto es seguro porque está en blockchain», está pidiendo prestada una
+    reputación. La reputación de la cadena de bloques pública viene de propiedades muy concretas:
+    que cualquiera puede participar sin permiso, que nadie puede censurar, que no hay una entidad
+    que pueda apagarla, y que la historia es costosa de reescribir porque reescribirla cuesta
+    energía real. <strong>Un sistema puede tener integridad criptográfica impecable y no tener
+    ninguna de esas otras propiedades.</strong></p>
+    <p>Si el sistema depende de que una empresa siga existiendo y siga publicando, entonces la
+    confianza no se eliminó: se movió de sitio. Puede que eso esté perfectamente bien para el
+    problema que resuelve. Pero entonces hay que decirlo así, y no tomar prestado un nombre que
+    promete otra cosa.</p>
+  </div>
+
+  <p>Ustedes van a decidir. No van a resumir lo que otros decidieron: van a ir a las fuentes,
+  incluidas las oficiales, van a encontrar tres más por su cuenta, y van a emitir un veredicto
+  que puedan sostener frente a preguntas.</p>
+</section>
+
+<!-- ============================ 2 · LA PREGUNTA ============================ -->
+<section class="sec nowrap">
+  <div class="sec-cab">
+    <span class="sec-num">02</span>
+    <h2>La pregunta que tienen que responder</h2>
+  </div>
+
+  <div class="caja alerta">
+    <div class="caja-et">EL ENUNCIADO</div>
+    <p style="font-family:'Arial Black',Arial,sans-serif; font-size:13pt; color:var(--tinta); line-height:1.3">
+      ¿El sistema KSI que protege los registros públicos de Estonia es una cadena de bloques?
+    </p>
+    <p style="margin-top:3mm">Respondan <strong>sí</strong>, <strong>no</strong> o
+    <strong>depende de la definición</strong> — pero si eligen la tercera, están obligados a dar
+    la definición y a mostrar qué cambia con ella. «Depende» sin definición no es un veredicto:
+    es una forma elegante de no responder.</p>
+  </div>
+
+  <p>Un veredicto defendible necesita tres cosas, y las tres se evalúan:</p>
+  <ul class="limpia">
+    <li>Una <strong>definición operativa</strong> de «cadena de bloques»: una lista de propiedades
+    que se puedan verificar presentes o ausentes en un sistema concreto. No vale una definición
+    que solo ustedes puedan aplicar.</li>
+    <li>La <strong>evidencia</strong>, citada, de qué propiedades tiene KSI y cuáles no.</li>
+    <li>El <strong>límite</strong> de lo que su evidencia permite concluir. Encontrar un error en un
+    documento de mercadeo no prueba que la tecnología sea mala. Confundir esas dos cosas es el
+    error más común de este ejercicio, y les va a costar puntos.</li>
+  </ul>
+</section>
+
+<!-- ============================ 3 · EL ENCARGO ============================ -->
+<section class="sec salto">
+  <div class="sec-cab">
+    <span class="sec-num">03</span>
+    <h2>El encargo</h2>
+    <span class="lead">SEIS TAREAS · TODAS OBLIGATORIAS</span>
+  </div>
+
+  <p>Las tareas marcadas <span class="mono" style="background:var(--naranja);color:var(--tinta);font-size:7pt;font-weight:bold;padding:.5mm 1.5mm;letter-spacing:.08em">NO-IA</span>
+  exigen abrir un archivo o una herramienta y mirar. Si las responden sin hacerlo, se nota, porque
+  las respuestas inventadas no coinciden con lo que hay.</p>
+
+  <div class="tarea">
+    <div class="tarea-cab">
+      <div class="tarea-n">T1</div>
+      <div class="tarea-t">
+        <div class="et">VERIFICACIÓN DOCUMENTAL <span class="noia">NO-IA</span></div>
+        <h3>Auditen la afirmación oficial</h3>
+      </div>
+    </div>
+    <div class="tarea-c">
+      <p>El documento oficial de e-Estonia afirma que el whitepaper de Bitcoin fue el que
+      <em>acuñó el término «blockchain»</em>. Ustedes ya tienen ese whitepaper: son nueve páginas y
+      lo leyeron en la Sesión 1.</p>
+      <p><strong>Ábranlo y búsquenlo.</strong> Cuenten cuántas veces aparece la palabra
+      <span class="mono">blockchain</span>, cuántas <span class="mono">block chain</span> separado,
+      y qué expresiones usa Nakamoto en su lugar. Anoten también qué números de referencia de la
+      bibliografía corresponden a los trabajos de Haber y Stornetta, y de qué años son.</p>
+      <div class="entrega"><b>ENTREGAN:</b> los conteos exactos, la captura de pantalla de la búsqueda,
+      los números de referencia con sus años, y <b>un párrafo sobre qué se sigue de esto — y qué NO se sigue.</b></div>
+    </div>
+  </div>
+
+  <div class="tarea">
+    <div class="tarea-cab">
+      <div class="tarea-n">T2</div>
+      <div class="tarea-t">
+        <div class="et">ARQUEOLOGÍA WEB <span class="noia">NO-IA</span></div>
+        <h3>Vean cómo cambió el discurso con el tiempo</h3>
+      </div>
+    </div>
+    <div class="tarea-c">
+      <p>Vayan a la <strong>Wayback Machine</strong> (<span class="mono">web.archive.org</span>), el
+      servicio de consulta de páginas archivadas que opera la fundación Internet Archive. Peguen ahí
+      la dirección de las páginas de e-Estonia sobre KSI o blockchain y recuperen capturas de
+      <strong>al menos dos momentos distintos</strong> separados por varios años — por ejemplo, una
+      alrededor de 2016 o 2017 y la de hoy.</p>
+      <p>Comparen la redacción. ¿Cómo se describía el sistema entonces y cómo se describe ahora?
+      ¿Aparecen o desaparecen matices? Presten atención especial a los adjetivos y a las fechas que
+      se citan como origen del proyecto.</p>
+      <div class="entrega"><b>ENTREGAN:</b> dos capturas con su fecha exacta y su enlace permanente,
+      la frase literal de cada una, y <b>una interpretación de por qué pudo cambiar.</b></div>
+    </div>
+  </div>
+
+  <div class="tarea">
+    <div class="tarea-cab">
+      <div class="tarea-n">T3</div>
+      <div class="tarea-t">
+        <div class="et">CAREO DE FUENTES <span class="noia">NO-IA</span></div>
+        <h3>Pongan a dos fuentes a contradecirse</h3>
+      </div>
+    </div>
+    <div class="tarea-c">
+      <p>Encuentren <strong>una afirmación concreta de una fuente oficial</strong> (de las dos que
+      les doy) y <strong>la frase de una fuente independiente que la contradice o la matiza</strong>.
+      Cítenlas literalmente, las dos, indicando dónde está cada una: página, sección o apartado.</p>
+      <p>No sirve un resumen del desacuerdo. Necesito las dos frases, textuales, una al lado de la
+      otra, para poder verlas chocar.</p>
+      <div class="entrega"><b>ENTREGAN:</b> las dos citas literales enfrentadas, con su ubicación exacta,
+      y <b>a cuál le creen y por qué.</b></div>
+    </div>
+  </div>
+
+  <div class="tarea">
+    <div class="tarea-cab">
+      <div class="tarea-n">T4</div>
+      <div class="tarea-t">
+        <div class="et">INVESTIGACIÓN PROPIA · MÍNIMO TRES</div>
+        <h3>Consigan y clasifiquen tres fuentes nuevas</h3>
+      </div>
+    </div>
+    <div class="tarea-c">
+      <p>Además de las cinco que les entrego, deben encontrar <strong>tres fuentes propias</strong>
+      y clasificar cada una según las reglas de la sección 5. Al menos una debe aportar algo que
+      ninguna de mis cinco dice.</p>
+      <div class="entrega"><b>ENTREGAN:</b> las tres referencias completas, su clasificación, y
+      <b>una línea por fuente diciendo qué aporta que las demás no aportan.</b></div>
+    </div>
+  </div>
+
+  <div class="tarea">
+    <div class="tarea-cab">
+      <div class="tarea-n">T5</div>
+      <div class="tarea-t">
+        <div class="et">EL VEREDICTO · NÚCLEO DE LA ACTIVIDAD</div>
+        <h3>Definan, evalúen y decidan</h3>
+      </div>
+    </div>
+    <div class="tarea-c">
+      <p>Construyan una tabla con su definición operativa: una fila por propiedad, y para cada una,
+      si KSI la tiene, no la tiene o la tiene parcialmente, <strong>con la fuente que lo respalda</strong>.
+      Propiedades que vale la pena considerar —pueden añadir o quitar, justificando—:</p>
+      <ul class="limpia">
+        <li>Encadenamiento criptográfico de bloques mediante hashes.</li>
+        <li>Participación abierta sin permiso previo.</li>
+        <li>Mecanismo de consenso distribuido entre partes que no confían entre sí.</li>
+        <li>Ausencia de un operador que pueda detener o alterar el sistema.</li>
+        <li>Réplica del registro en múltiples nodos independientes.</li>
+        <li>Verificabilidad por un tercero sin depender del operador.</li>
+      </ul>
+      <div class="entrega"><b>ENTREGAN:</b> la tabla completa con fuentes, el veredicto explícito, y
+      <b>el párrafo del límite: qué NO pueden concluir con la evidencia que reunieron.</b></div>
+    </div>
+  </div>
+
+  <div class="tarea">
+    <div class="tarea-cab">
+      <div class="tarea-n">T6</div>
+      <div class="tarea-t">
+        <div class="et">PROYECCIÓN</div>
+        <h3>Hacia adelante</h3>
+      </div>
+    </div>
+    <div class="tarea-c">
+      <p>Dos preguntas, respuesta breve y concreta cada una:</p>
+      <ol>
+        <li><strong>¿Qué tendría que cambiar</strong> —en el sistema, no en el nombre— para que el
+        veredicto de ustedes se invirtiera?</li>
+        <li>Si el sistema estonio resuelve bien su problema <em>sin</em> ser una cadena de bloques
+        pública, <strong>¿qué dice eso sobre los proyectos que sí la necesitan?</strong> Nombren un
+        problema, concreto y de su entorno, donde la diferencia sí sería decisiva — y expliquen por qué.</li>
+      </ol>
+      <div class="entrega"><b>ENTREGAN:</b> las dos respuestas. La segunda debe poder enunciarse
+      <b>sin nombrar la tecnología</b> — como el problema de su propio proyecto.</div>
+    </div>
+  </div>
+</section>
+
+<!-- ============================ 4 · FUENTES ============================ -->
+<section class="sec salto">
+  <div class="sec-cab">
+    <span class="sec-num">04</span>
+    <h2>Las cinco fuentes que les entrego</h2>
+    <span class="lead">TODAS GRATUITAS Y SIN REGISTRO</span>
+  </div>
+
+  <p>Verificadas y accesibles a la fecha de entrega de esta guía. Están escogidas para que se
+  contradigan: dos son parte interesada, una es arbitrada e independiente, una es del proveedor
+  y una es de un crítico declarado. <strong>Esa mezcla es deliberada</strong> — parte del trabajo es
+  notar quién habla desde dónde.</p>
+
+  <p><strong>Si alguno de estos enlaces les pide usuario y clave, o deja de abrir, avísenme por el
+  canal del curso.</strong> No traten de rodearlo: una fuente que exige credenciales no sirve para
+  este trabajo, y sustituirla es responsabilidad mía, no de ustedes.</p>
+
+  <div class="fuente">
+    <div class="etiquetas"><span class="tag parte">PARTE INTERESADA</span><span class="tag">OFICIAL</span></div>
+    <h3>F1 · Preguntas frecuentes sobre la tecnología estonia de blockchain</h3>
+    <div class="ref">e-Estonia (documento oficial en PDF, 3 páginas). Publicado por la iniciativa
+    estatal e-Estonia con apoyo del Fondo Europeo de Desarrollo Regional.</div>
+    <div class="url">https://e-estonia.com/wp-content/uploads/faq_estonian_blockchain_technology.pdf</div>
+    <div class="mirar"><b>Qué buscar:</b> el párrafo inicial sobre 2008 y el whitepaper de Bitcoin;
+    el nombre que ellos mismos usaban antes; la lista de servicios protegidos; y qué dicen que pasa
+    si la empresa proveedora desaparece. Es la fuente de la tarea T1.</div>
+  </div>
+
+  <div class="fuente">
+    <div class="etiquetas"><span class="tag parte">PARTE INTERESADA</span><span class="tag">OFICIAL · ACTUAL</span></div>
+    <h3>F2 · KSI Blockchain</h3>
+    <div class="ref">e-Estonia, página institucional vigente sobre la tecnología.</div>
+    <div class="url">https://e-estonia.com/solutions/cyber-security/ksi-blockchain/</div>
+    <div class="mirar"><b>Qué buscar:</b> el año que se cita como origen y el adjetivo exacto que
+    acompaña hoy a la palabra «blockchain». Compárenlo con lo que dice F1. Es el punto de partida
+    de la tarea T2.</div>
+  </div>
+
+  <div class="fuente">
+    <div class="etiquetas"><span class="tag arb">ARBITRADA</span><span class="tag indep">INDEPENDIENTE</span><span class="tag">ACCESO ABIERTO</span></div>
+    <h3>F3 · Blockchain-based application at a governmental level: disruption or illusion? The case of Estonia</h3>
+    <div class="ref">Semenzin, S.; Rozas, D.; Hassan, S. (2022). <em>Policy and Society</em>,
+    vol. 41, n.º 3, pp. 386–401. Oxford University Press. Acceso abierto, licencia CC BY.</div>
+    <div class="url">https://academic.oup.com/policyandsociety/article/41/3/386/6566828</div>
+    <div class="mirar"><b>Qué buscar:</b> las entrevistas. El artículo recoge voces de las dos
+    posiciones —un criptógrafo, un responsable de proyecto de e-salud, funcionarios— y las cita
+    textualmente. Es la fuente más valiosa que tienen y la única arbitrada. Material directo para T3.</div>
+  </div>
+
+  <div class="fuente">
+    <div class="etiquetas"><span class="tag parte">DEL PROVEEDOR</span><span class="tag arb">ARBITRADA</span><span class="tag">ACCESO ABIERTO</span></div>
+    <h3>F4 · Keyless Signatures' Infrastructure: How to Build Global Distributed Hash-Trees</h3>
+    <div class="ref">Buldas, A.; Kroonmaa, A.; Laanoja, R. (2013). Cryptology ePrint Archive,
+    documento 2013/834. Versión abierta del artículo presentado en NordSec 2013 (Springer LNCS).
+    Licencia CC BY. Los tres autores trabajan en Guardtime — la empresa que construye KSI — y dos
+    de ellos también en la Universidad Tecnológica de Tallin.</div>
+    <div class="url">https://eprint.iacr.org/2013/834</div>
+    <div class="mirar"><b>Qué buscar:</b> las tres fases del proceso —resumen, agregación y
+    publicación— y cuánto dura una ronda de agregación; qué es el «calendario de hashes»; y sobre
+    todo <b>dónde se publica el «ancla de confianza» y en qué medio</b>. Busquen también qué trabajo
+    de 1991 citan los propios autores como origen de la técnica que usan: esa frase sola vale para
+    la tarea T3.
+    <br><br><b>Ojo con la etiqueta doble:</b> es del proveedor <em>y</em> es arbitrada. Una fuente
+    puede ser las dos cosas, y saber leerla así es parte del ejercicio.</div>
+  </div>
+
+  <div class="fuente">
+    <div class="etiquetas"><span class="tag indep">INDEPENDIENTE</span><span class="tag">BLOG · CRÍTICO DECLARADO</span></div>
+    <h3>F5 · What is Estonia's blockchain?</h3>
+    <div class="ref">Gerard, D. (2017). Entrada de blog personal. El autor es un crítico declarado
+    del sector y autor de un libro escéptico sobre la tecnología.</div>
+    <div class="url">https://davidgerard.co.uk/blockchain/2017/09/06/estonias-smartcard-security-problem-is-probably-not-blockchain-related-but-what-is-estonias-blockchain/</div>
+    <div class="mirar"><b>Qué buscar:</b> su argumento sobre qué significa realmente «blockchain»
+    en KSI, y su lectura de la cifra de rendimiento que anuncia el proveedor.
+    <b>Ojo:</b> es la fuente menos autorizada de las cinco y está incluida a propósito. Úsenla, pero
+    no se apoyen solo en ella — y digan en la exposición cómo la evaluaron.</div>
+  </div>
+
+  <div class="caja">
+    <div class="caja-et">ADEMÁS, YA LO TIENEN</div>
+    <p><strong>Nakamoto, S. (2008). <em>Bitcoin: A Peer-to-Peer Electronic Cash System.</em></strong>
+    <span class="mono">https://bitcoin.org/bitcoin.pdf</span> — Nueve páginas. Es el objeto de la
+    tarea T1 y no cuenta dentro de sus tres fuentes propias.</p>
+  </div>
+</section>
+
+<!-- ============================ 5 · LAS TRES ============================ -->
+<section class="sec">
+  <div class="sec-cab">
+    <span class="sec-num">05</span>
+    <h2>Las tres fuentes que deben conseguir</h2>
+    <span class="lead">OBLIGATORIO</span>
+  </div>
+
+  <p>Encontrar fuentes es una destreza profesional, y no se aprende recibiéndolas. Estas son las
+  reglas:</p>
+
+  <table>
+    <tr><th style="width:32%">REGLA</th><th>POR QUÉ</th></tr>
+    <tr><td class="pk">Máximo UNA de blog o medio de opinión</td>
+        <td>Es fácil llenar tres con opiniones. La dificultad —y el aprendizaje— está en las otras dos.</td></tr>
+    <tr><td class="pk">Mínimo UNA arbitrada o institucional</td>
+        <td>Artículo con revisión por pares, tesis, norma técnica, informe de organismo público o centro de investigación.</td></tr>
+    <tr><td class="pk">Ninguna puede ser un chatbot</td>
+        <td>Un asistente de IA no es una fuente: no tiene autor responsable ni se puede verificar. Si lo usaron para <em>encontrar</em> una fuente, citen la fuente, no el chatbot.</td></tr>
+    <tr><td class="pk">Todas deben abrirse</td>
+        <td>Si el enlace no abre o exige pagar, no cuenta. Verifíquenlo el día que entregan, no el día que lo encontraron.</td></tr>
+    <tr><td class="pk">Cada una, clasificada</td>
+        <td>Con las tres etiquetas de abajo. Sin clasificación, la fuente no se cuenta.</td></tr>
+  </table>
+
+  <table>
+    <tr><th style="width:26%">EJE</th><th>OPCIONES</th></tr>
+    <tr><td class="pk">Tipo</td><td>Primaria (el sistema, su documentación, sus creadores) · Secundaria (alguien analizando)</td></tr>
+    <tr><td class="pk">Interés</td><td>Parte interesada (gana algo si les creen) · Independiente · Crítico declarado</td></tr>
+    <tr><td class="pk">Control de calidad</td><td>Arbitrada · Editorial (medio con redactor) · Autopublicada · Mercadeo</td></tr>
+  </table>
+
+  <div class="caja alerta">
+    <div class="caja-et">CÓMO SE CITA · FORMATO MÍNIMO OBLIGATORIO</div>
+    <p class="mono" style="font-size:8.5pt; line-height:1.6">
+    Apellido, Inicial. (Año). <em>Título</em>. Editorial o sitio. URL — consultado el DD/MM/AAAA.
+    </p>
+    <p style="margin-top:3mm">La <strong>fecha de consulta</strong> no es un adorno burocrático: en
+    este caso concreto, las páginas cambian de redacción con los años. Sin fecha, su cita no se
+    puede verificar — y la tarea T2 les va a mostrar exactamente por qué.</p>
+  </div>
+</section>
+
+<!-- ============================ 6 · ENTREGA Y EXPOSICIÓN ============================ -->
+<section class="sec salto">
+  <div class="sec-cab">
+    <span class="sec-num">06</span>
+    <h2>La entrega y la exposición</h2>
+  </div>
+
+  <p><strong>Documento del equipo.</strong> Las seis tareas resueltas, en orden, con las capturas de
+  pantalla incluidas y la lista final de las ocho fuentes (mis cinco más sus tres) citadas en el
+  formato de arriba. Sin extensión mínima: se evalúa lo que hay, no cuánto ocupa.</p>
+
+  <p><strong>Exposición de cinco minutos.</strong> Cinco minutos son cortos a propósito. No caben las
+  seis tareas, así que tienen que elegir. Estructura sugerida:</p>
+
+  <table>
+    <tr><th style="width:18%">TIEMPO</th><th>QUÉ</th></tr>
+    <tr><td class="pk">0:00 – 0:30</td><td>Su veredicto, dicho de entrada. Sin suspenso.</td></tr>
+    <tr><td class="pk">0:30 – 1:30</td><td>Su definición operativa: qué propiedades exigieron y por qué esas.</td></tr>
+    <tr><td class="pk">1:30 – 3:30</td><td><strong>La mejor evidencia que encontraron.</strong> Una sola, mostrada en pantalla. La captura, la cita literal, la comparación entre versiones — lo que sea más fuerte.</td></tr>
+    <tr><td class="pk">3:30 – 4:15</td><td>El límite: qué NO pueden concluir.</td></tr>
+    <tr><td class="pk">4:15 – 5:00</td><td>La proyección de T6: el problema de su entorno donde la diferencia sí sería decisiva.</td></tr>
+  </table>
+
+  <div class="caja clave">
+    <div class="caja-et">HABRÁ PREGUNTAS</div>
+    <p>Al terminar, cualquier persona del curso o yo podemos preguntarles <strong>de dónde salió un
+    dato concreto</strong>. Deben poder abrir la fuente en el momento y señalar el lugar exacto.
+    Un equipo que no puede hacerlo no reunió la evidencia: la contó.</p>
+  </div>
+</section>
+
+<!-- ============================ 7 · EVALUACIÓN ============================ -->
+<section class="sec">
+  <div class="sec-cab">
+    <span class="sec-num">07</span>
+    <h2>Qué se evalúa</h2>
+  </div>
+
+  <table>
+    <tr><th style="width:14%">PESO</th><th style="width:32%">CRITERIO</th><th>QUÉ DISTINGUE UN BUEN TRABAJO</th></tr>
+    <tr><td class="pk">30 %</td><td>Evidencia verificable</td>
+        <td>Las tareas T1, T2 y T3 realmente se hicieron. Capturas con fecha, citas literales localizables, conteos exactos. Se comprueba al azar.</td></tr>
+    <tr><td class="pk">25 %</td><td>Calidad del veredicto</td>
+        <td>Hay definición operativa antes del juicio, y la tabla se llena con fuentes y no con impresiones.</td></tr>
+    <tr><td class="pk">20 %</td><td>Manejo de fuentes</td>
+        <td>Las tres propias cumplen las reglas, están bien clasificadas y aportan algo nuevo. Las citas permiten llegar al lugar exacto.</td></tr>
+    <tr><td class="pk">15 %</td><td>Honestidad intelectual</td>
+        <td><strong>El párrafo del límite.</strong> Reconocer qué no se puede concluir vale más que un veredicto rotundo mal sostenido.</td></tr>
+    <tr><td class="pk">10 %</td><td>Exposición</td>
+        <td>Cinco minutos aprovechados, veredicto al frente, y capacidad de señalar la fuente cuando se pregunta.</td></tr>
+  </table>
+
+  <div class="caja alerta">
+    <div class="caja-et">SOBRE EL USO DE ASISTENTES DE IA</div>
+    <p><strong>Se permite, y hay que declararlo.</strong> Incluyan al final una nota corta diciendo
+    para qué lo usaron: traducir, ordenar el texto, sugerir dónde buscar. Eso no resta.</p>
+    <p>Lo que sí resta —y mucho— es <strong>presentar como verificado algo que no se abrió</strong>.
+    Las tareas T1, T2 y T3 se comprueban. Un modelo de lenguaje que no tiene el documento delante
+    produce conteos plausibles y falsos, citas que no existen y fechas de captura inventadas. Si eso
+    aparece en su entrega, el trabajo pierde el 30 % de evidencia verificable completo — y,
+    francamente, habrán demostrado en carne propia la tesis de la actividad: <em>una afirmación
+    repetida con seguridad no es una afirmación verificada.</em></p>
+  </div>
+
+  <div class="caja">
+    <div class="caja-et">UNA ADVERTENCIA, EN SERIO</div>
+    <p>Es muy probable que encuentren imprecisiones en el material oficial. <strong>Eso no convierte
+    a Estonia en un fraude ni a KSI en una mala tecnología.</strong> Un sistema de integridad basado
+    en encadenamiento de hashes puede ser sólido, útil y estar bien diseñado, y aun así no ser una
+    cadena de bloques en el sentido que este curso le da al término.</p>
+    <p>El equipo que confunda «el folleto exagera» con «la tecnología no sirve» va a perder puntos
+    en honestidad intelectual. Se les pide precisión, no escándalo.</p>
+  </div>
+</section>
+
+</body>
+</html>

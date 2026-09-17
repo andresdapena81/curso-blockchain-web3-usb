@@ -1,0 +1,244 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>FichaUSB · dApp de referencia</title>
+<!--
+  dApp de referencia · Laboratorio 12 · Blockchain y Web 3.0 · USB Medellín
+
+  Un solo archivo, sin paso de compilación: se abre en el navegador y funciona.
+  Es el ANDAMIAJE que se explica en clase; el laboratorio pide reconstruir cada
+  parte y conectar el token propio.
+
+  Lo que demuestra, que es el punto de la sesión:
+    - conectar MetaMask y leer la dirección y la red
+    - una LECTURA (balanceOf) que no cuesta gas
+    - una ESCRITURA (transfer) que sí, con sus estados
+    - los CUATRO estados de error que todo principiante ignora
+    - escuchar eventos y refrescar la interfaz sola
+
+  ethers.js v6 se carga desde el CDN permitido (jsDelivr). Necesita internet
+  la primera vez; después el navegador lo cachea.
+-->
+<style>
+  :root{
+    --naranja:#F07F06; --ocre:#A35604; --violeta:#7152E9;
+    --tinta:#0F0F11; --gris:#6F6B80; --superf:#F4F2F7; --blanco:#fff;
+    --verde:#1F7A4D; --rojo:#B3261E; --amarillo:#B26B00;
+    color-scheme: light;
+  }
+  *{ box-sizing:border-box; }
+  body{ margin:0; font-family:Arial,Helvetica,sans-serif; background:var(--superf); color:var(--tinta); }
+  header{ background:var(--tinta); color:var(--blanco); padding:20px 24px; border-bottom:4px solid var(--naranja); }
+  header h1{ margin:0; font-size:20px; letter-spacing:-.01em; }
+  header p{ margin:6px 0 0; color:#B9B4C4; font-size:13px; font-family:"Courier New",monospace; }
+  main{ max-width:760px; margin:24px auto; padding:0 16px; display:grid; gap:16px; }
+  .tarjeta{ background:var(--blanco); border:2px solid var(--tinta); box-shadow:5px 5px 0 var(--tinta); padding:18px 20px; }
+  .tarjeta h2{ margin:0 0 12px; font-size:13px; font-family:"Courier New",monospace; letter-spacing:.1em; text-transform:uppercase; color:var(--ocre); }
+  .dato{ display:flex; justify-content:space-between; gap:12px; padding:6px 0; border-bottom:1px solid #e6e3ec; font-size:14px; }
+  .dato:last-child{ border-bottom:0; }
+  .dato span:first-child{ color:var(--gris); }
+  .dato span:last-child{ font-family:"Courier New",monospace; word-break:break-all; text-align:right; }
+  button{ font-family:inherit; font-size:14px; font-weight:bold; padding:11px 18px; border:2px solid var(--tinta);
+    background:var(--naranja); color:var(--tinta); cursor:pointer; box-shadow:3px 3px 0 var(--tinta); }
+  button:disabled{ background:#d8d5de; cursor:not-allowed; box-shadow:none; color:var(--gris); }
+  button.sec{ background:var(--blanco); }
+  input{ font-family:"Courier New",monospace; font-size:14px; padding:10px; border:2px solid var(--tinta); width:100%; }
+  label{ display:block; font-size:12px; color:var(--gris); margin:10px 0 4px; font-family:"Courier New",monospace; letter-spacing:.05em; }
+  .fila{ display:grid; grid-template-columns:1fr 140px; gap:10px; align-items:end; }
+  #estado{ font-size:14px; padding:12px 14px; border:2px solid var(--tinta); background:var(--superf); min-height:20px; }
+  #estado.pendiente{ border-color:var(--amarillo); background:#fff6e6; color:var(--amarillo); }
+  #estado.ok{ border-color:var(--verde); background:#e9f6ef; color:var(--verde); }
+  #estado.error{ border-color:var(--rojo); background:#fbeceb; color:var(--rojo); }
+  a{ color:var(--violeta); }
+  .nota{ font-size:12px; color:var(--gris); margin-top:8px; line-height:1.5; }
+  .config{ font-family:"Courier New",monospace; font-size:12px; }
+</style>
+</head>
+<body>
+<header>
+  <h1>FichaUSB · dApp de referencia</h1>
+  <p>Blockchain y Web 3.0 · USB Medellín · Sesión 12</p>
+</header>
+
+<main>
+  <div class="tarjeta">
+    <h2>1 · Conexión</h2>
+    <div id="sinWallet" hidden class="nota" style="color:var(--rojo)">
+      No se detecta una billetera. Instala MetaMask y recarga esta página.
+    </div>
+    <button id="btnConectar">Conectar billetera</button>
+    <div id="infoConexion" hidden>
+      <div class="dato"><span>Cuenta</span><span id="cuenta">—</span></div>
+      <div class="dato"><span>Red</span><span id="red">—</span></div>
+      <div class="dato"><span>Saldo FUSB</span><span id="saldo">—</span></div>
+    </div>
+    <p id="avisoRed" class="nota" hidden style="color:var(--amarillo)"></p>
+  </div>
+
+  <div class="tarjeta">
+    <h2>2 · Transferir fichas</h2>
+    <label for="dest">Dirección de destino (0x…)</label>
+    <input id="dest" placeholder="0x0000000000000000000000000000000000000000" autocomplete="off">
+    <div class="fila">
+      <div>
+        <label for="monto">Cantidad (en FUSB)</label>
+        <input id="monto" type="number" min="0" step="0.01" placeholder="1.0">
+      </div>
+      <button id="btnEnviar" disabled>Enviar</button>
+    </div>
+    <p class="nota">Leer el saldo es gratis (una consulta al nodo). Transferir es una transacción: cuesta gas y hay que confirmarla en la billetera.</p>
+  </div>
+
+  <div class="tarjeta">
+    <h2>3 · Estado de la transacción</h2>
+    <div id="estado">Sin actividad todavía.</div>
+    <p class="nota">Los cuatro estados que un principiante olvida: red equivocada, billetera no instalada, rechazo del usuario y transacción revertida. Esta interfaz los maneja todos.</p>
+  </div>
+
+  <div class="tarjeta">
+    <h2>Configuración</h2>
+    <p class="config">Antes de usarla, poner aquí la dirección de tu FichaUSB en Sepolia,
+    editando la constante <b>DIRECCION_FICHA</b> en el código de esta página.</p>
+    <div class="dato"><span>Red esperada</span><span>Sepolia (11155111)</span></div>
+    <div class="dato"><span>Contrato</span><span id="dirContrato">—</span></div>
+  </div>
+</main>
+
+<script src="https://cdn.jsdelivr.net/npm/ethers@6.15.0/dist/ethers.umd.min.js"></script>
+<script>
+/* =====================================================================
+   CONFIGURACIÓN — cambiar por los valores de tu despliegue
+   ===================================================================== */
+const DIRECCION_FICHA = "0x0000000000000000000000000000000000000000"; // ← tu FichaUSB en Sepolia
+const CHAIN_ID_SEPOLIA = 11155111n;
+
+// Solo las funciones que esta interfaz usa: no hace falta el ABI completo.
+const ABI = [
+  "function symbol() view returns (string)",
+  "function decimals() view returns (uint8)",
+  "function balanceOf(address) view returns (uint256)",
+  "function transfer(address to, uint256 amount) returns (bool)",
+  "event Transfer(address indexed from, address indexed to, uint256 value)",
+];
+
+let provider, signer, contrato, cuenta, decimales = 18, simbolo = "FUSB";
+
+const $ = (id) => document.getElementById(id);
+const estado = (texto, clase = "") => { $("estado").textContent = texto; $("estado").className = clase; };
+
+$("dirContrato").textContent = DIRECCION_FICHA;
+
+/* ---------- deteccion de billetera ---------- */
+if (typeof window.ethereum === "undefined") {
+  $("sinWallet").hidden = false;
+  $("btnConectar").disabled = true;
+}
+
+/* ---------- conectar ---------- */
+$("btnConectar").addEventListener("click", async () => {
+  try {
+    estado("Conectando…", "pendiente");
+    provider = new ethers.BrowserProvider(window.ethereum);
+    await provider.send("eth_requestAccounts", []);   // pide permiso al usuario
+    signer = await provider.getSigner();
+    cuenta = await signer.getAddress();
+
+    const red = await provider.getNetwork();
+    $("cuenta").textContent = cuenta.slice(0, 6) + "…" + cuenta.slice(-4);
+    $("red").textContent = red.name + " (" + red.chainId + ")";
+    $("infoConexion").hidden = false;
+
+    // ESTADO DE ERROR 1 · red equivocada
+    if (red.chainId !== CHAIN_ID_SEPOLIA) {
+      $("avisoRed").hidden = false;
+      $("avisoRed").textContent = "Estás en la red equivocada. Cambia a Sepolia en la billetera y reconecta.";
+      $("btnEnviar").disabled = true;
+      estado("Red equivocada: cambia a Sepolia.", "error");
+      return;
+    }
+    $("avisoRed").hidden = true;
+
+    contrato = new ethers.Contract(DIRECCION_FICHA, ABI, signer);
+    simbolo = await contrato.symbol();
+    decimales = Number(await contrato.decimals());
+    await refrescarSaldo();
+    $("btnEnviar").disabled = false;
+    estado("Conectado. Listo para transferir.", "ok");
+  } catch (e) {
+    manejarError(e);
+  }
+});
+
+/* ---------- lectura: balanceOf (gratis) ---------- */
+async function refrescarSaldo() {
+  const bruto = await contrato.balanceOf(cuenta);
+  $("saldo").textContent = ethers.formatUnits(bruto, decimales) + " " + simbolo;
+}
+
+/* ---------- escritura: transfer (cuesta gas) ---------- */
+$("btnEnviar").addEventListener("click", async () => {
+  const dest = $("dest").value.trim();
+  const monto = $("monto").value.trim();
+
+  if (!ethers.isAddress(dest)) { estado("La dirección de destino no es válida.", "error"); return; }
+  if (!monto || Number(monto) <= 0) { estado("La cantidad debe ser mayor que cero.", "error"); return; }
+
+  try {
+    $("btnEnviar").disabled = true;
+    estado("Confirma la transacción en la billetera…", "pendiente");
+    const cantidad = ethers.parseUnits(monto, decimales);
+
+    const tx = await contrato.transfer(dest, cantidad);   // aquí la billetera pide confirmación
+    estado("Transacción enviada. Esperando confirmación… " + tx.hash.slice(0, 10) + "…", "pendiente");
+
+    const recibo = await tx.wait();                        // espera a que se mine
+    // ESTADO DE ERROR 4 · transacción revertida (status 0)
+    if (recibo.status === 0) { estado("La transacción se revirtió en la cadena.", "error"); return; }
+
+    await refrescarSaldo();
+    estado("¡Listo! Transferencia confirmada en el bloque " + recibo.blockNumber + ".", "ok");
+  } catch (e) {
+    manejarError(e);
+  } finally {
+    $("btnEnviar").disabled = false;
+  }
+});
+
+/* ---------- manejo de los cuatro estados de error ---------- */
+function manejarError(e) {
+  // ESTADO DE ERROR 3 · el usuario rechazó la firma
+  if (e.code === "ACTION_REJECTED" || e.code === 4001) {
+    estado("Rechazaste la transacción en la billetera.", "error");
+    return;
+  }
+  // saldo insuficiente para el gas o para el monto
+  if (e.code === "INSUFFICIENT_FUNDS") {
+    estado("No tienes ETH de prueba suficiente para el gas.", "error");
+    return;
+  }
+  // reversión con motivo, si el contrato lo da
+  const motivo = e.reason || e.shortMessage || e.message || "error desconocido";
+  estado("Error: " + motivo, "error");
+  console.error(e);
+}
+
+/* ---------- reaccionar a cambios en la billetera ---------- */
+if (window.ethereum) {
+  window.ethereum.on?.("accountsChanged", () => location.reload());
+  window.ethereum.on?.("chainChanged", () => location.reload());
+}
+
+/* ---------- escuchar el evento Transfer y refrescar solo ----------
+   Se suscribe cuando ya hay contrato; refresca el saldo si la cuenta
+   aparece como emisor o receptor de cualquier transferencia. */
+function suscribirEventos() {
+  if (!contrato) return;
+  contrato.on("Transfer", (from, to) => {
+    if (from === cuenta || to === cuenta) refrescarSaldo();
+  });
+}
+</script>
+</body>
+</html>

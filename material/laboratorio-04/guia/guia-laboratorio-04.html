@@ -1,0 +1,320 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<title>Guía · Laboratorio 04</title>
+<!--ESTILOS-->
+</head>
+<body>
+
+<section class="barra">
+  <div class="kicker">LABORATORIO 04 · PARA LA CASA · TRABAJO AUTÓNOMO · NO CALIFICABLE</div>
+  <h1>MINERÍA Y EL<br>ATAQUE DEL <em>51 %</em><br>PASO A PASO</h1>
+  <div class="sub">La teoría de la Sesión 4, convertida en código Python que corre en tu computador.<br>Sin red, sin billetera, sin internet. Solo Python y estas instrucciones.</div>
+</section>
+
+<dl class="datos">
+  <div><dt>MODALIDAD</dt><dd>Individual<br>o en pareja</dd></div>
+  <div><dt>REQUISITO</dt><dd>Python 3.10+<br>y pytest</dd></div>
+  <div><dt>DURACIÓN</dt><dd>2 a 3 horas<br>a tu ritmo</dd></div>
+  <div><dt>META</dt><dd>32 pruebas<br>en verde</dd></div>
+</dl>
+
+<div class="caja clave">
+  <div class="caja-et">CÓMO LEER ESTA GUÍA</div>
+  <p>Está pensada para que puedas hacer el laboratorio <strong>sin ayuda de nadie</strong>, incluso si es la primera vez que abres una terminal. Cada paso dice exactamente qué escribir y qué deberías ver. Si algo no sale como aquí se describe, ve al final: <strong>«Errores frecuentes»</strong> resuelve casi todo. No hay que memorizar nada: se trata de entender, escribir unas pocas líneas y comprobar con las pruebas.</p>
+</div>
+
+<!-- ============================================================ 1 -->
+<section class="sec">
+  <div class="sec-cab"><span class="sec-num">01</span><h2>Qué vas a construir, y por qué</h2><span class="lead">LEER PRIMERO</span></div>
+
+  <p>En la Sesión 4 vimos, en diapositivas, cómo una red de desconocidos se pone de acuerdo en un solo orden de los hechos. Hoy eso deja de ser una explicación y pasa a ser código que tú ejecutas. Vas a programar <strong>tres piezas</strong>, cada una atada a una lámina concreta de la clase:</p>
+
+  <table>
+    <tr><th style="width:26%">PARTE</th><th style="width:40%">QUÉ PROGRAMAS</th><th>QUÉ LÁMINA FIJA</th></tr>
+    <tr><td class="pk">1 · Prueba de trabajo</td><td>Buscar un <code>nonce</code> cuyo hash quede por debajo de un objetivo, y verificarlo.</td><td>A.5 y A.5b</td></tr>
+    <tr><td class="pk">2 · Elección de cadena</td><td>Decidir cuál de dos cadenas gana, por trabajo acumulado.</td><td>A.7</td></tr>
+    <tr><td class="pk">3 · El ataque del 51 %</td><td>La fórmula del whitepaper de Bitcoin, una simulación, y el cálculo exacto.</td><td>A.8, A.8b y A.9</td></tr>
+  </table>
+
+  <div class="caja alerta">
+    <div class="caja-et">EL HALLAZGO QUE HACE ESTO INTERESANTE</div>
+    <p>La tabla famosa del whitepaper de Bitcoin (la de «6 confirmaciones») es una <strong>aproximación</strong>, y subestima el riesgo real. En la Parte 3 vas a programar la fórmula original, después una simulación honesta, y vas a <strong>descubrir que no coinciden</strong>: hace falta esperar más confirmaciones de las que dice el whitepaper. Es la misma lección de la actividad de Estonia: un documento célebre, repetido mil veces, puede tener un error — y tú lo compruebas con código en lugar de creerlo.</p>
+  </div>
+
+  <p>No necesitas entender toda la matemática de antemano. Cada función que tienes que completar trae, en su comentario, la fórmula o la idea exacta. Tu trabajo es traducirla a Python y dejar que las pruebas confirmen que quedó bien.</p>
+</section>
+
+<!-- ============================================================ 2 -->
+<section class="sec salto">
+  <div class="sec-cab"><span class="sec-num">02</span><h2>Instalar Python (si no lo tienes)</h2><span class="lead">UNA SOLA VEZ</span></div>
+
+  <p>Necesitas <strong>Python 3.10 o más nuevo</strong>. Primero comprueba si ya lo tienes. Abre una terminal:</p>
+
+  <ul>
+    <li><strong>Windows:</strong> tecla Windows, escribe <code>cmd</code>, Enter. (O «PowerShell».)</li>
+    <li><strong>macOS:</strong> Cmd + Espacio, escribe <code>Terminal</code>, Enter.</li>
+    <li><strong>Linux:</strong> Ctrl + Alt + T.</li>
+  </ul>
+
+  <p>Y escribe (en Windows prueba primero <code>python</code>; en macOS y Linux, <code>python3</code>):</p>
+  <pre>python --version</pre>
+
+  <p>Si responde algo como <code>Python 3.12.1</code>, ya lo tienes: salta al paso 3. Si dice «no se reconoce» o muestra una versión menor que 3.10, instálalo:</p>
+
+  <table>
+    <tr><th style="width:22%">SISTEMA</th><th>CÓMO INSTALAR</th></tr>
+    <tr><td class="pk">Windows</td><td>Ve a <code>python.org/downloads</code>, descarga el instalador y — <strong>MUY IMPORTANTE</strong> — marca la casilla <strong>«Add Python to PATH»</strong> antes de pulsar Install. Sin esa casilla, la terminal no encontrará Python.</td></tr>
+    <tr><td class="pk">macOS</td><td>Descárgalo de <code>python.org/downloads</code>, o con Homebrew: <code>brew install python</code>.</td></tr>
+    <tr><td class="pk">Linux</td><td>Casi siempre ya viene. Si no: <code>sudo apt install python3 python3-pip</code> (Debian/Ubuntu).</td></tr>
+  </table>
+
+  <p>Cierra y vuelve a abrir la terminal después de instalar, y comprueba otra vez con <code>python --version</code>.</p>
+
+  <div class="caja">
+    <div class="caja-et">INSTALAR pytest</div>
+    <p>El laboratorio usa <code>pytest</code> para las pruebas. Instálalo una vez:</p>
+    <pre>python -m pip install pytest</pre>
+    <p>Si <code>python</code> no funciona pero <code>python3</code> sí, usa <code>python3 -m pip install pytest</code>. Úsalo así (con <code>python3</code>) en todos los comandos siguientes.</p>
+  </div>
+</section>
+
+<!-- ============================================================ 3 -->
+<section class="sec">
+  <div class="sec-cab"><span class="sec-num">03</span><h2>La carpeta del laboratorio</h2></div>
+
+  <p>Todo está en <code>material/laboratorio-04</code>. Su contenido:</p>
+  <pre>laboratorio-04/
+├── consenso.py          &lt;- AQUÍ TRABAJAS: tiene funciones con TODO
+├── test_consenso.py     &lt;- las 32 pruebas. NO se modifica
+├── andamiaje/           &lt;- copia intacta de consenso.py, por si empiezas de cero
+└── solucion/            &lt;- la solución de referencia (míralo solo al final)</pre>
+
+  <p>Abre una terminal <strong>dentro</strong> de esa carpeta. La forma más simple:</p>
+  <ul>
+    <li><strong>Windows:</strong> abre la carpeta en el Explorador, haz clic en la barra de dirección, escribe <code>cmd</code> y Enter.</li>
+    <li><strong>macOS/Linux:</strong> <code>cd</code> y arrastra la carpeta a la terminal, luego Enter. Ejemplo: <code>cd "ruta/a/material/laboratorio-04"</code>.</li>
+  </ul>
+
+  <p>Comprueba que estás en el sitio correcto listando los archivos: <code>dir</code> en Windows, <code>ls</code> en macOS/Linux. Debes ver <code>consenso.py</code> y <code>test_consenso.py</code>.</p>
+
+  <div class="caja clave">
+    <div class="caja-et">EL FLUJO: TE GUÍAN LAS PRUEBAS</div>
+    <p>No tienes que adivinar si tu código está bien. Corre las pruebas y ellas te dicen. Al empezar, <strong>las 32 fallan</strong> (rojo). Vas completando funciones y volviendo a correr; el laboratorio está terminado cuando las 32 pasan (verde). Corre las pruebas así:</p>
+    <pre>python -m pytest -q</pre>
+    <p>Para trabajar por partes y no ver el mar de errores completo, filtra por nombre:</p>
+    <pre>python -m pytest -q -k "objetivo or minar or nonce or bits"   # Parte 1
+python -m pytest -q -k "gana or empate"                        # Parte 2
+python -m pytest -q -k "formula or confirmaciones or mayoria"  # Parte 3a
+python -m pytest -q -k "simulacion or subestima"               # Parte 3b</pre>
+  </div>
+</section>
+
+<!-- ============================================================ 4 -->
+<section class="sec salto">
+  <div class="sec-cab"><span class="sec-num">04</span><h2>Parte 1 · Prueba de trabajo</h2><span class="lead">3 FUNCIONES</span></div>
+
+  <p>Recuerda el ejemplo real de la lámina A.5b: un bloque «gana» si el hash de su encabezado, con cierto <code>nonce</code>, queda por debajo de un objetivo. Minar es probar <code>nonce</code> tras <code>nonce</code> hasta encontrarlo. Verificar es recalcular un solo hash.</p>
+
+  <div class="pregunta">
+    <div class="cab"><div class="n">1</div><div class="enun"><span class="tema">FUNCIÓN · objetivo_para(bits)</span>El umbral que el hash debe no superar</div></div>
+    <div class="just">
+      <strong>Qué hace:</strong> con <code>bits</code> de dificultad, el objetivo es 2<sup>(256 − bits)</sup>. Un hash gana si, leído como número, es menor que ese objetivo.<br>
+      <strong>Qué escribir:</strong> una sola línea que devuelva <code>2 ** (256 - bits)</code>.<br>
+      <strong>Pista:</strong> en Python, <code>2 ** n</code> es «2 elevado a n». No hace falta nada más.<br>
+      <strong>Cómo lo compruebas:</strong> con 0 bits, el objetivo es 2<sup>256</sup> (cualquier hash gana). Cada bit extra parte el objetivo a la mitad.
+    </div>
+  </div>
+
+  <div class="pregunta">
+    <div class="cab"><div class="n">2</div><div class="enun"><span class="tema">FUNCIÓN · minar(encabezado, bits)</span>Buscar el nonce ganador</div></div>
+    <div class="just">
+      <strong>Qué hace:</strong> prueba <code>nonce = 0, 1, 2, …</code> y devuelve el <strong>primero</strong> cuyo <code>sha256(encabezado + nonce)</code> quede por debajo del objetivo.<br>
+      <strong>Qué escribir:</strong> un bucle. En cada vuelta: calcula el hash del texto <code>encabezado + str(nonce)</code>, conviértelo a número con <code>int(hash_hex, 16)</code>, y si es menor que <code>objetivo_para(bits)</code>, devuelve un <code>ResultadoMinado</code>.<br>
+      <strong>Pistas:</strong>
+      <br>· El hash en hexadecimal: <code>hashlib.sha256((encabezado + str(nonce)).encode()).hexdigest()</code>
+      <br>· <code>int(hash_hex, 16)</code> lo vuelve un entero comparable con el objetivo.
+      <br>· <code>ResultadoMinado</code> ya está definido arriba: guarda <code>nonce</code>, <code>hash_hex</code>, <code>intentos</code> (que es <code>nonce + 1</code>) y <code>segundos</code> (mide el tiempo con <code>time.perf_counter()</code> al inicio y al final).<br>
+      <strong>Cómo lo compruebas:</strong> el resultado que devuelvas debe pasar <code>verificar_minado</code> (la función siguiente).
+    </div>
+  </div>
+
+  <div class="pregunta">
+    <div class="cab"><div class="n">3</div><div class="enun"><span class="tema">FUNCIÓN · verificar_minado(encabezado, bits, nonce)</span>Comprobar en un solo hash</div></div>
+    <div class="just">
+      <strong>Qué hace:</strong> recalcula <code>sha256(encabezado + nonce)</code> UNA vez y devuelve <code>True</code> si queda por debajo del objetivo.<br>
+      <strong>Qué escribir:</strong> el mismo cálculo del hash que en <code>minar</code>, pero sin bucle: un solo hash, comparar, devolver <code>True</code> o <code>False</code>.<br>
+      <strong>La idea que demuestra:</strong> producir el nonce costó muchos intentos; verificarlo cuesta uno. Esa asimetría es toda la prueba de trabajo.
+    </div>
+  </div>
+
+  <p>Cuando las tres estén listas, corre <code>python -m pytest -q -k "objetivo or minar or nonce or bits"</code>. Deben pasar en verde. Verás pruebas como «una transferencia simple», «más bits exige más intentos» y «el nonce no sirve para otro encabezado».</p>
+</section>
+
+<!-- ============================================================ 5 -->
+<section class="sec salto">
+  <div class="sec-cab"><span class="sec-num">05</span><h2>Parte 2 · Elección de cadena</h2><span class="lead">2 FUNCIONES</span></div>
+
+  <p>Recuerda la lámina A.7: cuando hay dos cadenas válidas, gana la de <strong>más trabajo acumulado</strong>, no la más larga. El trabajo de un bloque es 2<sup>bits</sup> (ya está calculado en la propiedad <code>trabajo</code> de la clase <code>Bloque</code>).</p>
+
+  <div class="pregunta">
+    <div class="cab"><div class="n">4</div><div class="enun"><span class="tema">FUNCIÓN · trabajo_acumulado(cadena)</span>Sumar el trabajo de todos los bloques</div></div>
+    <div class="just">
+      <strong>Qué hace:</strong> devuelve la suma del <code>trabajo</code> de cada bloque de la cadena.<br>
+      <strong>Qué escribir:</strong> una línea. <strong>Pista:</strong> <code>sum(b.trabajo for b in cadena)</code>.
+    </div>
+  </div>
+
+  <div class="pregunta">
+    <div class="cab"><div class="n">5</div><div class="enun"><span class="tema">FUNCIÓN · elegir_cadena(a, b)</span>Quedarse con la de más trabajo</div></div>
+    <div class="just">
+      <strong>Qué hace:</strong> devuelve la cadena de mayor trabajo acumulado. Ante un <strong>empate</strong>, conserva la primera (<code>a</code>): es lo que hace Bitcoin, no cambiar de rama sin una razón.<br>
+      <strong>Qué escribir:</strong> compara los dos trabajos acumulados. Devuelve <code>b</code> solo si su trabajo es <strong>estrictamente mayor</strong> que el de <code>a</code>; si no, devuelve <code>a</code>.<br>
+      <strong>Pista:</strong> <code>return b if trabajo_acumulado(b) &gt; trabajo_acumulado(a) else a</code>.<br>
+      <strong>El detalle que evalúan las pruebas:</strong> una cadena más CORTA pero con bloques más difíciles puede ganar. Y el empate se resuelve a favor de <code>a</code>.
+    </div>
+  </div>
+
+  <p>Corre <code>python -m pytest -q -k "gana or empate"</code>. Verás «gana el mayor trabajo aunque sea más corta», «con igual dificultad gana la más larga» y «en empate se conserva la actual».</p>
+
+  <div class="caja">
+    <div class="caja-et">PREGUNTA PARA PENSAR (VA EN EL INFORME SI TU DOCENTE LO PIDE)</div>
+    <p>¿Por qué un nodo no cambia de cadena ante un empate? Piensa qué pasaría en la red si todos cambiaran de rama cada vez que ven una igual de pesada.</p>
+  </div>
+</section>
+
+<!-- ============================================================ 6 -->
+<section class="sec salto">
+  <div class="sec-cab"><span class="sec-num">06</span><h2>Parte 3 · El ataque del 51 %</h2><span class="lead">3 FUNCIONES · EL NÚCLEO</span></div>
+
+  <p>Aquí está el corazón del laboratorio y el hallazgo. Vas a calcular la probabilidad de que un atacante con una fracción <code>q</code> del cómputo alcance a la cadena honesta cuando el comerciante esperó <code>z</code> confirmaciones — de <strong>tres</strong> formas distintas, y a compararlas.</p>
+
+  <div class="pregunta">
+    <div class="cab"><div class="n">6</div><div class="enun"><span class="tema">FUNCIÓN · probabilidad_nakamoto(q, z)</span>La fórmula original del whitepaper</div></div>
+    <div class="just">
+      <strong>Qué hace:</strong> traduce a Python el programa en C de la sección 11 del whitepaper de Bitcoin. El comentario de la función trae la fórmula exacta.<br>
+      <strong>Cómo se arma:</strong> <code>p = 1 - q</code>; <code>lam = z * (q / p)</code>; luego un sumatorio para <code>k</code> de 0 a <code>z</code> de <code>Poisson(k; lam) · (1 − (q/p)^(z−k))</code>, y la probabilidad es <code>1 −</code> ese sumatorio.<br>
+      <strong>Pistas:</strong>
+      <br>· El término de Poisson: empieza en <code>math.exp(-lam)</code> y multiplícalo por <code>lam / i</code> dentro de un bucle <code>i</code> de 1 a k (así evitas factoriales grandes).
+      <br>· Casos borde: si <code>q &gt;= p</code> (atacante con la mitad o más), devuelve <code>1.0</code>.<br>
+      <strong>Cómo lo compruebas:</strong> las pruebas comparan tu resultado con <strong>los números que Nakamoto publicó</strong>. Si tu traducción es correcta, coinciden hasta el octavo decimal. Por ejemplo, con <code>q = 0,10</code> y <code>z = 1</code> debe dar <code>0,2045873</code>.
+    </div>
+  </div>
+
+  <div class="pregunta">
+    <div class="cab"><div class="n">7</div><div class="enun"><span class="tema">FUNCIÓN · simular_ataque(q, z)</span>La misma probabilidad, sin fórmula</div></div>
+    <div class="just">
+      <strong>Qué hace:</strong> en vez de una fórmula, <strong>simula</strong> la carrera miles de veces y cuenta cuántas gana el atacante. El comentario describe las dos fases.<br>
+      <strong>Cómo se arma:</strong> repite <code>ensayos</code> veces. En cada ensayo: mina bloques hasta que los honestos llevan <code>z</code> (el atacante lleva algunos en secreto); luego el «déficit» = <code>z − (bloques del atacante)</code> hace un paseo aleatorio: baja 1 con probabilidad <code>q</code>, sube 1 con probabilidad <code>p</code>. Si el déficit llega a 0, el atacante ganó ese ensayo. Devuelve la fracción de ensayos ganados.<br>
+      <strong>Pistas:</strong>
+      <br>· Usa <code>rnd = random.Random(semilla)</code> y <code>rnd.random() &lt; q</code> para decidir cada bloque.
+      <br>· Si el déficit supera el <code>tope</code>, da el ensayo por perdido (volver es despreciable).<br>
+      <strong>Lo que vas a notar:</strong> la simulación NO coincide con la fórmula del whitepaper. Sale sistemáticamente <strong>más alta</strong>. Eso no es un error tuyo: es el hallazgo.
+    </div>
+  </div>
+
+  <div class="pregunta">
+    <div class="cab"><div class="n">8</div><div class="enun"><span class="tema">FUNCIÓN · probabilidad_exacta(q, z)</span>Por qué el whitepaper se queda corto</div></div>
+    <div class="just">
+      <strong>Qué hace:</strong> el cálculo exacto (Rosenfeld, 2014), sin la aproximación de Poisson que usó Nakamoto. El comentario trae la fórmula: <code>P = 1 − Σ C(m+z−1, m)·(p^z q^m − q^z p^m)</code> para <code>m</code> de 0 a <code>z</code>.<br>
+      <strong>Pistas:</strong>
+      <br>· <code>C(m+z−1, m)</code> es una combinatoria: <code>math.comb(m + z - 1, m)</code>.
+      <br>· Con <code>q</code> grande y <code>z</code> grande, esa combinatoria desborda un <code>float</code>. Para evitarlo, calcula en espacio logarítmico con <code>math.lgamma</code> (la guía de la solución muestra cómo; si no llegas ahí, el cálculo directo con <code>math.comb</code> pasa las pruebas para los valores que se prueban).<br>
+      <strong>La confirmación:</strong> la simulación de la función 7 debe coincidir con esta fórmula exacta, no con la de Nakamoto.
+    </div>
+  </div>
+
+  <div class="caja alerta">
+    <div class="caja-et">EL RESULTADO QUE CIERRA EL LABORATORIO</div>
+    <p>La función <code>confirmaciones_necesarias</code> (que ya viene hecha) calcula cuántas confirmaciones hacen falta para que el riesgo baje de 0,1 %. Al comparar la fórmula del whitepaper con la exacta, el whitepaper pide menos confirmaciones de las necesarias:</p>
+    <table>
+      <tr><th style="width:34%">ATACANTE (q)</th><th>WHITEPAPER</th><th>EXACTA (ROSENFELD)</th></tr>
+      <tr><td class="pk">10 %</td><td>5</td><td>6</td></tr>
+      <tr><td class="pk">20 %</td><td>11</td><td>13</td></tr>
+      <tr><td class="pk">30 %</td><td>24</td><td>32</td></tr>
+      <tr><td class="pk">40 %</td><td>89</td><td>133</td></tr>
+    </table>
+    <p>Con un atacante del 30 %, esperar las 24 confirmaciones que sugiere el whitepaper <strong>no basta</strong>: hacen falta 32. Lo demostraste tú, con código.</p>
+  </div>
+</section>
+
+<!-- ============================================================ 7 -->
+<section class="sec salto">
+  <div class="sec-cab"><span class="sec-num">07</span><h2>La prueba final: todo junto</h2></div>
+
+  <p>Cuando las 32 pruebas pasen (<code>python -m pytest -q</code> muestra <code>32 passed</code>), corre el experimento completo:</p>
+  <pre>python consenso.py</pre>
+
+  <p>Deberías ver algo muy parecido a esto (los números de la Parte 1 y de la simulación varían un poco por el azar; los de la fórmula y las confirmaciones son fijos):</p>
+
+  <pre>PARTE 1 · dificultad frente a intentos
+ bits   intentos prom.   esperados 2^bits   segundos
+    8               92                256     0.0002
+   12            5,433              4,096     0.0160
+   16           88,918             65,536     0.1347
+   18          177,044            262,144     0.2639
+
+PARTE 3 · whitepaper, formula exacta y simulacion (q = 0,30)
+  z= 0  nakamoto=1.0000  exacta=1.0000  simulacion=1.0000
+  z= 5  nakamoto=0.1774  exacta=0.1976  simulacion=0.1937
+  z=10  nakamoto=0.0417  exacta=0.0651  simulacion=0.0663
+  z=15  nakamoto=0.0101  exacta=0.0233  simulacion=0.0267
+
+Confirmaciones para P &lt; 0,1 %      whitepaper   exacta
+  q=0.10                             5        6
+  q=0.30                            24       32
+  q=0.45                           340      539</pre>
+
+  <p>Fíjate en la Parte 3: la columna <code>nakamoto</code> siempre es menor que <code>exacta</code>, y <code>simulacion</code> se parece a <code>exacta</code>, no a <code>nakamoto</code>. Ese es, en tres columnas, todo el punto del laboratorio.</p>
+
+  <div class="caja">
+    <div class="caja-et">SI TE PIERDES O QUIERES EMPEZAR DE CERO</div>
+    <p>Copia otra vez el andamiaje sobre tu archivo de trabajo:</p>
+    <pre>copy andamiaje\consenso.py consenso.py      (Windows)
+cp andamiaje/consenso.py consenso.py         (macOS / Linux)</pre>
+    <p>Y si quieres comparar con la solución de referencia, está en <code>solucion/consenso.py</code>. Míralo <strong>solo al final</strong>: el aprendizaje está en intentarlo tú primero.</p>
+  </div>
+</section>
+
+<!-- ============================================================ 8 -->
+<section class="sec">
+  <div class="sec-cab"><span class="sec-num">08</span><h2>Errores frecuentes</h2><span class="lead">CASI TODO SE RESUELVE AQUÍ</span></div>
+
+  <table>
+    <tr><th style="width:42%">SÍNTOMA</th><th>CAUSA Y SOLUCIÓN</th></tr>
+    <tr><td class="pk">«python no se reconoce como comando»</td><td>Python no está en el PATH. En Windows, reinstala marcando «Add Python to PATH». O prueba con <code>py</code> o <code>python3</code>.</td></tr>
+    <tr><td class="pk">«No module named pytest»</td><td>Falta instalarlo: <code>python -m pip install pytest</code>.</td></tr>
+    <tr><td class="pk">«No such file or directory: consenso.py»</td><td>La terminal no está en la carpeta del laboratorio. Usa <code>cd</code> para entrar en <code>material/laboratorio-04</code>.</td></tr>
+    <tr><td class="pk"><code>minar</code> nunca termina / se queda pensando</td><td>Estás comparando el hash como texto, no como número. Convierte con <code>int(hash_hex, 16)</code> antes de comparar con el objetivo.</td></tr>
+    <tr><td class="pk">La prueba de la tabla de Nakamoto falla por muy poco</td><td>El sumatorio debe incluir <code>k = z</code>: usa <code>range(z + 1)</code>, no <code>range(z)</code>.</td></tr>
+    <tr><td class="pk">La simulación da siempre 1.0</td><td>El paseo aleatorio no tiene salida por el <code>tope</code>, o invertiste el signo del paso (baja con <code>q</code>, sube con <code>p</code>).</td></tr>
+    <tr><td class="pk"><code>OverflowError</code> en <code>probabilidad_exacta</code> con q alto</td><td><code>math.comb</code> crece demasiado. Calcula en espacio logarítmico con <code>math.lgamma</code> (ver la solución de referencia).</td></tr>
+    <tr><td class="pk">La simulación coincide con Nakamoto, no con la exacta</td><td>Estás generando los bloques del atacante con una Poisson en vez de bloque a bloque. Simula el paseo, no la fórmula.</td></tr>
+  </table>
+</section>
+
+<!-- ============================================================ 9 -->
+<section class="sec">
+  <div class="sec-cab"><span class="sec-num">09</span><h2>Si quieres ir más allá</h2><span class="lead">OPCIONAL</span></div>
+
+  <p>La función <code>experimento_dificultad</code> ya mide cuántos intentos toma minar según la dificultad. Con esos datos puedes hacer una gráfica del crecimiento exponencial (la idea de la lámina A.5b: cada bit extra duplica el trabajo). Si la traes a la Sesión 5, hay un punto extra de participación.</p>
+
+  <div class="caja clave">
+    <div class="caja-et">POR QUÉ ESTE LABORATORIO IMPORTA, AUNQUE NO SE CALIFIQUE</div>
+    <p>Cada función que completaste es una diapositiva de la clase vuelta código: minar es A.5, elegir la cadena es A.7, el ataque es A.8 y A.9. El Quiz 1 pregunta justo esto, así que quien hizo el laboratorio responde sin dudar. Y el hallazgo de la Parte 3 es el método que atraviesa todo el curso: <strong>verificar en lugar de creer</strong>.</p>
+  </div>
+</section>
+
+<!-- ============================================================ 10 -->
+<section class="sec">
+  <div class="sec-cab"><span class="sec-num">10</span><h2>Referencias</h2></div>
+  <ul>
+    <li>Nakamoto, S. (2008). <em>Bitcoin: A Peer-to-Peer Electronic Cash System</em>, sección 11. <code>https://bitcoin.org/bitcoin.pdf</code></li>
+    <li>Rosenfeld, M. (2014). <em>Analysis of hashrate-based double spending</em>. <code>arXiv:1402.2009</code></li>
+    <li>Grunspan, C. y Pérez-Marco, R. (2017). <em>Double spend races</em>. <code>arXiv:1702.02867</code></li>
+  </ul>
+</section>
+
+</body>
+</html>

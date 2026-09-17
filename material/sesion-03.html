@@ -1,0 +1,1541 @@
+<title>Sesión 03 · Firmas digitales y anatomía de la cadena</title>
+
+<style>
+/* ============================================================
+   SISTEMA DE TOKENS
+   Paleta derivada de las variables CSS oficiales de usbmed.edu.co
+   ============================================================ */
+
+:root{
+  /* --- Marca institucional --- */
+  --usb-naranja:    #F07F06;   /* --color-primary   */
+  --usb-naranja-2:  #F86F03;   /* --color-secondary */
+  --usb-ambar:      #FFA41B;   /* --color-tertiary  */
+  --usb-violeta:    #7152E9;   /* --color-tertiary-2 */
+  --usb-ocre:       #A35604;   /* --color-dark      */
+  --usb-gris:       #6F6B80;   /* --color-body      */
+
+  /* --- Superficies y tinta (TEMA CLARO) --- */
+  --ground:      #FFFFFF;
+  --surface:     #FAF9FB;
+  --surface-alt: #F2F0F5;
+  --ink:         #0F0F11;
+  --ink-soft:    #3A3844;
+  --muted:       #6F6B80;
+  --rule:        #0F0F11;
+  --rule-soft:   #D9D6E0;
+
+  /* --- Acentos legibles por tema --- */
+  --accent:      #F07F06;   /* relleno / reglas / bloques */
+  --accent-ink:  #A35604;   /* texto sobre fondo claro    */
+  --accent-on:   #0F0F11;   /* tinta sobre relleno naranja*/
+  --violet:      #7152E9;
+  --violet-ink:  #5638C9;
+  --shadow:      #0F0F11;
+
+  /* --- Tipografía --- */
+  --font-display: "Arial Black","Helvetica Neue","Segoe UI Black",Impact,system-ui,sans-serif;
+  --font-body:    Georgia,"Iowan Old Style","Times New Roman",serif;
+  --font-mono:    ui-monospace,"Cascadia Mono","Segoe UI Mono",Consolas,"SF Mono",Menlo,monospace;
+
+  /* --- Métrica --- */
+  --rail: 190px;
+  --gap: 44px;
+  --maxw: 1240px;
+}
+
+@media (prefers-color-scheme: dark){
+  :root:not([data-theme="light"]){
+    --ground:      #0F0F11;
+    --surface:     #17161A;
+    --surface-alt: #201E25;
+    --ink:         #F4F2F7;
+    --ink-soft:    #CFCBD8;
+    --muted:       #9A95A8;
+    --rule:        #F4F2F7;
+    --rule-soft:   #35323D;
+    --accent:      #F07F06;
+    --accent-ink:  #F5A03F;
+    --accent-on:   #0F0F11;
+    --violet:      #8F76FF;
+    --violet-ink:  #A794FF;
+    --shadow:      #F07F06;
+  }
+}
+
+:root[data-theme="dark"]{
+  --ground:      #0F0F11;
+  --surface:     #17161A;
+  --surface-alt: #201E25;
+  --ink:         #F4F2F7;
+  --ink-soft:    #CFCBD8;
+  --muted:       #9A95A8;
+  --rule:        #F4F2F7;
+  --rule-soft:   #35323D;
+  --accent:      #F07F06;
+  --accent-ink:  #F5A03F;
+  --accent-on:   #0F0F11;
+  --violet:      #8F76FF;
+  --violet-ink:  #A794FF;
+  --shadow:      #F07F06;
+}
+
+/* ============================================================
+   BASE
+   ============================================================ */
+
+*{ box-sizing:border-box; }
+
+body{
+  background: var(--ground);
+  color: var(--ink);
+  font-family: var(--font-body);
+  font-size: 17px;
+  line-height: 1.72;
+  margin: 0;
+  padding: 0 24px 120px;
+  -webkit-font-smoothing: antialiased;
+}
+
+.wrap{ max-width: var(--maxw); margin: 0 auto; }
+
+p{ margin: 0 0 1.1em; max-width: 68ch; }
+strong{ font-weight:700; color: var(--ink); }
+em{ font-style: italic; }
+
+a{ color: var(--accent-ink); text-underline-offset: 3px; text-decoration-thickness: 2px; }
+a:focus-visible, button:focus-visible{
+  outline: 3px solid var(--violet); outline-offset: 3px;
+}
+
+hr{ border:0; border-top:2px solid var(--rule); margin: 56px 0; }
+
+/* ============================================================
+   PORTADA
+   ============================================================ */
+
+.cover{
+  border: 3px solid var(--rule);
+  margin: 32px 0 0;
+  background: var(--ground);
+}
+
+.cover-top{
+  display: flex;
+  flex-wrap: wrap;
+  align-items: stretch;
+  border-bottom: 3px solid var(--rule);
+}
+
+.cover-num{
+  font-family: var(--font-display);
+  font-size: clamp(90px, 17vw, 200px);
+  line-height: .78;
+  letter-spacing: -.05em;
+  padding: 26px 30px 20px;
+  background: var(--accent);
+  color: var(--accent-on);
+  border-right: 3px solid var(--rule);
+  display: flex; align-items: flex-end;
+}
+
+.cover-head{ padding: 26px 30px; flex: 1 1 420px; display:flex; flex-direction:column; justify-content:space-between; gap: 18px; }
+
+.eyebrow{
+  font-family: var(--font-mono);
+  font-size: 11.5px;
+  letter-spacing: .16em;
+  text-transform: uppercase;
+  color: var(--muted);
+  margin: 0;
+}
+
+h1{
+  font-family: var(--font-display);
+  font-size: clamp(28px, 4.4vw, 52px);
+  line-height: 1.02;
+  letter-spacing: -.035em;
+  text-transform: uppercase;
+  text-wrap: balance;
+  margin: 0;
+  color: var(--ink);
+}
+
+.cover-meta{
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(160px,1fr));
+  font-family: var(--font-mono);
+  font-size: 12px;
+}
+.cover-meta div{
+  padding: 14px 18px;
+  border-right: 2px solid var(--rule-soft);
+}
+.cover-meta div:last-child{ border-right: 0; }
+.cover-meta b{ display:block; font-size:10.5px; letter-spacing:.14em; text-transform:uppercase; color: var(--muted); font-weight:400; margin-bottom:4px; }
+
+/* ============================================================
+   REJILLA CON RIEL
+   ============================================================ */
+
+.grid{
+  display: grid;
+  grid-template-columns: var(--rail) minmax(0,1fr);
+  gap: var(--gap);
+  align-items: start;
+}
+.rail{
+  font-family: var(--font-mono);
+  font-size: 11.5px;
+  line-height: 1.55;
+  color: var(--muted);
+  letter-spacing: .04em;
+  position: sticky;
+  top: 24px;
+  border-top: 3px solid var(--rule);
+  padding-top: 12px;
+}
+.rail b{ display:block; text-transform:uppercase; letter-spacing:.14em; color: var(--ink); font-weight:700; font-size:11px; }
+.rail .tick{ color: var(--accent-ink); font-weight:700; }
+
+@media (max-width: 900px){
+  .grid{ grid-template-columns: 1fr; gap: 14px; }
+  .rail{ position: static; }
+}
+
+/* ============================================================
+   TÍTULOS DE SECCIÓN
+   ============================================================ */
+
+section{ margin-top: 64px; scroll-margin-top: 20px; }
+
+h2{
+  font-family: var(--font-display);
+  font-size: clamp(24px, 3.4vw, 38px);
+  line-height: 1.06;
+  letter-spacing: -.03em;
+  text-transform: uppercase;
+  text-wrap: balance;
+  margin: 0 0 20px;
+  padding-bottom: 14px;
+  border-bottom: 3px solid var(--rule);
+}
+
+h3{
+  font-family: var(--font-display);
+  font-size: clamp(17px, 2vw, 22px);
+  line-height: 1.18;
+  letter-spacing: -.015em;
+  text-transform: uppercase;
+  margin: 44px 0 12px;
+  text-wrap: balance;
+}
+
+h4{
+  font-family: var(--font-mono);
+  font-size: 12.5px;
+  letter-spacing: .13em;
+  text-transform: uppercase;
+  color: var(--accent-ink);
+  margin: 32px 0 10px;
+  font-weight: 700;
+}
+
+/* Marcador de bloque de clase */
+.bloque{
+  display:flex; flex-wrap:wrap; align-items:baseline; gap: 14px;
+  background: var(--ink);
+  color: var(--ground);
+  padding: 12px 18px;
+  font-family: var(--font-mono);
+  font-size: 12px;
+  letter-spacing: .12em;
+  text-transform: uppercase;
+  margin-bottom: 0;
+}
+.bloque .b-min{ color: var(--accent); font-weight:700; }
+.bloque .b-tipo{ margin-left:auto; color: var(--ground); opacity:.62; }
+
+/* ============================================================
+   SIGLAS EN LÍNEA  — expansión siempre visible
+   ============================================================ */
+
+.sigla{
+  font-family: var(--font-mono);
+  font-weight: 700;
+  font-size: .92em;
+  color: var(--ink);
+  white-space: nowrap;
+  border-bottom: 2px solid var(--violet);
+}
+.sigla > i{
+  font-style: normal;
+  font-weight: 400;
+  font-size: .84em;
+  color: var(--violet-ink);
+  letter-spacing: .01em;
+}
+.sigla > i::before{ content:" ["; }
+.sigla > i::after{ content:"]"; }
+
+/* ============================================================
+   FICHAS (cajas brutalistas)
+   ============================================================ */
+
+.ficha{
+  border: 2px solid var(--rule);
+  background: var(--surface);
+  padding: 20px 22px;
+  margin: 26px 0;
+}
+.ficha > :last-child{ margin-bottom:0; }
+
+.ficha-tit{
+  font-family: var(--font-mono);
+  font-size: 11px;
+  letter-spacing: .15em;
+  text-transform: uppercase;
+  font-weight: 700;
+  margin: 0 0 12px;
+  padding-bottom: 8px;
+  border-bottom: 2px solid var(--rule-soft);
+  color: var(--muted);
+  max-width: none;
+  display: flex; flex-wrap: wrap; gap: 10px; align-items: baseline;
+}
+.ficha-tit span{ color: var(--ink); }
+
+/* variantes */
+.ficha--termino{ border-color: var(--violet); box-shadow: 6px 6px 0 var(--violet); background: var(--ground); }
+.ficha--termino .ficha-tit{ color: var(--violet-ink); border-bottom-color: var(--violet); }
+
+.ficha--profundidad{ border-left-width: 10px; }
+
+.ficha--alerta{ border-color: var(--accent); box-shadow: 6px 6px 0 var(--accent); background: var(--ground); }
+.ficha--alerta .ficha-tit{ color: var(--accent-ink); border-bottom-color: var(--accent); }
+
+.ficha--docente{ background: var(--surface-alt); border-style: dashed; }
+
+.ficha--pregunta{ border-width: 3px; background: var(--ground); }
+.ficha--pregunta p{ font-family: var(--font-display); font-size: clamp(17px,2.2vw,23px); line-height:1.25; letter-spacing:-.02em; text-transform: none; }
+
+/* Definición formal dentro de ficha de término */
+.def{
+  font-family: var(--font-mono);
+  font-size: 13px;
+  line-height: 1.6;
+  background: var(--surface-alt);
+  border-left: 4px solid var(--violet);
+  padding: 12px 14px;
+  margin: 0 0 14px;
+  max-width: none;
+  color: var(--ink-soft);
+}
+.def b{ color: var(--ink); }
+
+/* ============================================================
+   LISTAS
+   ============================================================ */
+
+ul, ol{ max-width: 68ch; padding-left: 1.25em; margin: 0 0 1.2em; }
+li{ margin-bottom: .55em; }
+li::marker{ color: var(--accent-ink); font-weight:700; }
+
+ul.plain{ list-style:none; padding-left:0; }
+ul.plain > li{
+  border-top: 2px solid var(--rule-soft);
+  padding: 12px 0 12px 0;
+  margin: 0;
+}
+ul.plain > li:last-child{ border-bottom: 2px solid var(--rule-soft); }
+
+/* Pasos numerados del laboratorio */
+ol.pasos{ list-style: none; padding-left:0; counter-reset: paso; max-width:none; }
+ol.pasos > li{
+  counter-increment: paso;
+  display: grid;
+  grid-template-columns: 62px minmax(0,1fr);
+  gap: 20px;
+  border-top: 2px solid var(--rule);
+  padding: 20px 0;
+  margin: 0;
+}
+ol.pasos > li::before{
+  content: counter(paso, decimal-leading-zero);
+  font-family: var(--font-display);
+  font-size: 34px;
+  line-height: .9;
+  letter-spacing: -.04em;
+  color: var(--accent);
+}
+ol.pasos > li:last-child{ border-bottom: 2px solid var(--rule); }
+ol.pasos h4{ margin-top: 0; }
+
+/* ============================================================
+   TABLAS
+   ============================================================ */
+
+.tabla-wrap{ overflow-x: auto; margin: 26px 0; border: 2px solid var(--rule); }
+table{
+  border-collapse: collapse;
+  width: 100%;
+  min-width: 620px;
+  font-family: var(--font-mono);
+  font-size: 13px;
+  line-height: 1.5;
+  font-variant-numeric: tabular-nums;
+}
+th{
+  background: var(--ink);
+  color: var(--ground);
+  text-align: left;
+  font-weight: 700;
+  font-size: 10.5px;
+  letter-spacing: .12em;
+  text-transform: uppercase;
+  padding: 11px 14px;
+  vertical-align: bottom;
+}
+td{
+  padding: 12px 14px;
+  border-top: 2px solid var(--rule-soft);
+  vertical-align: top;
+  color: var(--ink-soft);
+}
+td:first-child{ color: var(--ink); font-weight:700; }
+tbody tr:nth-child(even) td{ background: var(--surface); }
+
+/* ============================================================
+   CÓDIGO / DATOS
+   ============================================================ */
+
+code{
+  font-family: var(--font-mono);
+  font-size: .88em;
+  background: var(--surface-alt);
+  padding: 2px 6px;
+  border: 1px solid var(--rule-soft);
+  word-break: break-word;
+}
+pre{
+  font-family: var(--font-mono);
+  font-size: 12.5px;
+  line-height: 1.6;
+  background: var(--ink);
+  color: #F4F2F7;
+  border: 2px solid var(--rule);
+  padding: 16px 18px;
+  overflow-x: auto;
+  margin: 20px 0;
+}
+pre code{ background: none; border: 0; padding: 0; color: inherit; font-size: inherit; }
+pre .c{ color: #9A95A8; }
+pre .k{ color: var(--usb-ambar); }
+
+/* ============================================================
+   ÍNDICE
+   ============================================================ */
+
+.toc{ border: 2px solid var(--rule); }
+.toc ol{ list-style:none; margin:0; padding:0; max-width:none; counter-reset: toc; }
+.toc li{ margin:0; border-top: 2px solid var(--rule-soft); }
+.toc li:first-child{ border-top:0; }
+.toc a{
+  display:flex; gap:16px; align-items:baseline;
+  padding: 13px 18px;
+  font-family: var(--font-mono);
+  font-size: 13px;
+  text-decoration:none;
+  color: var(--ink);
+}
+.toc a:hover{ background: var(--accent); color: var(--accent-on); }
+.toc a .n{ color: var(--muted); font-size:11px; letter-spacing:.1em; min-width: 46px; }
+.toc a:hover .n{ color: var(--accent-on); }
+.toc a .t{ flex:1; }
+.toc a .m{ color: var(--muted); font-size:11px; }
+.toc a:hover .m{ color: var(--accent-on); }
+
+/* ============================================================
+   LÍNEA DE TIEMPO DE LA SESIÓN
+   ============================================================ */
+
+.timeline{ display:grid; gap:0; border:2px solid var(--rule); margin: 26px 0; }
+.tl-row{
+  display:grid;
+  grid-template-columns: 96px 1fr;
+  border-top: 2px solid var(--rule-soft);
+}
+.tl-row:first-child{ border-top:0; }
+.tl-min{
+  font-family: var(--font-mono);
+  font-size: 12px;
+  font-weight:700;
+  padding: 14px;
+  background: var(--surface-alt);
+  border-right: 2px solid var(--rule-soft);
+  color: var(--accent-ink);
+  font-variant-numeric: tabular-nums;
+}
+.tl-body{ padding: 14px 18px; }
+.tl-body b{ display:block; font-family: var(--font-mono); font-size:12px; letter-spacing:.08em; text-transform:uppercase; }
+.tl-body span{ font-size:15px; color: var(--ink-soft); }
+
+/* ============================================================
+   BARRA SUPERIOR
+   ============================================================ */
+
+.topbar{
+  display:flex; flex-wrap:wrap; gap:12px; align-items:center;
+  font-family: var(--font-mono);
+  font-size: 11px;
+  letter-spacing:.12em;
+  text-transform: uppercase;
+  color: var(--muted);
+  padding: 14px 0 0;
+}
+.topbar .dot{ width:10px; height:10px; background: var(--accent); display:inline-block; }
+.topbar .sep{ margin-left:auto; }
+
+/* ============================================================
+   GLOSARIO
+   ============================================================ */
+
+.glos{ border:2px solid var(--rule); }
+.glos-row{
+  display:grid;
+  grid-template-columns: minmax(150px, 220px) minmax(0,1fr);
+  border-top: 2px solid var(--rule-soft);
+}
+.glos-row:first-child{ border-top:0; }
+.glos-k{
+  padding: 14px 16px;
+  font-family: var(--font-mono);
+  font-size: 13px;
+  font-weight: 700;
+  background: var(--surface);
+  border-right: 2px solid var(--rule-soft);
+  color: var(--ink);
+  word-break: break-word;
+}
+.glos-k em{ display:block; font-style:normal; font-weight:400; font-size:11px; color: var(--muted); margin-top:4px; letter-spacing:.03em; }
+.glos-v{ padding: 14px 18px; font-size: 15.5px; line-height:1.62; color: var(--ink-soft); }
+.glos-v p{ margin:0; max-width:none; }
+@media (max-width:700px){
+  .glos-row{ grid-template-columns: 1fr; }
+  .glos-k{ border-right:0; border-bottom:2px solid var(--rule-soft); }
+}
+
+/* ============================================================
+   PIE
+   ============================================================ */
+
+footer{
+  margin-top: 80px;
+  border-top: 3px solid var(--rule);
+  padding-top: 20px;
+  font-family: var(--font-mono);
+  font-size: 11.5px;
+  line-height: 1.7;
+  color: var(--muted);
+  letter-spacing: .04em;
+}
+
+@media (prefers-reduced-motion: reduce){
+  *{ animation: none !important; transition: none !important; }
+}
+
+/* ============================================================
+   SISTEMA DE ICONOGRAFÍA
+   Iconos monolineales de 2px, trazo recto y uniones en inglete,
+   coherentes con el tratamiento brutalista del documento.
+   Se aplican por máscara CSS para que hereden el color del tema.
+   ============================================================ */
+
+.ficha{ --icon: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%23000' stroke-width='2' stroke-linecap='square'%3E%3Cpath d='M9 4H4v16h5M15 4h5v16h-5M10.5 12h3'/%3E%3C/svg%3E"); }
+.ficha--profundidad{ --icon: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%23000' stroke-width='2' stroke-linecap='square'%3E%3Cpath d='M12 3 2 8l10 5 10-5-10-5zM2 14l10 5 10-5'/%3E%3C/svg%3E"); }
+.ficha--alerta{ --icon: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%23000' stroke-width='2' stroke-linecap='square'%3E%3Cpath d='M12 3 22 20H2zM12 10v4M12 16.5v1'/%3E%3C/svg%3E"); }
+.ficha--docente{ --icon: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%23000' stroke-width='2' stroke-linecap='square'%3E%3Cpath d='M3 4h18v12H3zM12 16v4M8 20h8'/%3E%3C/svg%3E"); }
+.ficha--pregunta{ --icon: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%23000' stroke-width='2' stroke-linecap='square'%3E%3Cpath d='M4 4h16v12H9l-5 4z'/%3E%3C/svg%3E"); }
+
+.ficha-tit{ align-items: center; }
+.ficha-tit::before{
+  content:"";
+  flex: 0 0 auto;
+  width: 17px; height: 17px;
+  background-color: currentColor;
+  -webkit-mask: var(--icon) center/contain no-repeat;
+  mask: var(--icon) center/contain no-repeat;
+}
+
+/* --- Iconos de sección --- */
+h2::before{
+  content:"";
+  display:inline-block;
+  vertical-align: -0.06em;
+  width: .78em; height: .78em;
+  margin-right: .44em;
+  background-color: var(--accent);
+  -webkit-mask: var(--icon, none) center/contain no-repeat;
+  mask: var(--icon, none) center/contain no-repeat;
+}
+#uso     { --icon: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%23000' stroke-width='2' stroke-linecap='square'%3E%3Cpath d='M4 4h7v16H4zM13 4h7v16h-7z'/%3E%3C/svg%3E"); }
+#mapa    { --icon: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%23000' stroke-width='2' stroke-linecap='square'%3E%3Cpath d='M3 3h7v7H3zM14 3h7v7h-7zM3 14h7v7H3zM14 14h7v7h-7z'/%3E%3C/svg%3E"); }
+#a1      { --icon: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%23000' stroke-width='2' stroke-linecap='square'%3E%3Cpath d='M2 12h8M10 12 20 6M20 6l-5 1M20 6l-1 5M10 12 20 18M20 18l-5-1M20 18l-1-5'/%3E%3C/svg%3E"); }
+#a2      { --icon: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%23000' stroke-width='2' stroke-linecap='square'%3E%3Cpath d='M12 3 3 7v5c0 5 4 8 9 9 5-1 9-4 9-9V7z'/%3E%3C/svg%3E"); }
+#a3      { --icon: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%23000' stroke-width='2' stroke-linecap='square'%3E%3Cpath d='M12 3a9 9 0 100 18 9 9 0 000-18zM12 7v5l4 2'/%3E%3C/svg%3E"); }
+#a4      { --icon: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%23000' stroke-width='2' stroke-linecap='square'%3E%3Cpath d='M4 4v6a4 4 0 004 4h12M16 10l4 4-4 4'/%3E%3C/svg%3E"); }
+#a5      { --icon: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%23000' stroke-width='2' stroke-linecap='square'%3E%3Cpath d='M3 8h5v8H3zM11 8h5v8h-5zM19 8h2v8h-2zM8 12h3M16 12h3'/%3E%3C/svg%3E"); }
+#a6      { --icon: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%23000' stroke-width='2' stroke-linecap='square'%3E%3Cpath d='M9 3h6v4H9zM2 17h6v4H2zM16 17h6v4h-6zM12 7v3M5 17v-3h14v3'/%3E%3C/svg%3E"); }
+#a7      { --icon: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%23000' stroke-width='2' stroke-linecap='square'%3E%3Cpath d='M12 2 22 12 12 22 2 12zM12 8v4M12 15.5v1'/%3E%3C/svg%3E"); }
+#b1      { --icon: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%23000' stroke-width='2' stroke-linecap='square'%3E%3Cpath d='M12 3a2 2 0 100 4 2 2 0 000-4zM5 17a2 2 0 100 4 2 2 0 000-4zM19 17a2 2 0 100 4 2 2 0 000-4zM12 7v3M11 11 6.5 15.5M13 11l4.5 4.5'/%3E%3C/svg%3E"); }
+#b2      { --icon: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%23000' stroke-width='2' stroke-linecap='square'%3E%3Cpath d='M3 6l6-3 6 3 6-3v15l-6 3-6-3-6 3zM9 3v15M15 6v15'/%3E%3C/svg%3E"); }
+#b3      { --icon: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%23000' stroke-width='2' stroke-linecap='square'%3E%3Cpath d='M3 3v18h18M7 17v-4M12 17V9M17 17v-7'/%3E%3C/svg%3E"); }
+#b4      { --icon: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%23000' stroke-width='2' stroke-linecap='square'%3E%3Cpath d='M3 20v-2a3 3 0 013-3h4a3 3 0 013 3v2M8 5a3 3 0 106 0 3 3 0 00-6 0M16 20v-2a3 3 0 00-1.5-2.6M15.5 5.3a3 3 0 010 5.4'/%3E%3C/svg%3E"); }
+#cierre  { --icon: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%23000' stroke-width='2' stroke-linecap='square'%3E%3Cpath d='M5 21V4h14l-3 4 3 4H5'/%3E%3C/svg%3E"); }
+#falsos  { --icon: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%23000' stroke-width='2' stroke-linecap='square'%3E%3Cpath d='M12 3a9 9 0 100 18 9 9 0 000-18zM8.5 8.5l7 7M15.5 8.5l-7 7'/%3E%3C/svg%3E"); }
+#glosario{ --icon: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%23000' stroke-width='2' stroke-linecap='square'%3E%3Cpath d='M3 6h2M8 6h13M3 12h2M8 12h13M3 18h2M8 18h13'/%3E%3C/svg%3E"); }
+#fuentes { --icon: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%23000' stroke-width='2' stroke-linecap='square'%3E%3Cpath d='M6 3h9l4 4v14H6zM15 3v4h4M9 12h7M9 16h7'/%3E%3C/svg%3E"); }
+
+/* --- Icono del marcador de bloque --- */
+.bloque::before{
+  content:"";
+  width: 15px; height: 15px;
+  background-color: var(--accent);
+  -webkit-mask: var(--icon) center/contain no-repeat;
+  mask: var(--icon) center/contain no-repeat;
+  flex: 0 0 auto;
+}
+.bloque--a{ --icon: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%23000' stroke-width='2' stroke-linecap='square'%3E%3Cpath d='M12 3a9 9 0 100 18 9 9 0 000-18zM12 8v1M12 12v4'/%3E%3C/svg%3E"); }
+.bloque--b{ --icon: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%23000' stroke-width='2' stroke-linecap='square'%3E%3Cpath d='M12 3 2 8l10 5 10-5-10-5zM2 14l10 5 10-5'/%3E%3C/svg%3E"); }
+.bloque--c{ --icon: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%23000' stroke-width='2' stroke-linecap='square'%3E%3Cpath d='M5 21V4h14l-3 4 3 4H5'/%3E%3C/svg%3E"); }
+
+/* --- Icono de la barra superior: eslabones --- */
+.topbar .dot{
+  width: 16px; height: 16px;
+  background-color: var(--accent);
+  -webkit-mask: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%23000' stroke-width='2' stroke-linecap='square'%3E%3Cpath d='M9 12h6M10 8H8a4 4 0 000 8h2M14 8h2a4 4 0 010 8h-2'/%3E%3C/svg%3E") center/contain no-repeat;
+  mask: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%23000' stroke-width='2' stroke-linecap='square'%3E%3Cpath d='M9 12h6M10 8H8a4 4 0 000 8h2M14 8h2a4 4 0 010 8h-2'/%3E%3C/svg%3E") center/contain no-repeat;
+}
+
+/* --- Icono en los pasos de la demostración --- */
+.tl-body b::before{
+  content:"";
+  display:inline-block;
+  width: 11px; height: 11px;
+  margin-right: 8px;
+  vertical-align: 0;
+  background-color: var(--accent);
+  -webkit-mask: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='%23000'%3E%3Cpath d='M4 4h16v16H4z'/%3E%3C/svg%3E") center/contain no-repeat;
+  mask: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='%23000'%3E%3Cpath d='M4 4h16v16H4z'/%3E%3C/svg%3E") center/contain no-repeat;
+}
+
+/* ============================================================
+   DIAGRAMAS
+   ============================================================ */
+
+figure{ margin: 30px 0; border: 2px solid var(--rule); background: var(--ground); }
+figure .fig-scroll{ overflow-x: auto; }
+figure svg{ display:block; width:100%; min-width: 560px; height:auto; }
+figcaption{
+  font-family: var(--font-mono);
+  font-size: 11px;
+  letter-spacing: .1em;
+  text-transform: uppercase;
+  color: var(--muted);
+  padding: 12px 16px;
+  border-top: 2px solid var(--rule-soft);
+  background: var(--surface);
+}
+
+.dgm-box   { fill: var(--surface); stroke: var(--ink); stroke-width: 2; }
+.dgm-box-a { fill: none; stroke: var(--accent); stroke-width: 2; }
+.dgm-box-v { fill: none; stroke: var(--violet); stroke-width: 2; }
+.dgm-fill  { fill: var(--ink); }
+.dgm-line  { stroke: var(--ink); stroke-width: 2; fill: none; }
+.dgm-line-a{ stroke: var(--accent); stroke-width: 2; fill: none; }
+.dgm-dash  { stroke: var(--muted); stroke-width: 2; fill: none; stroke-dasharray: 6 5; }
+.dgm-h     { font-family: var(--font-mono); font-size: 12.5px; font-weight: 700; letter-spacing: .1em; fill: var(--ink); }
+.dgm-t     { font-family: var(--font-mono); font-size: 12.5px; fill: var(--ink-soft); }
+.dgm-s     { font-family: var(--font-mono); font-size: 11px; letter-spacing: .06em; fill: var(--muted); }
+.dgm-a     { font-family: var(--font-mono); font-size: 11.5px; font-weight: 700; letter-spacing: .08em; fill: var(--accent-ink); }
+.dgm-inv   { fill: var(--ground); }
+
+/* ============================================================
+   GUION DE DEMOSTRACIÓN
+   ============================================================ */
+
+.dm{ margin-bottom: .75em; }
+.dm-l{
+  display: inline-block;
+  font-family: var(--font-mono);
+  font-size: 10px;
+  font-weight: 700;
+  letter-spacing: .13em;
+  text-transform: uppercase;
+  color: var(--accent-on);
+  background: var(--accent);
+  padding: 2px 7px;
+  margin-right: 9px;
+  vertical-align: .1em;
+}
+.dm-min{
+  font-family: var(--font-mono);
+  font-size: 10.5px;
+  font-weight: 400;
+  letter-spacing: .1em;
+  color: var(--muted);
+  text-transform: none;
+  margin-left: 10px;
+  white-space: nowrap;
+}
+ol.pasos h4{ display: block; }
+</style>
+
+<style>
+#uso     { --icon: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%23000' stroke-width='2' stroke-linecap='square'%3E%3Cpath d='M4 4h7v16H4zM13 4h7v16h-7z'/%3E%3C/svg%3E"); }
+#mapa    { --icon: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%23000' stroke-width='2' stroke-linecap='square'%3E%3Cpath d='M3 3h7v7H3zM14 3h7v7h-7zM3 14h7v7H3zM14 14h7v7h-7z'/%3E%3C/svg%3E"); }
+#a1      { --icon: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%23000' stroke-width='2' stroke-linecap='square'%3E%3Cpath d='M5 11h14v10H5zM8 11V7a4 4 0 018 0v4M12 15v3'/%3E%3C/svg%3E"); }
+#a2      { --icon: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%23000' stroke-width='2' stroke-linecap='square'%3E%3Cpath d='M14 7a4 4 0 11-4 4l-7 7v3h3l7-7'/%3E%3C/svg%3E"); }
+#a3      { --icon: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%23000' stroke-width='2' stroke-linecap='square'%3E%3Cpath d='M3 21c4-1 6-3 9-6l6-6-3-3-6 6c-3 3-5 5-6 9zM14 6l4 4M4 17l3 3'/%3E%3C/svg%3E"); }
+#a4      { --icon: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%23000' stroke-width='2' stroke-linecap='square'%3E%3Cpath d='M3 6h6v5H3zM15 13h6v5h-6zM9 8.5h6M15 8.5l-3-3M15 8.5l-3 3M9 15.5H3M3 15.5l3-3M3 15.5l3 3'/%3E%3C/svg%3E"); }
+#b1      { --icon: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%23000' stroke-width='2' stroke-linecap='square'%3E%3Cpath d='M4 4h16v6H4zM4 14h16v6H4z'/%3E%3C/svg%3E"); }
+#b2      { --icon: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%23000' stroke-width='2' stroke-linecap='square'%3E%3Cpath d='M3 8h5v8H3zM11 8h5v8h-5zM19 8h2v8h-2zM8 12h3M16 12h3'/%3E%3C/svg%3E"); }
+#b3      { --icon: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%23000' stroke-width='2' stroke-linecap='square'%3E%3Cpath d='M12 3a2 2 0 100 4 2 2 0 000-4zM5 17a2 2 0 100 4 2 2 0 000-4zM19 17a2 2 0 100 4 2 2 0 000-4zM12 7v3M11 11 6.5 15.5M13 11l4.5 4.5'/%3E%3C/svg%3E"); }
+#lab     { --icon: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%23000' stroke-width='2' stroke-linecap='square'%3E%3Cpath d='M9 3h6M10 3v6L4 20h16L14 9V3M7 15h10'/%3E%3C/svg%3E"); }
+#cierre  { --icon: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%23000' stroke-width='2' stroke-linecap='square'%3E%3Cpath d='M5 21V4h14l-3 4 3 4H5'/%3E%3C/svg%3E"); }
+#errores { --icon: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%23000' stroke-width='2' stroke-linecap='square'%3E%3Cpath d='M12 3a9 9 0 100 18 9 9 0 000-18zM8.5 8.5l7 7M15.5 8.5l-7 7'/%3E%3C/svg%3E"); }
+#glosario{ --icon: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%23000' stroke-width='2' stroke-linecap='square'%3E%3Cpath d='M3 6h2M8 6h13M3 12h2M8 12h13M3 18h2M8 18h13'/%3E%3C/svg%3E"); }
+#fuentes { --icon: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%23000' stroke-width='2' stroke-linecap='square'%3E%3Cpath d='M6 3h9l4 4v14H6zM15 3v4h4M9 12h7M9 16h7'/%3E%3C/svg%3E"); }
+.bloque--a{ --icon: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%23000' stroke-width='2' stroke-linecap='square'%3E%3Cpath d='M14 7a4 4 0 11-4 4l-7 7v3h3l7-7'/%3E%3C/svg%3E"); }
+.bloque--b{ --icon: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%23000' stroke-width='2' stroke-linecap='square'%3E%3Cpath d='M3 8h5v8H3zM11 8h5v8h-5zM19 8h2v8h-2zM8 12h3M16 12h3'/%3E%3C/svg%3E"); }
+.bloque--c{ --icon: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%23000' stroke-width='2' stroke-linecap='square'%3E%3Cpath d='M9 3h6M10 3v6L4 20h16L14 9V3M7 15h10'/%3E%3C/svg%3E"); }
+</style>
+
+<div class="wrap">
+
+<div class="topbar">
+  <span class="dot"></span>
+  <span>Universidad de San Buenaventura Medellín</span>
+  <span class="sep">Ingeniería de Sistemas · Blockchain y Web 3.0</span>
+</div>
+
+<header class="cover">
+  <div class="cover-top">
+    <div class="cover-num">03</div>
+    <div class="cover-head">
+      <p class="eyebrow">Unidad I · Fundamentos de sistemas distribuidos confiables</p>
+      <h1>Firmas digitales y anatomía de la cadena</h1>
+      <p class="eyebrow">Material autoexplicativo de sesión · v1.0</p>
+    </div>
+  </div>
+  <div class="cover-meta">
+    <div><b>Duración</b>180 minutos</div>
+    <div><b>Modalidad</b>Teórico-práctica</div>
+    <div><b>Prerrequisito</b>Laboratorio 01 entregado</div>
+    <div><b>Equipo</b>Python 3 o Node.js</div>
+    <div><b>Entregable</b>Mini-blockchain</div>
+  </div>
+</header>
+
+<section id="uso">
+<div class="grid">
+  <div class="rail"><b>Preliminar</b>Instrucciones de<br>lectura</div>
+  <div>
+    <h2>Cómo usar este documento</h2>
+    <p>Mismos dispositivos que las sesiones anteriores. Esta sesión cierra la Unidad I por el lado criptográfico: después de hoy, todas las piezas que la Sesión 1 mencionó sin demostrar quedan demostradas y programadas.</p>
+
+    <div class="ficha ficha--docente">
+      <p class="ficha-tit"><span>Qué entra y qué sale de esta sesión</span></p>
+      <p><strong>Entra</strong> la firma digital, que venía de la Sesión 2 —donde no cabía por la demostración de apertura—.</p>
+      <p><strong>Salen</strong> dos temas: el modelo UTXO frente al de cuentas pasa a la <strong>Sesión 5</strong>, donde se entiende mucho mejor por comparación directa con el modelo de cuentas de Ethereum; y las bifurcaciones, reorganizaciones y finalidad pasan a la <strong>Sesión 4</strong>, porque son consecuencia del mecanismo de consenso y no se pueden explicar antes de tenerlo.</p>
+    </div>
+
+    <div class="ficha ficha--alerta">
+      <p class="ficha-tit"><span>Requisito de entrada</span></p>
+      <p>El laboratorio de hoy <strong>reutiliza el código del Laboratorio 01</strong>: la función de hash y el árbol de Merkle. Quien no lo tenga funcionando arranca en desventaja. Se entrega una implementación de referencia al inicio del bloque C para quien la necesite, pero conviene llegar con la propia.</p>
+      <p>Además hay <strong>una dependencia nueva que instalar</strong>. Está en el archivo de requisitos del laboratorio; instalarla antes de clase ahorra diez minutos.</p>
+    </div>
+  </div>
+</div>
+</section>
+
+<section id="mapa">
+<div class="grid">
+  <div class="rail"><b>Mapa</b>Estructura de<br>los 180 minutos</div>
+  <div>
+    <h2>Mapa de la sesión</h2>
+    <div class="timeline">
+      <div class="tl-row"><div class="tl-min">00–10</div><div class="tl-body"><b>Apertura</b><span>Plenaria de la pregunta de la semana y revisión rápida del entregable de la Sesión 2.</span></div></div>
+      <div class="tl-row"><div class="tl-min">10–25</div><div class="tl-body"><b>A.1 · El problema de la autoría</b><span>Por qué un hash no basta, y por qué los dos intentos ingenuos fracasan.</span></div></div>
+      <div class="tl-row"><div class="tl-min">25–42</div><div class="tl-body"><b>A.2 · Criptografía asimétrica</b><span>La función de un solo sentido con trampa. La curva secp256k1 y el par de claves.</span></div></div>
+      <div class="tl-row"><div class="tl-min">42–58</div><div class="tl-body"><b>A.3 · ECDSA</b><span>Firmar y verificar. Qué prueba una firma y qué no prueba. El fallo que revela la clave.</span></div></div>
+      <div class="tl-row"><div class="tl-min">58–70</div><div class="tl-body"><b>A.4 · De clave pública a dirección</b><span>Keccak-256, los últimos 20 bytes y el checksum de EIP-55.</span></div></div>
+      <div class="tl-row"><div class="tl-min">70–78</div><div class="tl-body"><b>Pausa</b><span></span></div></div>
+      <div class="tl-row"><div class="tl-min">78–92</div><div class="tl-body"><b>B.1 · Anatomía del bloque</b><span>Cabecera y cuerpo, campo por campo. Dónde encaja la raíz de Merkle de la Sesión 2.</span></div></div>
+      <div class="tl-row"><div class="tl-min">92–105</div><div class="tl-body"><b>B.2 · Encadenamiento</b><span>El hash del padre y el efecto cascada, ahora con todas las piezas en la mano.</span></div></div>
+      <div class="tl-row"><div class="tl-min">105–118</div><div class="tl-body"><b>B.3 · La red P2P</b><span>Propagación, mempool y qué ocurre cuando dos nodos ven bloques distintos.</span></div></div>
+      <div class="tl-row"><div class="tl-min">118–170</div><div class="tl-body"><b>BLOQUE C · Laboratorio 02</b><span>Firmas, derivación de dirección y mini-blockchain con transacciones firmadas.</span></div></div>
+      <div class="tl-row"><div class="tl-min">170–180</div><div class="tl-body"><b>BLOQUE D · Cierre</b><span>Síntesis, entregable y puente hacia el consenso.</span></div></div>
+    </div>
+
+    <h4>Resultados de aprendizaje que esta sesión atiende</h4>
+    <div class="tabla-wrap">
+    <table>
+      <thead><tr><th>Código</th><th>Resultado de aprendizaje</th><th>Nivel</th><th>Dónde se evidencia</th></tr></thead>
+      <tbody>
+        <tr><td>RA1</td><td>Explicar los fundamentos criptográficos que sustentan la integridad de un registro distribuido.</td><td>Comprender</td><td><strong>Se completa aquí.</strong> Laboratorio 02 · Quiz 1 (S4)</td></tr>
+        <tr><td>RA4</td><td>Construir una suite de pruebas automatizadas.</td><td>Aplicar</td><td>Continúa. Se evalúa en S8.</td></tr>
+      </tbody>
+    </table>
+    </div>
+
+    <h4>Índice del documento</h4>
+    <nav class="toc">
+      <ol>
+        <li><a href="#a1"><span class="n">A.1</span><span class="t">El problema de la autoría</span><span class="m">15 min</span></a></li>
+        <li><a href="#a2"><span class="n">A.2</span><span class="t">Criptografía asimétrica</span><span class="m">17 min</span></a></li>
+        <li><a href="#a3"><span class="n">A.3</span><span class="t">ECDSA: firmar y verificar</span><span class="m">16 min</span></a></li>
+        <li><a href="#a4"><span class="n">A.4</span><span class="t">De clave pública a dirección</span><span class="m">12 min</span></a></li>
+        <li><a href="#b1"><span class="n">B.1</span><span class="t">Anatomía del bloque</span><span class="m">14 min</span></a></li>
+        <li><a href="#b2"><span class="n">B.2</span><span class="t">Encadenamiento e inmutabilidad</span><span class="m">13 min</span></a></li>
+        <li><a href="#b3"><span class="n">B.3</span><span class="t">La red P2P</span><span class="m">13 min</span></a></li>
+        <li><a href="#lab"><span class="n">C</span><span class="t">Laboratorio 02 · Mini-blockchain firmada</span><span class="m">52 min</span></a></li>
+        <li><a href="#cierre"><span class="n">D</span><span class="t">Cierre y trabajo autónomo</span><span class="m">10 min</span></a></li>
+        <li><a href="#errores"><span class="n">§</span><span class="t">Errores frecuentes del laboratorio</span><span class="m">—</span></a></li>
+        <li><a href="#glosario"><span class="n">§</span><span class="t">Glosario de la sesión</span><span class="m">—</span></a></li>
+        <li><a href="#fuentes"><span class="n">§</span><span class="t">Fuentes y lecturas</span><span class="m">—</span></a></li>
+      </ol>
+    </nav>
+  </div>
+</div>
+</section>
+
+<hr>
+
+<p class="bloque bloque--a"><span class="b-min">MIN 10 — 70</span> <span>Bloque A · Criptografía asimétrica</span> <span class="b-tipo">Exposición dialogada</span></p>
+
+<section id="a1">
+<div class="grid">
+  <div class="rail">
+    <b>A.1</b>
+    <span class="tick">min 10–25</span><br><br>
+    Concepto eje:<br>autenticidad<br><br>
+    Deuda de la S2:<br>se salda aquí
+  </div>
+  <div>
+    <h2>A.1 · El problema de la autoría</h2>
+
+    <p>La Sesión 2 resolvió media pregunta. Sabemos comprobar que un dato <strong>no cambió</strong>: se publica su hash y cualquiera verifica. Pero eso deja abierta la otra mitad, que es la que hace falta para que exista el dinero digital.</p>
+
+    <div class="ficha ficha--pregunta">
+      <p class="ficha-tit"><span>La pregunta de hoy</span></p>
+      <p>Un hash lo puede calcular cualquiera. ¿Cómo demuestro que <strong>fui yo</strong> quien escribió el dato, ante alguien que no me conoce y sin revelarle ningún secreto?</p>
+    </div>
+
+    <p>Antes de dar la respuesta conviene agotar los caminos que no funcionan, porque cada fracaso deja claro un requisito.</p>
+
+    <h3>Intento 1 · Firmar con una contraseña compartida</h3>
+
+    <p>Ana y Bruno acuerdan una contraseña secreta. Ana publica el mensaje junto a <code>hash(contraseña + mensaje)</code>. Bruno, que conoce la contraseña, recalcula y comprueba.</p>
+
+    <p><strong>Funciona</strong>, y de hecho es una construcción real: se llama código de autenticación de mensaje. Pero tiene dos fallas que lo descartan para nuestro problema.</p>
+
+    <ul class="plain">
+      <li><b>Falla 1 · No escala.</b> Hace falta un secreto distinto con cada persona con la que se quiera operar. Con <em>n</em> participantes hacen falta del orden de <em>n</em>² secretos, y hay que distribuirlos por un canal seguro que todavía no existe.</li>
+      <li><b>Falla 2 · El verificador puede suplantar.</b> Bruno conoce la contraseña, así que Bruno puede fabricar mensajes que parezcan de Ana. No puede demostrarle a un tercero que Ana los escribió, porque él mismo pudo haberlos escrito.</li>
+    </ul>
+
+    <h3>Intento 2 · Publicar la contraseña para que todos verifiquen</h3>
+
+    <p>Si el problema es que solo Bruno puede verificar, publiquemos la contraseña. Ahora cualquiera comprueba la firma.</p>
+
+    <p>Y ahora cualquiera <strong>la fabrica</strong>. El sistema no distingue a Ana de un impostor. Este intento se derrumba de inmediato, pero deja enunciado el requisito exacto:</p>
+
+    <div class="ficha ficha--termino">
+      <p class="ficha-tit"><span>Ficha de término 01</span> · El requisito de asimetría</p>
+      <p class="def">Se necesita un esquema en el que <b>verificar y firmar sean capacidades distintas</b>: que quien puede comprobar una firma NO pueda producirla.</p>
+      <p>Enunciado así parece contradictorio, y durante siglos la criptografía no supo construirlo: todos los sistemas anteriores a los años setenta eran <strong>simétricos</strong>, es decir, la misma clave cifraba y descifraba, firmaba y verificaba.</p>
+      <p>La solución llegó en 1976 con la criptografía de clave pública, y es una de las ideas más consecuentes del siglo XX. Sin ella no hay comercio electrónico, ni certificados de sitio web, ni blockchain.</p>
+    </div>
+
+    <h3>Las tres propiedades que se buscan</h3>
+
+    <div class="tabla-wrap">
+    <table>
+      <thead><tr><th>Propiedad</th><th>Qué significa</th></tr></thead>
+      <tbody>
+        <tr><td>Autenticidad</td><td>El mensaje proviene de quien controla una clave concreta. Nadie más pudo producir esa firma.</td></tr>
+        <tr><td>Integridad</td><td>El mensaje no fue alterado después de firmarse. Cambiar un byte invalida la firma.</td></tr>
+        <tr><td>No repudio</td><td>Quien firmó no puede negar después haberlo hecho, porque nadie más tenía la capacidad de hacerlo.</td></tr>
+      </tbody>
+    </table>
+    </div>
+
+    <div class="ficha ficha--alerta">
+      <p class="ficha-tit"><span>Alerta</span> · El no repudio es técnico, no jurídico</p>
+      <p>La firma demuestra que <strong>se usó una clave concreta</strong>. No demuestra que la persona a la que atribuimos esa clave estuviera consciente, de acuerdo, o siquiera presente.</p>
+      <p>Si a alguien le roban la clave privada, el sistema seguirá considerando auténtica cada firma que produzca el ladrón, y matemáticamente tendrá razón. Es exactamente lo que ocurre en cada robo de billetera: no falla la criptografía, falla la custodia.</p>
+      <p>La distinción importa para el proyecto: <strong>«el sistema garantiza que fue el usuario» es falso</strong>. Lo que garantiza es que fue quien tenía la clave.</p>
+    </div>
+  </div>
+</div>
+</section>
+
+<hr>
+
+<section id="a2">
+<div class="grid">
+  <div class="rail">
+    <b>A.2</b>
+    <span class="tick">min 25–42</span><br><br>
+    Concepto eje:<br>función de un solo<br>sentido con trampa<br><br>
+    Se implementa en:<br>laboratorio, parte 1
+  </div>
+  <div>
+    <h2>A.2 · Criptografía asimétrica</h2>
+
+    <p>La idea central es una función que sea <strong>fácil de calcular en un sentido y computacionalmente inviable en el contrario</strong>. Ya conocemos una: el hash de la Sesión 2. Pero al hash le falta algo — es <em>demasiado</em> irreversible, no deja ninguna puerta.</p>
+
+    <p>Lo que hace falta es una función de un solo sentido <strong>con trampa</strong>: irreversible para todo el mundo, salvo para quien conoce un dato secreto.</p>
+
+    <div class="ficha ficha--profundidad">
+      <p class="ficha-tit"><span>Analogía</span> · el candado abierto</p>
+      <p>Imagine que reparte por la ciudad candados abiertos con su nombre grabado, y se queda con la única llave. Cualquiera puede cerrar uno de sus candados —esa es la operación fácil y pública—, pero solo usted puede abrirlo.</p>
+      <p>La analogía sirve para el cifrado. Para la <em>firma</em> hay que darle la vuelta: usted usa la llave para producir algo que solo su llave puede producir, y cualquiera comprueba con el candado que efectivamente salió de allí. <strong>La operación privada produce; la pública verifica.</strong></p>
+    </div>
+
+    <h3>El problema difícil que se usa aquí</h3>
+
+    <p>Las firmas de Bitcoin y Ethereum se apoyan en el <strong>problema del logaritmo discreto sobre curvas elípticas</strong>. No hace falta la matemática completa; hace falta entender la asimetría.</p>
+
+    <p>Sobre una curva elíptica está definida una operación de «suma» de puntos. A partir de ella se define multiplicar un punto por un número entero: <code>k · G</code> significa sumar el punto <code>G</code> consigo mismo <code>k</code> veces. Y aquí está todo:</p>
+
+    <div class="tabla-wrap">
+    <table>
+      <thead><tr><th>Operación</th><th>Coste</th></tr></thead>
+      <tbody>
+        <tr><td>Dados <code>k</code> y <code>G</code>, calcular <code>P = k · G</code></td><td><strong>Barato.</strong> Hay atajos que lo resuelven en unos cientos de operaciones aunque <code>k</code> tenga 256 bits.</td></tr>
+        <tr><td>Dados <code>P</code> y <code>G</code>, recuperar <code>k</code></td><td><strong>Inviable.</strong> No se conoce ningún método sustancialmente mejor que probar valores. Con 256 bits, eso está fuera del alcance de cualquier cómputo concebible.</td></tr>
+      </tbody>
+    </table>
+    </div>
+
+    <p>Esa asimetría es toda la construcción. <code>k</code> es la clave privada; <code>P</code> es la clave pública.</p>
+
+    <div class="ficha ficha--termino">
+      <p class="ficha-tit"><span>Ficha de término 02</span> · secp256k1 y el par de claves</p>
+      <p class="def"><b>secp256k1</b>: la curva elíptica concreta que usan Bitcoin y Ethereum, definida por la ecuación <code>y² = x³ + 7</code> sobre un cuerpo finito. Trae fijado un punto generador <b>G</b> y un orden <b>n</b>, que es la cantidad de puntos distintos que se pueden alcanzar.</p>
+      <ul>
+        <li><strong>Clave privada</strong> — un número entero aleatorio entre 1 y n−1. En la práctica, 32 bytes. Nada más: no se «genera» con un algoritmo elaborado, se <em>sortea</em>.</li>
+        <li><strong>Clave pública</strong> — el punto <code>P = k · G</code>. Son dos coordenadas de 32 bytes cada una, es decir 64 bytes.</li>
+      </ul>
+      <p>El nombre no es decorativo: <em>sec</em> por el consorcio que la estandarizó, <em>p256</em> por los 256 bits, <em>k</em> por Koblitz —la familia de curvas a la que pertenece— y <em>1</em> por ser la primera de esa lista.</p>
+    </div>
+
+    <div class="ficha ficha--alerta">
+      <p class="ficha-tit"><span>Alerta</span> · La seguridad está en el sorteo, no en la curva</p>
+      <p>Si la clave privada es simplemente un número aleatorio, entonces <strong>toda la seguridad del sistema descansa en la calidad de ese azar</strong>. Una clave generada con un generador de números aleatorios predecible es tan insegura como una contraseña que sea «1234», por mucho que la curva sea impecable.</p>
+      <p>Esto no es teórico. Ha habido incidentes reales, con pérdidas grandes, causados exclusivamente por generadores de aleatoriedad defectuosos en dispositivos y bibliotecas — no por debilidades de la criptografía.</p>
+      <p><strong>Consecuencia para el laboratorio y para el proyecto:</strong> nunca se genera una clave con la función de azar de propósito general del lenguaje. Se usa la fuente criptográficamente segura del sistema, que es lo que hacen por defecto las bibliotecas serias.</p>
+    </div>
+
+    <div class="ficha ficha--profundidad">
+      <p class="ficha-tit"><span>Profundidad</span> · ¿Por qué 256 bits?</p>
+      <p>Por lo mismo que se vio en la Sesión 2 con la paradoja del cumpleaños: el mejor ataque conocido contra el logaritmo discreto elíptico cuesta del orden de la <strong>raíz cuadrada</strong> del orden del grupo. Con 256 bits, eso deja unos 128 bits de seguridad efectiva.</p>
+      <p>Ciento veintiocho bits es el nivel que la industria considera fuera de alcance por un margen enorme. Es el mismo criterio de diseño que fija la longitud de salida de SHA-256, y no es coincidencia: <strong>los sistemas se dimensionan para que ninguna pieza sea el eslabón débil.</strong></p>
+    </div>
+  </div>
+</div>
+</section>
+
+<hr>
+
+<section id="a3">
+<div class="grid">
+  <div class="rail">
+    <b>A.3</b>
+    <span class="tick">min 42–58</span><br><br>
+    Concepto eje:<br>firmar ≠ cifrar<br><br>
+    Alerta crítica:<br>el nonce de firma
+  </div>
+  <div>
+    <h2>A.3 · ECDSA: firmar y verificar</h2>
+
+    <p>Con el par de claves ya se puede construir la firma. El algoritmo se llama <span class="sigla">ECDSA<i>Elliptic Curve Digital Signature Algorithm · algoritmo de firma digital sobre curva elíptica</i></span> y su interfaz es de una simplicidad engañosa.</p>
+
+    <figure>
+      <div class="fig-scroll">
+      <svg viewBox="0 0 720 300" role="img" aria-label="Firmar usa la clave privada y produce una firma; verificar usa la clave pública y devuelve verdadero o falso. Son operaciones distintas con claves distintas.">
+        <text class="dgm-s" x="16" y="26">FIRMAR · operación privada</text>
+        <rect class="dgm-box-v" x="16" y="36" width="150" height="46"/>
+        <text class="dgm-t" x="91" y="64" text-anchor="middle">clave privada</text>
+        <rect class="dgm-box" x="16" y="92" width="150" height="46"/>
+        <text class="dgm-t" x="91" y="120" text-anchor="middle">mensaje</text>
+        <path class="dgm-line" d="M166 59h40V87M166 115h40"/>
+        <path class="dgm-line" d="M206 87h30"/>
+        <polygon class="dgm-fill" points="242,87 232,82 232,92"/>
+        <rect class="dgm-box" x="248" y="64" width="130" height="46"/>
+        <text class="dgm-h" x="313" y="92" text-anchor="middle">ECDSA</text>
+        <path class="dgm-line" d="M378 87h34"/>
+        <polygon class="dgm-fill" points="418,87 408,82 408,92"/>
+        <rect class="dgm-box-a" x="424" y="64" width="280" height="46"/>
+        <text class="dgm-t" x="564" y="92" text-anchor="middle">firma = (r, s) · 64 bytes</text>
+
+        <path class="dgm-dash" d="M16 158h688"/>
+
+        <text class="dgm-s" x="16" y="188">VERIFICAR · operación pública</text>
+        <rect class="dgm-box" x="16" y="198" width="150" height="40"/>
+        <text class="dgm-t" x="91" y="222" text-anchor="middle">clave pública</text>
+        <rect class="dgm-box" x="16" y="244" width="150" height="40"/>
+        <text class="dgm-t" x="91" y="268" text-anchor="middle">mensaje + firma</text>
+        <path class="dgm-line" d="M166 218h40V241M166 264h40"/>
+        <path class="dgm-line" d="M206 241h30"/>
+        <polygon class="dgm-fill" points="242,241 232,236 232,246"/>
+        <rect class="dgm-box" x="248" y="218" width="130" height="46"/>
+        <text class="dgm-h" x="313" y="246" text-anchor="middle">VERIFY</text>
+        <path class="dgm-line" d="M378 241h34"/>
+        <polygon class="dgm-fill" points="418,241 408,236 408,246"/>
+        <rect class="dgm-box" x="424" y="218" width="280" height="46"/>
+        <text class="dgm-t" x="564" y="246" text-anchor="middle">verdadero  /  falso</text>
+      </svg>
+      </div>
+      <figcaption>Fig. 1 — Quien verifica nunca toca la clave privada. Esa es toda la asimetría.</figcaption>
+    </figure>
+
+    <div class="ficha ficha--termino">
+      <p class="ficha-tit"><span>Ficha de término 03</span> · Firma digital</p>
+      <p class="def"><b>Firma digital</b>: par de números <code>(r, s)</code>, de 32 bytes cada uno, producido a partir del hash del mensaje y de la clave privada, tal que cualquiera puede comprobar con la clave pública que ese par solo pudo generarse con esa clave privada y para ese mensaje exacto.</p>
+      <p>Nótese que <strong>no se firma el mensaje: se firma su hash</strong>. Por eso las dos sesiones encajan. La Sesión 2 construyó la pieza que la firma necesita, y por eso una firma de 64 bytes puede comprometer un documento de cualquier tamaño.</p>
+    </div>
+
+    <h3>Un ejemplo real, con valores verificables</h3>
+
+    <p>Los valores siguientes se generaron con la implementación que se usará en el laboratorio. Son reproducibles: la clave privada se derivó de una frase fija.</p>
+
+    <pre><code><span class="c">// NUNCA usar esta clave con fondos reales: es material de clase.</span>
+clave privada  7fa03ea163b89b38dfe61c7070b0894b2b5b3eee14187af429a90d17ec19fd1e
+               <span class="c">32 bytes · el secreto absoluto</span>
+
+clave pública  edafd5fc366ffb944d605a7050235b9da3cb1ef99146520 …
+               … 78e62a570faa3a87f032638c917d0dea04a019a27c90b0327b7e0b7b9a981e39b9f0aaadac58bb61d
+               <span class="c">64 bytes · coordenada X seguida de coordenada Y</span>
+
+mensaje        <span class="k">"Transfiero 10 lotes a Bruno"</span>
+
+firma          c877ef924d6ed057e27af4e21bb6a36f8ce97565a85d5172535f8a541aec3d30 <span class="c">← r</span>
+               f21fe2d75a6cab0e93b080a2020b02cebfc8d5ed6990d90fcde7a432966fe023 <span class="c">← s</span>
+
+verificar(mensaje, firma, pública)                    → <span class="k">verdadero</span>
+verificar(<span class="k">"Transfiero 100 lotes a Bruno"</span>, firma, pública) → <span class="k">falso</span></code></pre>
+
+    <p>La última línea es la que hay que mirar. Cambiar un solo carácter del mensaje —un cero de más— invalida la firma. La firma no protege «el sentido» del mensaje: protege sus bytes exactos.</p>
+
+    <h3>Qué prueba una firma y qué no prueba</h3>
+
+    <div class="tabla-wrap">
+    <table>
+      <thead><tr><th>Sí prueba</th><th>No prueba</th></tr></thead>
+      <tbody>
+        <tr><td>Que quien produjo la firma tenía la clave privada correspondiente.</td><td>Quién es esa persona. La clave no lleva nombre, cédula ni nacionalidad.</td></tr>
+        <tr><td>Que el mensaje no cambió ni un byte después de firmarse.</td><td>Que el firmante entendiera lo que firmaba. Es la base de casi todos los robos a usuarios.</td></tr>
+        <tr><td>Que la firma corresponde a ese mensaje y no a otro.</td><td>Cuándo se firmó. No hay marca temporal dentro de la firma.</td></tr>
+        <tr><td>Que nadie sin la clave pudo fabricarla.</td><td>Que el firmante fuera el dueño legítimo de la clave, y no alguien que se la robó.</td></tr>
+      </tbody>
+    </table>
+    </div>
+
+    <div class="ficha ficha--alerta">
+      <p class="ficha-tit"><span>Alerta crítica</span> · el número que no se puede repetir</p>
+      <p>Cada firma ECDSA necesita internamente un número aleatorio de un solo uso. Si ese número <strong>se repite</strong> en dos firmas hechas con la misma clave, cualquiera que vea ambas firmas puede despejar la clave privada con álgebra elemental. No hace falta romper nada: basta con resolver un sistema de dos ecuaciones.</p>
+      <p>Esto ha ocurrido en producción más de una vez, con consecuencias graves: consolas de videojuegos cuya clave de firmado quedó expuesta, y billeteras móviles vaciadas porque el generador de aleatoriedad del sistema devolvía valores repetidos.</p>
+      <p>La defensa estándar hoy es <strong>derivar ese número de forma determinista a partir de la clave privada y del mensaje</strong>, en lugar de sortearlo. Así nunca se repite mientras el mensaje sea distinto, y no depende del azar del dispositivo. Las bibliotecas serias lo hacen por defecto.</p>
+      <p>La moraleja profesional, que vale para todo el curso: <strong>no se implementa criptografía a mano.</strong> Se usan bibliotecas establecidas y se comprueban contra vectores de prueba conocidos.</p>
+    </div>
+
+    <div class="ficha ficha--profundidad">
+      <p class="ficha-tit"><span>Profundidad</span> · El tercer valor de las firmas de Ethereum</p>
+      <p>En Ethereum las firmas se guardan como <code>(r, s, v)</code>. Ese <code>v</code> añadido —un solo byte— sirve para algo muy práctico: permite <strong>recuperar la clave pública a partir de la firma y del mensaje</strong>, en lugar de tener que enviarla aparte.</p>
+      <p>El ahorro es real: una transacción no necesita cargar 64 bytes de clave pública, porque el nodo la deduce. De ahí sale la función <code>ecrecover</code> que aparecerá en la Sesión 13, cuando se firmen mensajes fuera de la cadena.</p>
+    </div>
+  </div>
+</div>
+</section>
+
+<hr>
+
+<section id="a4">
+<div class="grid">
+  <div class="rail">
+    <b>A.4</b>
+    <span class="tick">min 58–70</span><br><br>
+    Se implementa en:<br>laboratorio, parte 2<br><br>
+    Deuda de la S2:<br>el checksum EIP-55
+  </div>
+  <div>
+    <h2>A.4 · De clave pública a dirección</h2>
+
+    <p>En la demostración de la Sesión 2 se vio una dirección de 42 caracteres y se dijo que sus mayúsculas «no son decorativas». Aquí se cierra esa deuda, y de paso queda demostrada la cadena completa que la Sesión 1 dibujó sin justificar.</p>
+
+    <figure>
+      <div class="fig-scroll">
+      <svg viewBox="0 0 720 330" role="img" aria-label="Cadena de derivación: clave privada de 32 bytes, clave pública de 64 bytes, keccak-256 de 32 bytes, y la dirección son sus últimos 20 bytes.">
+        <rect class="dgm-box-v" x="16" y="30" width="688" height="52"/>
+        <text class="dgm-s" x="32" y="52">1 · CLAVE PRIVADA · 32 bytes · sorteada al azar</text>
+        <text class="dgm-t" x="32" y="72">7fa03ea163b89b38dfe61c7070b0894b2b5b3eee14187af429a90d17ec19fd1e</text>
+
+        <path class="dgm-line" d="M60 82v22"/>
+        <polygon class="dgm-fill" points="60,110 55,100 65,100"/>
+        <text class="dgm-s" x="76" y="100">multiplicación sobre la curva · k · G</text>
+
+        <rect class="dgm-box" x="16" y="116" width="688" height="52"/>
+        <text class="dgm-s" x="32" y="138">2 · CLAVE PÚBLICA · 64 bytes · coordenada X seguida de Y</text>
+        <text class="dgm-t" x="32" y="158">edafd5fc366ffb944d605a7050235b9d … 9f0aaadac58bb61d</text>
+
+        <path class="dgm-line" d="M60 168v22"/>
+        <polygon class="dgm-fill" points="60,196 55,186 65,186"/>
+        <text class="dgm-s" x="76" y="186">keccak-256</text>
+
+        <rect class="dgm-box" x="16" y="202" width="688" height="52"/>
+        <text class="dgm-s" x="32" y="224">3 · HASH DE LA CLAVE PÚBLICA · 32 bytes</text>
+        <text class="dgm-t" x="32" y="244">3c966aba52e0ac36472673387</text>
+        <text class="dgm-t" x="232" y="244" style="fill:var(--accent-ink);font-weight:700">32805fbe544f6117b755512f2029e3e8b6aa135</text>
+
+        <path class="dgm-line-a" d="M232 254v18h472v-18"/>
+        <text class="dgm-a" x="468" y="290" text-anchor="middle">SE DESCARTAN LOS 12 PRIMEROS BYTES · SE CONSERVAN LOS ÚLTIMOS 20</text>
+
+        <rect class="dgm-box-a" x="16" y="270" width="200" height="46"/>
+        <text class="dgm-s" x="32" y="290">4 · DIRECCIÓN</text>
+        <text class="dgm-t" x="32" y="308">20 bytes · 40 hex</text>
+      </svg>
+      </div>
+      <figcaption>Fig. 2 — La dirección es, literalmente, la cola del hash de la clave pública. Valores reales y reproducibles.</figcaption>
+    </figure>
+
+    <p>Obsérvese el paso 3 con atención: los cuarenta caracteres resaltados en el hash <strong>son</strong> la dirección. No hay ninguna transformación adicional; se recorta y se le antepone <code>0x</code>.</p>
+
+    <h4>¿Por qué 20 bytes y no los 32 completos?</h4>
+    <p>Por costo. Cada byte que viaja en una transacción y se almacena en el estado de todos los nodos del mundo se paga. Veinte bytes dejan 160 bits, que frente a un ataque de colisión ofrecen unos 80 bits de resistencia — suficiente para el uso previsto, y un 37 % más barato que guardar 32. Es una decisión de ingeniería, no de criptografía.</p>
+
+    <div class="ficha ficha--termino">
+      <p class="ficha-tit"><span>Ficha de término 04</span> · El checksum de EIP-55</p>
+      <p class="def">Convención que codifica una suma de verificación <b>en el patrón de mayúsculas y minúsculas</b> de una dirección, sin cambiar su valor ni ocupar un solo byte adicional.</p>
+      <p>El procedimiento es ingenioso por lo económico. Se toma la dirección en minúsculas y se calcula su hash. Después, para cada carácter de la dirección: si es una letra <em>y</em> el dígito correspondiente del hash es 8 o mayor, esa letra se escribe en mayúscula; si no, se deja en minúscula. Los dígitos numéricos no cambian, porque no tienen mayúscula.</p>
+      <p>El resultado, para el ejemplo de la figura:</p>
+      <ul>
+        <li>Sin checksum — <code>0x732805fbe544f6117b755512f2029e3e8b6aa135</code></li>
+        <li>Con EIP-55 — <code>0x732805FbE544F6117B755512f2029e3e8B6aa135</code></li>
+      </ul>
+      <p>Son la <strong>misma dirección</strong>: para la red, las mayúsculas son irrelevantes. Pero un programa que valide el patrón detecta prácticamente cualquier error de transcripción antes de que los fondos se envíen a la nada. Y como se calcula solo, no ocupa espacio ni requiere que nadie lo mantenga.</p>
+    </div>
+
+    <div class="ficha ficha--alerta">
+      <p class="ficha-tit"><span>Alerta</span> · Una dirección no se puede validar «de verdad»</p>
+      <p>El checksum detecta errores de <em>transcripción</em>, no direcciones inexistentes. Cualquier cadena de 20 bytes es una dirección sintácticamente válida, exista o no alguien que tenga la clave correspondiente.</p>
+      <p>Esto tiene una consecuencia dura que conviene decir en voz alta: <strong>enviar fondos a una dirección bien formada pero sin dueño los destruye para siempre</strong>. No hay error, no hay rebote, no hay reclamación. La transacción es perfectamente válida y el dinero queda inalcanzable.</p>
+    </div>
+  </div>
+</div>
+</section>
+
+<hr>
+
+<p class="bloque bloque--b"><span class="b-min">MIN 78 — 118</span> <span>Bloque B · Anatomía de la cadena</span> <span class="b-tipo">Exposición dialogada</span></p>
+
+<section id="b1">
+<div class="grid">
+  <div class="rail">
+    <b>B.1</b>
+    <span class="tick">min 78–92</span><br><br>
+    Aquí encaja:<br>la raíz de Merkle<br>de la Sesión 2<br><br>
+    Se implementa en:<br>laboratorio, parte 3
+  </div>
+  <div>
+    <h2>B.1 · Anatomía del bloque</h2>
+
+    <p>Ya están todas las piezas: hash, árbol de Merkle y firma. Un bloque es simplemente la estructura que las ensambla.</p>
+
+    <p>Se divide en dos partes con propósitos distintos. La <strong>cabecera</strong> es pequeña, de tamaño fijo, y es lo único que se hashea para identificar el bloque. El <strong>cuerpo</strong> es la carga útil y puede pesar megabytes.</p>
+
+    <div class="tabla-wrap">
+    <table>
+      <thead><tr><th>Campo de la cabecera</th><th>Para qué sirve</th><th>De dónde sale</th></tr></thead>
+      <tbody>
+        <tr><td>Hash del bloque anterior</td><td>El eslabón. Es lo que convierte una lista de bloques en una cadena.</td><td>Se copia del bloque padre.</td></tr>
+        <tr><td>Raíz de Merkle</td><td>Compromete el contenido completo del cuerpo en 32 bytes.</td><td><strong>Sesión 2.</strong> Se calcula sobre las transacciones del bloque.</td></tr>
+        <tr><td>Marca temporal</td><td>Cuándo declara el proponente que se creó el bloque.</td><td>La pone quien propone, dentro de márgenes que la red valida.</td></tr>
+        <tr><td>Dificultad</td><td>Cuán costoso debía ser el trabajo para que el bloque sea válido.</td><td>La calcula el protocolo, no el minero. Sesión 4.</td></tr>
+        <tr><td>Nonce</td><td>El campo que se recorre por fuerza bruta hasta cumplir la dificultad.</td><td>Lo busca quien mina. Sesión 4.</td></tr>
+      </tbody>
+    </table>
+    </div>
+
+    <div class="ficha ficha--pregunta">
+      <p class="ficha-tit"><span>La observación que hay que hacer</span></p>
+      <p>El cuerpo puede pesar megabytes, pero <strong>solo se hashea la cabecera</strong>, que ocupa unas decenas de bytes. Y sin embargo el hash del bloque queda comprometido con todas y cada una de sus transacciones. ¿Por qué?</p>
+      <p>Porque la raíz de Merkle está <em>dentro</em> de la cabecera. Ese es el trabajo que hizo la Sesión 2: comprimir un conjunto arbitrariamente grande en 32 bytes verificables.</p>
+    </div>
+
+    <h4>Dónde entra la firma</h4>
+    <p>Las firmas no están en la cabecera: viajan <strong>dentro de cada transacción</strong>, en el cuerpo. Cada transacción lleva su propia firma, y cada nodo la verifica de forma independiente antes de aceptarla.</p>
+    <p>Conviene ver la división de responsabilidades, porque es limpia y se repite en todo el diseño:</p>
+    <ul class="plain">
+      <li><b>La firma</b> responde «¿esta transacción la autorizó quien controla esos fondos?».</li>
+      <li><b>El árbol de Merkle</b> responde «¿esta transacción está en este bloque?».</li>
+      <li><b>El encadenamiento por hash</b> responde «¿este bloque sigue siendo el que era?».</li>
+      <li><b>El consenso</b> —Sesión 4— responde «¿es esta la cadena en la que todos estamos de acuerdo?».</li>
+    </ul>
+  </div>
+</div>
+</section>
+
+<hr>
+
+<section id="b2">
+<div class="grid">
+  <div class="rail">
+    <b>B.2</b>
+    <span class="tick">min 92–105</span><br><br>
+    Ya se vio en:<br>Sesión 1, Fig. 2<br><br>
+    Ahora con:<br>todas las piezas
+  </div>
+  <div>
+    <h2>B.2 · Encadenamiento e inmutabilidad</h2>
+
+    <p>En la Sesión 1 esto se presentó como una afirmación acompañada de un dibujo. Con lo que hay ahora sobre la mesa, se puede sostener el argumento completo.</p>
+
+    <figure>
+      <div class="fig-scroll">
+      <svg viewBox="0 0 720 292" role="img" aria-label="Alterar una transacción del bloque 120 cambia la raíz de Merkle, lo que cambia el hash del bloque, lo que rompe el eslabón del bloque 121 y de todos los posteriores.">
+        <rect class="dgm-box-a" x="16" y="34" width="210" height="150"/>
+        <rect class="dgm-fill" x="16" y="34" width="210" height="24"/>
+        <text x="30" y="51" style="font-family:var(--font-mono);font-size:11px;font-weight:700;letter-spacing:.1em" fill="var(--ground)">BLOQUE 120</text>
+        <text class="dgm-s" x="30" y="78">hash anterior</text>
+        <text class="dgm-t" x="30" y="96">0x4c1e…9ab2</text>
+        <text class="dgm-s" x="30" y="122">raíz de Merkle</text>
+        <text class="dgm-a" x="30" y="140">0x8f3a… → 0xd4b7…</text>
+        <text class="dgm-s" x="30" y="166">hash del bloque</text>
+        <text class="dgm-a" x="150" y="166">CAMBIA</text>
+
+        <rect class="dgm-box" x="255" y="34" width="210" height="150"/>
+        <rect class="dgm-fill" x="255" y="34" width="210" height="24"/>
+        <text x="269" y="51" style="font-family:var(--font-mono);font-size:11px;font-weight:700;letter-spacing:.1em" fill="var(--ground)">BLOQUE 121</text>
+        <text class="dgm-s" x="269" y="78">hash anterior</text>
+        <text class="dgm-a" x="269" y="96">ya no coincide</text>
+        <text class="dgm-s" x="269" y="122">raíz de Merkle</text>
+        <text class="dgm-t" x="269" y="140">0x21b7…0f5e</text>
+        <text class="dgm-s" x="269" y="166">hash del bloque</text>
+        <text class="dgm-a" x="389" y="166">INVÁLIDO</text>
+
+        <rect class="dgm-box" x="494" y="34" width="210" height="150"/>
+        <rect class="dgm-fill" x="494" y="34" width="210" height="24"/>
+        <text x="508" y="51" style="font-family:var(--font-mono);font-size:11px;font-weight:700;letter-spacing:.1em" fill="var(--ground)">BLOQUE 122</text>
+        <text class="dgm-s" x="508" y="78">hash anterior</text>
+        <text class="dgm-a" x="508" y="96">ya no coincide</text>
+        <text class="dgm-s" x="508" y="122">raíz de Merkle</text>
+        <text class="dgm-t" x="508" y="140">0x9d02…7e13</text>
+        <text class="dgm-s" x="508" y="166">hash del bloque</text>
+        <text class="dgm-a" x="628" y="166">INVÁLIDO</text>
+
+        <path class="dgm-line" d="M226 100h29M465 100h29"/>
+        <polygon class="dgm-fill" points="255,100 245,95 245,105"/>
+        <polygon class="dgm-fill" points="494,100 484,95 484,105"/>
+
+        <path class="dgm-line-a" d="M16 206h688"/>
+        <text class="dgm-a" x="16" y="230">SE ALTERA UNA TRANSACCIÓN DEL BLOQUE 120</text>
+        <text class="dgm-s" x="16" y="250">cambia su raíz de Merkle · cambia el hash del bloque</text>
+        <text class="dgm-s" x="16" y="268">se rompe el eslabón de 121 · y el de 122 · y el de todos los posteriores</text>
+      </svg>
+      </div>
+      <figcaption>Fig. 3 — El efecto cascada, ahora con la pieza que lo explica: la raíz de Merkle en la cabecera.</figcaption>
+    </figure>
+
+    <p>La secuencia es mecánica y no requiere confiar en nadie: se altera una transacción → cambia la raíz de Merkle porque la raíz compromete el conjunto (Sesión 2) → cambia el hash de la cabecera porque la raíz está dentro → el bloque siguiente ya no apunta a un hash que exista → y así hasta el final de la cadena.</p>
+
+    <div class="ficha ficha--termino">
+      <p class="ficha-tit"><span>Ficha de término 05</span> · Inmutabilidad, con precisión</p>
+      <p class="def">Propiedad por la cual alterar un registro ya escrito resulta <b>económicamente inviable</b>, no físicamente imposible.</p>
+      <p>Nada impide reescribir la historia desde el punto de vista matemático. Lo que lo impide es que habría que <strong>rehacer el trabajo de todos los bloques posteriores más rápido de lo que el resto de la red produce bloques nuevos</strong> — y eso es lo que cuesta dinero. El mecanismo concreto es el tema de la Sesión 4.</p>
+      <p>De ahí sale la práctica de esperar <strong>confirmaciones</strong>: cada bloque añadido encima multiplica el costo de revertir. Un bloque recién incluido es barato de deshacer; con seis encima, deja de serlo.</p>
+    </div>
+
+    <div class="ficha ficha--profundidad">
+      <p class="ficha-tit"><span>Profundidad</span> · Lo que el encadenamiento NO resuelve</p>
+      <p>El encadenamiento garantiza que <em>una</em> cadena dada es internamente coherente. No dice nada sobre cuál de dos cadenas coherentes es la buena.</p>
+      <p>Un atacante puede construir su propia cadena, perfectamente encadenada, con las transacciones que le convengan. Todas sus firmas serán válidas y todos sus hashes cuadrarán. El encadenamiento no lo detecta, porque no hay nada que detectar: esa cadena es válida.</p>
+      <p>Lo que falta es un criterio para que toda la red elija la misma. Ese criterio es el consenso, y es exactamente el problema que quedó planteado en la Sesión 1 con el doble gasto. <strong>Se cierra en la Sesión 4.</strong></p>
+    </div>
+  </div>
+</div>
+</section>
+
+<hr>
+
+<section id="b3">
+<div class="grid">
+  <div class="rail">
+    <b>B.3</b>
+    <span class="tick">min 105–118</span><br><br>
+    Retoma:<br>B.1 de la Sesión 1<br><br>
+    Deja planteado:<br>el conflicto de la S4
+  </div>
+  <div>
+    <h2>B.3 · La red P2P</h2>
+
+    <p>Hasta aquí todo ha sido estructura de datos. Falta la parte de sistemas distribuidos: cómo llega una transacción desde la máquina de quien la firma hasta las miles de copias del libro repartidas por el mundo.</p>
+
+    <h3>Propagación por rumor</h3>
+
+    <p>No hay servidor ni directorio central. Cada nodo mantiene conexiones con un puñado de vecinos y aplica una regla simple: <strong>cuando recibo algo válido que no conocía, lo valido y se lo paso a mis vecinos</strong>.</p>
+
+    <p>Esa regla tan sencilla basta para que un mensaje alcance a toda la red en segundos, y tiene dos propiedades valiosas: no hay ningún punto cuya caída interrumpa la difusión, y no hace falta que nadie conozca la topología completa.</p>
+
+    <div class="ficha ficha--termino">
+      <p class="ficha-tit"><span>Ficha de término 06</span> · Mempool</p>
+      <p class="def"><b>Mempool</b> (de <i>memory pool</i>): conjunto de transacciones que un nodo ha recibido y considerado válidas, pero que todavía no están incluidas en ningún bloque.</p>
+      <p>Es la sala de espera. Cuando en la demostración de la Sesión 2 la transacción apareció como «pendiente», estaba exactamente aquí.</p>
+      <p>Tres cosas que conviene retener y que sorprenden:</p>
+      <ul>
+        <li><strong>Cada nodo tiene su propio mempool</strong>, y no son idénticos. Dependen de qué le llegó a cada uno y en qué orden.</li>
+        <li><strong>Es público.</strong> Cualquiera puede observar las transacciones pendientes antes de que se ejecuten. De ahí sale el problema de reordenamiento que se mencionó en la Sesión 1 y que se trata en la Sesión 9.</li>
+        <li><strong>Estar en el mempool no garantiza nada.</strong> Una transacción puede quedarse ahí indefinidamente si nadie tiene incentivo para incluirla.</li>
+      </ul>
+    </div>
+
+    <h3>Qué valida cada nodo antes de propagar</h3>
+
+    <p>Un nodo completo no reenvía lo que recibe sin mirarlo. Comprueba, por su cuenta y sin preguntarle a nadie:</p>
+
+    <ul class="plain">
+      <li><b>La firma</b> — que la transacción esté autorizada por quien controla los fondos. Es lo que se implementa hoy.</li>
+      <li><b>Los saldos</b> — que quien gasta tenga con qué.</li>
+      <li><b>La no repetición</b> — que no sea una transacción ya vista, reenviada por un atacante. Para eso sirve el contador por cuenta que en la Sesión 2 apareció en el explorador con el nombre de <em>nonce</em>.</li>
+      <li><b>Las reglas del bloque</b> — si lo que recibe es un bloque: que su hash cumpla la dificultad, que la raíz de Merkle corresponda a las transacciones que trae, y que apunte a un padre conocido.</li>
+    </ul>
+
+    <p>Aquí se ve por qué en la Sesión 1 se dijo que los nodos completos son el contrapeso real del sistema. <strong>Su poder es negarse.</strong> Un bloque inválido, venga de quien venga y con cuanto poder de cómputo se haya producido, simplemente no se propaga.</p>
+
+    <div class="ficha ficha--pregunta">
+      <p class="ficha-tit"><span>El conflicto que queda abierto</span></p>
+      <p>Dos nodos producen un bloque válido casi al mismo tiempo, cada uno apuntando al mismo padre. Ambos son correctos. Ambos se propagan. Media red ve uno y media red ve el otro.</p>
+      <p>Todo lo que hemos construido hasta hoy —hash, Merkle, firmas, encadenamiento— <strong>no resuelve esto</strong>, porque no hay nada roto que detectar. Es el doble gasto de la Sesión 1, reaparecido con otro disfraz.</p>
+      <p>La Sesión 4 responde.</p>
+    </div>
+  </div>
+</div>
+</section>
+
+<hr>
+
+<p class="bloque bloque--c"><span class="b-min">MIN 118 — 170</span> <span>Bloque C · Laboratorio 02</span> <span class="b-tipo">En máquina, en parejas · con entregable</span></p>
+
+<section id="lab">
+<div class="grid">
+  <div class="rail">
+    <b>LAB 02</b>
+    <span class="tick">52 min</span><br><br>
+    Entregable:<br>mini-blockchain<br>funcional<br><br>
+    Reutiliza:<br>el Laboratorio 01
+  </div>
+  <div>
+    <h2>Laboratorio 02 · Mini-blockchain firmada</h2>
+
+    <p><strong>Objetivo.</strong> Construir, en unas doscientas líneas, un sistema que reúne todo lo visto en la Unidad I: transacciones firmadas, agrupadas en bloques, comprometidas por un árbol de Merkle y encadenadas por hash. Y después romperlo, para ver la cascada con los propios ojos.</p>
+
+    <div class="ficha ficha--alerta">
+      <p class="ficha-tit"><span>Antes de empezar</span> · dos requisitos</p>
+      <p><strong>Uno.</strong> Hay una dependencia nueva que instalar, indicada en el archivo de requisitos. Debería estar hecho antes de clase.</p>
+      <p><strong>Dos.</strong> Este laboratorio importa la función de hash y el árbol de Merkle del Laboratorio 01. Quien no lo tenga funcionando puede usar la implementación de referencia que se entrega, pero <strong>pierde la oportunidad de comprobar que su propio código encaja</strong>, que es media gracia del ejercicio.</p>
+    </div>
+
+    <h3>Parte 1 · Claves y firmas</h3>
+    <p class="eyebrow" style="margin-bottom:14px">≈ 15 minutos</p>
+    <ol class="pasos">
+      <li>
+        <h4>Generar un par de claves</h4>
+        <p>Implementar <code>generar_par()</code> usando la fuente de aleatoriedad segura de la biblioteca. Observar los tamaños: 32 bytes la privada, 64 la pública.</p>
+      </li>
+      <li>
+        <h4>Firmar y verificar</h4>
+        <p>Implementar <code>firmar(privada, mensaje)</code> y <code>verificar(publica, mensaje, firma)</code>. Comprobar que una firma válida verifica.</p>
+      </li>
+      <li>
+        <h4>Romperla de tres maneras</h4>
+        <p>Comprobar que la verificación devuelve falso cuando se altera el mensaje, cuando se altera un byte de la firma, y cuando se usa la clave pública de otro par. <em>Las tres deben fallar.</em> Una función que solo acepta lo correcto está a medio escribir.</p>
+      </li>
+    </ol>
+
+    <h3>Parte 2 · Dirección y checksum</h3>
+    <p class="eyebrow" style="margin-bottom:14px">≈ 12 minutos</p>
+    <ol class="pasos">
+      <li>
+        <h4>Derivar la dirección</h4>
+        <p>Implementar <code>direccion_desde_publica(publica)</code>: calcular keccak-256 de los 64 bytes de la clave pública y quedarse con los <strong>últimos 20</strong>. Contrastar con el valor de referencia que trae el archivo de pruebas.</p>
+      </li>
+      <li>
+        <h4>Aplicar EIP-55</h4>
+        <p>Implementar <code>a_eip55(direccion_hex)</code>: hashear la dirección en minúsculas y poner en mayúscula cada letra cuyo dígito correspondiente del hash sea 8 o mayor.</p>
+      </li>
+      <li>
+        <h4>Detectar un error de transcripción</h4>
+        <p>Implementar <code>eip55_valido(direccion)</code> y comprobar que rechaza una dirección a la que se le cambió una sola letra de caja.</p>
+      </li>
+    </ol>
+
+    <h3>Parte 3 · La mini-blockchain</h3>
+    <p class="eyebrow" style="margin-bottom:14px">≈ 25 minutos</p>
+    <ol class="pasos">
+      <li>
+        <h4>Transacciones firmadas</h4>
+        <p>Una transacción tiene origen, destino, monto, contador y firma. Implementar su serialización determinista —<strong>siempre los mismos campos en el mismo orden</strong>— y su firma sobre esa serialización.</p>
+        <p><em>Por qué importa:</em> si dos nodos serializan distinto, calculan hashes distintos y la firma no verifica. Es el mismo problema de convenciones del Laboratorio 01.</p>
+      </li>
+      <li>
+        <h4>El bloque</h4>
+        <p>Implementar la cabecera con el hash del padre, la raíz de Merkle de sus transacciones —<strong>reutilizando el Laboratorio 01</strong>—, la marca temporal y el nonce. El hash del bloque se calcula solo sobre la cabecera.</p>
+      </li>
+      <li>
+        <h4>Validación de la cadena</h4>
+        <p>Implementar <code>cadena_valida(cadena)</code>, que comprueba para cada bloque: que su hash del padre coincida con el hash real del bloque anterior, que su raíz de Merkle corresponda a sus transacciones, y que <strong>todas las firmas verifiquen</strong>.</p>
+      </li>
+      <li>
+        <h4>Romper la cadena</h4>
+        <p>Alterar el monto de una transacción de un bloque intermedio y ejecutar la validación. Observar <em>qué</em> falla exactamente y <em>dónde</em>: primero la firma de esa transacción, después la raíz de Merkle de su bloque, y después el eslabón de todos los posteriores.</p>
+        <p><strong>Esta es la comprobación central del laboratorio</strong> y el cierre de la Unidad I: la Fig. 3 de este documento, ejecutándose.</p>
+      </li>
+    </ol>
+
+    <h4>Entregable</h4>
+    <ul class="plain">
+      <li><b>Qué se entrega</b> — Repositorio Git con el código y la suite de pruebas pasando.</li>
+      <li><b>Documento anexo</b> — Media página describiendo la salida del paso 4 de la parte 3: qué comprobación falló primero y por qué en ese orden.</li>
+      <li><b>Condición de aceptación</b> — Las pruebas entregadas deben pasar sin modificarlas.</li>
+      <li><b>Plazo</b> — Antes del inicio de la Sesión 4.</li>
+      <li><b>Trabajo autónomo</b> — Implementar la propagación entre dos instancias locales y resolver el conflicto quedándose con la cadena más larga. Es el anticipo de la Sesión 4.</li>
+    </ul>
+  </div>
+</div>
+</section>
+
+<hr>
+
+<p class="bloque bloque--c"><span class="b-min">MIN 170 — 180</span> <span>Bloque D · Cierre</span> <span class="b-tipo">Plenaria</span></p>
+
+<section id="cierre">
+<div class="grid">
+  <div class="rail"><b>Cierre</b><span class="tick">10 min</span><br><br>Prepara:<br>Sesión 4 ·<br>Consenso</div>
+  <div>
+    <h2>Cierre y trabajo autónomo</h2>
+
+    <h3>Lo que hay que llevarse de esta sesión</h3>
+    <ul class="plain">
+      <li><b>Uno.</b> El requisito era <strong>asimetría</strong>: que quien puede verificar no pueda firmar. Los esquemas de clave compartida fracasan por eso, no por debilidad criptográfica.</li>
+      <li><b>Dos.</b> La clave privada es <strong>un número sorteado al azar</strong>. Toda la seguridad descansa en la calidad de ese sorteo, no en la elegancia de la curva.</li>
+      <li><b>Tres.</b> Una firma prueba <strong>que se usó una clave</strong>. No prueba identidad, ni intención, ni momento, ni que el firmante entendiera lo que firmaba.</li>
+      <li><b>Cuatro.</b> La dirección es literalmente <strong>la cola del hash de la clave pública</strong>, y su patrón de mayúsculas es una suma de verificación gratuita.</li>
+      <li><b>Cinco.</b> El bloque ensambla las tres piezas: firmas en el cuerpo, raíz de Merkle en la cabecera, hash del padre como eslabón. Cada una responde una pregunta distinta.</li>
+      <li><b>Seis.</b> Nada de lo construido hasta hoy resuelve <strong>cuál de dos cadenas válidas es la buena</strong>. Ese hueco tiene nombre y fecha: Sesión 4.</li>
+    </ul>
+
+    <h3>Trabajo autónomo para la Sesión 4</h3>
+    <ol>
+      <li><strong>Entregable del laboratorio</strong> — repositorio con las pruebas pasando, antes del inicio de la Sesión 4.</li>
+      <li><strong>Extensión</strong> — propagación entre dos instancias y resolución del conflicto por longitud de cadena.</li>
+      <li><strong>Preparación</strong> — <span class="sigla">S4<i>Sesión 4</i></span> cierra la Unidad I y trae el <strong>Quiz 1</strong>, que evalúa todo lo visto desde la Sesión 1. Repasar los glosarios acumulados.</li>
+      <li><strong>Pregunta de la semana</strong> — se piensa, no se entrega: <em>si un atacante construye su propia cadena, perfectamente encadenada y con todas las firmas válidas, ¿qué impide que la red la acepte? Proponga un criterio y busque cómo se lo saltaría usted mismo.</em></li>
+    </ol>
+
+    <div class="ficha ficha--profundidad">
+      <p class="ficha-tit"><span>Puente hacia la Sesión 4</span></p>
+      <p>Con la Sesión 3 termina la parte criptográfica del curso. Todo lo que la Sesión 1 afirmó sin demostrar está ahora demostrado y, sobre todo, <strong>programado por cada estudiante</strong>: el hash, el árbol de Merkle, la firma, la derivación de la dirección y el encadenamiento.</p>
+      <p>Y queda un hueco perfectamente delimitado. Sabemos construir una cadena válida; no sabemos decidir cuál de varias cadenas válidas es <em>la</em> cadena. La Sesión 4 lo resuelve con el problema de los generales bizantinos, la prueba de trabajo, la prueba de participación y el trilema — y cierra la unidad con el Quiz 1.</p>
+    </div>
+  </div>
+</div>
+</section>
+
+<hr>
+
+<section id="errores">
+<div class="grid">
+  <div class="rail"><b>Anexo I</b>Depuración<br>del laboratorio</div>
+  <div>
+    <h2>Errores frecuentes del laboratorio</h2>
+    <p>Conviene proyectarlos antes de soltar el bloque C.</p>
+    <div class="tabla-wrap">
+    <table>
+      <thead><tr><th>Síntoma</th><th>Causa y solución</th></tr></thead>
+      <tbody>
+        <tr><td>La firma verifica en una máquina y no en otra</td><td>Serialización no determinista de la transacción: campos en distinto orden, o un diccionario sin orden fijo. Fija el orden de los campos y hashea bytes, no la representación de un objeto.</td></tr>
+        <tr><td>La dirección no coincide con la de referencia</td><td>Casi siempre se está hasheando la clave pública <strong>con el prefijo</strong> de formato. Hay que hashear los 64 bytes de las coordenadas, sin byte inicial.</td></tr>
+        <tr><td>Se usó SHA-3 en lugar de Keccak</td><td>La trampa de la Sesión 2. Comprueba contra el vector conocido: <code>keccak256("")</code> empieza por <code>c5d2460186f7233c</code>.</td></tr>
+        <tr><td>EIP-55 devuelve todo en minúsculas</td><td>Se está comparando el carácter del hash como texto en vez de como dígito hexadecimal. Hay que convertirlo a entero y compararlo con 8.</td></tr>
+        <tr><td>La cadena valida aunque se alteró un bloque</td><td>La validación no está recalculando: está leyendo el hash guardado en el bloque en lugar de volver a calcularlo desde la cabecera. Es el error conceptual más grave de este laboratorio.</td></tr>
+        <tr><td>Todas las firmas fallan tras cambiar un campo</td><td>Correcto. Eso es lo que debe pasar: es el resultado esperado del paso 4 de la parte 3, no un fallo.</td></tr>
+      </tbody>
+    </table>
+    </div>
+  </div>
+</div>
+</section>
+
+<hr>
+
+<section id="glosario">
+<div class="grid">
+  <div class="rail"><b>Anexo II</b>Términos<br>nuevos</div>
+  <div>
+    <h2>Glosario de la sesión</h2>
+    <p>Solo los términos que introduce esta sesión. Los de las sesiones 1 y 2 siguen siendo exigibles.</p>
+    <div class="glos">
+      <div class="glos-row"><div class="glos-k">Autenticidad</div><div class="glos-v"><p>Garantía de que un mensaje proviene de quien controla una clave concreta. Junto con la integridad y el no repudio, es lo que aporta una firma digital.</p></div></div>
+      <div class="glos-row"><div class="glos-k">Cabecera de bloque<em>block header</em></div><div class="glos-v"><p>Parte pequeña y de tamaño fijo del bloque que contiene el hash del padre, la raíz de Merkle, la marca temporal, la dificultad y el nonce. Es lo único que se hashea para identificar el bloque.</p></div></div>
+      <div class="glos-row"><div class="glos-k">Clave privada</div><div class="glos-v"><p>Número entero de 32 bytes sorteado al azar. Es el secreto absoluto: quien lo tiene controla los fondos. No se deriva de nada ni se puede recuperar si se pierde.</p></div></div>
+      <div class="glos-row"><div class="glos-k">Clave pública</div><div class="glos-v"><p>Punto de la curva obtenido multiplicando el generador por la clave privada. Son 64 bytes —dos coordenadas de 32—. Publicarla no compromete nada.</p></div></div>
+      <div class="glos-row"><div class="glos-k">ECDSA<em>Elliptic Curve Digital Signature Algorithm</em></div><div class="glos-v"><p>Algoritmo de firma digital sobre curva elíptica. Produce un par (r, s) de 64 bytes a partir del hash del mensaje y la clave privada.</p></div></div>
+      <div class="glos-row"><div class="glos-k">EIP-55</div><div class="glos-v"><p>Convención que codifica una suma de verificación en el patrón de mayúsculas y minúsculas de una dirección de Ethereum, sin ocupar espacio adicional. Detecta errores de transcripción.</p></div></div>
+      <div class="glos-row"><div class="glos-k">Logaritmo discreto elíptico</div><div class="glos-v"><p>Problema de recuperar el escalar k dados el punto P = k·G y el generador G. Calcular P es barato; recuperar k es inviable. Esa asimetría sostiene toda la criptografía de clave pública del curso.</p></div></div>
+      <div class="glos-row"><div class="glos-k">Mempool<em>memory pool</em></div><div class="glos-v"><p>Conjunto de transacciones que un nodo considera válidas pero que aún no están en ningún bloque. Es público, distinto en cada nodo, y estar en él no garantiza la inclusión.</p></div></div>
+      <div class="glos-row"><div class="glos-k">No repudio</div><div class="glos-v"><p>Imposibilidad de negar haber firmado, dado que nadie más podía producir esa firma. Es una propiedad técnica sobre la clave, no una prueba jurídica sobre la persona.</p></div></div>
+      <div class="glos-row"><div class="glos-k">Propagación por rumor<em>gossip</em></div><div class="glos-v"><p>Mecanismo de difusión en el que cada nodo reenvía a sus vecinos lo que recibe y valida. No requiere servidor ni conocer la topología completa.</p></div></div>
+      <div class="glos-row"><div class="glos-k">secp256k1</div><div class="glos-v"><p>Curva elíptica concreta que usan Bitcoin y Ethereum, definida por y² = x³ + 7 sobre un cuerpo finito, con un punto generador y un orden fijados por el estándar.</p></div></div>
+      <div class="glos-row"><div class="glos-k">Serialización determinista</div><div class="glos-v"><p>Representación en bytes de una estructura que siempre produce exactamente la misma salida para los mismos datos. Es condición necesaria para que dos nodos calculen el mismo hash y la firma verifique.</p></div></div>
+    </div>
+  </div>
+</div>
+</section>
+
+<hr>
+
+<section id="fuentes">
+<div class="grid">
+  <div class="rail"><b>Anexo III</b>Fuentes</div>
+  <div>
+    <h2>Fuentes y lecturas</h2>
+    <h4>Fuentes primarias</h4>
+    <ul>
+      <li>Diffie, W. y Hellman, M. (1976). <em>New Directions in Cryptography.</em> El artículo que introduce la criptografía de clave pública.</li>
+      <li>Estándar SEC 2, <em>Recommended Elliptic Curve Domain Parameters</em> — define secp256k1.</li>
+      <li>RFC 6979, <em>Deterministic Usage of DSA and ECDSA</em> — la defensa contra la repetición del número de un solo uso.</li>
+      <li>EIP-55, <em>Mixed-case checksum address encoding</em>.</li>
+    </ul>
+    <h4>Ampliación recomendada</h4>
+    <ul>
+      <li>Antonopoulos, A. <em>Mastering Bitcoin.</em> Capítulo de claves y direcciones. Libre acceso.</li>
+      <li>Antonopoulos, A. y Wood, G. <em>Mastering Ethereum.</em> Capítulo de criptografía. Libre acceso.</li>
+      <li>Narayanan, A. et al. <em>Bitcoin and Cryptocurrency Technologies.</em> Capítulo 1, sección de firmas digitales.</li>
+    </ul>
+    <div class="ficha ficha--docente">
+      <p class="ficha-tit"><span>Nota de vigencia</span></p>
+      <p>Las fuentes de esta sesión son estándares estables. Lo que sí conviene verificar antes de dictar es el nombre y la interfaz exactos de las funciones en la versión de la biblioteca que se use, y comprobar el vector conocido de keccak-256 al arrancar el laboratorio.</p>
+    </div>
+  </div>
+</div>
+</section>
+
+<footer>
+  <p>Universidad de San Buenaventura Medellín · Facultad de Ingeniería<br>
+  Blockchain y Web 3.0 · Unidad I · Sesión 03 de 17 · Material autoexplicativo de sesión, versión 1.0<br>
+  Paleta derivada de la identidad visual institucional de usbmed.edu.co</p>
+</footer>
+
+</div>

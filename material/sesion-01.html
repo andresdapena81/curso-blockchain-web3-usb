@@ -1,0 +1,1924 @@
+<title>Sesión 01 · ¿Qué problema resuelve realmente blockchain?</title>
+
+<style>
+/* ============================================================
+   SISTEMA DE TOKENS
+   Paleta derivada de las variables CSS oficiales de usbmed.edu.co
+   ============================================================ */
+
+:root{
+  /* --- Marca institucional --- */
+  --usb-naranja:    #F07F06;   /* --color-primary   */
+  --usb-naranja-2:  #F86F03;   /* --color-secondary */
+  --usb-ambar:      #FFA41B;   /* --color-tertiary  */
+  --usb-violeta:    #7152E9;   /* --color-tertiary-2 */
+  --usb-ocre:       #A35604;   /* --color-dark      */
+  --usb-gris:       #6F6B80;   /* --color-body      */
+
+  /* --- Superficies y tinta (TEMA CLARO) --- */
+  --ground:      #FFFFFF;
+  --surface:     #FAF9FB;
+  --surface-alt: #F2F0F5;
+  --ink:         #0F0F11;
+  --ink-soft:    #3A3844;
+  --muted:       #6F6B80;
+  --rule:        #0F0F11;
+  --rule-soft:   #D9D6E0;
+
+  /* --- Acentos legibles por tema --- */
+  --accent:      #F07F06;   /* relleno / reglas / bloques */
+  --accent-ink:  #A35604;   /* texto sobre fondo claro    */
+  --accent-on:   #0F0F11;   /* tinta sobre relleno naranja*/
+  --violet:      #7152E9;
+  --violet-ink:  #5638C9;
+  --shadow:      #0F0F11;
+
+  /* --- Tipografía --- */
+  --font-display: "Arial Black","Helvetica Neue","Segoe UI Black",Impact,system-ui,sans-serif;
+  --font-body:    Georgia,"Iowan Old Style","Times New Roman",serif;
+  --font-mono:    ui-monospace,"Cascadia Mono","Segoe UI Mono",Consolas,"SF Mono",Menlo,monospace;
+
+  /* --- Métrica --- */
+  --rail: 190px;
+  --gap: 44px;
+  --maxw: 1240px;
+}
+
+@media (prefers-color-scheme: dark){
+  :root:not([data-theme="light"]){
+    --ground:      #0F0F11;
+    --surface:     #17161A;
+    --surface-alt: #201E25;
+    --ink:         #F4F2F7;
+    --ink-soft:    #CFCBD8;
+    --muted:       #9A95A8;
+    --rule:        #F4F2F7;
+    --rule-soft:   #35323D;
+    --accent:      #F07F06;
+    --accent-ink:  #F5A03F;
+    --accent-on:   #0F0F11;
+    --violet:      #8F76FF;
+    --violet-ink:  #A794FF;
+    --shadow:      #F07F06;
+  }
+}
+
+:root[data-theme="dark"]{
+  --ground:      #0F0F11;
+  --surface:     #17161A;
+  --surface-alt: #201E25;
+  --ink:         #F4F2F7;
+  --ink-soft:    #CFCBD8;
+  --muted:       #9A95A8;
+  --rule:        #F4F2F7;
+  --rule-soft:   #35323D;
+  --accent:      #F07F06;
+  --accent-ink:  #F5A03F;
+  --accent-on:   #0F0F11;
+  --violet:      #8F76FF;
+  --violet-ink:  #A794FF;
+  --shadow:      #F07F06;
+}
+
+/* ============================================================
+   BASE
+   ============================================================ */
+
+*{ box-sizing:border-box; }
+
+body{
+  background: var(--ground);
+  color: var(--ink);
+  font-family: var(--font-body);
+  font-size: 17px;
+  line-height: 1.72;
+  margin: 0;
+  padding: 0 24px 120px;
+  -webkit-font-smoothing: antialiased;
+}
+
+.wrap{ max-width: var(--maxw); margin: 0 auto; }
+
+p{ margin: 0 0 1.1em; max-width: 68ch; }
+strong{ font-weight:700; color: var(--ink); }
+em{ font-style: italic; }
+
+a{ color: var(--accent-ink); text-underline-offset: 3px; text-decoration-thickness: 2px; }
+a:focus-visible, button:focus-visible{
+  outline: 3px solid var(--violet); outline-offset: 3px;
+}
+
+hr{ border:0; border-top:2px solid var(--rule); margin: 56px 0; }
+
+/* ============================================================
+   PORTADA
+   ============================================================ */
+
+.cover{
+  border: 3px solid var(--rule);
+  margin: 32px 0 0;
+  background: var(--ground);
+}
+
+.cover-top{
+  display: flex;
+  flex-wrap: wrap;
+  align-items: stretch;
+  border-bottom: 3px solid var(--rule);
+}
+
+.cover-num{
+  font-family: var(--font-display);
+  font-size: clamp(90px, 17vw, 200px);
+  line-height: .78;
+  letter-spacing: -.05em;
+  padding: 26px 30px 20px;
+  background: var(--accent);
+  color: var(--accent-on);
+  border-right: 3px solid var(--rule);
+  display: flex; align-items: flex-end;
+}
+
+.cover-head{ padding: 26px 30px; flex: 1 1 420px; display:flex; flex-direction:column; justify-content:space-between; gap: 18px; }
+
+.eyebrow{
+  font-family: var(--font-mono);
+  font-size: 11.5px;
+  letter-spacing: .16em;
+  text-transform: uppercase;
+  color: var(--muted);
+  margin: 0;
+}
+
+h1{
+  font-family: var(--font-display);
+  font-size: clamp(28px, 4.4vw, 52px);
+  line-height: 1.02;
+  letter-spacing: -.035em;
+  text-transform: uppercase;
+  text-wrap: balance;
+  margin: 0;
+  color: var(--ink);
+}
+
+.cover-meta{
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(160px,1fr));
+  font-family: var(--font-mono);
+  font-size: 12px;
+}
+.cover-meta div{
+  padding: 14px 18px;
+  border-right: 2px solid var(--rule-soft);
+}
+.cover-meta div:last-child{ border-right: 0; }
+.cover-meta b{ display:block; font-size:10.5px; letter-spacing:.14em; text-transform:uppercase; color: var(--muted); font-weight:400; margin-bottom:4px; }
+
+/* ============================================================
+   REJILLA CON RIEL
+   ============================================================ */
+
+.grid{
+  display: grid;
+  grid-template-columns: var(--rail) minmax(0,1fr);
+  gap: var(--gap);
+  align-items: start;
+}
+.rail{
+  font-family: var(--font-mono);
+  font-size: 11.5px;
+  line-height: 1.55;
+  color: var(--muted);
+  letter-spacing: .04em;
+  position: sticky;
+  top: 24px;
+  border-top: 3px solid var(--rule);
+  padding-top: 12px;
+}
+.rail b{ display:block; text-transform:uppercase; letter-spacing:.14em; color: var(--ink); font-weight:700; font-size:11px; }
+.rail .tick{ color: var(--accent-ink); font-weight:700; }
+
+@media (max-width: 900px){
+  .grid{ grid-template-columns: 1fr; gap: 14px; }
+  .rail{ position: static; }
+}
+
+/* ============================================================
+   TÍTULOS DE SECCIÓN
+   ============================================================ */
+
+section{ margin-top: 64px; scroll-margin-top: 20px; }
+
+h2{
+  font-family: var(--font-display);
+  font-size: clamp(24px, 3.4vw, 38px);
+  line-height: 1.06;
+  letter-spacing: -.03em;
+  text-transform: uppercase;
+  text-wrap: balance;
+  margin: 0 0 20px;
+  padding-bottom: 14px;
+  border-bottom: 3px solid var(--rule);
+}
+
+h3{
+  font-family: var(--font-display);
+  font-size: clamp(17px, 2vw, 22px);
+  line-height: 1.18;
+  letter-spacing: -.015em;
+  text-transform: uppercase;
+  margin: 44px 0 12px;
+  text-wrap: balance;
+}
+
+h4{
+  font-family: var(--font-mono);
+  font-size: 12.5px;
+  letter-spacing: .13em;
+  text-transform: uppercase;
+  color: var(--accent-ink);
+  margin: 32px 0 10px;
+  font-weight: 700;
+}
+
+/* Marcador de bloque de clase */
+.bloque{
+  display:flex; flex-wrap:wrap; align-items:baseline; gap: 14px;
+  background: var(--ink);
+  color: var(--ground);
+  padding: 12px 18px;
+  font-family: var(--font-mono);
+  font-size: 12px;
+  letter-spacing: .12em;
+  text-transform: uppercase;
+  margin-bottom: 0;
+}
+.bloque .b-min{ color: var(--accent); font-weight:700; }
+.bloque .b-tipo{ margin-left:auto; color: var(--ground); opacity:.62; }
+
+/* ============================================================
+   SIGLAS EN LÍNEA  — expansión siempre visible
+   ============================================================ */
+
+.sigla{
+  font-family: var(--font-mono);
+  font-weight: 700;
+  font-size: .92em;
+  color: var(--ink);
+  white-space: nowrap;
+  border-bottom: 2px solid var(--violet);
+}
+.sigla > i{
+  font-style: normal;
+  font-weight: 400;
+  font-size: .84em;
+  color: var(--violet-ink);
+  letter-spacing: .01em;
+}
+.sigla > i::before{ content:" ["; }
+.sigla > i::after{ content:"]"; }
+
+/* ============================================================
+   FICHAS (cajas brutalistas)
+   ============================================================ */
+
+.ficha{
+  border: 2px solid var(--rule);
+  background: var(--surface);
+  padding: 20px 22px;
+  margin: 26px 0;
+}
+.ficha > :last-child{ margin-bottom:0; }
+
+.ficha-tit{
+  font-family: var(--font-mono);
+  font-size: 11px;
+  letter-spacing: .15em;
+  text-transform: uppercase;
+  font-weight: 700;
+  margin: 0 0 12px;
+  padding-bottom: 8px;
+  border-bottom: 2px solid var(--rule-soft);
+  color: var(--muted);
+  max-width: none;
+  display: flex; flex-wrap: wrap; gap: 10px; align-items: baseline;
+}
+.ficha-tit span{ color: var(--ink); }
+
+/* variantes */
+.ficha--termino{ border-color: var(--violet); box-shadow: 6px 6px 0 var(--violet); background: var(--ground); }
+.ficha--termino .ficha-tit{ color: var(--violet-ink); border-bottom-color: var(--violet); }
+
+.ficha--profundidad{ border-left-width: 10px; }
+
+.ficha--alerta{ border-color: var(--accent); box-shadow: 6px 6px 0 var(--accent); background: var(--ground); }
+.ficha--alerta .ficha-tit{ color: var(--accent-ink); border-bottom-color: var(--accent); }
+
+.ficha--docente{ background: var(--surface-alt); border-style: dashed; }
+
+.ficha--pregunta{ border-width: 3px; background: var(--ground); }
+.ficha--pregunta p{ font-family: var(--font-display); font-size: clamp(17px,2.2vw,23px); line-height:1.25; letter-spacing:-.02em; text-transform: none; }
+
+/* Definición formal dentro de ficha de término */
+.def{
+  font-family: var(--font-mono);
+  font-size: 13px;
+  line-height: 1.6;
+  background: var(--surface-alt);
+  border-left: 4px solid var(--violet);
+  padding: 12px 14px;
+  margin: 0 0 14px;
+  max-width: none;
+  color: var(--ink-soft);
+}
+.def b{ color: var(--ink); }
+
+/* ============================================================
+   LISTAS
+   ============================================================ */
+
+ul, ol{ max-width: 68ch; padding-left: 1.25em; margin: 0 0 1.2em; }
+li{ margin-bottom: .55em; }
+li::marker{ color: var(--accent-ink); font-weight:700; }
+
+ul.plain{ list-style:none; padding-left:0; }
+ul.plain > li{
+  border-top: 2px solid var(--rule-soft);
+  padding: 12px 0 12px 0;
+  margin: 0;
+}
+ul.plain > li:last-child{ border-bottom: 2px solid var(--rule-soft); }
+
+/* Pasos numerados del laboratorio */
+ol.pasos{ list-style: none; padding-left:0; counter-reset: paso; max-width:none; }
+ol.pasos > li{
+  counter-increment: paso;
+  display: grid;
+  grid-template-columns: 62px minmax(0,1fr);
+  gap: 20px;
+  border-top: 2px solid var(--rule);
+  padding: 20px 0;
+  margin: 0;
+}
+ol.pasos > li::before{
+  content: counter(paso, decimal-leading-zero);
+  font-family: var(--font-display);
+  font-size: 34px;
+  line-height: .9;
+  letter-spacing: -.04em;
+  color: var(--accent);
+}
+ol.pasos > li:last-child{ border-bottom: 2px solid var(--rule); }
+ol.pasos h4{ margin-top: 0; }
+
+/* ============================================================
+   TABLAS
+   ============================================================ */
+
+.tabla-wrap{ overflow-x: auto; margin: 26px 0; border: 2px solid var(--rule); }
+table{
+  border-collapse: collapse;
+  width: 100%;
+  min-width: 620px;
+  font-family: var(--font-mono);
+  font-size: 13px;
+  line-height: 1.5;
+  font-variant-numeric: tabular-nums;
+}
+th{
+  background: var(--ink);
+  color: var(--ground);
+  text-align: left;
+  font-weight: 700;
+  font-size: 10.5px;
+  letter-spacing: .12em;
+  text-transform: uppercase;
+  padding: 11px 14px;
+  vertical-align: bottom;
+}
+td{
+  padding: 12px 14px;
+  border-top: 2px solid var(--rule-soft);
+  vertical-align: top;
+  color: var(--ink-soft);
+}
+td:first-child{ color: var(--ink); font-weight:700; }
+tbody tr:nth-child(even) td{ background: var(--surface); }
+
+/* ============================================================
+   CÓDIGO / DATOS
+   ============================================================ */
+
+code{
+  font-family: var(--font-mono);
+  font-size: .88em;
+  background: var(--surface-alt);
+  padding: 2px 6px;
+  border: 1px solid var(--rule-soft);
+  word-break: break-word;
+}
+pre{
+  font-family: var(--font-mono);
+  font-size: 12.5px;
+  line-height: 1.6;
+  background: var(--ink);
+  color: #F4F2F7;
+  border: 2px solid var(--rule);
+  padding: 16px 18px;
+  overflow-x: auto;
+  margin: 20px 0;
+}
+pre code{ background: none; border: 0; padding: 0; color: inherit; font-size: inherit; }
+pre .c{ color: #9A95A8; }
+pre .k{ color: var(--usb-ambar); }
+
+/* ============================================================
+   ÍNDICE
+   ============================================================ */
+
+.toc{ border: 2px solid var(--rule); }
+.toc ol{ list-style:none; margin:0; padding:0; max-width:none; counter-reset: toc; }
+.toc li{ margin:0; border-top: 2px solid var(--rule-soft); }
+.toc li:first-child{ border-top:0; }
+.toc a{
+  display:flex; gap:16px; align-items:baseline;
+  padding: 13px 18px;
+  font-family: var(--font-mono);
+  font-size: 13px;
+  text-decoration:none;
+  color: var(--ink);
+}
+.toc a:hover{ background: var(--accent); color: var(--accent-on); }
+.toc a .n{ color: var(--muted); font-size:11px; letter-spacing:.1em; min-width: 46px; }
+.toc a:hover .n{ color: var(--accent-on); }
+.toc a .t{ flex:1; }
+.toc a .m{ color: var(--muted); font-size:11px; }
+.toc a:hover .m{ color: var(--accent-on); }
+
+/* ============================================================
+   LÍNEA DE TIEMPO DE LA SESIÓN
+   ============================================================ */
+
+.timeline{ display:grid; gap:0; border:2px solid var(--rule); margin: 26px 0; }
+.tl-row{
+  display:grid;
+  grid-template-columns: 96px 1fr;
+  border-top: 2px solid var(--rule-soft);
+}
+.tl-row:first-child{ border-top:0; }
+.tl-min{
+  font-family: var(--font-mono);
+  font-size: 12px;
+  font-weight:700;
+  padding: 14px;
+  background: var(--surface-alt);
+  border-right: 2px solid var(--rule-soft);
+  color: var(--accent-ink);
+  font-variant-numeric: tabular-nums;
+}
+.tl-body{ padding: 14px 18px; }
+.tl-body b{ display:block; font-family: var(--font-mono); font-size:12px; letter-spacing:.08em; text-transform:uppercase; }
+.tl-body span{ font-size:15px; color: var(--ink-soft); }
+
+/* ============================================================
+   BARRA SUPERIOR
+   ============================================================ */
+
+.topbar{
+  display:flex; flex-wrap:wrap; gap:12px; align-items:center;
+  font-family: var(--font-mono);
+  font-size: 11px;
+  letter-spacing:.12em;
+  text-transform: uppercase;
+  color: var(--muted);
+  padding: 14px 0 0;
+}
+.topbar .dot{ width:10px; height:10px; background: var(--accent); display:inline-block; }
+.topbar .sep{ margin-left:auto; }
+
+/* ============================================================
+   GLOSARIO
+   ============================================================ */
+
+.glos{ border:2px solid var(--rule); }
+.glos-row{
+  display:grid;
+  grid-template-columns: minmax(150px, 220px) minmax(0,1fr);
+  border-top: 2px solid var(--rule-soft);
+}
+.glos-row:first-child{ border-top:0; }
+.glos-k{
+  padding: 14px 16px;
+  font-family: var(--font-mono);
+  font-size: 13px;
+  font-weight: 700;
+  background: var(--surface);
+  border-right: 2px solid var(--rule-soft);
+  color: var(--ink);
+  word-break: break-word;
+}
+.glos-k em{ display:block; font-style:normal; font-weight:400; font-size:11px; color: var(--muted); margin-top:4px; letter-spacing:.03em; }
+.glos-v{ padding: 14px 18px; font-size: 15.5px; line-height:1.62; color: var(--ink-soft); }
+.glos-v p{ margin:0; max-width:none; }
+@media (max-width:700px){
+  .glos-row{ grid-template-columns: 1fr; }
+  .glos-k{ border-right:0; border-bottom:2px solid var(--rule-soft); }
+}
+
+/* ============================================================
+   PIE
+   ============================================================ */
+
+footer{
+  margin-top: 80px;
+  border-top: 3px solid var(--rule);
+  padding-top: 20px;
+  font-family: var(--font-mono);
+  font-size: 11.5px;
+  line-height: 1.7;
+  color: var(--muted);
+  letter-spacing: .04em;
+}
+
+@media (prefers-reduced-motion: reduce){
+  *{ animation: none !important; transition: none !important; }
+}
+
+/* ============================================================
+   SISTEMA DE ICONOGRAFÍA
+   Iconos monolineales de 2px, trazo recto y uniones en inglete,
+   coherentes con el tratamiento brutalista del documento.
+   Se aplican por máscara CSS para que hereden el color del tema.
+   ============================================================ */
+
+.ficha{ --icon: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%23000' stroke-width='2' stroke-linecap='square'%3E%3Cpath d='M9 4H4v16h5M15 4h5v16h-5M10.5 12h3'/%3E%3C/svg%3E"); }
+.ficha--profundidad{ --icon: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%23000' stroke-width='2' stroke-linecap='square'%3E%3Cpath d='M12 3 2 8l10 5 10-5-10-5zM2 14l10 5 10-5'/%3E%3C/svg%3E"); }
+.ficha--alerta{ --icon: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%23000' stroke-width='2' stroke-linecap='square'%3E%3Cpath d='M12 3 22 20H2zM12 10v4M12 16.5v1'/%3E%3C/svg%3E"); }
+.ficha--docente{ --icon: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%23000' stroke-width='2' stroke-linecap='square'%3E%3Cpath d='M3 4h18v12H3zM12 16v4M8 20h8'/%3E%3C/svg%3E"); }
+.ficha--pregunta{ --icon: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%23000' stroke-width='2' stroke-linecap='square'%3E%3Cpath d='M4 4h16v12H9l-5 4z'/%3E%3C/svg%3E"); }
+
+.ficha-tit{ align-items: center; }
+.ficha-tit::before{
+  content:"";
+  flex: 0 0 auto;
+  width: 17px; height: 17px;
+  background-color: currentColor;
+  -webkit-mask: var(--icon) center/contain no-repeat;
+  mask: var(--icon) center/contain no-repeat;
+}
+
+/* --- Iconos de sección --- */
+h2::before{
+  content:"";
+  display:inline-block;
+  vertical-align: -0.06em;
+  width: .78em; height: .78em;
+  margin-right: .44em;
+  background-color: var(--accent);
+  -webkit-mask: var(--icon, none) center/contain no-repeat;
+  mask: var(--icon, none) center/contain no-repeat;
+}
+#uso     { --icon: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%23000' stroke-width='2' stroke-linecap='square'%3E%3Cpath d='M4 4h7v16H4zM13 4h7v16h-7z'/%3E%3C/svg%3E"); }
+#mapa    { --icon: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%23000' stroke-width='2' stroke-linecap='square'%3E%3Cpath d='M3 3h7v7H3zM14 3h7v7h-7zM3 14h7v7H3zM14 14h7v7h-7z'/%3E%3C/svg%3E"); }
+#a1      { --icon: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%23000' stroke-width='2' stroke-linecap='square'%3E%3Cpath d='M2 12h8M10 12 20 6M20 6l-5 1M20 6l-1 5M10 12 20 18M20 18l-5-1M20 18l-1-5'/%3E%3C/svg%3E"); }
+#a2      { --icon: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%23000' stroke-width='2' stroke-linecap='square'%3E%3Cpath d='M12 3 3 7v5c0 5 4 8 9 9 5-1 9-4 9-9V7z'/%3E%3C/svg%3E"); }
+#a3      { --icon: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%23000' stroke-width='2' stroke-linecap='square'%3E%3Cpath d='M12 3a9 9 0 100 18 9 9 0 000-18zM12 7v5l4 2'/%3E%3C/svg%3E"); }
+#a4      { --icon: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%23000' stroke-width='2' stroke-linecap='square'%3E%3Cpath d='M4 4v6a4 4 0 004 4h12M16 10l4 4-4 4'/%3E%3C/svg%3E"); }
+#a5      { --icon: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%23000' stroke-width='2' stroke-linecap='square'%3E%3Cpath d='M3 8h5v8H3zM11 8h5v8h-5zM19 8h2v8h-2zM8 12h3M16 12h3'/%3E%3C/svg%3E"); }
+#a6      { --icon: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%23000' stroke-width='2' stroke-linecap='square'%3E%3Cpath d='M9 3h6v4H9zM2 17h6v4H2zM16 17h6v4h-6zM12 7v3M5 17v-3h14v3'/%3E%3C/svg%3E"); }
+#a7      { --icon: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%23000' stroke-width='2' stroke-linecap='square'%3E%3Cpath d='M12 2 22 12 12 22 2 12zM12 8v4M12 15.5v1'/%3E%3C/svg%3E"); }
+#b1      { --icon: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%23000' stroke-width='2' stroke-linecap='square'%3E%3Cpath d='M12 3a2 2 0 100 4 2 2 0 000-4zM5 17a2 2 0 100 4 2 2 0 000-4zM19 17a2 2 0 100 4 2 2 0 000-4zM12 7v3M11 11 6.5 15.5M13 11l4.5 4.5'/%3E%3C/svg%3E"); }
+#b2      { --icon: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%23000' stroke-width='2' stroke-linecap='square'%3E%3Cpath d='M3 6l6-3 6 3 6-3v15l-6 3-6-3-6 3zM9 3v15M15 6v15'/%3E%3C/svg%3E"); }
+#b3      { --icon: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%23000' stroke-width='2' stroke-linecap='square'%3E%3Cpath d='M3 3v18h18M7 17v-4M12 17V9M17 17v-7'/%3E%3C/svg%3E"); }
+#b4      { --icon: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%23000' stroke-width='2' stroke-linecap='square'%3E%3Cpath d='M3 20v-2a3 3 0 013-3h4a3 3 0 013 3v2M8 5a3 3 0 106 0 3 3 0 00-6 0M16 20v-2a3 3 0 00-1.5-2.6M15.5 5.3a3 3 0 010 5.4'/%3E%3C/svg%3E"); }
+#cierre  { --icon: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%23000' stroke-width='2' stroke-linecap='square'%3E%3Cpath d='M5 21V4h14l-3 4 3 4H5'/%3E%3C/svg%3E"); }
+#falsos  { --icon: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%23000' stroke-width='2' stroke-linecap='square'%3E%3Cpath d='M12 3a9 9 0 100 18 9 9 0 000-18zM8.5 8.5l7 7M15.5 8.5l-7 7'/%3E%3C/svg%3E"); }
+#glosario{ --icon: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%23000' stroke-width='2' stroke-linecap='square'%3E%3Cpath d='M3 6h2M8 6h13M3 12h2M8 12h13M3 18h2M8 18h13'/%3E%3C/svg%3E"); }
+#fuentes { --icon: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%23000' stroke-width='2' stroke-linecap='square'%3E%3Cpath d='M6 3h9l4 4v14H6zM15 3v4h4M9 12h7M9 16h7'/%3E%3C/svg%3E"); }
+
+/* --- Icono del marcador de bloque --- */
+.bloque::before{
+  content:"";
+  width: 15px; height: 15px;
+  background-color: var(--accent);
+  -webkit-mask: var(--icon) center/contain no-repeat;
+  mask: var(--icon) center/contain no-repeat;
+  flex: 0 0 auto;
+}
+.bloque--a{ --icon: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%23000' stroke-width='2' stroke-linecap='square'%3E%3Cpath d='M12 3a9 9 0 100 18 9 9 0 000-18zM12 8v1M12 12v4'/%3E%3C/svg%3E"); }
+.bloque--b{ --icon: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%23000' stroke-width='2' stroke-linecap='square'%3E%3Cpath d='M12 3 2 8l10 5 10-5-10-5zM2 14l10 5 10-5'/%3E%3C/svg%3E"); }
+.bloque--c{ --icon: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%23000' stroke-width='2' stroke-linecap='square'%3E%3Cpath d='M5 21V4h14l-3 4 3 4H5'/%3E%3C/svg%3E"); }
+
+/* --- Icono de la barra superior: eslabones --- */
+.topbar .dot{
+  width: 16px; height: 16px;
+  background-color: var(--accent);
+  -webkit-mask: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%23000' stroke-width='2' stroke-linecap='square'%3E%3Cpath d='M9 12h6M10 8H8a4 4 0 000 8h2M14 8h2a4 4 0 010 8h-2'/%3E%3C/svg%3E") center/contain no-repeat;
+  mask: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%23000' stroke-width='2' stroke-linecap='square'%3E%3Cpath d='M9 12h6M10 8H8a4 4 0 000 8h2M14 8h2a4 4 0 010 8h-2'/%3E%3C/svg%3E") center/contain no-repeat;
+}
+
+/* --- Icono en los pasos de la demostración --- */
+.tl-body b::before{
+  content:"";
+  display:inline-block;
+  width: 11px; height: 11px;
+  margin-right: 8px;
+  vertical-align: 0;
+  background-color: var(--accent);
+  -webkit-mask: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='%23000'%3E%3Cpath d='M4 4h16v16H4z'/%3E%3C/svg%3E") center/contain no-repeat;
+  mask: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='%23000'%3E%3Cpath d='M4 4h16v16H4z'/%3E%3C/svg%3E") center/contain no-repeat;
+}
+
+/* ============================================================
+   DIAGRAMAS
+   ============================================================ */
+
+figure{ margin: 30px 0; border: 2px solid var(--rule); background: var(--ground); }
+figure .fig-scroll{ overflow-x: auto; }
+figure svg{ display:block; width:100%; min-width: 560px; height:auto; }
+figcaption{
+  font-family: var(--font-mono);
+  font-size: 11px;
+  letter-spacing: .1em;
+  text-transform: uppercase;
+  color: var(--muted);
+  padding: 12px 16px;
+  border-top: 2px solid var(--rule-soft);
+  background: var(--surface);
+}
+
+.dgm-box   { fill: var(--surface); stroke: var(--ink); stroke-width: 2; }
+.dgm-box-a { fill: none; stroke: var(--accent); stroke-width: 2; }
+.dgm-box-v { fill: none; stroke: var(--violet); stroke-width: 2; }
+.dgm-fill  { fill: var(--ink); }
+.dgm-line  { stroke: var(--ink); stroke-width: 2; fill: none; }
+.dgm-line-a{ stroke: var(--accent); stroke-width: 2; fill: none; }
+.dgm-dash  { stroke: var(--muted); stroke-width: 2; fill: none; stroke-dasharray: 6 5; }
+.dgm-h     { font-family: var(--font-mono); font-size: 12.5px; font-weight: 700; letter-spacing: .1em; fill: var(--ink); }
+.dgm-t     { font-family: var(--font-mono); font-size: 12.5px; fill: var(--ink-soft); }
+.dgm-s     { font-family: var(--font-mono); font-size: 11px; letter-spacing: .06em; fill: var(--muted); }
+.dgm-a     { font-family: var(--font-mono); font-size: 11.5px; font-weight: 700; letter-spacing: .08em; fill: var(--accent-ink); }
+.dgm-inv   { fill: var(--ground); }
+
+/* ============================================================
+   GUION DE DEMOSTRACIÓN
+   ============================================================ */
+
+.dm{ margin-bottom: .75em; }
+.dm-l{
+  display: inline-block;
+  font-family: var(--font-mono);
+  font-size: 10px;
+  font-weight: 700;
+  letter-spacing: .13em;
+  text-transform: uppercase;
+  color: var(--accent-on);
+  background: var(--accent);
+  padding: 2px 7px;
+  margin-right: 9px;
+  vertical-align: .1em;
+}
+.dm-min{
+  font-family: var(--font-mono);
+  font-size: 10.5px;
+  font-weight: 400;
+  letter-spacing: .1em;
+  color: var(--muted);
+  text-transform: none;
+  margin-left: 10px;
+  white-space: nowrap;
+}
+ol.pasos h4{ display: block; }
+</style>
+
+<div class="wrap">
+
+<div class="topbar">
+  <span class="dot"></span>
+  <span>Universidad de San Buenaventura Medellín</span>
+  <span class="sep">Ingeniería de Sistemas · Blockchain y Web 3.0</span>
+</div>
+
+<!-- ========================= PORTADA ========================= -->
+<header class="cover">
+  <div class="cover-top">
+    <div class="cover-num">01</div>
+    <div class="cover-head">
+      <p class="eyebrow">Unidad I · Fundamentos de sistemas distribuidos confiables</p>
+      <h1>¿Qué problema resuelve realmente blockchain?</h1>
+      <p class="eyebrow">Material autoexplicativo de sesión · v1.0</p>
+    </div>
+  </div>
+  <div class="cover-meta">
+    <div><b>Duración</b>180 minutos</div>
+    <div><b>Modalidad</b>Teórico-conceptual</div>
+    <div><b>Prerrequisito</b>Ninguno</div>
+    <div><b>Equipo</b>No se requiere</div>
+    <div><b>Entregable</b>Ninguno</div>
+  </div>
+</header>
+
+<!-- ========================= CÓMO USAR ========================= -->
+<section id="uso">
+<div class="grid">
+  <div class="rail">
+    <b>Preliminar</b>
+    Instrucciones de<br>lectura
+  </div>
+  <div>
+    <h2>Cómo usar este documento</h2>
+
+    <p>Este material cumple dos funciones a la vez. Durante la clase es el guion proyectado; fuera de la clase es el texto de estudio. Por eso todo concepto se explica dentro del propio documento: no hay ninguna sigla, ningún término técnico ni ninguna referencia que exija buscar información en otra parte para poder seguir el hilo.</p>
+
+    <p>El documento usa un conjunto reducido de dispositivos visuales, siempre con el mismo significado. Cada tipo de caja lleva su propio icono, de modo que el tipo de contenido se reconoce antes de leerlo. Aprenderlos toma treinta segundos y ahorra confusión durante todo el semestre.</p>
+
+    <ul class="plain">
+      <li><span class="sigla">SIGLA<i>expansión de la sigla</i></span> — Cada vez que aparece una sigla por primera vez en una sección, se muestra su expansión literal entre corchetes, en el mismo renglón, subrayada en violeta. No hay que pasar el cursor por encima ni hacer clic: la explicación está siempre visible en pantalla.</li>
+      <li><b>Ficha de término</b> (caja con borde violeta) — Concepto central que se define formalmente. Incluye la definición en una línea, el origen del nombre y la explicación extendida.</li>
+      <li><b>Ficha de profundidad</b> (caja con barra gruesa a la izquierda) — Material que va más allá del mínimo evaluable. Es opcional en primera lectura y obligatorio si el proyecto del estudiante toca ese tema.</li>
+      <li><b>Ficha de alerta</b> (borde naranja, triángulo) — Advertencias de seguridad, errores frecuentes y afirmaciones falsas de circulación común. Se leen siempre.</li>
+      <li><b>Ficha del docente</b> (borde punteado, pantalla) — Notas metodológicas y de preparación. Dirigidas a quien dicta, no a quien estudia.</li>
+      <li><b>Diagramas</b> — Los esquemas no son ilustrativos: cada uno sustituye a un párrafo. Si un concepto tiene diagrama, el diagrama es la explicación principal y el texto es el desarrollo.</li>
+    </ul>
+
+    <div class="ficha ficha--docente">
+      <p class="ficha-tit"><span>Nota para el docente</span></p>
+      <p>Las marcas de minuto del riel izquierdo son una referencia de ritmo, no una camisa de fuerza. Si el grupo llega sin base de redes, el bloque A.2 se extiende y se recorta A.6, que es el más prescindible.</p>
+      <p>Esta sesión es <strong>íntegramente teórica: sin computadores, sin laboratorio y sin entregable</strong>. La decisión es deliberada — el primer día se dedica por completo a construir el modelo mental, sin pelear con instalaciones ni permisos de red. La Sesión 2 abre con la demostración en vivo de billeteras y explorador de bloques, y sigue con el primer laboratorio en máquina.</p>
+    </div>
+  </div>
+</div>
+</section>
+
+<!-- ========================= MAPA ========================= -->
+<section id="mapa">
+<div class="grid">
+  <div class="rail">
+    <b>Mapa</b>
+    Estructura de<br>los 180 minutos
+  </div>
+  <div>
+    <h2>Mapa de la sesión</h2>
+
+    <div class="timeline">
+      <div class="tl-row"><div class="tl-min">00–10</div><div class="tl-body"><b>Apertura</b><span>Presentación del curso, del proyecto integrador y de la regla de oro: nunca dinero real.</span></div></div>
+      <div class="tl-row"><div class="tl-min">10–30</div><div class="tl-body"><b>A.1 · El doble gasto</b><span>Por qué el dinero digital sin intermediario fue un problema abierto durante treinta años.</span></div></div>
+      <div class="tl-row"><div class="tl-min">30–45</div><div class="tl-body"><b>A.2 · El tercero de confianza</b><span>Qué garantiza realmente un banco, y cuál es el costo de esa garantía.</span></div></div>
+      <div class="tl-row"><div class="tl-min">45–60</div><div class="tl-body"><b>A.3 · Los intentos fallidos</b><span>DigiCash, Hashcash, b-money, bit gold: qué aportó cada uno y dónde se rompió.</span></div></div>
+      <div class="tl-row"><div class="tl-min">60–72</div><div class="tl-body"><b>A.4 · 2008 y la síntesis</b><span>Bitcoin no inventó ninguna pieza; ensambló cinco piezas existentes.</span></div></div>
+      <div class="tl-row"><div class="tl-min">72–82</div><div class="tl-body"><b>A.5 · Anatomía conceptual</b><span>Qué es realmente una cadena de bloques, en términos de estructuras de datos.</span></div></div>
+      <div class="tl-row"><div class="tl-min">82–92</div><div class="tl-body"><b>A.6 · Taxonomía y Web 3.0</b><span>Pública, privada, de consorcio. Y qué significa —y qué no— «Web 3.0».</span></div></div>
+      <div class="tl-row"><div class="tl-min">92–105</div><div class="tl-body"><b>A.7 · Cuándo NO usarla</b><span>Árbol de decisión. La sección más importante de la sesión.</span></div></div>
+      <div class="tl-row"><div class="tl-min">105–115</div><div class="tl-body"><b>Pausa</b><span></span></div></div>
+      <div class="tl-row"><div class="tl-min">115–132</div><div class="tl-body"><b>B.1 · El ecosistema</b><span>Quién sostiene la red, qué poder tiene cada actor y por qué la descentralización es un vector y no una propiedad.</span></div></div>
+      <div class="tl-row"><div class="tl-min">132–147</div><div class="tl-body"><b>B.2 · Mapa del territorio</b><span>Bitcoin y Ethereum, qué significa ser compatible con la EVM, y por qué existen tantas cadenas parecidas.</span></div></div>
+      <div class="tl-row"><div class="tl-min">147–160</div><div class="tl-body"><b>B.3 · Adopción real</b><span>Qué encontró uso sostenido después de quince años y qué no, con la evidencia en lugar de la promesa.</span></div></div>
+      <div class="tl-row"><div class="tl-min">160–172</div><div class="tl-body"><b>B.4 · Taller de casos</b><span>Grupos de tres. Aplicar el árbol de decisión a tres casos y defenderlo en plenaria.</span></div></div>
+      <div class="tl-row"><div class="tl-min">172–180</div><div class="tl-body"><b>BLOQUE C · Cierre</b><span>Síntesis, pregunta de la semana y lectura obligatoria para la Sesión 2.</span></div></div>
+    </div>
+
+    <h4>Resultados de aprendizaje que esta sesión atiende</h4>
+    <div class="tabla-wrap">
+    <table>
+      <thead><tr><th>Código</th><th>Resultado de aprendizaje</th><th>Nivel</th><th>Dónde se evidencia</th></tr></thead>
+      <tbody>
+        <tr><td>RA1</td><td>Explicar los fundamentos criptográficos que sustentan la integridad de un registro distribuido.</td><td>Comprender</td><td>Se introduce · se evalúa en el Quiz 1 (S4)</td></tr>
+        <tr><td>RA2</td><td>Comparar arquitecturas y justificar la elección frente a un problema concreto.</td><td>Analizar</td><td>Taller A.7 · Anteproyecto (S6)</td></tr>
+        <tr><td>RA7</td><td>Evaluar críticamente implicaciones económicas, éticas y regulatorias.</td><td>Evaluar</td><td>Discusión A.4 y A.7 · Ensayo final</td></tr>
+      </tbody>
+    </table>
+    </div>
+
+    <h4>Índice del documento</h4>
+    <nav class="toc">
+      <ol>
+        <li><a href="#a1"><span class="n">A.1</span><span class="t">El problema del doble gasto</span><span class="m">20 min</span></a></li>
+        <li><a href="#a2"><span class="n">A.2</span><span class="t">El tercero de confianza y su costo</span><span class="m">15 min</span></a></li>
+        <li><a href="#a3"><span class="n">A.3</span><span class="t">Treinta años de intentos fallidos</span><span class="m">15 min</span></a></li>
+        <li><a href="#a4"><span class="n">A.4</span><span class="t">2008: la síntesis</span><span class="m">12 min</span></a></li>
+        <li><a href="#a5"><span class="n">A.5</span><span class="t">Anatomía conceptual de una cadena de bloques</span><span class="m">10 min</span></a></li>
+        <li><a href="#a6"><span class="n">A.6</span><span class="t">Taxonomía de redes y la promesa Web 3.0</span><span class="m">10 min</span></a></li>
+        <li><a href="#a7"><span class="n">A.7</span><span class="t">Cuándo NO se debe usar blockchain</span><span class="m">13 min</span></a></li>
+        <li><a href="#b1"><span class="n">B.1</span><span class="t">El ecosistema: quién sostiene la red</span><span class="m">17 min</span></a></li>
+        <li><a href="#b2"><span class="n">B.2</span><span class="t">Mapa del territorio</span><span class="m">15 min</span></a></li>
+        <li><a href="#b3"><span class="n">B.3</span><span class="t">Adopción real: qué prendió y qué no</span><span class="m">13 min</span></a></li>
+        <li><a href="#b4"><span class="n">B.4</span><span class="t">Taller de casos</span><span class="m">12 min</span></a></li>
+        <li><a href="#cierre"><span class="n">C</span><span class="t">Cierre y trabajo autónomo</span><span class="m">8 min</span></a></li>
+        <li><a href="#glosario"><span class="n">§</span><span class="t">Glosario completo de la sesión</span><span class="m">—</span></a></li>
+        <li><a href="#falsos"><span class="n">§</span><span class="t">Afirmaciones falsas de circulación común</span><span class="m">—</span></a></li>
+        <li><a href="#fuentes"><span class="n">§</span><span class="t">Fuentes y lecturas</span><span class="m">—</span></a></li>
+      </ol>
+    </nav>
+  </div>
+</div>
+</section>
+
+<hr>
+
+<!-- ========================= BLOQUE A ========================= -->
+<p class="bloque bloque--a"><span class="b-min">MIN 10 — 105</span> <span>Bloque A · Conceptual</span> <span class="b-tipo">Exposición dialogada</span></p>
+
+<section id="a1">
+<div class="grid">
+  <div class="rail">
+    <b>A.1</b>
+    <span class="tick">min 10–30</span><br><br>
+    Concepto eje:<br>doble gasto<br><br>
+    Pregunta guía:<br>¿por qué el dinero digital necesitó 30 años?
+  </div>
+  <div>
+    <h2>A.1 · El problema del doble gasto</h2>
+
+    <p>Empecemos por un hecho que parece trivial y no lo es: <strong>copiar un archivo digital es gratis, instantáneo y perfecto</strong>. Esa propiedad, que es la razón por la cual internet funciona tan bien para distribuir información, es exactamente la razón por la cual el dinero digital fue un problema irresuelto durante décadas.</p>
+
+    <p>Si le envío a un compañero un archivo con una fotografía, ambos terminamos con la fotografía. Eso es deseable. Pero si el archivo representara un billete de veinte mil pesos, ambos terminaríamos con veinte mil pesos, y el sistema monetario colapsaría en cuestión de minutos. Un bien digital, por su naturaleza, no puede <em>transferirse</em>: solo puede <em>duplicarse</em>.</p>
+
+    <div class="ficha ficha--termino">
+      <p class="ficha-tit"><span>Ficha de término 01</span> · Doble gasto</p>
+      <p class="def"><b>Doble gasto</b> (en inglés, <i>double-spending</i>): posibilidad de que una misma unidad de dinero digital sea gastada más de una vez, porque el gasto consiste en transmitir una copia de un dato y el emisor conserva el original.</p>
+      <p>Es el problema fundacional de todo el campo. Formulado con precisión: en un sistema donde el dinero es información, y la información es perfectamente replicable, ¿cómo se garantiza que quien transfiere una unidad deje efectivamente de poseerla?</p>
+      <p>Nótese que el problema no es criptográfico en su núcleo. Con criptografía sabemos, desde los años setenta, cómo demostrar que un mensaje proviene de quien dice provenir y que no fue alterado. Lo que la criptografía por sí sola <strong>no</strong> resuelve es el <em>orden</em>: si Ana firma dos transferencias válidas de la misma moneda, ambas son criptográficamente impecables. El problema es decidir cuál ocurrió primero, y lograr que <em>todos</em> los participantes coincidan en esa decisión sin consultar a una autoridad.</p>
+    </div>
+
+    <h3>El dinero no es un objeto: es un registro</h3>
+
+    <p>Aquí hay un cambio de perspectiva que conviene hacer explícito, porque de él depende todo lo demás. Tendemos a pensar el dinero como una cosa que se pasa de mano en mano. Pero en el sistema financiero moderno, la enorme mayoría del dinero no existe como objeto: existe como <strong>una anotación en un libro contable</strong>.</p>
+
+    <p>Cuando alguien transfiere cien mil pesos desde su cuenta en un banco hacia la cuenta de otra persona en otro banco, ningún objeto viaja. Lo que ocurre es que un banco resta cien mil de un renglón y otro banco suma cien mil en otro renglón, y luego ambas instituciones concilian sus saldos a través de un tercero. El dinero <em>es</em> el registro. No hay nada más.</p>
+
+    <p>Esta observación reencuadra el problema por completo. La pregunta deja de ser «¿cómo hago que un objeto digital sea único?» —que no tiene solución— y pasa a ser «<strong>¿cómo construyo un libro contable en el que todos confíen, sin que nadie sea el dueño del libro?</strong>». Esa segunda pregunta sí tiene solución, y esa solución es el objeto de estudio de este curso.</p>
+
+    <div class="ficha ficha--termino">
+      <p class="ficha-tit"><span>Ficha de término 02</span> · Libro mayor / ledger</p>
+      <p class="def"><b>Libro mayor</b> (en inglés, <i>ledger</i>): registro ordenado y acumulativo de todas las transacciones de un sistema, a partir del cual se puede derivar el estado actual —los saldos— de cada participante.</p>
+      <p>El término viene de la contabilidad de partida doble, formalizada por Luca Pacioli en 1494. La idea es antigua y robusta: no se almacenan los saldos, se almacenan los <em>movimientos</em>; el saldo se calcula sumando los movimientos desde el inicio. Esto permite auditar, porque cada peso tiene una historia rastreable.</p>
+      <p>Cuando se antepone la palabra «distribuido» se obtiene <span class="sigla">DLT<i>Distributed Ledger Technology · tecnología de libro mayor distribuido</i></span>, el término técnico y neutral que engloba a blockchain y a otras estructuras similares. Toda blockchain es un DLT; no todo DLT es una blockchain, porque algunos no agrupan las transacciones en bloques encadenados.</p>
+    </div>
+
+    <h3>Cómo se ve concretamente un doble gasto</h3>
+
+    <p>Supongamos un sistema ingenuo: cada usuario tiene un par de claves criptográficas, y una transferencia es un mensaje firmado que dice «yo, Ana, transfiero la moneda M a Bruno». El mensaje se difunde por la red y cada participante actualiza su copia del libro.</p>
+
+    <p>Ana puede hacer lo siguiente:</p>
+
+    <ol>
+      <li>Firma el mensaje <code>M → Bruno</code> y se lo envía <strong>solo a Bruno</strong> y a los nodos cercanos a Bruno.</li>
+      <li>En el mismo instante, firma el mensaje <code>M → Carlos</code> y se lo envía <strong>solo a Carlos</strong> y a los nodos cercanos a Carlos.</li>
+      <li>Bruno verifica la firma: es válida. Ve que Ana tiene la moneda M en su copia del libro. Entrega la mercancía.</li>
+      <li>Carlos hace exactamente lo mismo. También entrega la mercancía.</li>
+      <li>Cuando la red termina de propagar ambos mensajes, existen dos versiones incompatibles del libro. Alguien fue estafado, y no hay ningún criterio dentro del sistema para decidir quién.</li>
+    </ol>
+
+    <figure>
+      <div class="fig-scroll">
+      <svg viewBox="0 0 720 322" role="img" aria-label="Diagrama del ataque de doble gasto: Ana emite dos transacciones firmadas de la misma moneda hacia dos destinatarios distintos, produciendo dos versiones incompatibles del libro mayor.">
+        <!-- Rama superior -->
+        <text class="dgm-s" x="250" y="30">TX 1 · FIRMADA POR ANA · M → BRUNO</text>
+        <rect class="dgm-box" x="250" y="40" width="130" height="64"/>
+        <text class="dgm-h" x="315" y="68" text-anchor="middle">BRUNO</text>
+        <text class="dgm-s" x="315" y="88" text-anchor="middle">verifica y entrega</text>
+        <path class="dgm-line" d="M380 72h58"/>
+        <polygon class="dgm-fill" points="444,72 434,67 434,77"/>
+        <rect class="dgm-box" x="450" y="40" width="254" height="64"/>
+        <text class="dgm-s" x="466" y="66">LIBRO DE LA MITAD A DE LA RED</text>
+        <text class="dgm-t" x="466" y="90">M pertenece a Bruno</text>
+
+        <!-- Emisora -->
+        <rect class="dgm-box" x="16" y="138" width="130" height="64"/>
+        <text class="dgm-h" x="81" y="166" text-anchor="middle">ANA</text>
+        <text class="dgm-s" x="81" y="186" text-anchor="middle">posee la moneda M</text>
+        <path class="dgm-line" d="M146 170h34M180 170V72h64M180 170v98h64"/>
+        <polygon class="dgm-fill" points="244,72 234,67 234,77"/>
+        <polygon class="dgm-fill" points="244,268 234,263 234,273"/>
+
+        <!-- Conflicto -->
+        <rect class="dgm-box-a" x="250" y="138" width="454" height="64"/>
+        <text class="dgm-a" x="477" y="166" text-anchor="middle">LAS DOS TRANSACCIONES SON VÁLIDAS</text>
+        <text class="dgm-s" x="477" y="186" text-anchor="middle">ninguna es fraude; el sistema no puede ordenarlas</text>
+
+        <!-- Rama inferior -->
+        <text class="dgm-s" x="250" y="228">TX 2 · FIRMADA POR ANA · M → CARLOS</text>
+        <rect class="dgm-box" x="250" y="236" width="130" height="64"/>
+        <text class="dgm-h" x="315" y="264" text-anchor="middle">CARLOS</text>
+        <text class="dgm-s" x="315" y="284" text-anchor="middle">verifica y entrega</text>
+        <path class="dgm-line" d="M380 268h58"/>
+        <polygon class="dgm-fill" points="444,268 434,263 434,273"/>
+        <rect class="dgm-box" x="450" y="236" width="254" height="64"/>
+        <text class="dgm-s" x="466" y="262">LIBRO DE LA MITAD B DE LA RED</text>
+        <text class="dgm-t" x="466" y="286">M pertenece a Carlos</text>
+      </svg>
+      </div>
+      <figcaption>Fig. 1 — El doble gasto no rompe la criptografía: rompe el orden. Ambas firmas verifican correctamente.</figcaption>
+    </figure>
+
+    <p>Obsérvese que <strong>ningún componente falló</strong>. Las firmas eran válidas, los mensajes íntegros, los nodos honestos. El fallo es arquitectónico: el sistema carece de un mecanismo para establecer un <em>orden único y global</em> de los eventos. Este es, en el fondo, un problema clásico de sistemas distribuidos, no de criptografía.</p>
+
+    <div class="ficha ficha--profundidad">
+      <p class="ficha-tit"><span>Profundidad</span> · Conexión con Sistemas Distribuidos</p>
+      <p>Quienes hayan cursado Sistemas Distribuidos reconocerán aquí el problema del <strong>orden total de eventos</strong> en ausencia de un reloj global, tratado por Leslie Lamport en <em>Time, Clocks, and the Ordering of Events in a Distributed System</em> (1978). El punto que conviene retener es que blockchain no es un tema nuevo desconectado de la carrera: es una solución particular —con supuestos de adversario mucho más duros— a un problema que la disciplina lleva medio siglo estudiando.</p>
+      <p>La diferencia crítica está en el modelo de fallas. Los algoritmos clásicos de consenso como Paxos o Raft asumen <strong>fallas por caída</strong> (<i>crash faults</i>): un nodo puede apagarse o perder mensajes, pero si responde, responde honestamente. Blockchain asume <strong>fallas bizantinas</strong>: un nodo puede mentir activamente, coordinarse con otros nodos maliciosos y tener incentivos económicos para hacerlo. Ese endurecimiento del modelo es lo que hace el problema difícil, y lo veremos formalmente en la Sesión 4.</p>
+    </div>
+
+    <div class="ficha ficha--pregunta">
+      <p class="ficha-tit"><span>Pregunta para el aula</span></p>
+      <p>Si el problema es lograr que todos coincidan en el orden de los eventos, ¿por qué no basta con poner un servidor que reciba todo y decida el orden? ¿Qué se gana y qué se pierde con esa decisión?</p>
+    </div>
+  </div>
+</div>
+</section>
+
+<hr>
+
+<section id="a2">
+<div class="grid">
+  <div class="rail">
+    <b>A.2</b>
+    <span class="tick">min 30–45</span><br><br>
+    Concepto eje:<br>confianza como<br>requisito de sistema<br><br>
+    Enlaza con:<br>A.7 (cuándo no usar)
+  </div>
+  <div>
+    <h2>A.2 · El tercero de confianza y su costo</h2>
+
+    <p>La respuesta a la pregunta anterior es, por supuesto, que sí basta con poner un servidor. Y esa es precisamente la solución que la humanidad usa desde hace siglos: se llama banco. Es importante entender que <strong>esta solución funciona bien</strong>, porque el discurso entusiasta del sector cripto suele presentarla como si estuviera rota, y no lo está.</p>
+
+    <div class="ficha ficha--termino">
+      <p class="ficha-tit"><span>Ficha de término 03</span> · Tercero de confianza</p>
+      <p class="def"><b>Tercero de confianza</b> (en inglés, <i>trusted third party</i>, abreviado <span class="sigla">TTP<i>Trusted Third Party</i></span>): entidad en la que dos partes que no confían entre sí delegan la verificación y el registro de una transacción, porque ambas confían en ella.</p>
+      <p>Un banco, una cámara de compensación, una notaría, una autoridad certificadora de certificados digitales y una plataforma de pagos son todos terceros de confianza. Resuelven el doble gasto de la forma más simple posible: hay <strong>una sola copia autorizada del libro</strong>, la del tercero, y si dos transacciones entran en conflicto, el tercero decide.</p>
+    </div>
+
+    <h3>Qué garantiza realmente un tercero de confianza</h3>
+
+    <ul class="plain">
+      <li><b>Orden.</b> Al haber un único punto de escritura, no hay ambigüedad sobre qué transacción ocurrió primero. El doble gasto es imposible por construcción.</li>
+      <li><b>Reversibilidad.</b> Si hay fraude o error, existe una autoridad que puede revertir la operación. Esta propiedad es enormemente valiosa y las cadenas públicas la pierden por completo.</li>
+      <li><b>Identidad y cumplimiento.</b> El tercero sabe quién es cada parte, lo que permite aplicar la normativa de <span class="sigla">KYC<i>Know Your Customer · conozca a su cliente</i></span> y de <span class="sigla">AML<i>Anti-Money Laundering · antilavado de activos</i></span>, y responder ante un juez.</li>
+      <li><b>Eficiencia.</b> Un sistema centralizado es varios órdenes de magnitud más rápido y más barato por transacción que cualquier cadena pública. No es una limitación temporal: es una consecuencia matemática de tener que replicar y verificar todo en miles de nodos.</li>
+    </ul>
+
+    <h3>Qué cuesta</h3>
+
+    <p>El precio de esas garantías es que <strong>el tercero debe ser confiable, permanentemente y para todos</strong>. Eso implica cuatro riesgos estructurales que no se eliminan con mejor ingeniería, porque son propiedades del modelo:</p>
+
+    <ul class="plain">
+      <li><b>Punto único de falla.</b> En inglés, <span class="sigla">SPOF<i>Single Point Of Failure · punto único de falla</i></span>. Si el tercero cae, se corrompe o es capturado, el sistema entero cae con él.</li>
+      <li><b>Poder de exclusión.</b> El tercero decide quién participa. Puede negar el servicio, congelar fondos o excluir a una población entera —por costo, por geografía o por decisión política—. Esto no es hipotético: es la experiencia cotidiana de una parte significativa de la población no bancarizada.</li>
+      <li><b>Poder de censura.</b> El tercero puede negarse a procesar una transacción concreta entre dos partes que sí quieren realizarla.</li>
+      <li><b>Opacidad.</b> El usuario no puede auditar el libro. Debe creer en el saldo que le muestran. Los grandes fraudes contables del último siglo consistieron exactamente en esto.</li>
+    </ul>
+
+    <p>El aporte real de blockchain, formulado con precisión y sin entusiasmo, es este: <strong>ofrece un conjunto de garantías distinto, a un costo distinto</strong>. Cambia «confiar en una entidad» por «verificar un mecanismo». No es mejor en abstracto. Es mejor <em>cuando y solo cuando</em> el costo de tener que confiar en un tercero supera el costo enorme de replicar y verificar todo en una red abierta. Determinar cuándo se cumple esa condición es la competencia profesional que este curso busca formar.</p>
+
+    <div class="ficha ficha--alerta">
+      <p class="ficha-tit"><span>Alerta conceptual</span> · «Sin confianza» es una mala traducción</p>
+      <p>Se dice con frecuencia que blockchain es un sistema <i>trustless</i>, y se traduce como «sin confianza». Es engañoso. Un sistema de este tipo <strong>sí requiere confianza</strong>, solo que la traslada: hay que confiar en la matemática de las funciones criptográficas, en la corrección del código del cliente que se ejecuta, en que la mayoría del poder de la red no está coludida y —muy importante— en que el contrato inteligente con el que se interactúa no tiene una puerta trasera.</p>
+      <p>La traducción honesta de <i>trustless</i> es «<strong>que no exige confiar en una contraparte identificada</strong>», o mejor aún «<strong>minimizado en confianza</strong>» (<i>trust-minimized</i>). La diferencia importa: quien cree que no confía en nada, no audita nada, y ese es exactamente el perfil de la víctima típica de una estafa cripto.</p>
+    </div>
+  </div>
+</div>
+</section>
+
+<hr>
+
+<section id="a3">
+<div class="grid">
+  <div class="rail">
+    <b>A.3</b>
+    <span class="tick">min 45–60</span><br><br>
+    Concepto eje:<br>genealogía técnica<br><br>
+    Objetivo:<br>desmontar la idea de invención espontánea
+  </div>
+  <div>
+    <h2>A.3 · Treinta años de intentos fallidos</h2>
+
+    <p>Bitcoin no apareció de la nada en 2008. Fue el resultado de una tradición de investigación que se puede fechar con precisión y cuyos fracasos son más instructivos que el éxito final, porque cada uno aisló una pieza del problema.</p>
+
+    <p>El contexto intelectual es el movimiento <strong>cypherpunk</strong>: un grupo de criptógrafos, matemáticos y activistas que desde finales de los años ochenta sostuvo que la criptografía fuerte, en manos de individuos, era una condición necesaria para la privacidad en una sociedad digital. Su lista de correo fue el laboratorio donde se discutieron casi todas las ideas que hoy estudiamos.</p>
+
+    <div class="tabla-wrap">
+    <table>
+      <thead><tr><th>Año</th><th>Propuesta</th><th>Autor</th><th>Aporte conservado</th><th>Por qué no bastó</th></tr></thead>
+      <tbody>
+        <tr>
+          <td>1982</td><td>Firmas ciegas</td><td>David Chaum</td>
+          <td>Permite firmar un mensaje sin ver su contenido: base del dinero digital anónimo.</td>
+          <td>Es una primitiva criptográfica, no un sistema. No dice nada sobre el orden ni sobre quién lleva el libro.</td>
+        </tr>
+        <tr>
+          <td>1989</td><td>DigiCash / eCash</td><td>David Chaum</td>
+          <td>Primer dinero digital con privacidad real puesto en producción.</td>
+          <td>El emisor seguía siendo una empresa central. Cuando DigiCash quebró en 1998, el dinero desapareció con ella. El problema del tercero de confianza quedó intacto.</td>
+        </tr>
+        <tr>
+          <td>1997</td><td>Hashcash</td><td>Adam Back</td>
+          <td><strong>Prueba de trabajo.</strong> Obligar al emisor a gastar cómputo verificable para enviar un mensaje. Diseñado originalmente contra el correo no deseado.</td>
+          <td>Resolvía el costo de emitir, no el registro ni el consenso. Pero es la pieza que Bitcoin toma casi sin modificar.</td>
+        </tr>
+        <tr>
+          <td>1998</td><td>b-money</td><td>Wei Dai</td>
+          <td>Propuso que <em>todos</em> los participantes mantuvieran una copia del libro y que la creación de dinero costara trabajo computacional.</td>
+          <td>Nunca se implementó. No especificaba cómo lograr acuerdo cuando las copias divergieran: dejaba el consenso como un problema abierto.</td>
+        </tr>
+        <tr>
+          <td>1998</td><td>bit gold</td><td>Nick Szabo</td>
+          <td>Cadenas de pruebas de trabajo encadenadas por hash, con sellado temporal. Estructuralmente muy cercano a lo que vendría.</td>
+          <td>Tampoco se implementó, y dependía de un registro de títulos que requería consenso bizantino no resuelto.</td>
+        </tr>
+        <tr>
+          <td>1996</td><td>e-gold</td><td>Douglas Jackson</td>
+          <td>Demostró que existía demanda real y masiva de pagos digitales transfronterizos.</td>
+          <td>Centralizado y respaldado en oro físico. Fue cerrado por las autoridades estadounidenses. Ilustra la vulnerabilidad regulatoria del emisor único.</td>
+        </tr>
+      </tbody>
+    </table>
+    </div>
+
+    <p>Léase la columna de la derecha en conjunto. Se repite un patrón: <strong>o la propuesta tenía un emisor central y por lo tanto era clausurable, o no tenía emisor central pero no explicaba cómo lograr acuerdo</strong>. Durante veinte años nadie cerró esa brecha.</p>
+
+    <div class="ficha ficha--termino">
+      <p class="ficha-tit"><span>Ficha de término 04</span> · Prueba de trabajo</p>
+      <p class="def"><b>Prueba de trabajo</b> (en inglés, <i>Proof of Work</i>, abreviado <span class="sigla">PoW<i>Proof of Work</i></span>): mecanismo por el cual un participante demuestra que invirtió una cantidad medible de cómputo, mediante un resultado que es <strong>costoso de producir y barato de verificar</strong>.</p>
+      <p>Esa asimetría es toda la idea. Encontrar la solución exige millones de intentos aleatorios; comprobar que una solución propuesta es correcta exige una sola operación. Así, cualquier participante —incluso uno con un teléfono— puede verificar el trabajo de una granja de minado industrial en microsegundos.</p>
+      <p>La formalizaremos en la Sesión 4 y la implementaremos en la Sesión 3. Por ahora basta la intuición: <strong>convierte el derecho a escribir en el libro en algo que cuesta dinero real</strong>, y por lo tanto en algo que un atacante no puede acaparar gratuitamente.</p>
+    </div>
+  </div>
+</div>
+</section>
+
+<hr>
+
+<section id="a4">
+<div class="grid">
+  <div class="rail">
+    <b>A.4</b>
+    <span class="tick">min 60–72</span><br><br>
+    Concepto eje:<br>síntesis, no invención<br><br>
+    Fecha clave:<br>31 · 10 · 2008
+  </div>
+  <div>
+    <h2>A.4 · 2008: la síntesis</h2>
+
+    <p>El 31 de octubre de 2008, alguien que firmaba como <strong>Satoshi Nakamoto</strong> —seudónimo cuya identidad real sigue sin establecerse— publicó en una lista de correo de criptografía un documento de nueve páginas titulado <em>Bitcoin: A Peer-to-Peer Electronic Cash System</em>. El 3 de enero de 2009 se generó el primer bloque de la red.</p>
+
+    <p>El contexto importa: el sistema financiero global atravesaba la crisis más grave desde 1929, y los rescates bancarios con dinero público estaban en el centro del debate. En el primer bloque de Bitcoin quedó grabado, de forma permanente, el titular de portada de <em>The Times</em> del 3 de enero de 2009 sobre un segundo rescate bancario. Esa inscripción cumple dos funciones: es una prueba criptográfica de que el bloque no pudo haberse creado antes de esa fecha, y es una declaración política inequívoca sobre el objeto del proyecto.</p>
+
+    <h3>La contribución real</h3>
+
+    <p>Conviene ser preciso, porque aquí se concentra buena parte de la mitología del sector. <strong>Bitcoin no inventó ninguna de sus piezas.</strong> Todas existían. Lo que hizo fue ensamblarlas de modo que el conjunto resolviera lo que ninguna resolvía por separado:</p>
+
+    <div class="tabla-wrap">
+    <table>
+      <thead><tr><th>Pieza</th><th>Ya existía desde</th><th>Función dentro del sistema</th></tr></thead>
+      <tbody>
+        <tr><td>Funciones hash criptográficas</td><td>Años 70–90</td><td>Encadenar bloques y hacer detectable cualquier alteración. Sesión 2.</td></tr>
+        <tr><td>Firmas digitales de clave pública</td><td>1976 en adelante</td><td>Probar la autoría de una transacción sin revelar la clave privada. Sesión 2.</td></tr>
+        <tr><td>Árboles de Merkle</td><td>1979</td><td>Resumir miles de transacciones en un único valor verificable. Sesión 2.</td></tr>
+        <tr><td>Prueba de trabajo (Hashcash)</td><td>1997</td><td>Hacer costoso el derecho a proponer un bloque. Sesión 4.</td></tr>
+        <tr><td>Redes <span class="sigla">P2P<i>peer-to-peer · de par a par</i></span></td><td>Años 90–2000</td><td>Propagar transacciones y bloques sin servidor central. Sesión 3.</td></tr>
+      </tbody>
+    </table>
+    </div>
+
+    <p>La pieza genuinamente nueva es la <strong>sexta</strong>, y no es tecnológica sino económica: <strong>un esquema de incentivos que hace que comportarse honestamente sea más rentable que atacar el sistema</strong>. Quien aporta cómputo recibe monedas recién emitidas y comisiones; ese ingreso solo tiene valor si la red conserva credibilidad; atacar la red destruiría el valor de la recompensa que se busca obtener. El atacante racional descubre que atacar le cuesta más de lo que le rinde.</p>
+
+    <p>Formulado como principio de diseño, que es como conviene retenerlo:</p>
+
+    <div class="ficha ficha--pregunta">
+      <p class="ficha-tit"><span>Idea central de la sesión</span></p>
+      <p>El acuerdo entre desconocidos no se logró con más criptografía. Se logró alineando incentivos económicos con el comportamiento honesto, y usando criptografía para que las trampas fueran <em>detectables</em>.</p>
+    </div>
+
+    <div class="ficha ficha--profundidad">
+      <p class="ficha-tit"><span>Profundidad</span> · Por qué esto es relevante para un ingeniero de software</p>
+      <p>Hay una lección de diseño de sistemas que trasciende el tema de la sesión: cuando un sistema tiene participantes con intereses propios, <strong>el modelo de amenaza debe incluir la racionalidad económica del adversario, no solo sus capacidades técnicas</strong>.</p>
+      <p>La seguridad tradicional pregunta «¿puede un atacante hacer X?». El diseño de protocolos económicos pregunta además «¿le conviene?». Un sistema puede ser técnicamente vulnerable y en la práctica seguro porque el ataque no es rentable, y puede ser técnicamente sólido y en la práctica quebrado porque un incentivo mal calibrado hace que los participantes honestos abandonen. Volveremos a esto en la Sesión 9 (seguridad) y en la Sesión 14 (DeFi), donde varios de los mayores robos de la historia del sector no explotaron un fallo de código sino un fallo de incentivos.</p>
+    </div>
+  </div>
+</div>
+</section>
+
+<hr>
+
+<section id="a5">
+<div class="grid">
+  <div class="rail">
+    <b>A.5</b>
+    <span class="tick">min 72–82</span><br><br>
+    Concepto eje:<br>estructura de datos<br><br>
+    Preparación para:<br>Sesión 3 (implementación)
+  </div>
+  <div>
+    <h2>A.5 · Anatomía conceptual de una cadena de bloques</h2>
+
+    <p>Dejemos la historia y vayamos a la estructura. Para un ingeniero de sistemas, una blockchain se describe con precisión en una frase:</p>
+
+    <div class="ficha ficha--termino">
+      <p class="ficha-tit"><span>Ficha de término 05</span> · Blockchain / cadena de bloques</p>
+      <p class="def"><b>Cadena de bloques</b>: lista enlazada, de solo anexado, cuyos nodos —llamados bloques— agrupan transacciones y contienen el resumen criptográfico del nodo anterior; replicada en una red de pares que acuerdan su contenido mediante un protocolo de consenso tolerante a fallas bizantinas.</p>
+      <p>Desarmemos la definición pieza por pieza, porque cada cláusula carga un requisito de diseño.</p>
+      <ul>
+        <li><strong>Lista enlazada</strong> — la estructura de datos es la que se estudia en segundo semestre. No hay nada exótico en ella.</li>
+        <li><strong>De solo anexado</strong> (<i>append-only</i>) — la única operación de escritura permitida es agregar al final. No existen <code>update</code> ni <code>delete</code>. Esta restricción es la fuente de la propiedad de inmutabilidad.</li>
+        <li><strong>Cada bloque contiene el resumen del anterior</strong> — el enlace no es un puntero de memoria, es un <em>hash</em> del contenido previo. Por eso alterar un bloque antiguo cambia su hash, lo que invalida el enlace del siguiente, y en cascada toda la cadena posterior. La detección de manipulación es inmediata y no requiere confiar en nadie.</li>
+        <li><strong>Replicada en una red de pares</strong> — no hay una copia; hay miles de copias completas. Borrar el dato exigiría alcanzar simultáneamente a todos los nodos del mundo.</li>
+        <li><strong>Consenso tolerante a fallas bizantinas</strong> — el mecanismo por el cual esas miles de copias acuerdan cuál es la versión válida, incluso si una parte de los participantes miente activamente.</li>
+      </ul>
+    </div>
+
+    <h4>Estructura simplificada de un bloque</h4>
+
+    <pre><code><span class="c">// Representación conceptual. La implementaremos en la Sesión 3.</span>
+Bloque {
+  <span class="k">cabecera</span> {
+    hashBloqueAnterior : bytes32   <span class="c">// el enlace de la cadena</span>
+    raizDeMerkle       : bytes32   <span class="c">// resumen de TODAS las transacciones</span>
+    marcaDeTiempo      : uint      <span class="c">// cuándo se propuso el bloque</span>
+    dificultad         : uint      <span class="c">// cuán costoso debía ser el trabajo</span>
+    nonce              : uint      <span class="c">// el número que se busca por fuerza bruta</span>
+  }
+  <span class="k">transacciones</span>: Transaccion[]   <span class="c">// la carga útil</span>
+}</code></pre>
+
+    <figure>
+      <div class="fig-scroll">
+      <svg viewBox="0 0 720 265" role="img" aria-label="Diagrama del encadenamiento por hash: cada bloque contiene el hash del anterior, de modo que alterar un bloque invalida el enlace de todos los posteriores.">
+        <!-- Bloque 1 -->
+        <rect class="dgm-box" x="20" y="30" width="200" height="180"/>
+        <rect class="dgm-fill" x="20" y="30" width="200" height="26"/>
+        <text class="dgm-inv" x="32" y="48" style="font-family:var(--font-mono);font-size:11px;font-weight:700;letter-spacing:.12em">BLOQUE 120</text>
+        <text class="dgm-s" x="32" y="78">HASH ANTERIOR</text>
+        <text class="dgm-t" x="32" y="96">0x4c1e…9ab2</text>
+        <path class="dgm-line" d="M20 106h200"/>
+        <text class="dgm-s" x="32" y="128">TRANSACCIONES</text>
+        <text class="dgm-t" x="32" y="146">raíz de Merkle</text>
+        <path class="dgm-line" d="M20 156h200"/>
+        <text class="dgm-s" x="32" y="178">HASH DE ESTE BLOQUE</text>
+        <text class="dgm-t" x="32" y="196">0x8f3a…c41d</text>
+
+        <!-- Bloque 2 -->
+        <rect class="dgm-box" x="260" y="30" width="200" height="180"/>
+        <rect class="dgm-fill" x="260" y="30" width="200" height="26"/>
+        <text class="dgm-inv" x="272" y="48" style="font-family:var(--font-mono);font-size:11px;font-weight:700;letter-spacing:.12em">BLOQUE 121</text>
+        <text class="dgm-s" x="272" y="78">HASH ANTERIOR</text>
+        <text class="dgm-t" x="272" y="96">0x8f3a…c41d</text>
+        <path class="dgm-line" d="M260 106h200"/>
+        <text class="dgm-s" x="272" y="128">TRANSACCIONES</text>
+        <text class="dgm-t" x="272" y="146">raíz de Merkle</text>
+        <path class="dgm-line" d="M260 156h200"/>
+        <text class="dgm-s" x="272" y="178">HASH DE ESTE BLOQUE</text>
+        <text class="dgm-t" x="272" y="196">0x21b7…0f5e</text>
+
+        <!-- Bloque 3 -->
+        <rect class="dgm-box" x="500" y="30" width="200" height="180"/>
+        <rect class="dgm-fill" x="500" y="30" width="200" height="26"/>
+        <text class="dgm-inv" x="512" y="48" style="font-family:var(--font-mono);font-size:11px;font-weight:700;letter-spacing:.12em">BLOQUE 122</text>
+        <text class="dgm-s" x="512" y="78">HASH ANTERIOR</text>
+        <text class="dgm-t" x="512" y="96">0x21b7…0f5e</text>
+        <path class="dgm-line" d="M500 106h200"/>
+        <text class="dgm-s" x="512" y="128">TRANSACCIONES</text>
+        <text class="dgm-t" x="512" y="146">raíz de Merkle</text>
+        <path class="dgm-line" d="M500 156h200"/>
+        <text class="dgm-s" x="512" y="178">HASH DE ESTE BLOQUE</text>
+        <text class="dgm-t" x="512" y="196">0x9d02…7e13</text>
+
+        <!-- Enlaces -->
+        <path class="dgm-line" d="M220 190h20V88h20M460 190h20V88h20"/>
+        <polygon class="dgm-fill" points="260,88 250,83 250,93"/>
+        <polygon class="dgm-fill" points="500,88 490,83 490,93"/>
+
+        <!-- Anotación de manipulación -->
+        <path class="dgm-line-a" d="M20 226h200M260 226h440"/>
+        <text class="dgm-a" x="20" y="248">1 · SE ALTERA UN BYTE AQUÍ</text>
+        <text class="dgm-a" x="260" y="248">2 · SU HASH CAMBIA Y ROMPE TODOS LOS ENLACES POSTERIORES</text>
+      </svg>
+      </div>
+      <figcaption>Fig. 2 — El enlace no es un puntero: es el hash del contenido previo. Por eso la manipulación se detecta en cascada y sin consultar a nadie.</figcaption>
+    </figure>
+
+    <div class="ficha ficha--termino">
+      <p class="ficha-tit"><span>Ficha de término 06</span> · Hash y nonce</p>
+      <p class="def"><b>Hash</b> (o resumen criptográfico): salida de longitud fija que produce una función matemática a partir de una entrada de cualquier longitud, de manera determinista, irreversible en la práctica, y tal que un cambio mínimo en la entrada altera por completo la salida.</p>
+      <p class="def"><b>Nonce</b> (contracción del inglés <i>number used once</i>, «número usado una sola vez»): campo modificable de la cabecera cuyo único propósito es variar hasta que el hash del bloque cumpla la condición de dificultad exigida.</p>
+      <p>El nonce es el corazón operativo del minado. El minero no «resuelve un problema matemático útil», como suele decirse: prueba un nonce, calcula el hash del bloque, verifica si el resultado empieza con la cantidad requerida de ceros, y si no, incrementa el nonce y repite. Miles de billones de veces por segundo. Es fuerza bruta pura, y esa es exactamente la propiedad deseada, porque hace el trabajo medible e infalsificable.</p>
+      <p>Cuidado con una ambigüedad que confunde a todo el mundo en la Sesión 5: en Ethereum, la palabra <em>nonce</em> designa además un contador de transacciones por cuenta, que no tiene nada que ver con el minado. Son dos conceptos distintos con el mismo nombre.</p>
+    </div>
+
+    <div class="ficha ficha--alerta">
+      <p class="ficha-tit"><span>Alerta</span> · Inmutable no significa indestructible</p>
+      <p>La inmutabilidad de una cadena de bloques es <strong>económica y probabilística</strong>, no física. Nada impide matemáticamente reescribir la historia; lo que lo impide es que hacerlo exigiría rehacer la prueba de trabajo de todos los bloques posteriores <em>más rápido</em> que el resto de la red produce bloques nuevos. Es una barrera de costo, no un candado.</p>
+      <p>Consecuencia práctica que se usa todos los días: un bloque no es «definitivo» de inmediato. Se vuelve progresivamente más difícil de revertir a medida que se acumulan bloques encima. Por eso los intercambios esperan un número de confirmaciones antes de acreditar un depósito. En la Sesión 3 mediremos experimentalmente ese costo.</p>
+    </div>
+  </div>
+</div>
+</section>
+
+<hr>
+
+<section id="a6">
+<div class="grid">
+  <div class="rail">
+    <b>A.6</b>
+    <span class="tick">min 82–92</span><br><br>
+    Concepto eje:<br>taxonomía<br><br>
+    Uso directo en:<br>Anteproyecto (S6)
+  </div>
+  <div>
+    <h2>A.6 · Taxonomía de redes y la promesa Web 3.0</h2>
+
+    <p>«Blockchain» no designa una sola cosa. Designa una familia de arquitecturas con propiedades muy distintas. Confundirlas es el error más común en las propuestas de proyecto, y es un error caro: la mitad de las decisiones de diseño dependen de esta elección.</p>
+
+    <p>Dos ejes independientes clasifican el espacio. El primero es <strong>quién puede leer</strong> el libro; el segundo es <strong>quién puede escribir</strong> en él, es decir, quién participa en el consenso.</p>
+
+    <div class="tabla-wrap">
+    <table>
+      <thead><tr><th>Tipo</th><th>Quién lee</th><th>Quién escribe</th><th>Confianza requerida</th><th>Ejemplo de uso apropiado</th></tr></thead>
+      <tbody>
+        <tr>
+          <td>Pública sin permiso</td><td>Cualquiera</td><td>Cualquiera</td>
+          <td>Mínima. No hay que identificar a nadie.</td>
+          <td>Activos digitales de circulación abierta; registros que deben resistir la presión de cualquier gobierno o empresa.</td>
+        </tr>
+        <tr>
+          <td>Pública con permiso</td><td>Cualquiera</td><td>Conjunto autorizado</td>
+          <td>En los validadores autorizados.</td>
+          <td>Registros públicos estatales donde la transparencia es obligatoria pero la escritura debe ser oficial.</td>
+        </tr>
+        <tr>
+          <td>De consorcio</td><td>Miembros</td><td>Miembros</td>
+          <td>En el consorcio como colectivo; ningún miembro individual controla.</td>
+          <td>Trazabilidad entre empresas competidoras de una misma cadena de suministro, que no confían entre sí pero necesitan un registro común.</td>
+        </tr>
+        <tr>
+          <td>Privada</td><td>Una organización</td><td>Una organización</td>
+          <td>Total, en el operador.</td>
+          <td><strong>Casi siempre: ninguno.</strong> Ver la alerta de abajo.</td>
+        </tr>
+      </tbody>
+    </table>
+    </div>
+
+    <div class="ficha ficha--alerta">
+      <p class="ficha-tit"><span>Alerta</span> · El caso de la blockchain privada de un solo dueño</p>
+      <p>Si una sola organización controla la lectura, la escritura y los nodos, entonces esa organización puede reescribir el registro cuando quiera. Ha construido, con un costo de operación mucho mayor, <strong>una base de datos con bitácora de auditoría</strong>. Una base de datos relacional con firmas digitales y registros de solo anexado ofrece las mismas garantías reales, con mejor rendimiento y personal disponible en el mercado laboral.</p>
+      <p>Esto no significa que las redes permisionadas carezcan de valor: el caso de consorcio, con varias organizaciones que <em>no</em> confían entre sí, es legítimo y frecuente en la industria. La pregunta que separa un caso del otro es siempre la misma: <strong>¿hay más de una parte, con intereses divergentes, que necesita coincidir en un registro común?</strong> Si la respuesta es no, no hay caso.</p>
+    </div>
+
+    <h3>Web 1.0 → Web 2.0 → Web 3.0</h3>
+
+    <p>El término «Web 3.0» es de mercadeo antes que técnico, y conviene tratarlo con la distancia crítica correspondiente. Dicho eso, describe un desplazamiento real en el control de los datos y de la identidad.</p>
+
+    <div class="tabla-wrap">
+    <table>
+      <thead><tr><th>Etapa</th><th>Periodo aprox.</th><th>Verbo</th><th>Quién posee los datos</th><th>Modelo de identidad</th></tr></thead>
+      <tbody>
+        <tr><td>Web 1.0</td><td>1991–2004</td><td>Leer</td><td>Quien publica el sitio</td><td>Ninguno. Documentos anónimos enlazados.</td></tr>
+        <tr><td>Web 2.0</td><td>2004–hoy</td><td>Leer y escribir</td><td>La plataforma que aloja el contenido</td><td>Cuenta en un servidor ajeno: usuario y contraseña que la plataforma puede revocar.</td></tr>
+        <tr><td>Web 3.0</td><td>2015–hoy</td><td>Leer, escribir y <em>poseer</em></td><td>El usuario, mediante control de claves criptográficas</td><td>Par de claves controlado por el usuario. Nadie puede revocarlo, y nadie puede recuperarlo si se pierde.</td></tr>
+      </tbody>
+    </table>
+    </div>
+
+    <p>El cambio operativo concreto —el que se experimenta en el laboratorio de hoy— es este: en la Web 2.0, la identidad la <em>otorga</em> un servidor y por lo tanto la puede quitar; en la Web 3.0, la identidad es <strong>una clave criptográfica que el usuario genera por su cuenta</strong>, sin pedir permiso a nadie y sin que exista registro previo.</p>
+
+    <p>La simetría de esa propiedad es total y hay que decirla completa: si nadie puede quitarle la cuenta al usuario, entonces <strong>nadie puede devolvérsela si la pierde</strong>. No hay «olvidé mi contraseña». Esta es, en la práctica, la mayor barrera de adopción del modelo, y es el motivo por el cual existe toda una línea de investigación —abstracción de cuentas, que veremos en la Sesión 13— dedicada a recuperar la recuperabilidad sin recuperar al intermediario.</p>
+
+    <div class="ficha ficha--profundidad">
+      <p class="ficha-tit"><span>Profundidad</span> · Precisión terminológica: Web 3.0 no es Web3</p>
+      <p>Hay dos términos parecidos que designan cosas distintas y que a menudo se usan indistintamente.</p>
+      <p><strong>Web 3.0</strong>, en el uso original de Tim Berners-Lee y del <span class="sigla">W3C<i>World Wide Web Consortium · organismo de estándares de la web</i></span>, se refiere a la <em>web semántica</em>: datos estructurados y legibles por máquinas mediante ontologías. No tiene relación con blockchain.</p>
+      <p><strong>Web3</strong>, sin punto, es el término acuñado hacia 2014 en el entorno de Ethereum para designar la web construida sobre protocolos descentralizados y propiedad criptográfica.</p>
+      <p>En el uso actual de la industria los dos se han fundido, y este curso adopta el sentido de «Web3» aunque el nombre del curso conserve la forma «Web 3.0». Se señala la distinción porque en la literatura académica anterior a 2015 «Web 3.0» significa otra cosa, y un estudiante que cite esas fuentes sin advertirlo cometerá un error.</p>
+    </div>
+  </div>
+</div>
+</section>
+
+<hr>
+
+<section id="a7">
+<div class="grid">
+  <div class="rail">
+    <b>A.7</b>
+    <span class="tick">min 92–105</span><br><br>
+    <span class="tick">SECCIÓN CRÍTICA</span><br><br>
+    Se evalúa en:<br>Anteproyecto · rúbrica<br>criterio «pertinencia»
+  </div>
+  <div>
+    <h2>A.7 · Cuándo NO se debe usar blockchain</h2>
+
+    <p>Esta es la sección más importante de la sesión, y la que más pesa en la rúbrica del proyecto. Un ingeniero que solo sabe construir con una herramienta la usará para todo. La competencia profesional consiste en saber <strong>descartarla con argumentos</strong>.</p>
+
+    <p>El criterio de pertinencia del proyecto final vale el 15 % de la nota, y su descriptor de «insuficiente» dice literalmente: <em>usa blockchain sin necesidad real; una base de datos resolvería mejor</em>. Conviene tomárselo en serio desde hoy.</p>
+
+    <h3>Árbol de decisión</h3>
+
+    <p>Aplíquese en orden. La primera respuesta que corte, corta.</p>
+
+    <ol class="pasos">
+      <li>
+        <h4>¿Hay más de una parte que escriba en el registro?</h4>
+        <p><strong>Si no</strong> → use una base de datos. Un registro con un solo escritor no tiene problema de consenso, y el consenso es lo único que blockchain aporta y lo único que cuesta caro.</p>
+      </li>
+      <li>
+        <h4>¿Esas partes tienen intereses divergentes, al punto de que una podría querer alterar el registro en su favor?</h4>
+        <p><strong>Si no</strong> → use una base de datos compartida con control de acceso. Entre partes que confían mutuamente, replicar y verificar todo es costo puro sin beneficio.</p>
+      </li>
+      <li>
+        <h4>¿Existe un tercero de confianza aceptable para todas las partes y disponible en la práctica?</h4>
+        <p><strong>Si existe</strong> → úselo. Un banco, una notaría, una cámara de compensación o un organismo regulador resuelven el problema de forma más barata, más rápida y con recurso legal en caso de disputa. Blockchain solo se justifica cuando ese tercero <em>no existe</em>, <em>no es aceptable para todos</em> o <em>su costo o su poder de exclusión son inaceptables</em>.</p>
+      </li>
+      <li>
+        <h4>¿El dato debe ser público, o al menos verificable por terceros?</h4>
+        <p><strong>Si el dato es sensible o personal</strong> → cuidado grave. Todo lo escrito en una cadena pública es visible para siempre y no se puede borrar. Esto colisiona frontalmente con el derecho de supresión de datos personales reconocido en la Ley 1581 de 2012 en Colombia y en el reglamento europeo de protección de datos. Si se debe registrar información personal, lo que va a la cadena es <strong>el hash del dato, nunca el dato</strong>, y el dato vive fuera de ella.</p>
+      </li>
+      <li>
+        <h4>¿El sistema puede tolerar latencia de segundos a minutos y un costo por operación?</h4>
+        <p><strong>Si necesita miles de operaciones por segundo con latencia de milisegundos</strong> → la capa base no sirve. Evalúe capa 2 (Sesión 16) o, con honestidad, una arquitectura convencional. Los números están más abajo.</p>
+      </li>
+      <li>
+        <h4>¿El problema es realmente de registro, o es de captura de datos?</h4>
+        <p>Esta es la trampa más frecuente en proyectos de trazabilidad. Una cadena de bloques garantiza que <strong>lo que se escribió no se alteró después</strong>. No garantiza que lo que se escribió fuera cierto. Si alguien registra que un lote de café es orgánico y no lo es, la cadena preservará esa mentira con integridad criptográfica perfecta y para siempre. El problema del último kilómetro —la conexión entre el mundo físico y el registro digital— no lo resuelve la tecnología, sino el diseño institucional: sensores certificados, auditores, responsabilidad legal.</p>
+      </li>
+    </ol>
+
+    <div class="ficha ficha--alerta">
+      <p class="ficha-tit"><span>Alerta</span> · El problema del oráculo, enunciado desde el primer día</p>
+      <p>Se enuncia formalmente así: <strong>una cadena de bloques no tiene acceso al mundo exterior</strong>. No puede consultar el clima, ni un precio, ni si un contenedor llegó al puerto. Toda información externa debe ser introducida por un actor, y ese actor es un punto de confianza que hay que analizar explícitamente.</p>
+      <p>Cualquier proyecto que dependa de datos del mundo físico debe responder, en el anteproyecto, quién introduce el dato y por qué debemos creerle. La respuesta «lo pone el usuario» es válida solo si se acepta explícitamente que el sistema no verifica la veracidad. Trataremos el tema a fondo en la Sesión 14, con oráculos descentralizados.</p>
+    </div>
+
+    <h3>Los números, para dimensionar el costo</h3>
+
+    <p>Órdenes de magnitud aproximados, útiles para argumentar en una propuesta. La unidad es <span class="sigla">TPS<i>Transactions Per Second · transacciones por segundo</i></span>.</p>
+
+    <div class="tabla-wrap">
+    <table>
+      <thead><tr><th>Sistema</th><th>Rendimiento aprox.</th><th>Latencia hasta liquidación práctica</th><th>Costo por operación</th></tr></thead>
+      <tbody>
+        <tr><td>Motor de base de datos centralizado</td><td>Decenas de miles a millones</td><td>Milisegundos</td><td>Despreciable</td></tr>
+        <tr><td>Red de tarjetas de pago</td><td>Miles (promedio real)</td><td>Segundos para autorizar; días para liquidar</td><td>Comisión porcentual al comercio</td></tr>
+        <tr><td>Ethereum, capa base</td><td>Orden de decenas</td><td>Decenas de segundos a minutos</td><td>Variable, según congestión</td></tr>
+        <tr><td>Bitcoin, capa base</td><td>Orden de unidades</td><td>Decenas de minutos</td><td>Variable, según congestión</td></tr>
+        <tr><td>Capa 2 sobre Ethereum</td><td>Cientos a miles</td><td>Segundos</td><td>Fracción del costo de la capa base</td></tr>
+      </tbody>
+    </table>
+    </div>
+
+    <div class="ficha ficha--docente">
+      <p class="ficha-tit"><span>Nota metodológica</span></p>
+      <p>Estas cifras cambian con cada actualización de protocolo y con la congestión de la red. Deben verificarse en fuentes primarias antes de citarse en un trabajo evaluable; en el proyecto se exigirá la fuente y la fecha de consulta. La tabla sirve para razonar en órdenes de magnitud, que es lo que se necesita para decidir una arquitectura — no como dato duro.</p>
+    </div>
+
+    <div class="ficha ficha--pregunta">
+      <p class="ficha-tit"><span>Este árbol se aplica en el taller B.4</span></p>
+      <p>No hay que memorizarlo. Hay que saber recorrerlo con un caso en la mano — que es exactamente lo que se hará después de la pausa, y lo que se exigirá en el anteproyecto de la Sesión 6.</p>
+    </div>
+  </div>
+</div>
+</section>
+
+<hr>
+
+<!-- ========================= BLOQUE B ========================= -->
+<p class="bloque bloque--b"><span class="b-min">MIN 115 — 172</span> <span>Bloque B · Profundización</span> <span class="b-tipo">Exposición dialogada + taller</span></p>
+
+<section id="b1">
+<div class="grid">
+  <div class="rail">
+    <b>B.1</b>
+    <span class="tick">min 115–132</span><br><br>
+    Concepto eje:<br>dónde está<br>el poder real<br><br>
+    Cierra el círculo de:<br>A.2 y A.6
+  </div>
+  <div>
+    <h2>B.1 · El ecosistema: quién sostiene la red</h2>
+
+    <p>En el bloque A quedó establecido que una cadena pública no tiene dueño. Eso plantea de inmediato una pregunta que casi nunca se hace y que es la más importante para evaluar cualquier proyecto: <strong>si nadie es dueño, ¿quién opera esto, con qué recursos y a cambio de qué?</strong></p>
+
+    <p>Responderla es lo que permite distinguir una red genuinamente resistente de una que solo lo parece. Y es la pregunta que un ingeniero debe saber contestar antes de recomendar una arquitectura a un cliente.</p>
+
+    <h3>Los siete actores y el poder de cada uno</h3>
+
+    <div class="tabla-wrap">
+    <table>
+      <thead><tr><th>Actor</th><th>Qué aporta</th><th>Qué poder tiene</th><th>Qué lo limita</th></tr></thead>
+      <tbody>
+        <tr>
+          <td>Validadores</td>
+          <td>Producen bloques y comprometen capital o cómputo como garantía.</td>
+          <td>Deciden qué transacciones entran y <strong>en qué orden</strong>. El orden es un poder económico real, no un detalle.</td>
+          <td>Los nodos rechazan bloques inválidos. En prueba de participación, el comportamiento probadamente deshonesto destruye el capital comprometido.</td>
+        </tr>
+        <tr>
+          <td>Nodos completos</td>
+          <td>Verifican de forma independiente cada bloque y conservan una copia íntegra del libro.</td>
+          <td><strong>Rechazar.</strong> Un bloque que viola las reglas simplemente no es propagado, sin importar quién lo firmó.</td>
+          <td>Nada, salvo el costo de operarlos. Son el contrapeso real del sistema y el más invisible.</td>
+        </tr>
+        <tr>
+          <td>Desarrolladores de protocolo</td>
+          <td>Escriben y mantienen el software cliente que todos ejecutan.</td>
+          <td>Proponer cambios de reglas y decidir qué se implementa.</td>
+          <td>No pueden imponer nada: cada operador decide qué versión ejecuta. Un cambio que los nodos no adopten simplemente no ocurre.</td>
+        </tr>
+        <tr>
+          <td>Usuarios y titulares</td>
+          <td>Demanda, uso y valor.</td>
+          <td>Poder de salida: vender, migrar a otra red, o seguir una bifurcación distinta.</td>
+          <td>La coordinación es costosa. En la práctica, la mayoría no ejerce este poder.</td>
+        </tr>
+        <tr>
+          <td>Intercambios centralizados</td>
+          <td>Liquidez y la puerta de entrada desde el dinero tradicional.</td>
+          <td>Enorme y sistemáticamente subestimado: custodian fondos ajenos, controlan el acceso al sistema financiero y, en redes con gobernanza por token, pueden votar con monedas de sus clientes.</td>
+          <td>La regulación y la posibilidad de que los usuarios retiren a autocustodia.</td>
+        </tr>
+        <tr>
+          <td>Proveedores de acceso</td>
+          <td>Infraestructura de lectura de la cadena para billeteras y aplicaciones.</td>
+          <td>Casi todas las billeteras del mundo consultan la cadena a través de un puñado de empresas. Si caen, la red sigue viva pero nadie puede usarla.</td>
+          <td>Cualquiera puede correr su propio nodo. Casi nadie lo hace.</td>
+        </tr>
+        <tr>
+          <td>Reguladores</td>
+          <td>No participan del protocolo.</td>
+          <td>Determinan quién puede operar en la frontera con el dinero tradicional, que es por donde pasa casi toda la utilidad práctica.</td>
+          <td>La jurisdicción. Una red global no se apaga desde un solo país, pero sí se puede aislar de su sistema financiero.</td>
+        </tr>
+      </tbody>
+    </table>
+    </div>
+
+    <div class="ficha ficha--termino">
+      <p class="ficha-tit"><span>Ficha de término 07</span> · Nodo completo y nodo ligero</p>
+      <p class="def"><b>Nodo completo</b> (<i>full node</i>): computador que descarga y verifica por sí mismo todos los bloques y todas las transacciones, aplicando las reglas del protocolo sin confiar en nadie.<br><b>Nodo ligero</b> (<i>light client</i>): programa que no verifica todo, sino que consulta a otros nodos y comprueba solo pruebas puntuales.</p>
+      <p>La distinción es política además de técnica. Quien corre un nodo completo <strong>no le cree a nadie</strong>: comprueba. Quien usa un nodo ligero —es decir, prácticamente todo el mundo, porque toda billetera de navegador o de teléfono lo es— confía en que alguien más verificó bien.</p>
+      <p>Aquí aparece la tensión central del ecosistema. La verificación independiente es lo que hace valioso al sistema, y es justamente lo que casi ningún usuario ejerce.</p>
+    </div>
+
+    <h3>La descentralización no es una propiedad: es un vector</h3>
+
+    <p>En A.6 se dijo que la descentralización es una variable continua. Ahora se puede precisar más: no es una sola variable, sino <strong>varias dimensiones independientes que pueden estar en estados opuestos al mismo tiempo</strong>. Una red puede ser ejemplar en una y desastrosa en otra.</p>
+
+    <div class="tabla-wrap">
+    <table>
+      <thead><tr><th>Dimensión</th><th>La pregunta que la mide</th><th>Señal de concentración</th></tr></thead>
+      <tbody>
+        <tr><td>Consenso</td><td>¿Cuántas entidades independientes producen bloques?</td><td>Unos pocos grupos concentran la mayoría de la capacidad de validación.</td></tr>
+        <tr><td>Cliente</td><td>¿Cuántas implementaciones distintas del software existen y se usan?</td><td>Una sola implementación domina: un fallo en ella tumba la red entera.</td></tr>
+        <tr><td>Acceso</td><td>¿Por dónde leen la cadena las aplicaciones y las billeteras?</td><td>Casi todo el tráfico pasa por dos o tres proveedores comerciales.</td></tr>
+        <tr><td>Capital</td><td>¿Cómo está distribuida la tenencia del activo?</td><td>Un puñado de direcciones controla una fracción decisiva del total.</td></tr>
+        <tr><td>Gobernanza</td><td>¿Quién decide los cambios de reglas y cómo?</td><td>Una fundación o un grupo cerrado propone y aprueba sin oposición efectiva.</td></tr>
+        <tr><td>Desarrollo</td><td>¿Quién paga a quienes escriben el protocolo?</td><td>Una sola organización financia a la mayoría de los desarrolladores.</td></tr>
+      </tbody>
+    </table>
+    </div>
+
+    <div class="ficha ficha--alerta">
+      <p class="ficha-tit"><span>Alerta</span> · La descentralización de la capa base no se hereda hacia arriba</p>
+      <p>Es perfectamente posible —y es la situación habitual— que la capa base sea muy descentralizada y que la experiencia del usuario esté <strong>completamente centralizada</strong>: la billetera es de una empresa, lee la cadena a través de otra, el activo se compró en un intercambio custodio y la interfaz web se sirve desde un servidor con dueño.</p>
+      <p>Cuando alguien afirme que un sistema «es descentralizado», la pregunta profesional es siempre la misma: <strong>¿en qué dimensión, y comparado con qué?</strong> Un proyecto que no puede responderla no ha hecho el análisis.</p>
+    </div>
+
+    <div class="ficha ficha--profundidad">
+      <p class="ficha-tit"><span>Profundidad</span> · El poder de ordenar</p>
+      <p>Se dijo arriba que quien produce bloques decide el orden de las transacciones. Ese poder tiene nombre propio y un mercado detrás: <span class="sigla">MEV<i>Maximal Extractable Value · valor máximo extraíble</i></span>, el beneficio que un productor de bloques puede obtener incluyendo, excluyendo o reordenando transacciones dentro del bloque que le toca proponer.</p>
+      <p>Es una consecuencia estructural, no un fallo: alguien tiene que decidir el orden, y quien decide puede aprovecharlo. Se trata a fondo en la Sesión 9 como vector de ataque y en la Sesión 14 como fenómeno económico. Por ahora basta con retener que <strong>el orden de las transacciones es un bien escaso y valioso</strong>, y que ese es el motivo por el que a nadie le regalan el derecho a escribir en el libro.</p>
+    </div>
+
+    <div class="ficha ficha--pregunta">
+      <p class="ficha-tit"><span>Pregunta para el aula</span></p>
+      <p>Si operar un nodo completo es lo que hace verificable al sistema, y casi nadie lo hace, ¿en qué se diferencia el usuario promedio de este ecosistema del cliente de un banco?</p>
+    </div>
+  </div>
+</div>
+</section>
+
+<hr>
+
+<section id="b2">
+<div class="grid">
+  <div class="rail">
+    <b>B.2</b>
+    <span class="tick">min 132–147</span><br><br>
+    Concepto eje:<br>familias de<br>arquitecturas<br><br>
+    Prepara:<br>Sesión 5 y Sesión 16
+  </div>
+  <div>
+    <h2>B.2 · Mapa del territorio</h2>
+
+    <p>Existen miles de cadenas de bloques. Para un estudiante que llega hoy, el paisaje es ruido. Pero por debajo hay muy pocas ideas arquitectónicas distintas, y conocerlas permite ubicar cualquier proyecto nuevo sin tener que estudiarlo desde cero.</p>
+
+    <h3>Las dos referencias: Bitcoin y Ethereum</h3>
+
+    <p>Se comparan constantemente y es un error de encuadre: <strong>no compiten por lo mismo</strong>. Uno es dinero; el otro es una plataforma de cómputo.</p>
+
+    <div class="tabla-wrap">
+    <table>
+      <thead><tr><th>Criterio</th><th>Bitcoin</th><th>Ethereum</th></tr></thead>
+      <tbody>
+        <tr><td>Propósito de diseño</td><td>Ser dinero digital resistente a la censura y a la inflación discrecional.</td><td>Ser una computadora mundial: ejecutar programas con estado compartido y verificable.</td></tr>
+        <tr><td>Capacidad de programación</td><td>Lenguaje deliberadamente limitado, sin bucles. Se puede condicionar un pago, no construir una aplicación.</td><td>Lenguaje de propósito general. Se puede expresar cualquier cómputo, con el límite del gas.</td></tr>
+        <tr><td>Modelo de estado</td><td>UTXO: el estado son las salidas de transacción no gastadas.</td><td>Cuentas y saldos, como un libro contable convencional.</td></tr>
+        <tr><td>Consenso</td><td>Prueba de trabajo.</td><td>Prueba de participación desde 2022.</td></tr>
+        <tr><td>Cultura de cambio</td><td>Conservadurismo extremo y deliberado. Cambiar es un riesgo; la estabilidad es la funcionalidad.</td><td>Evolución rápida y planificada, con cambios de protocolo frecuentes.</td></tr>
+        <tr><td>Riesgo dominante</td><td>Quedarse corto en funcionalidad frente a otras redes.</td><td>Introducir un fallo al cambiar. Más superficie, más cosas que pueden romperse.</td></tr>
+      </tbody>
+    </table>
+    </div>
+
+    <div class="ficha ficha--termino">
+      <p class="ficha-tit"><span>Ficha de término 08</span> · Turing-completo</p>
+      <p class="def"><b>Turing-completo</b>: se dice de un sistema de cómputo capaz de expresar cualquier algoritmo que pueda calcularse, dado tiempo y memoria suficientes.</p>
+      <p>Es lo que separa a Bitcoin de Ethereum en una sola palabra. Un lenguaje Turing-completo permite bucles y recursión, y por lo tanto permite escribir programas arbitrarios — incluidos programas que nunca terminan.</p>
+      <p>Eso plantea un problema serio en una red donde <em>todos</em> los nodos deben ejecutar el mismo código: un bucle infinito congelaría la red entera. La solución de Ethereum es cobrar por cada operación elemental, de modo que un programa que no termina simplemente se queda sin fondos y aborta. <strong>Ese mecanismo se llama gas y es el tema central de la Sesión 5.</strong></p>
+    </div>
+
+    <h3>Por qué hay tantas cadenas que se parecen</h3>
+
+    <p>Buena parte del ecosistema está formado por redes <strong>compatibles con la EVM</strong>. Conviene entender qué significa esto, porque explica el paisaje.</p>
+
+    <div class="ficha ficha--termino">
+      <p class="ficha-tit"><span>Ficha de término 09</span> · EVM y compatibilidad</p>
+      <p class="def"><b>EVM</b> (<i>Ethereum Virtual Machine</i>, máquina virtual de Ethereum): la especificación de la máquina de estados que ejecuta el código de los contratos. Define qué operaciones existen y cuánto cuesta cada una.</p>
+      <p>Que una red sea <strong>compatible con la EVM</strong> significa que ejecuta esa misma especificación. La consecuencia práctica es enorme: un contrato escrito para Ethereum se despliega en esa red sin reescribirlo, y las mismas herramientas, bibliotecas y billeteras funcionan igual.</p>
+      <p>Por eso proliferan: adoptar la EVM permite a una red nueva heredar de golpe todo un ecosistema de desarrolladores y de código probado. Y por eso <strong>lo que se aprende en este curso se transfiere</strong>: no se está aprendiendo una red, se está aprendiendo un modelo de cómputo.</p>
+    </div>
+
+    <h3>Las capas</h3>
+
+    <div class="ficha ficha--termino">
+      <p class="ficha-tit"><span>Ficha de término 10</span> · Capa 1 y capa 2</p>
+      <p class="def"><b>Capa 1</b> (<i>layer 1</i>, L1): la cadena base, que provee consenso y seguridad por sí misma.<br><b>Capa 2</b> (<i>layer 2</i>, L2): red construida encima que ejecuta transacciones fuera de la capa base y se apoya en ella para la seguridad y la resolución de disputas.</p>
+      <p>La motivación viene directamente del trilema de A.4: la capa base no puede ganar escalabilidad sin ceder descentralización o seguridad. La estrategia de las capas 2 es <strong>mover la ejecución fuera y dejar en la capa base solo la verificación</strong>, que es mucho más barata.</p>
+      <p>Es la vía de escalado dominante hoy y se estudia en la Sesión 16. Se menciona aquí porque sin ella el mapa queda incompleto: buena parte de la actividad real ya no ocurre en la capa base.</p>
+    </div>
+
+    <div class="ficha ficha--docente">
+      <p class="ficha-tit"><span>Por qué este curso usa Ethereum</span></p>
+      <p>Conviene decirlo explícitamente para evitar la lectura de que es una elección ideológica. Tres razones prácticas: es donde está la mayor cantidad de herramientas maduras y documentación; sus estándares —los que se estudian en las sesiones 10 y 11— son los que adoptó el resto de la industria; y el conocimiento se transfiere sin fricción a todas las redes compatibles con la EVM, que son la mayoría de las que un egresado encontrará en el mercado.</p>
+    </div>
+  </div>
+</div>
+</section>
+
+<hr>
+
+<section id="b3">
+<div class="grid">
+  <div class="rail">
+    <b>B.3</b>
+    <span class="tick">min 147–160</span><br><br>
+    Concepto eje:<br>evidencia frente<br>a narrativa<br><br>
+    Se evalúa en:<br>Anteproyecto (S6)
+  </div>
+  <div>
+    <h2>B.3 · Adopción real: qué prendió y qué no</h2>
+
+    <p>Después de más de quince años, es posible mirar la evidencia en lugar de la promesa. Este ejercicio es el complemento empírico del árbol de decisión de A.7: allí se razonó de forma deductiva sobre cuándo <em>debería</em> usarse blockchain; aquí se mira qué ocurrió en la práctica.</p>
+
+    <p>El método para evaluar cualquier caso, incluido el proyecto de cada estudiante, cabe en dos preguntas: <strong>¿qué problema resolvió, y para quién?</strong> Si la respuesta requiere hablar del futuro, todavía no hay evidencia.</p>
+
+    <h3>Lo que sí encontró uso sostenido</h3>
+
+    <div class="tabla-wrap">
+    <table>
+      <thead><tr><th>Caso</th><th>Por qué funcionó</th></tr></thead>
+      <tbody>
+        <tr>
+          <td>Monedas estables y pagos transfronterizos</td>
+          <td>Es el caso con adopción más medible, y tiene especial peso en economías con alta inflación, controles de capital o infraestructura de pagos costosa. Resuelve un problema que la gente tenía de verdad: mover valor entre países sin depender de una cadena de bancos corresponsales.</td>
+        </tr>
+        <tr>
+          <td>Especulación y mercados de activos digitales</td>
+          <td>Hay que decirlo con honestidad intelectual: es el uso dominante en volumen. Un curso serio no lo omite ni lo celebra; lo reconoce como el hecho que financió el desarrollo de toda la infraestructura que sí tiene otros usos.</td>
+        </tr>
+        <tr>
+          <td>Tokenización de activos financieros</td>
+          <td>Bonos, fondos e instrumentos de deuda emitidos y liquidados sobre cadena. Funciona porque la liquidación entre instituciones que no confían plenamente entre sí es exactamente el problema que un libro compartido resuelve.</td>
+        </tr>
+        <tr>
+          <td>Credenciales y registros verificables</td>
+          <td>Adopción lenta pero sostenida. Funciona cuando lo que se ancla es un <em>hash</em> y no el dato, y cuando la entidad emisora ya es confiable: lo que aporta la cadena es la verificación sin depender de que el emisor siga existiendo o responda el teléfono.</td>
+        </tr>
+      </tbody>
+    </table>
+    </div>
+
+    <h3>Lo que no prendió, y en qué paso del árbol muere</h3>
+
+    <div class="tabla-wrap">
+    <table>
+      <thead><tr><th>Caso</th><th>Dónde falla</th></tr></thead>
+      <tbody>
+        <tr>
+          <td>Trazabilidad genérica de cadena de suministro</td>
+          <td><strong>Paso 6.</strong> El registro es impecable y el dato de entrada no está verificado. Se invirtió mucho en resolver criptográficamente un problema que era de auditoría física.</td>
+        </tr>
+        <tr>
+          <td>Blockchain empresarial privada</td>
+          <td><strong>Pasos 1 y 2.</strong> Una sola organización, o varias que ya confían entre sí y tienen contratos. La ola de pilotos corporativos de la segunda mitad de la década pasada terminó, en su mayoría, en bases de datos con más pasos.</td>
+        </tr>
+        <tr>
+          <td>Identidad digital universal</td>
+          <td><strong>Adopción y recuperación.</strong> Técnicamente viable, pero exige que todo un ecosistema adopte el mismo esquema al tiempo, y choca con el problema de qué hacer cuando el usuario pierde sus claves.</td>
+        </tr>
+        <tr>
+          <td>Coleccionables digitales como mercado masivo</td>
+          <td><strong>El activo no tenía la demanda que el precio suponía.</strong> Conviene separar dos cosas: el mercado especulativo colapsó, pero el estándar técnico sobrevivió y hoy se usa para entradas, credenciales y membresías. La tecnología no fracasó; la tesis de inversión sí.</td>
+        </tr>
+      </tbody>
+    </table>
+    </div>
+
+    <div class="ficha ficha--pregunta">
+      <p class="ficha-tit"><span>El patrón, en una frase</span></p>
+      <p>Sobrevivieron los casos que necesitaban <strong>resistencia a la censura</strong> o <strong>liquidación sin intermediario</strong>. Fracasaron los que solo necesitaban un registro compartido — porque para eso ya existía algo más barato.</p>
+    </div>
+
+    <div class="ficha ficha--alerta">
+      <p class="ficha-tit"><span>Contexto regional</span> · verificar antes de dictar</p>
+      <p>América Latina aparece de forma recurrente en las mediciones de adopción minorista de criptoactivos, impulsada por remesas, por la exposición a la inflación y por una parte significativa de la población con acceso limitado a servicios financieros. En Colombia ha habido actividad regulatoria relevante: pruebas supervisadas de operación entre entidades financieras y plataformas de intercambio, obligaciones de reporte de operaciones y discusión legislativa sobre el régimen aplicable.</p>
+      <p><strong>El estado exacto de todo lo anterior cambia con frecuencia.</strong> Es material de la Sesión 16 y debe verificarse en fuentes primarias antes de dictarse; aquí se enuncia solo para situar el curso en su contexto y para que los anteproyectos de la Sesión 6 no se diseñen en el vacío.</p>
+    </div>
+  </div>
+</div>
+</section>
+
+<hr>
+
+<section id="b4">
+<div class="grid">
+  <div class="rail">
+    <b>B.4</b>
+    <span class="tick">min 160–172</span><br><br>
+    Formato:<br>grupos de 3<br><br>
+    8 min de trabajo<br>4 de plenaria
+  </div>
+  <div>
+    <h2>B.4 · Taller de casos</h2>
+
+    <p>Aplicación directa del árbol de decisión de A.7 y del criterio de evidencia de B.3. Es el ensayo del anteproyecto de la Sesión 6: el mismo razonamiento que se exigirá allí, hecho aquí sobre casos ajenos y sin nota de por medio.</p>
+
+    <h4>Instrucciones</h4>
+    <ul class="plain">
+      <li><b>Formato</b> — Grupos de tres. Cada grupo toma un caso. Ocho minutos de trabajo y cuatro de plenaria.</li>
+      <li><b>Qué hay que producir</b> — Tres respuestas, escritas, de una línea cada una. Nada más.</li>
+      <li><b>Cómo se defiende</b> — Treinta segundos por grupo, de pie, sin apoyo visual.</li>
+    </ul>
+
+    <h4>Las tres preguntas que hay que responder</h4>
+    <ol>
+      <li><strong>¿En qué paso del árbol se corta el caso?</strong> Si no se corta en ninguno, decirlo explícitamente y justificar por qué sobrevive los seis.</li>
+      <li><strong>Si sobrevive: ¿qué actor introduce los datos y por qué habría que creerle?</strong> Es la pregunta del oráculo, y no admite la respuesta «el sistema lo verifica».</li>
+      <li><strong>¿Qué arquitectura corresponde</strong> —pública, de consorcio, permisionada— <strong>y por qué?</strong> Usar la taxonomía de A.6.</li>
+    </ol>
+
+    <h4>Los casos</h4>
+    <div class="tabla-wrap">
+    <table>
+      <thead><tr><th>Caso</th><th>Situación</th></tr></thead>
+      <tbody>
+        <tr><td>Caso 1 · Diplomas</td><td>La universidad quiere que un empleador pueda verificar un diploma sin llamar a la oficina de registro, y que la verificación siga funcionando dentro de treinta años.</td></tr>
+        <tr><td>Caso 2 · Café</td><td>Una cooperativa cafetera de Antioquia quiere demostrar a un comprador europeo el origen de cada lote y las condiciones en que le compró al caficultor.</td></tr>
+        <tr><td>Caso 3 · Asistencia</td><td>Una empresa quiere registrar la asistencia diaria de sus empleados de forma inalterable, para evitar disputas laborales.</td></tr>
+      </tbody>
+    </table>
+    </div>
+
+    <div class="ficha ficha--docente">
+      <p class="ficha-tit"><span>Respuestas de referencia</span> · no anticiparlas</p>
+      <p><strong>Caso 1.</strong> Sobrevive el árbol, con matices. Hay dos partes con intereses no alineados —quien contrata no tiene por qué confiar en el dicho del candidato— y el requisito de treinta años es justamente lo que descarta depender de que un servidor de la universidad siga en pie. Lo que va a la cadena es el hash del diploma, nunca los datos del egresado. El grupo que proponga subir el diploma completo ha fallado el paso 4.</p>
+      <p><strong>Caso 2.</strong> Sobrevive los pasos 1 a 3 y choca de frente con el <strong>paso 6</strong>. El registro será perfecto y no dice nada sobre si el café es realmente de ese origen. Es un caso legítimo <em>solo</em> si se responde con seriedad quién certifica en el mundo físico. Es el caso más rico para discutir.</p>
+      <p><strong>Caso 3.</strong> Muere en el <strong>paso 1</strong>. Un solo escritor, ninguna parte con interés divergente que también escriba, y un tercero de confianza disponible —la propia empresa, o la autoridad laboral—. Y si el problema real es que el empleador podría alterar el registro, la solución es un tercero neutral, no una cadena que el mismo empleador operaría. Aquí conviene dejar que el grupo defienda su caso y que sea la plenaria la que lo derribe.</p>
+    </div>
+
+    <div class="ficha ficha--pregunta">
+      <p class="ficha-tit"><span>Cierre del taller</span></p>
+      <p>Dos de estos tres casos no justifican una blockchain. En una propuesta profesional, decirlo a tiempo vale más que construirla.</p>
+    </div>
+  </div>
+</div>
+</section>
+
+
+<hr>
+
+<!-- ========================= BLOQUE C ========================= -->
+<p class="bloque bloque--c"><span class="b-min">MIN 172 — 180</span> <span>Bloque C · Cierre</span> <span class="b-tipo">Plenaria</span></p>
+
+<section id="cierre">
+<div class="grid">
+  <div class="rail">
+    <b>Cierre</b>
+    <span class="tick">8 min</span><br><br>
+    Prepara:<br>Sesión 2 ·<br>Criptografía aplicada
+  </div>
+  <div>
+    <h2>Cierre y trabajo autónomo</h2>
+
+    <h3>Lo que hay que llevarse de esta sesión</h3>
+
+    <ul class="plain">
+      <li><b>Uno.</b> El problema original no era criptográfico sino de <strong>orden</strong>: cómo hacer que participantes que no se conocen coincidan en qué ocurrió primero, sin árbitro.</li>
+      <li><b>Dos.</b> El dinero es un <strong>registro</strong>, no un objeto. Esa reformulación es la que hace el problema soluble.</li>
+      <li><b>Tres.</b> Blockchain no elimina la confianza: la <strong>traslada</strong> de una institución a un mecanismo verificable, y ese traslado tiene un costo alto en rendimiento y en irreversibilidad.</li>
+      <li><b>Cuatro.</b> La contribución de 2008 no fue tecnológica sino de <strong>diseño de incentivos</strong>. Todas las piezas criptográficas ya existían.</li>
+      <li><b>Cinco.</b> Saber <strong>cuándo no usarla</strong> es parte del oficio, y en este curso es parte de la nota.</li>
+      <li><b>Seis.</b> «Descentralizado» no es una propiedad que se tiene o no se tiene: es un <strong>vector de varias dimensiones</strong> —consenso, cliente, acceso, capital, gobernanza— que pueden estar en estados opuestos al mismo tiempo. La pregunta correcta nunca es «¿es descentralizado?», sino «¿en qué dimensión, y comparado con qué?».</li>
+      <li><b>Siete.</b> Después de quince años ya hay <strong>evidencia en lugar de promesa</strong>. Sobrevivieron los casos que necesitaban resistencia a la censura o liquidación sin intermediario; fracasaron los que solo necesitaban un registro compartido.</li>
+    </ul>
+
+    <h3>Trabajo autónomo para la Sesión 2</h3>
+
+    <p><strong>Nada de esto se entrega ni se califica.</strong> Es trabajo real y necesario —la Sesión 2 lo da por hecho—, pero se verifica en clase mediante discusión, no mediante recolección. Quien no lo haga no pierde nota: pierde la sesión siguiente.</p>
+
+    <ol>
+      <li><strong>Lectura obligatoria.</strong> Whitepaper de Bitcoin, secciones 1 a 5. Son cinco páginas. Léase sin buscar entenderlo todo: el objetivo es reconocer, en el texto original, los conceptos discutidos hoy. Traer identificado el párrafo donde se enuncia el problema del doble gasto.</li>
+      <li><strong>Preparación técnica.</strong> Verificar que el equipo personal tenga Python 3 o Node.js instalado y funcionando desde la línea de comandos. La Sesión 2 abre con la demostración en vivo de billeteras y explorador de bloques, y sigue con el primer laboratorio en máquina del semestre. Quien tenga problemas de instalación debe resolverlos <em>antes</em>, no durante la clase.</li>
+      <li><strong>Pregunta de la semana</strong> — se piensa y se trae resuelta, no se entrega. Abre la plenaria de la Sesión 2 y se responde en voz alta: <em>si una cadena de bloques garantiza que un registro no fue alterado después de escrito, ¿qué garantiza sobre la veracidad de ese registro en el momento de escribirlo? Ilústrelo con un ejemplo propio.</em></li>
+    </ol>
+
+    <div class="ficha ficha--profundidad">
+      <p class="ficha-tit"><span>Puente hacia la Sesión 2</span></p>
+      <p>Hoy usamos tres veces la palabra <em>hash</em> sin definirla con rigor: al describir el enlace entre bloques, al derivar una dirección desde una clave pública y al identificar una transacción. También afirmamos, sin demostrarlo, que de una clave pública no puede recuperarse la privada.</p>
+      <p>La Sesión 2 salda esas dos deudas, y lo hace en dos tiempos. <strong>Abre con una demostración en vivo</strong>: se crea una billetera desde cero en pantalla, se muestra qué es realmente una frase semilla, se emite una transacción y se recorre campo por campo en un explorador de bloques. Todo lo discutido hoy en abstracto aparecerá allí como datos concretos.</p>
+      <p>Después viene el primer laboratorio: construiremos funciones hash, mediremos experimentalmente el efecto avalancha, levantaremos un árbol de Merkle desde cero y firmaremos mensajes con criptografía de curva elíptica. Al final de esa sesión, la afirmación «alterar un bloque invalida la cadena» dejará de ser una afirmación y pasará a ser algo que cada estudiante habrá comprobado en su propio código.</p>
+    </div>
+  </div>
+</div>
+</section>
+
+<hr>
+
+<!-- ========================= FALSOS ========================= -->
+<section id="falsos">
+<div class="grid">
+  <div class="rail">
+    <b>Anexo I</b>
+    Higiene<br>conceptual
+  </div>
+  <div>
+    <h2>Afirmaciones falsas de circulación común</h2>
+
+    <p>Todas estas frases se escuchan con frecuencia, incluso en medios especializados. Todas son falsas o gravemente imprecisas. Reconocerlas es parte del criterio profesional.</p>
+
+    <div class="tabla-wrap">
+    <table>
+      <thead><tr><th>Se dice</th><th>Por qué es falso</th></tr></thead>
+      <tbody>
+        <tr><td>«Blockchain es imposible de hackear»</td><td>El protocolo base es robusto, pero los ataques ocurren en las capas de arriba: contratos con fallos, billeteras comprometidas, puentes entre redes, ingeniería social. La inmensa mayoría de las pérdidas del sector no atacaron el consenso.</td></tr>
+        <tr><td>«Las transacciones son anónimas»</td><td>Son <strong>seudónimas</strong>. No llevan nombre, pero cada dirección tiene un historial público completo y permanente. El análisis de cadena es una industria consolidada, y basta un punto de contacto con el mundo real para desanonimizar todo el historial hacia atrás.</td></tr>
+        <tr><td>«Los mineros resuelven problemas matemáticos útiles»</td><td>El cálculo no tiene utilidad externa. Es fuerza bruta deliberadamente inútil; su función es <em>costar</em>, no producir conocimiento.</td></tr>
+        <tr><td>«Blockchain elimina intermediarios»</td><td>Los sustituye. Aparecen intercambios, custodios, proveedores de infraestructura de nodos, emisores de stablecoins y desarrolladores de protocolo. Algunos concentran tanto poder como los intermediarios que reemplazaron.</td></tr>
+        <tr><td>«Los datos en blockchain no se pueden borrar, luego sirve para guardar cualquier cosa»</td><td>La primera parte es cierta y por eso mismo la conclusión es peligrosa. La permanencia es un problema legal grave para datos personales, y almacenar archivos en cadena es prohibitivamente caro. Se almacena el hash; el dato vive fuera.</td></tr>
+        <tr><td>«Un contrato inteligente es un contrato»</td><td>Ni es inteligente ni es, por sí solo, un contrato en sentido jurídico. Es un programa que se ejecuta de forma determinista cuando se cumplen condiciones. Su relación con el derecho es materia de la Sesión 16.</td></tr>
+        <tr><td>«Es un sistema descentralizado, luego nadie lo controla»</td><td>La descentralización es una variable continua, no binaria, y se mide en varias dimensiones: quién valida, quién desarrolla el cliente, quién opera los nodos de acceso, quién controla el capital. Muchas redes que se presentan como descentralizadas están fuertemente concentradas en al menos una de ellas.</td></tr>
+      </tbody>
+    </table>
+    </div>
+  </div>
+</div>
+</section>
+
+<hr>
+
+<!-- ========================= GLOSARIO ========================= -->
+<section id="glosario">
+<div class="grid">
+  <div class="rail">
+    <b>Anexo II</b>
+    Glosario<br>acumulativo<br><br>
+    Se amplía en<br>cada sesión
+  </div>
+  <div>
+    <h2>Glosario completo de la sesión</h2>
+
+    <p>Todos los términos y siglas empleados en este documento, con su expansión literal y su definición operativa. Este glosario es acumulativo: cada sesión añade entradas y ninguna se elimina.</p>
+
+    <div class="glos">
+
+      <div class="glos-row"><div class="glos-k">AML<em>Anti-Money Laundering</em></div><div class="glos-v"><p>Antilavado de activos. Conjunto de obligaciones normativas que exigen a las entidades financieras detectar y reportar operaciones sospechosas. En Colombia, el reporte se dirige a la Unidad de Información y Análisis Financiero.</p></div></div>
+
+
+      <div class="glos-row"><div class="glos-k">Bloque</div><div class="glos-v"><p>Agrupación de transacciones con una cabecera que contiene el hash del bloque anterior, la raíz de Merkle de sus transacciones, una marca temporal y los datos de la prueba de trabajo.</p></div></div>
+
+      <div class="glos-row"><div class="glos-k">Blockchain</div><div class="glos-v"><p>Lista enlazada de solo anexado, replicada en una red de pares, cuyos elementos se encadenan mediante hashes y cuyo contenido se acuerda mediante un protocolo de consenso tolerante a fallas bizantinas.</p></div></div>
+      <div class="glos-row"><div class="glos-k">Capa 1 y capa 2<em>layer 1 / layer 2</em></div><div class="glos-v"><p>La capa 1 es la cadena base, que provee consenso y seguridad por sí misma. La capa 2 es una red construida encima que ejecuta transacciones fuera de la capa base y se apoya en ella para la seguridad y la resolución de disputas.</p></div></div>
+
+      <div class="glos-row"><div class="glos-k">Confirmación</div><div class="glos-v"><p>Cada bloque añadido por encima del bloque que contiene una transacción. A mayor número de confirmaciones, mayor el costo de revertirla y por tanto mayor la certeza práctica de que es definitiva.</p></div></div>
+
+      <div class="glos-row"><div class="glos-k">Cypherpunk</div><div class="glos-v"><p>Movimiento surgido a finales de los años ochenta que promovía el uso de criptografía fuerte por parte de individuos como condición para la privacidad y la autonomía en sociedades digitales. Contexto intelectual del que surge Bitcoin.</p></div></div>
+
+      <div class="glos-row"><div class="glos-k">dApp<em>decentralized application</em></div><div class="glos-v"><p>Aplicación descentralizada: programa cuya lógica de negocio reside, total o parcialmente, en contratos inteligentes desplegados en una cadena de bloques, en lugar de en un servidor bajo control de una organización.</p></div></div>
+
+      <div class="glos-row"><div class="glos-k">Dirección</div><div class="glos-v"><p>Identificador público de una cuenta, derivado por hash de la clave pública. En Ethereum son 20 bytes representados como 40 caracteres hexadecimales precedidos de <code>0x</code>.</p></div></div>
+
+      <div class="glos-row"><div class="glos-k">DLT<em>Distributed Ledger Technology</em></div><div class="glos-v"><p>Tecnología de libro mayor distribuido. Categoría general que engloba a blockchain y a otras estructuras de registro replicado que no necesariamente encadenan bloques.</p></div></div>
+
+      <div class="glos-row"><div class="glos-k">Doble gasto</div><div class="glos-v"><p>Gastar dos veces la misma unidad de dinero digital aprovechando que transferir información equivale a copiarla. Problema fundacional del campo.</p></div></div>
+      <div class="glos-row"><div class="glos-k">EVM<em>Ethereum Virtual Machine</em></div><div class="glos-v"><p>Máquina virtual de Ethereum. Especificación de la máquina de estados que ejecuta el código de los contratos: define qué operaciones existen y cuánto cuesta cada una. Una red «compatible con la EVM» ejecuta esa misma especificación, por lo que el código y las herramientas se transfieren sin reescribirse.</p></div></div>
+
+
+
+
+      <div class="glos-row"><div class="glos-k">Hash</div><div class="glos-v"><p>Resumen criptográfico. Salida de longitud fija de una función determinista, irreversible en la práctica, en la que un cambio mínimo de la entrada altera por completo la salida.</p></div></div>
+
+      <div class="glos-row"><div class="glos-k">Inmutabilidad</div><div class="glos-v"><p>Propiedad por la cual alterar un registro ya escrito resulta económicamente inviable, al exigir rehacer todo el trabajo posterior más rápido que el resto de la red. Es una barrera de costo, no una imposibilidad física.</p></div></div>
+      <div class="glos-row"><div class="glos-k">Intercambio centralizado<em>CEX · centralized exchange</em></div><div class="glos-v"><p>Plataforma que custodia fondos de terceros y hace de puerta de entrada desde el dinero tradicional. Concentra un poder frecuentemente subestimado: controla el acceso al sistema financiero y, en redes con gobernanza por token, puede votar con monedas de sus clientes.</p></div></div>
+
+      <div class="glos-row"><div class="glos-k">KYC<em>Know Your Customer</em></div><div class="glos-v"><p>«Conozca a su cliente». Obligación normativa de identificar y verificar la identidad de los usuarios de servicios financieros antes de operar con ellos.</p></div></div>
+
+      <div class="glos-row"><div class="glos-k">Libro mayor<em>ledger</em></div><div class="glos-v"><p>Registro acumulativo y ordenado de transacciones, del cual se derivan los saldos. El dinero moderno es, en lo esencial, una anotación en un libro mayor.</p></div></div>
+      <div class="glos-row"><div class="glos-k">MEV<em>Maximal Extractable Value</em></div><div class="glos-v"><p>Valor máximo extraíble. Beneficio que un productor de bloques puede obtener incluyendo, excluyendo o reordenando transacciones dentro del bloque que le corresponde proponer. Es una consecuencia estructural de que alguien tenga que decidir el orden, no un fallo de implementación.</p></div></div>
+
+
+      <div class="glos-row"><div class="glos-k">Minado<em>mining</em></div><div class="glos-v"><p>Proceso de buscar por fuerza bruta un valor que haga que el hash de un bloque cumpla la condición de dificultad, obteniendo así el derecho a proponerlo y la recompensa asociada.</p></div></div>
+      <div class="glos-row"><div class="glos-k">Moneda estable<em>stablecoin</em></div><div class="glos-v"><p>Criptoactivo diseñado para mantener un valor estable frente a una referencia externa, habitualmente una moneda fiduciaria. Es el caso de uso con adopción sostenida más medible, sobre todo en pagos transfronterizos y en economías con alta inflación.</p></div></div>
+
+      <div class="glos-row"><div class="glos-k">Nodo</div><div class="glos-v"><p>Computador que ejecuta el software del protocolo, mantiene una copia del libro mayor y valida de forma independiente las transacciones y bloques que recibe.</p></div></div>
+      <div class="glos-row"><div class="glos-k">Nodo completo<em>full node</em></div><div class="glos-v"><p>Nodo que descarga y verifica por sí mismo todos los bloques y transacciones, aplicando las reglas del protocolo sin confiar en nadie. Su poder es rechazar: un bloque inválido no se propaga, sin importar quién lo firmó.</p></div></div>
+      <div class="glos-row"><div class="glos-k">Nodo ligero<em>light client</em></div><div class="glos-v"><p>Programa que no verifica toda la cadena, sino que consulta a otros nodos y comprueba solo pruebas puntuales. Toda billetera de navegador o de teléfono lo es, de modo que la inmensa mayoría de los usuarios confía en que alguien más verificó bien.</p></div></div>
+
+      <div class="glos-row"><div class="glos-k">Nonce<em>number used once</em></div><div class="glos-v"><p>Dos sentidos distintos. En el minado: campo variable de la cabecera del bloque que se recorre por fuerza bruta. En una cuenta de Ethereum: contador de transacciones emitidas, que impide la reutilización y fija el orden.</p></div></div>
+
+      <div class="glos-row"><div class="glos-k">Oráculo</div><div class="glos-v"><p>Mecanismo que introduce información del mundo exterior en una cadena de bloques. Constituye siempre un punto de confianza que debe analizarse de forma explícita en el diseño.</p></div></div>
+
+      <div class="glos-row"><div class="glos-k">P2P<em>peer-to-peer</em></div><div class="glos-v"><p>De par a par. Arquitectura de red en la que todos los participantes tienen el mismo rol y se comunican directamente entre sí, sin servidor central que coordine.</p></div></div>
+
+      <div class="glos-row"><div class="glos-k">PoW<em>Proof of Work</em></div><div class="glos-v"><p>Prueba de trabajo. Mecanismo por el cual se demuestra haber invertido cómputo, mediante un resultado costoso de producir y barato de verificar.</p></div></div>
+      <div class="glos-row"><div class="glos-k">Proveedor de acceso<em>RPC · Remote Procedure Call</em></div><div class="glos-v"><p>Empresa que ofrece la infraestructura por la que billeteras y aplicaciones leen la cadena. Punto de centralización habitualmente invisible: si cae, la red sigue viva pero deja de ser utilizable para la mayoría.</p></div></div>
+
+      <div class="glos-row"><div class="glos-k">Seudonimato</div><div class="glos-v"><p>Situación en la que un actor opera bajo un identificador que no revela su identidad legal, pero cuya actividad es completamente pública y enlazable entre sí. No equivale a anonimato.</p></div></div>
+
+      <div class="glos-row"><div class="glos-k">SPOF<em>Single Point Of Failure</em></div><div class="glos-v"><p>Punto único de falla. Componente cuya caída inhabilita el sistema completo. Es la debilidad estructural característica de las arquitecturas centralizadas.</p></div></div>
+
+
+      <div class="glos-row"><div class="glos-k">TPS<em>Transactions Per Second</em></div><div class="glos-v"><p>Transacciones por segundo. Métrica de rendimiento. Debe interpretarse siempre junto con la latencia hasta la liquidación definitiva, no de forma aislada.</p></div></div>
+
+      <div class="glos-row"><div class="glos-k">Trust-minimized<em>minimizado en confianza</em></div><div class="glos-v"><p>Traducción precisa del mal llamado <i>trustless</i>. Describe un sistema que reduce la confianza necesaria en contrapartes identificadas, sin eliminar la confianza en la matemática, el código y los supuestos del modelo.</p></div></div>
+
+      <div class="glos-row"><div class="glos-k">TTP<em>Trusted Third Party</em></div><div class="glos-v"><p>Tercero de confianza. Entidad en la que dos partes que no confían entre sí delegan la verificación y el registro de sus transacciones.</p></div></div>
+      <div class="glos-row"><div class="glos-k">Turing-completo</div><div class="glos-v"><p>Se dice de un sistema de cómputo capaz de expresar cualquier algoritmo calculable, dado tiempo y memoria suficientes. Es lo que separa a Ethereum de Bitcoin, y lo que obliga a cobrar por cada operación elemental para que un programa que no termina no congele la red.</p></div></div>
+
+      <div class="glos-row"><div class="glos-k">W3C<em>World Wide Web Consortium</em></div><div class="glos-v"><p>Organismo internacional que define los estándares de la web. Origen del sentido original de «Web 3.0» como web semántica, distinto del sentido actual del término en este curso.</p></div></div>
+
+      <div class="glos-row"><div class="glos-k">Wallet<em>billetera</em></div><div class="glos-v"><p>Programa que genera, custodia y usa claves criptográficas para firmar transacciones. No almacena fondos: almacena claves.</p></div></div>
+
+      <div class="glos-row"><div class="glos-k">Whitepaper</div><div class="glos-v"><p>Documento técnico en el que se expone el diseño de un protocolo. En este campo, «el whitepaper» sin más designa por defecto el documento de Bitcoin de 2008.</p></div></div>
+
+    </div>
+  </div>
+</div>
+</section>
+
+<hr>
+
+<!-- ========================= FUENTES ========================= -->
+<section id="fuentes">
+<div class="grid">
+  <div class="rail">
+    <b>Anexo III</b>
+    Fuentes
+  </div>
+  <div>
+    <h2>Fuentes y lecturas</h2>
+
+    <h4>Obligatoria para la Sesión 2</h4>
+    <ul>
+      <li>Nakamoto, S. (2008). <em>Bitcoin: A Peer-to-Peer Electronic Cash System.</em> Secciones 1 a 5.</li>
+    </ul>
+
+    <h4>Fuentes primarias referidas en esta sesión</h4>
+    <ul>
+      <li>Chaum, D. (1983). <em>Blind Signatures for Untraceable Payments.</em> Advances in Cryptology.</li>
+      <li>Back, A. (1997/2002). <em>Hashcash — A Denial of Service Counter-Measure.</em></li>
+      <li>Dai, W. (1998). <em>b-money.</em></li>
+      <li>Szabo, N. (1998/2005). <em>Bit Gold.</em></li>
+      <li>Lamport, L., Shostak, R. y Pease, M. (1982). <em>The Byzantine Generals Problem.</em> ACM TOPLAS.</li>
+      <li>Lamport, L. (1978). <em>Time, Clocks, and the Ordering of Events in a Distributed System.</em> Communications of the ACM.</li>
+    </ul>
+
+    <h4>Ampliación recomendada</h4>
+    <ul>
+      <li>Antonopoulos, A. <em>Mastering Bitcoin.</em> O'Reilly. Capítulos 1 y 2. Disponible libremente.</li>
+      <li>Narayanan, A. et al. <em>Bitcoin and Cryptocurrency Technologies.</em> Princeton University Press. Capítulo 1.</li>
+      <li>Werbach, K. <em>The Blockchain and the New Architecture of Trust.</em> MIT Press. Para la discusión sobre confianza de A.2.</li>
+    </ul>
+
+    <div class="ficha ficha--docente">
+      <p class="ficha-tit"><span>Nota de vigencia</span></p>
+      <p>Los datos de rendimiento, las redes de prueba disponibles y los servicios de faucet cambian con cada actualización de protocolo. Antes de dictar la sesión conviene verificar la red de prueba vigente y probar el flujo completo del laboratorio en un equipo de la sala. Las fuentes primarias listadas arriba son estables y no requieren esa verificación.</p>
+    </div>
+  </div>
+</div>
+</section>
+
+<footer>
+  <p>Universidad de San Buenaventura Medellín · Facultad de Ingeniería<br>
+  Blockchain y Web 3.0 · Unidad I · Sesión 01 de 17 · Material autoexplicativo de sesión, versión 2.0 — sesión íntegramente teórica<br>
+  Paleta derivada de la identidad visual institucional de usbmed.edu.co</p>
+</footer>
+
+</div>

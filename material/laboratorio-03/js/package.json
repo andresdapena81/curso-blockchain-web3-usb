@@ -1,0 +1,7 @@
+{
+  "name": "laboratorio-03",
+  "type": "module",
+  "private": true,
+  "dependencies": { "js-sha3": "^0.9.3" },
+  "scripts": { "test": "node --test" }
+}
