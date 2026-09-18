@@ -1,0 +1,156 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<title>Auditoría cruzada</title>
+<!--ESTILOS-->
+</head>
+<body>
+
+<section class="barra">
+  <div class="kicker">PROYECTO INTEGRADOR · AUDITORÍA ENTRE PARES · SESIONES 9 Y 17</div>
+  <h1>AUDITORÍA<br><em>CRUZADA</em></h1>
+  <div class="sub">Cómo se audita el contrato de otro equipo: formato de hallazgo, severidades,<br>asignación de equipos, qué se entrega y cómo se califica.</div>
+</section>
+
+<dl class="datos">
+  <div><dt>MODALIDAD</dt><dd>Entre equipos<br>de proyecto</dd></div>
+  <div><dt>MOMENTO 1</dt><dd>Sesión 9 · informe<br>escrito (20 % del corte)</dd></div>
+  <div><dt>MOMENTO 2</dt><dd>Sesión 17 · una<br>pregunta técnica en vivo</dd></div>
+  <div><dt>SE EVALÚA</dt><dd>La calidad de la auditoría,<br>no cuántos fallos tenga el otro</dd></div>
+</dl>
+
+<div class="caja clave">
+  <div class="caja-et">POR QUÉ ESTO ES PARTE DEL CURSO</div>
+  <p>Leer código ajeno con criterio de seguridad es una competencia profesional tan importante como escribirlo. Un auditor no busca lucirse encontrando fallos: busca <strong>reducir el riesgo</strong> de un sistema que custodia valor. Este documento fija las reglas de las dos auditorías cruzadas del semestre para que todos los equipos entreguen con el mismo formato y se califiquen con la misma vara.</p>
+</div>
+
+<!-- ============================================================ 1 -->
+<section class="sec">
+  <div class="sec-cab"><span class="sec-num">01</span><h2>Los dos momentos de la auditoría</h2></div>
+  <table>
+    <tr><th style="width:16%">#</th><th style="width:20%">CUÁNDO</th><th>EN QUÉ CONSISTE</th></tr>
+    <tr><td class="pk">#1</td><td>Sesión 9</td><td><strong>Informe escrito.</strong> Cada equipo audita el contrato principal de otro equipo y entrega un informe de 1 a 2 páginas con hallazgos clasificados. Vale el 20 % del segundo corte, junto con Ethernaut.</td></tr>
+    <tr><td class="pk">#2</td><td>Sesión 17 (Demo Day)</td><td><strong>Una pregunta técnica en vivo.</strong> Durante la sustentación, cada equipo formula al menos una pregunta técnica de seguridad al equipo evaluado. Se califica la <strong>calidad de la pregunta</strong> (ver sección 6).</td></tr>
+  </table>
+  <p>Las dos comparten el mismo marco de severidades y el mismo espíritu: mejorar el sistema del otro, no derrotarlo.</p>
+</section>
+
+<!-- ============================================================ 2 -->
+<section class="sec">
+  <div class="sec-cab"><span class="sec-num">02</span><h2>Cómo se asignan los equipos</h2></div>
+  <ol>
+    <li>El docente organiza los equipos en un <strong>ciclo</strong>: A audita a B, B audita a C, C audita a D… y el último audita a A. Así nadie audita a quien lo audita (no hay «te perdono si me perdonas»).</li>
+    <li>Cada equipo entrega, al inicio del bloque, el <strong>contrato principal</strong> de su proyecto: un solo archivo <code>.sol</code> que compile, con sus dependencias declaradas. Nada de capturas: el código real.</li>
+    <li>El equipo auditor recibe <strong>solo el código</strong> y una descripción de una línea de qué hace el contrato. No recibe las pruebas del otro equipo: parte de auditar es entender el contrato sin que te lo expliquen.</li>
+    <li>Media hora de trabajo en clase; el informe puede cerrarse fuera de clase si el tiempo aprieta.</li>
+  </ol>
+  <div class="caja">
+    <div class="caja-et">REGLA DE CONDUCTA</div>
+    <p>Se audita el <strong>código</strong>, no a las personas. No se reescribe el contrato ajeno: se <strong>proponen correcciones mínimas</strong>. Un hallazgo se redacta para que el otro equipo pueda actuar, no para que quede mal.</p>
+  </div>
+</section>
+
+<!-- ============================================================ 3 -->
+<section class="sec salto">
+  <div class="sec-cab"><span class="sec-num">03</span><h2>Las cinco severidades</h2><span class="lead">CRITERIOS</span></div>
+  <p>Cada hallazgo se clasifica en una de estas cinco categorías. La severidad combina <strong>impacto</strong> (qué se pierde) y <strong>probabilidad</strong> (qué tan fácil es explotarlo).</p>
+  <table>
+    <tr><th style="width:20%">SEVERIDAD</th><th>CRITERIO</th><th style="width:30%">EJEMPLO TÍPICO</th></tr>
+    <tr><td class="pk">Crítica</td><td>Pérdida directa de fondos o control del contrato, fácil de explotar por cualquiera.</td><td>Reentrancy que vacía el contrato; función de retiro sin control de acceso.</td></tr>
+    <tr><td class="pk">Alta</td><td>Pérdida de fondos o de disponibilidad, pero con alguna condición (un rol, un estado, un monto).</td><td><code>tx.origin</code> para autorizar; <code>delegatecall</code> a dirección elegible.</td></tr>
+    <tr><td class="pk">Media</td><td>Impacto acotado o que requiere condiciones poco frecuentes; degrada la seguridad sin robo directo.</td><td>Aleatoriedad on-chain manipulable; dependencia de <code>block.timestamp</code>.</td></tr>
+    <tr><td class="pk">Baja</td><td>Riesgo menor o difícil de explotar; buenas prácticas incumplidas con efecto limitado.</td><td>Falta de límite de deslizamiento; envío con retorno no comprobado en caso benigno.</td></tr>
+    <tr><td class="pk">Informativa</td><td>No es una vulnerabilidad: es una observación de calidad, gas o legibilidad.</td><td>Falta un evento; variable que podría ser <code>immutable</code>; nombre confuso.</td></tr>
+  </table>
+  <div class="caja alerta">
+    <div class="caja-et">SEÑAL DE MADUREZ: DISTINGUIR HALLAZGO DE RUIDO</div>
+    <p>Un analizador como Slither marca cosas ciertas que <strong>no</strong> son vulnerabilidades (por ejemplo, «low-level call» en un patrón de retiro correcto). Clasificarlas como <strong>informativas</strong> —y explicar por qué no son explotables— vale tanto como encontrar un fallo real. Inflar la severidad de un hallazgo trivial resta credibilidad al informe.</p>
+  </div>
+</section>
+
+<!-- ============================================================ 4 -->
+<section class="sec salto">
+  <div class="sec-cab"><span class="sec-num">04</span><h2>El formato de cada hallazgo</h2><span class="lead">OBLIGATORIO</span></div>
+  <p>Todo hallazgo del informe #1 usa exactamente estos seis campos. Un hallazgo sin ubicación o sin recomendación está incompleto.</p>
+
+  <div class="pregunta">
+    <div class="cab"><div class="n">H</div><div class="enun"><span class="tema">PLANTILLA DE HALLAZGO</span>Los seis campos</div></div>
+    <div class="just">
+      <strong>1 · Título:</strong> una línea que nombra el fallo (p. ej. «Reentrancy en <code>retirar()</code>»).<br>
+      <strong>2 · Severidad:</strong> Crítica / Alta / Media / Baja / Informativa, según la sección 3.<br>
+      <strong>3 · Ubicación:</strong> archivo, función y <strong>número de línea exacto</strong>.<br>
+      <strong>4 · Descripción:</strong> qué está mal y por qué, en dos o tres frases.<br>
+      <strong>5 · Escenario de explotación:</strong> los pasos concretos por los que un atacante lo aprovecha (o, si es informativo, por qué no es explotable).<br>
+      <strong>6 · Recomendación:</strong> la corrección <strong>mínima</strong>. No reescribir el contrato: señalar el cambio puntual.
+    </div>
+  </div>
+
+  <div class="caja">
+    <div class="caja-et">EJEMPLO RESUELTO (SOBRE UN CONTRATO DE CLASE)</div>
+    <p><strong>Título:</strong> Reentrancy en la función de retiro.<br>
+    <strong>Severidad:</strong> Crítica.<br>
+    <strong>Ubicación:</strong> <code>Banco.sol</code> · <code>retirar()</code> · líneas 21-30.<br>
+    <strong>Descripción:</strong> la función envía ETH con <code>call{value:}</code> (línea 26) <em>antes</em> de poner el saldo en cero (línea 29). El receptor puede reentrar mientras su saldo sigue en pie.<br>
+    <strong>Escenario:</strong> un contrato atacante deposita 1, llama <code>retirar()</code>, y en su <code>receive()</code> vuelve a llamar <code>retirar()</code> repetidamente hasta vaciar el contrato.<br>
+    <strong>Recomendación:</strong> aplicar Checks-Effects-Interactions (poner <code>saldos[msg.sender] = 0</code> antes del <code>call</code>) y, como refuerzo, el modificador <code>nonReentrant</code> de OpenZeppelin.</p>
+  </div>
+</section>
+
+<!-- ============================================================ 5 -->
+<section class="sec salto">
+  <div class="sec-cab"><span class="sec-num">05</span><h2>Qué se entrega y cómo se califica</h2><span class="lead">AUDITORÍA #1 · SESIÓN 9</span></div>
+
+  <p><strong>Entrega:</strong> un informe de <strong>1 a 2 páginas</strong> (PDF) con: (a) el contrato auditado y su equipo; (b) el método usado (taxonomía recorrida + Slither); (c) la lista de hallazgos con el formato de la sección 4; (d) un resumen de una línea con la conclusión general.</p>
+
+  <table>
+    <tr><th style="width:44%">CRITERIO</th><th style="width:16%">PESO</th><th>QUÉ SE ESPERA</th></tr>
+    <tr><td class="pk">Cobertura del método</td><td>25 %</td><td>Se recorrieron las ocho vulnerabilidades de la taxonomía y se corrió Slither, separando señal de ruido.</td></tr>
+    <tr><td class="pk">Hallazgos bien formados</td><td>30 %</td><td>Cada hallazgo con los seis campos, ubicación exacta y escenario creíble.</td></tr>
+    <tr><td class="pk">Severidad coherente</td><td>20 %</td><td>La severidad corresponde al impacto real; nada inflado ni minimizado.</td></tr>
+    <tr><td class="pk">Recomendaciones útiles</td><td>15 %</td><td>Correcciones mínimas y accionables; no se reescribió el contrato ajeno.</td></tr>
+    <tr><td class="pk">Claridad y honestidad</td><td>10 %</td><td>El informe es legible. «No hallé vulnerabilidades explotables; revisé esto y esto» es una conclusión válida y vale.</td></tr>
+  </table>
+
+  <div class="caja">
+    <div class="caja-et">LO QUE NO SE PREMIA</div>
+    <p>No se califica por <strong>cantidad</strong> de hallazgos: un contrato bien hecho puede tener cero vulnerabilidades reales, y decirlo con evidencia es un buen informe. Tampoco se premia el hallazgo espectacular mal ubicado: sin línea y sin escenario, no cuenta.</p>
+  </div>
+</section>
+
+<!-- ============================================================ 6 -->
+<section class="sec">
+  <div class="sec-cab"><span class="sec-num">06</span><h2>Auditoría #2 · la pregunta técnica (Sesión 17)</h2><span class="lead">MODALIDAD BREVE</span></div>
+
+  <p>En el Demo Day, la auditoría cruzada cambia de forma: en lugar de un informe, cada equipo formula <strong>al menos una pregunta técnica de seguridad</strong> al equipo que sustenta. No es un «gotcha»: es una pregunta que obliga al otro equipo a demostrar que pensó en su seguridad.</p>
+
+  <table>
+    <tr><th style="width:50%">UNA BUENA PREGUNTA…</th><th>UNA PREGUNTA DÉBIL…</th></tr>
+    <tr><td>Apunta a un vector concreto de la taxonomía sobre <em>ese</em> contrato: «¿cómo evitan reentrancy en su función de retiro?».</td><td>Es genérica o de sí/no: «¿es seguro su contrato?».</td></tr>
+    <tr><td>Nace de haber leído el código o la arquitectura mostrada.</td><td>Se podría hacer sin haber visto nada del proyecto.</td></tr>
+    <tr><td>Deja al equipo evaluado demostrar criterio, no solo defenderse.</td><td>Busca ridiculizar en vez de mejorar.</td></tr>
+  </table>
+
+  <div class="caja clave">
+    <div class="caja-et">CÓMO SE CALIFICA LA PREGUNTA</div>
+    <p>Se evalúa la <strong>pertinencia y profundidad técnica</strong> de la pregunta que formula el equipo auditor: qué tan bien conecta con un riesgo real del proyecto evaluado. Una pregunta que revela lectura del código y dominio de la taxonomía puntúa alto; una genérica, bajo. La respuesta del equipo evaluado se califica aparte, dentro de su propia sustentación.</p>
+  </div>
+</section>
+
+<!-- ============================================================ 7 -->
+<section class="sec">
+  <div class="sec-cab"><span class="sec-num">07</span><h2>Lista de chequeo del auditor</h2></div>
+  <table>
+    <tr><th style="width:80%">ANTES DE ENTREGAR EL INFORME #1</th><th>OK</th></tr>
+    <tr><td>Recorrí las ocho vulnerabilidades de la taxonomía, una por una, sobre el contrato recibido.</td><td></td></tr>
+    <tr><td>Corrí Slither y separé los hallazgos reales de los falsos positivos.</td><td></td></tr>
+    <tr><td>Cada hallazgo tiene los seis campos, con línea exacta y escenario.</td><td></td></tr>
+    <tr><td>Las severidades son coherentes con el impacto; no inflé nada.</td><td></td></tr>
+    <tr><td>Cada recomendación es una corrección mínima, no una reescritura.</td><td></td></tr>
+    <tr><td>El informe cabe en 1 o 2 páginas y se entiende sin explicación oral.</td><td></td></tr>
+  </table>
+  <p style="font-size:9pt;color:var(--gris);margin-top:4mm;">La taxonomía de referencia (reentrancy, control de acceso y <code>tx.origin</code>, <code>delegatecall</code>, desbordamiento, aleatoriedad on-chain, front-running/MEV, oráculos, DoS) y las herramientas (Slither) se estudian en la Sesión 9. Este documento se reutiliza en la Sesión 17 para la modalidad de pregunta técnica.</p>
+</section>
+
+</body>
+</html>

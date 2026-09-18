@@ -1,133 +1,126 @@
 """
-Laboratorio 01 · Integridad verificable
+Laboratorio · Árbol de Merkle — IMPLEMENTACIÓN COMPLETA
 Blockchain y Web 3.0 · Universidad de San Buenaventura Medellín
 
-Completa los cuerpos marcados con TODO. No modifiques test_merkle.py:
-las pruebas son la especificación y el laboratorio termina cuando pasan.
+Este es el código que recorremos en clase. Ejecútalo:
 
-    python -m pytest test_merkle.py -v
+    python merkle.py
+
+Y comprueba que la raíz de los ocho lotes empieza por 53c895e4.
 """
 
 import hashlib
 from typing import List, Tuple
 
 # =====================================================================
-# CONVENCIONES DEL LABORATORIO — acordadas para todo el curso
+# CONVENCIONES DEL LABORATORIO
+# Las tres decisiones que hay que acordar para que dos implementaciones
+# produzcan la misma raíz. Si una pareja obtiene una raíz distinta a la
+# de otra, es casi seguro que difieren en alguna de estas tres.
 #
-#   1. Las HOJAS son hash_hex(dato). Se hashea el dato; no se mete crudo.
+#   1. Las HOJAS son hash_hex(dato). Se hashea el dato, no se mete crudo.
 #   2. Al combinar dos nodos se concatenan sus BYTES, no sus cadenas
-#      hexadecimales.  ->  bytes.fromhex(izq) + bytes.fromhex(der)
+#      hexadecimales. De ahí el bytes.fromhex() de _combinar().
 #   3. Si un nivel tiene un número IMPAR de elementos, se DUPLICA el
 #      último para completar el par.
-#
-# Si tu raíz no coincide con la de otra pareja, la causa está casi
-# siempre en una de estas tres.
 # =====================================================================
 
 
-# --------------------------------------------------------------- PARTE 1
 def hash_hex(dato) -> str:
     """Hash SHA-256 de `dato`, devuelto en hexadecimal (64 caracteres).
 
-    Debe aceptar str (codificar en utf-8) y también bytes.
-
-    Pista: hashlib.sha256(b).hexdigest()
+    Acepta str (se codifica en utf-8) o bytes.
     """
-    # TODO
-    raise NotImplementedError("Parte 1 · hash_hex")
+    if isinstance(dato, str):
+        dato = dato.encode("utf-8")
+    return hashlib.sha256(dato).hexdigest()
 
 
 def bits_distintos(hash_a: str, hash_b: str) -> int:
     """Número de bits que difieren entre dos hashes hexadecimales.
 
-    OJO: no compares carácter a carácter. Cada carácter hexadecimal son
-    4 bits, así que contar caracteres distintos NO da el número de bits.
-
-    Pista: convierte ambos a entero con int(h, 16), aplica XOR (^) y
-    cuenta los unos del resultado en binario.
+    XOR pone a 1 exactamente los bits que difieren; basta contarlos.
+    Comparar carácter a carácter NO sirve: cada carácter hex son 4 bits.
     """
-    # TODO
-    raise NotImplementedError("Parte 1 · bits_distintos")
+    return bin(int(hash_a, 16) ^ int(hash_b, 16)).count("1")
 
 
-# --------------------------------------------------------------- PARTE 2
 def _combinar(izquierdo: str, derecho: str) -> str:
-    """Hash del par de nodos. Ya viene resuelto: fíjate en la convención 2.
-
-    Concatena los BYTES de ambos hashes, no sus representaciones en texto.
-    """
+    """Hash del par de nodos, concatenando sus bytes (no sus cadenas hex)."""
     return hashlib.sha256(bytes.fromhex(izquierdo) + bytes.fromhex(derecho)).hexdigest()
 
 
 def construir_arbol(hojas: List[str]) -> List[List[str]]:
-    """Construye el árbol y devuelve TODOS los niveles, de abajo arriba.
+    """Construye el árbol completo y devuelve TODOS los niveles.
 
-    niveles[0]  -> las hojas ya hasheadas
-    niveles[-1] -> [raíz]
-
-    Devuelve todos los niveles (no solo la raíz) porque generar_prueba()
-    los necesita. Guarda cada nivel YA RELLENADO —con el último elemento
-    duplicado si eran impares—, para que los índices coincidan después.
-
-    Debe lanzar ValueError si `hojas` está vacío.
-
-    Estructura sugerida:
-        nivel = [hash de cada hoja]
-        repetir:
-            si len(nivel) > 1 y es impar: duplicar el último
-            guardar nivel
-            si len(nivel) == 1: terminar
-            nivel = combinar los elementos de dos en dos
+    niveles[0] son las hojas ya hasheadas; niveles[-1] es [raíz].
+    Se devuelven todos porque generar_prueba() los necesita.
+    Los niveles se almacenan YA RELLENADOS (con el último duplicado si
+    eran impares), para que la generación de pruebas use los mismos
+    índices que la construcción.
     """
-    # TODO
-    raise NotImplementedError("Parte 2 · construir_arbol")
+    if not hojas:
+        raise ValueError("El conjunto no puede estar vacío")
+
+    nivel = [hash_hex(h) for h in hojas]
+    niveles: List[List[str]] = []
+
+    while True:
+        if len(nivel) > 1 and len(nivel) % 2 == 1:
+            nivel = nivel + [nivel[-1]]          # convención 3
+        niveles.append(nivel)
+        if len(nivel) == 1:
+            return niveles
+        nivel = [_combinar(nivel[i], nivel[i + 1]) for i in range(0, len(nivel), 2)]
 
 
 def raiz_de_merkle(hojas: List[str]) -> str:
-    """Raíz de Merkle del conjunto. Apóyate en construir_arbol()."""
-    # TODO
-    raise NotImplementedError("Parte 2 · raiz_de_merkle")
+    """Raíz de Merkle del conjunto."""
+    return construir_arbol(hojas)[-1][0]
 
 
-# --------------------------------------------------------------- PARTE 3
 def generar_prueba(hojas: List[str], indice: int) -> List[Tuple[str, str]]:
-    """Prueba de inclusión del elemento que ocupa la posición `indice`.
+    """Prueba de inclusión del elemento `indice`.
 
-    Devuelve una lista de pares (hash_hermano, lado), donde lado vale
-    'izq' si el hermano va a la IZQUIERDA al concatenar, y 'der' si va a
-    la DERECHA.
-
-    GUARDAR EL LADO ES IMPRESCINDIBLE. Si concatenas siempre en el mismo
-    orden, la verificación falla aproximadamente la mitad de las veces:
-    es el error más común de esta parte.
-
-    Estructura sugerida:
-        recorrer los niveles menos el último
-        si el índice es par -> el hermano está a la derecha (idx + 1)
-        si es impar         -> el hermano está a la izquierda (idx - 1)
-        subir de nivel: idx = idx // 2
+    Devuelve una lista de pares (hash_hermano, lado), donde lado es
+    'izq' si el hermano va a la izquierda al concatenar y 'der' si va a
+    la derecha. GUARDAR EL LADO ES IMPRESCINDIBLE: sin él, la
+    verificación falla la mitad de las veces.
     """
-    # TODO
-    raise NotImplementedError("Parte 3 · generar_prueba")
+    if not 0 <= indice < len(hojas):
+        raise IndexError("Índice fuera del conjunto")
+
+    niveles = construir_arbol(hojas)
+    prueba: List[Tuple[str, str]] = []
+    idx = indice
+
+    for nivel in niveles[:-1]:               # todos menos el de la raíz
+        if idx % 2 == 0:
+            prueba.append((nivel[idx + 1], "der"))
+        else:
+            prueba.append((nivel[idx - 1], "izq"))
+        idx //= 2
+
+    return prueba
 
 
 def verificar_prueba(dato, prueba: List[Tuple[str, str]], raiz: str) -> bool:
-    """¿Pertenece `dato` al conjunto cuya raíz de Merkle es `raiz`?
+    """Verifica que `dato` pertenece al conjunto cuya raíz es `raiz`.
 
-    Parte del hash del dato y combínalo sucesivamente con cada hermano,
-    RESPETANDO EL LADO. Si el valor final coincide con la raíz, el
-    elemento estaba en el conjunto.
-
-    Debe devolver False —no lanzar excepción— cuando la prueba no cuadre.
-    Una verificación que solo acepta lo correcto está a medio escribir:
-    tiene que rechazar lo incorrecto.
+    No necesita los demás elementos, ni confiar en quien envía la prueba:
+    una prueba falsa simplemente no cuadra con la raíz.
     """
-    # TODO
-    raise NotImplementedError("Parte 3 · verificar_prueba")
+    actual = hash_hex(dato)
+    for hermano, lado in prueba:
+        if lado == "izq":
+            actual = _combinar(hermano, actual)
+        else:
+            actual = _combinar(actual, hermano)
+    return actual == raiz
 
 
 # =====================================================================
-# Comprobación rápida a ojo:  python merkle.py
+# Demostración manual:  python merkle.py
 # =====================================================================
 if __name__ == "__main__":
     a, b = "USB Medellin", "USB Medellín"

@@ -2,6 +2,8 @@
  * Laboratorio 07 · Subasta con patrón de retiro, antipatrón push y empaquetado
  *
  *     npx hardhat test test/s07/Subasta.test.js
+ *
+ * La comparación de gas completa (la tabla del informe) está en GasPushPull.test.js.
  */
 import { expect } from "chai";
 import { network } from "hardhat";
@@ -147,6 +149,22 @@ describe("S07 · Subasta · interruptor de emergencia", () => {
   it("solo el dueño pausa", async () => {
     const { s, ana } = await loadFixture(desplegar);
     await expect(s.connect(ana).pausar()).to.be.revertedWithCustomError(s, "OwnableUnauthorizedAccount");
+  });
+});
+
+describe("S07 · Subasta · recibir ether", () => {
+  // Subasta no declara receive() ni fallback(): la ÚNICA puerta de entrada del
+  // dinero es pujar(). Un envío directo no puede quedar huérfano en el contrato.
+  it("rechaza ether enviado directamente, sin pasar por pujar()", async () => {
+    const { s, ana } = await loadFixture(desplegar);
+    await expect(ana.sendTransaction({ to: await s.getAddress(), value: eth(1) }))
+      .to.be.revertedWithoutReason(ethers);
+  });
+
+  it("rechaza una llamada a una función que no existe", async () => {
+    const { s, ana } = await loadFixture(desplegar);
+    await expect(ana.sendTransaction({ to: await s.getAddress(), data: "0x12345678" }))
+      .to.be.revertedWithoutReason(ethers);
   });
 });
 

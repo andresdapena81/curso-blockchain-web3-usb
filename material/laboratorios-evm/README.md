@@ -60,4 +60,15 @@ Ver [`versiones.md`](versiones.md). **No se actualizan a mitad de semestre.**
 
 | Sesión | Guía | Contratos |
 |---|---|---|
-| 05 · EVM y gas | `guias/s05-forense-y-gas.md` | `Operaciones` |
+| 05 · EVM y gas | `guias/s05-forense-y-gas.pdf` (fuente `.html`) | `Operaciones` |
+| 06 · Solidity I · Remix | `guias/s06-certificados-remix.pdf` (fuente `.html`) | `CertificadosUSB` |
+| 07 · Solidity II · subasta y patrones | `guias/s07-subasta-patrones.pdf` (fuente `.html`) | `Subasta`, `ISubasta`, `Porcentajes`, `SubastaPush`, `SubastaPullMinima`, `PostorHostil`, `Empaquetado` |
+| 08 · Hardhat · pruebas y mutantes | `guias/s08-pruebas-y-mutantes.pdf` (fuente `.html`) | `Recaudo` (+ 3 mutantes), `ignition/modules/Recaudo.js` |
+| 09 · Seguridad · Ethernaut y auditoría | `guias/s09-seguridad-ethernaut.pdf` (fuente `.html`) | `BancoVulnerable`, `Atacante`, `BancoSeguro` |
+| 10 · Tokens fungibles · ERC-20 | `guias/s10-token-erc20.pdf` (fuente `.html`) | `FichaUSB`, `Canje`, `ignition/modules/s10-FichaCanje.js` |
+| 11 · NFT, IPFS y diploma | `guias/s11-diploma-nft-ipfs.pdf` (fuente `.html`) | `DiplomaUSB`, `DiplomaSBT`, `ignition/modules/s11-DiplomaUSB.js` |
+| 12 · Frontend Web3 | `../laboratorio-12/guia/guia-laboratorio-12.pdf` (la dApp vive en `../laboratorio-12/`) | usa `FichaUSB` de la S10 · `scripts/s12/` |
+| 13 · Firmas EIP-712 e indexación | `guias/s13-firmas-eip712.pdf` (fuente `.html`) | `AsistenciaFirmada`, `ignition/modules/s13-AsistenciaFirmada.js` |
+| 14 · DeFi · oráculos y AMM | `guias/s14-defi-oraculos-amm.pdf` (fuente `.html`) + `guias/s14-plantilla-perdida-impermanente.xlsx` | `PoolXYK`, `TokenLab14`, `OraculoConsumidor`, `OraculoFalso`, `ignition/modules/s14-OraculoConsumidor.js` |
+| 15 · DAOs y gobernanza | `guias/s15-gobernanza-dao.pdf` (fuente `.html`) | `TokenVoto`, `GobiernoUSB`, `TimelockUSB`, `Tesoreria`, `MultisigUSB` |
+| 16 · Capa 2 y regulación | `guias/s16-capa2-comparativa.pdf` (fuente `.html`) | `SelloTiempo` |

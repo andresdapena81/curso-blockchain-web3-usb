@@ -1,0 +1,331 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<title>Guía · Laboratorio 14</title>
+<!--ESTILOS-->
+</head>
+<body>
+
+<section class="barra">
+  <div class="kicker">LABORATORIO 14 · SESIÓN 14 · EN PAREJAS · CALIFICABLE (LABORATORIOS S13–S16)</div>
+  <h1>UN AMM <em>x · y = k</em>,<br>UN ORÁCULO REAL<br>Y LA PÉRDIDA IMPERMANENTE</h1>
+  <div class="sub">Completar y medir un mini-AMM, consumir el price feed ETH/USD de Chainlink en Sepolia<br>con sus defensas, y calcular la pérdida impermanente en una hoja que se autocomprueba.</div>
+</section>
+
+<dl class="datos">
+  <div><dt>MODALIDAD</dt><dd>En parejas<br>dentro del equipo</dd></div>
+  <div><dt>REQUISITO</dt><dd>laboratorios-evm,<br>keystore y hoja</dd></div>
+  <div><dt>DURACIÓN</dt><dd>65 min en clase<br>+ Sepolia en casa</dd></div>
+  <div><dt>META</dt><dd>21 pruebas + 1 contrato<br>verificado + 4 ✔</dd></div>
+</dl>
+
+<div class="caja clave">
+  <div class="caja-et">CÓMO LEER ESTA GUÍA</div>
+  <p>Tres partes independientes: si una se atasca, avanza con la otra. Cada paso dice qué escribir, qué deberías ver y cómo saber que funcionó. Todos los números esperados de esta guía salieron de correr el código del laboratorio; si tu resultado es otro, el error está en tu código, no en la guía. Los problemas comunes están en la sección 12.</p>
+</div>
+
+<!-- ============================================================ 1 -->
+<section class="sec">
+  <div class="sec-cab"><span class="sec-num">01</span><h2>Qué vas a construir, y por qué</h2><span class="lead">LEER PRIMERO</span></div>
+
+  <p><strong>Objetivo.</strong> Entender las primitivas DeFi como quien las evalúa: medir el precio, el slippage y la pérdida impermanente de un AMM, y leer un precio externo sin caer en las dos trampas clásicas de los oráculos (precio rancio y precio manipulable). <strong>Resultados de aprendizaje:</strong> RA2 (justificar una arquitectura), RA5 (riesgos y defensas) y RA7 (implicaciones económicas).</p>
+
+  <table>
+    <tr><th style="width:18%">PARTE</th><th style="width:44%">QUÉ HACES</th><th>ARCHIVOS</th></tr>
+    <tr><td class="pk">1 · Mini-AMM</td><td>Completas <code>cotizar</code>, <code>intercambiar</code> y <code>quitarLiquidez</code>; mides slippage y pérdida impermanente en cadena.</td><td><code>andamiaje/s14/PoolXYK.sol</code>, <code>test/s14/PoolXYK.test.js</code>, <code>scripts/s14/pool-en-numeros.js</code></td></tr>
+    <tr><td class="pk">2 · Oráculo</td><td>Completas las defensas del consumidor y lo despliegas en Sepolia contra el feed real de Chainlink.</td><td><code>andamiaje/s14/OraculoConsumidor.sol</code>, <code>test/s14/Oraculo.test.js</code>, <code>scripts/s14/leer-chainlink.js</code></td></tr>
+    <tr><td class="pk">3 · Hoja de cálculo</td><td>Tres escenarios de precio con fórmulas; la plantilla dice si coinciden.</td><td><code>guias/s14-plantilla-perdida-impermanente.xlsx</code> (y <code>.csv</code>)</td></tr>
+  </table>
+
+  <div class="caja alerta">
+    <div class="caja-et">POR QUÉ UN AMM PROPIO Y NO UNISWAP EN SEPOLIA</div>
+    <p>La interfaz de Uniswap admite Sepolia en «modo testnet» (verificado el 17 de septiembre de 2026 en su centro de soporte). Pero los pools de prueba tienen poca liquidez y precios sin relación con ningún mercado, y cada paso exige tokens y ETH de prueba. Medir slippage allí mide el desorden del pool, no el mecanismo. Por eso la parte 1 usa <code>PoolXYK</code>: la misma idea de Uniswap v2 en 150 líneas que puedes leer, probar y medir. Uniswap queda como extensión opcional (sección 11).</p>
+  </div>
+</section>
+
+<!-- ============================================================ 2 -->
+<section class="sec">
+  <div class="sec-cab"><span class="sec-num">02</span><h2>Qué se entrega</h2><span class="lead">EVIDENCIA VERIFICABLE</span></div>
+  <ol>
+    <li><strong>Mini-AMM:</strong> captura de <code>15 passing</code> en <code>test/s14/PoolXYK.test.js</code> con tu código, y la salida de <code>pool-en-numeros.js</code>.</li>
+    <li><strong>Oráculo:</strong> captura de <code>6 passing</code> en <code>test/s14/Oraculo.test.js</code>, dirección de tu <code>OraculoConsumidor</code> <strong>verificado</strong> en Sepolia y la salida de <code>leer-chainlink.js</code> con <code>CONSUMIDOR</code>.</li>
+    <li><strong>Hoja:</strong> tu archivo con las cuatro filas en «✔ coincide», hechas con fórmulas.</li>
+    <li><strong>Análisis:</strong> un párrafo sobre un ataque real visto en clase (oráculo o flash loan): qué falló y qué defensa de este laboratorio lo habría evitado.</li>
+    <li>Las respuestas de reflexión (sección 13).</li>
+  </ol>
+  <p>Un documento por pareja, por el canal del curso. Sin evidencia en cadena (el consumidor verificado en Sepolia), el laboratorio no se califica.</p>
+</section>
+
+<!-- ============================================================ 3 -->
+<section class="sec salto">
+  <div class="sec-cab"><span class="sec-num">03</span><h2>Preparación desde cero</h2><span class="lead">10 MINUTOS</span></div>
+
+  <pre>node --version                # v22.x
+cd laboratorios-evm
+git pull                      # trae contracts/s14, test/s14, scripts/s14, andamiaje/s14 y la plantilla
+npm install                   # solo si es la primera vez en este computador
+npx hardhat --version         # 3.16.0
+npx hardhat keystore list     # SEPOLIA_RPC_URL, SEPOLIA_PRIVATE_KEY, ETHERSCAN_API_KEY</pre>
+  <p><strong>Cómo sé que funcionó:</strong> existe <code>guias/s14-plantilla-perdida-impermanente.xlsx</code> y <code>npx hardhat test test/s14/PoolXYK.test.js</code> compila (cuántas pruebas pasan lo ves en el paso 1). Para la hoja necesitas Excel, LibreOffice Calc o Google Sheets; cualquiera sirve.</p>
+
+  <div class="caja peligro">
+    <div class="caja-et">REGLAS QUE NO ADMITEN EXCEPCIÓN</div>
+    <p>Solo red local y Sepolia: <strong>nunca</strong> dinero real, y nada de este laboratorio es una recomendación de inversión. La clave privada es la de la billetera del curso y vive <strong>solo</strong> en el keystore, igual que la URL del RPC. La dirección de un contrato no es un secreto: puede ir en una variable de entorno. Los tokens TETH y TUSD de la parte 1 son de juguete: cualquiera puede acuñarlos.</p>
+  </div>
+</section>
+
+<!-- ============================================================ 4 -->
+<section class="sec">
+  <div class="sec-cab"><span class="sec-num">04</span><h2>Parte 1 · Paso 1: el pool en rojo</h2><span class="lead">5 MINUTOS</span></div>
+  <pre>copy andamiaje\s14\PoolXYK.sol contracts\s14\          (Windows)
+cp andamiaje/s14/PoolXYK.sol contracts/s14/            (macOS / Linux)
+npx hardhat test test/s14/PoolXYK.test.js</pre>
+  <p><strong>Salida esperada:</strong> compila (con avisos de «pure» del andamiaje) y termina en <code>3 passing</code> y <code>12 failing</code>. Las tres verdes son las de <code>agregarLiquidez</code>, que ya viene hecha: léela antes de seguir, porque te muestra cómo se usan <code>reservaA</code>, <code>reservaB</code>, <code>totalSupply()</code> y <code>safeTransferFrom</code>.</p>
+  <p>El pool de las pruebas es el de la clase: <strong>10 TETH y 20 000 TUSD</strong>, precio 2 000, comisión 0,30 % (<code>COMISION_BPS = 30</code>, <code>BPS = 10 000</code>).</p>
+</section>
+
+<!-- ============================================================ 5 -->
+<section class="sec">
+  <div class="sec-cab"><span class="sec-num">05</span><h2>Parte 1 · Paso 2: TODO 1, cotizar</h2><span class="lead">LA FÓRMULA</span></div>
+
+  <p>Quien mete <code>montoEntrada</code> de un token saca del otro la cantidad que mantiene el producto de las reservas. Con la comisión descontada de la entrada:</p>
+  <pre>entradaNeta = montoEntrada × (1 − 0,003)
+(rEntrada + entradaNeta) × (rSalida − salida) = rEntrada × rSalida
+⇒  salida = rSalida × entradaNeta ÷ (rEntrada + entradaNeta)</pre>
+
+  <div class="pregunta">
+    <div class="cab"><div class="n">1</div><div class="enun"><span class="tema">FUNCIÓN · cotizar(tokenEntrada, montoEntrada)</span>Cuánto sale, en enteros</div></div>
+    <div class="just">
+      <strong>Qué escribir</strong> (debajo de la línea que ya obtiene <code>rEntrada</code> y <code>rSalida</code>):<br>
+      · <code>if (montoEntrada == 0) revert MontoCero();</code><br>
+      · <code>if (rEntrada == 0 || rSalida == 0) revert SinLiquidez();</code><br>
+      · <code>uint256 entradaNeta = montoEntrada * (BPS - COMISION_BPS);</code> ← ya multiplicada por 10 000<br>
+      · <code>return (rSalida * entradaNeta) / (rEntrada * BPS + entradaNeta);</code><br>
+      <strong>Por qué así:</strong> Solidity no tiene decimales. Para aplicar 0,997 se multiplica por 9 970 y se multiplica también el denominador por 10 000. Y siempre se multiplica <strong>antes</strong> de dividir: la división entera trunca.<br>
+      <strong>Comprobación a mano:</strong> 2 000 TUSD → entradaNeta = 2 000 × 9 970 = 19 940 000 (en unidades de 10<sup>18</sup>); salida = 10 × 19 940 000 ÷ (20 000 × 10 000 + 19 940 000) = 0,906610893880149131 TETH. La prueba «el ejemplo de la lámina» exige ese valor exacto: <code>906610893880149131</code> unidades mínimas.
+    </div>
+  </div>
+</section>
+
+<!-- ============================================================ 6 -->
+<section class="sec salto">
+  <div class="sec-cab"><span class="sec-num">06</span><h2>Parte 1 · Paso 3: TODO 2 y 3</h2><span class="lead">INTERCAMBIAR Y RETIRAR</span></div>
+
+  <div class="pregunta">
+    <div class="cab"><div class="n">2</div><div class="enun"><span class="tema">FUNCIÓN · intercambiar(tokenEntrada, montoEntrada, minimoSalida)</span>Checks → effects → interactions (Sesión 9)</div></div>
+    <div class="just">
+      <strong>Checks:</strong> <code>salida = cotizar(tokenEntrada, montoEntrada);</code> y <code>if (salida &lt; minimoSalida) revert SlippageExcedido(minimoSalida, salida);</code><br>
+      <strong>Effects:</strong> <code>bool entraA = tokenEntrada == address(tokenA);</code> Si entra A: <code>reservaA += montoEntrada; reservaB -= salida;</code>. Si entra B, al revés.<br>
+      <strong>Interactions:</strong> <code>IERC20(tokenEntrada).safeTransferFrom(msg.sender, address(this), montoEntrada);</code> y <code>(entraA ? tokenB : tokenA).safeTransfer(msg.sender, salida);</code>. Al final, <code>emit Intercambio(msg.sender, tokenEntrada, montoEntrada, salida);</code><br>
+      <strong>Lo que vigilan las pruebas:</strong> que entregues exactamente lo cotizado, que <code>k</code> nunca baje (sube un poco por la comisión) y que un mínimo no alcanzado revierta todo (★ slippage).
+    </div>
+  </div>
+
+  <div class="pregunta">
+    <div class="cab"><div class="n">3</div><div class="enun"><span class="tema">FUNCIÓN · quitarLiquidez(participaciones)</span>La parte proporcional de AMBAS reservas</div></div>
+    <div class="just">
+      · <code>if (participaciones == 0) revert MontoCero();</code><br>
+      · <code>uint256 total = totalSupply();</code> — <strong>antes</strong> de quemar: si quemas primero, el total cambia y el cálculo sale mal.<br>
+      · <code>montoA = (participaciones * reservaA) / total;</code> y lo mismo para B.<br>
+      · <code>_burn(msg.sender, participaciones);</code> — revierte sola con <code>ERC20InsufficientBalance</code> si no las tiene.<br>
+      · Restar de las reservas, <code>safeTransfer</code> de los dos tokens y <code>emit LiquidezRetirada(msg.sender, montoA, montoB, participaciones);</code>
+    </div>
+  </div>
+
+  <p><strong>Cómo sé que terminé:</strong> <code>npx hardhat test test/s14/PoolXYK.test.js</code> muestra <code>15 passing</code>, incluidas las tres con ★:</p>
+  <pre>    √ ★ protección de slippage: si sale menos del mínimo aceptado, se revierte todo
+    √ ★ pérdida impermanente en cadena: si el precio se multiplica por ~4, el LP pierde ≈ 20 % frente a conservar
+    √ ★ una sola compra grande multiplica el precio spot dentro de la misma transacción
+  15 passing</pre>
+  <p>Con <code>--coverage</code>, la solución de referencia da 100 % de líneas en <code>PoolXYK.sol</code>.</p>
+</section>
+
+<!-- ============================================================ 7 -->
+<section class="sec">
+  <div class="sec-cab"><span class="sec-num">07</span><h2>Parte 1 · Paso 4: medir</h2><span class="lead">SLIPPAGE Y PÉRDIDA EN CADENA</span></div>
+  <pre>npx hardhat run scripts/s14/pool-en-numeros.js</pre>
+  <p><strong>Salida real</strong> en la red local (el gas puede variar unas unidades):</p>
+  <pre style="font-size:7pt">  POOL INICIAL: 10 TETH + 20 000 TUSD · comisión 0,30 %
+  inicio                 TETH      10,0000 · TUSD    20.000,00 · k   200.000,00 · precio   2.000,00
+
+  1 · COTIZAR (lectura, sin gas)
+  TUSD que entran   TETH que salen   precio promedio   peor que el spot
+           100         0,049603          2.016,02            0,80 %
+         2.000         0,906611          2.206,02           10,30 %
+        10.000         3,326660          3.006,02           50,30 %
+
+  2 · COMPRAR con 2 000 TUSD, tolerancia de slippage del 1 %
+  recibió 0,906611 TETH (mínimo aceptado 0,897545) · gas 69751
+  después de comprar     TETH       9,0934 · TUSD    22.000,00 · k   200.054,56 · precio   2.419,34
+
+  3 · PÉRDIDA IMPERMANENTE, MEDIDA EN CADENA
+  el arbitrajista mete 20 000 TUSD; nuevo precio 7.988,00 (r = 3,9940)
+  el LP retiraría      5,0075 TETH + 40.000,00 TUSD = 80.000,00 TUSD
+  si hubiera conservado 10 TETH + 20 000 TUSD      = 99.880,00 TUSD
+  pérdida impermanente medida 19,90 %  ·  fórmula 2√r/(1+r) 19,96 %</pre>
+  <p><strong>Cómo sé que funcionó:</strong> los números coinciden con los de arriba. Si la parte 1 da otros valores, tu <code>cotizar</code> tiene un error: vuelve a la comprobación a mano del paso 2.</p>
+</section>
+
+<!-- ============================================================ 8 -->
+<section class="sec">
+  <div class="sec-cab"><span class="sec-num">08</span><h2>Parte 2 · El consumidor de oráculo</h2><span class="lead">20 MINUTOS</span></div>
+  <pre>copy andamiaje\s14\OraculoConsumidor.sol contracts\s14\        (cp en macOS / Linux)
+npx hardhat test test/s14/Oraculo.test.js          # al empezar: 0 passing · 6 failing</pre>
+
+  <div class="pregunta">
+    <div class="cab"><div class="n">4</div><div class="enun"><span class="tema">FUNCIÓN · precioEth(maxAntiguedad) · TODO 1 A 3</span>Leer un precio sin creérselo todo</div></div>
+    <div class="just">
+      <strong>TODO 1 · positivo:</strong> <code>if (answer &lt;= 0) revert PrecioInvalido();</code> — un feed puede devolver 0 o negativo si algo falla.<br>
+      <strong>TODO 2 · no rancio:</strong> <code>uint256 antiguedad = block.timestamp - updatedAt;</code> y <code>if (antiguedad &gt; maxAntiguedad) revert PrecioViejo(antiguedad);</code> — un oráculo que dejó de actualizarse es tan peligroso como uno manipulado: en una caída, seguiría diciendo el precio de antes.<br>
+      <strong>TODO 3 · normalizar:</strong> <code>uint8 d = feed.decimals();</code> y <code>return uint256(answer) * (10 ** (18 - d));</code> — Chainlink ETH/USD usa 8 decimales; los tokens, 18.<br>
+      <strong>Cómo lo compruebas:</strong> <code>6 passing</code>. Mira las dos con ★: «rechaza un precio rancio» y «demuestra la manipulación: quien controla el oráculo controla el precio».
+    </div>
+  </div>
+
+  <div style="break-inside:avoid">
+  <h3 style="font-size:10.5pt;margin:4mm 0 2mm">El feed real, verificado</h3>
+  <table>
+    <tr><th style="width:30%">DATO</th><th style="width:40%">VALOR</th><th>DÓNDE SE VERIFICÓ</th></tr>
+    <tr><td class="pk">Dirección ETH/USD en Sepolia</td><td><code>0x694AA1769357215DE4FAC081bf1f309aDC325306</code></td><td>docs.chain.link → Price Feed Contract Addresses → Ethereum → Sepolia (17-sep-2026)</td></tr>
+    <tr><td class="pk">Decimales · desviación · heartbeat</td><td>8 · 1 % · 3 600 s</td><td>La misma página, «More details».</td></tr>
+    <tr><td class="pk">description()</td><td><code>"ETH / USD"</code></td><td>Lectura directa del contrato en Sepolia.</td></tr>
+  </table>
+  </div>
+  <p>Antes de usarla en otro semestre, vuelve a comprobarla en <code>docs.chain.link</code>: las direcciones de redes de prueba pueden cambiar.</p>
+</section>
+
+<!-- ============================================================ 9 -->
+<section class="sec">
+  <div class="sec-cab"><span class="sec-num">09</span><h2>Parte 2 · Desplegar en Sepolia y leer</h2><span class="lead">LA EVIDENCIA EN CADENA</span></div>
+  <p><strong>9.1 · Leer el feed directo</strong> (solo lectura, no gasta ETH):</p>
+  <pre>npx hardhat run scripts/s14/leer-chainlink.js --network sepolia</pre>
+  <p><strong>Salida real</strong> del 17-sep-2026 (la hora está en UTC; tus números serán otros):</p>
+  <pre>  Red: Sepolia · feed real de Chainlink 0x694AA1769357215DE4FAC081bf1f309aDC325306
+  roundId       : 18446744073709587749
+  answer (crudo): 244571660075 (8 decimales)
+  precio ETH/USD: 2445.71660075
+  actualizado   : 2026-09-18T00:04:00.000Z · hace 2952 s
+  ¿rancio?      : no (heartbeat 3600 s)</pre>
+
+  <p><strong>9.2 · Desplegar tu consumidor, verificado:</strong></p>
+  <pre>npx hardhat ignition deploy ignition/modules/s14-OraculoConsumidor.js --network sepolia --verify</pre>
+  <p>El módulo trae la dirección del feed como parámetro <code>feed</code> por defecto. Salida esperada: <code>OraculoConsumidorModulo#OraculoConsumidor - 0x…</code> y el enlace de verificación.</p>
+
+  <p><strong>9.3 · Leer a través de tu contrato:</strong></p>
+  <pre>$env:CONSUMIDOR="0x...tu consumidor..."               (PowerShell)
+export CONSUMIDOR=0x...tu consumidor...               (macOS / Linux)
+npx hardhat run scripts/s14/leer-chainlink.js --network sepolia</pre>
+  <p>Al final aparecen dos líneas más: <code>Su OraculoConsumidor 0x…</code> y <code>precioEth(7200) : 2445.71660075</code> (o el precio de ese momento), ahora con 18 decimales. <strong>Cómo sé que terminé:</strong> el precio por tu contrato coincide con el crudo, y en Etherscan tu contrato tiene la marca de verificado.</p>
+</section>
+
+<!-- ============================================================ 10 -->
+<section class="sec salto">
+  <div class="sec-cab"><span class="sec-num">10</span><h2>Parte 3 · La hoja de pérdida impermanente</h2><span class="lead">15 MINUTOS</span></div>
+  <p>Abre <code>guias/s14-plantilla-perdida-impermanente.xlsx</code>. Un LP depositó <strong>1 ETH + 2 000 USDC con ETH a 2 000</strong> (celdas B3 a B5). Llena las celdas <strong>amarillas</strong> de las filas 9 a 12 con <strong>fórmulas</strong>, no con números copiados:</p>
+  <table>
+    <tr><th style="width:22%">COLUMNA</th><th style="width:38%">QUÉ ES</th><th>FÓRMULA (FILA 9; LUEGO SE ARRASTRA)</th></tr>
+    <tr><td class="pk">C · r</td><td>cuántas veces cambió el precio</td><td><code>=B9/$B$5</code></td></tr>
+    <tr><td class="pk">D · ETH en el pool</td><td>x0 ÷ √r</td><td><code>=$B$3/SQRT(C9)</code> · en Excel en español: <code>=$B$3/RAIZ(C9)</code></td></tr>
+    <tr><td class="pk">E · USDC en el pool</td><td>y0 × √r</td><td><code>=$B$4*SQRT(C9)</code></td></tr>
+    <tr><td class="pk">F · valor del pool</td><td>ETH × precio final + USDC</td><td><code>=D9*B9+E9</code></td></tr>
+    <tr><td class="pk">G · valor si conserva</td><td>x0 × precio final + y0</td><td><code>=$B$3*B9+$B$4</code></td></tr>
+    <tr><td class="pk">H · pérdida</td><td>1 − pool ÷ conservar</td><td><code>=1-F9/G9</code></td></tr>
+  </table>
+  <p><strong>Valores esperados</strong> (también están en la hoja, debajo, y en el <code>.csv</code>):</p>
+  <table>
+    <tr><th>ESCENARIO</th><th>r</th><th>ETH</th><th>USDC</th><th>POOL</th><th>CONSERVAR</th><th>PÉRDIDA</th></tr>
+    <tr><td class="pk">A · ETH cae a 1 000</td><td>0,5</td><td>1,4142</td><td>1 414,21</td><td>2 828,43</td><td>3 000</td><td>5,72 %</td></tr>
+    <tr><td class="pk">B · ETH sube a 4 000</td><td>2</td><td>0,7071</td><td>2 828,43</td><td>5 656,85</td><td>6 000</td><td>5,72 %</td></tr>
+    <tr><td class="pk">C · ETH sube a 8 000</td><td>4</td><td>0,5000</td><td>4 000,00</td><td>8 000,00</td><td>10 000</td><td>20,00 %</td></tr>
+  </table>
+  <p><strong>Cómo sé que funcionó:</strong> la columna I dice <strong>«✔ coincide»</strong> en A, B y C. En la fila D escribe un precio final propio en B12 (por ejemplo 20 000, r = 10 → 42,50 %): la columna I la contrasta con la fórmula cerrada 1 − 2√r ÷ (1 + r). Los mismos números salen de <code>node scripts/s14/perdida-impermanente.js 10</code>.</p>
+  <div class="caja">
+    <div class="caja-et">SEPARADORES SEGÚN EL PROGRAMA</div>
+    <p>En Excel o LibreOffice configurados en español, los argumentos se separan con <code>;</code> y la raíz se llama <code>RAIZ</code>; en inglés y en Google Sheets, <code>SQRT</code>. Las fórmulas que ya trae la plantilla se traducen solas al abrirla. Si todo marca «✘ revisar» aunque los valores parezcan iguales, escribiste números redondeados en vez de fórmulas.</p>
+  </div>
+</section>
+
+<!-- ============================================================ 11 -->
+<section class="sec">
+  <div class="sec-cab"><span class="sec-num">11</span><h2>Para ir más allá (opcional)</h2></div>
+  <ul>
+    <li><strong>Uniswap en Sepolia.</strong> En <code>app.uniswap.org</code>, con la billetera del curso, activa el modo testnet en la configuración y elige Sepolia. Haz un intercambio pequeño y anota el precio cotizado, el mínimo a recibir y el obtenido. Compara con la tabla del paso 4 y explica por qué un pool de prueba se comporta distinto. Lee cada campo antes de firmar: una aprobación ilimitada de tokens también es una firma.</li>
+    <li><strong>Circuit breaker.</strong> Añade a tu copia de <code>OraculoConsumidor</code> una comprobación que rechace el precio si cambió más de un X % respecto a la última lectura guardada, y una prueba que lo demuestre con <code>OraculoFalso.fijarPrecio</code>.</li>
+    <li><strong>Sin comisión.</strong> En una copia del pool pon <code>COMISION_BPS = 0</code> y vuelve a correr el paso 4: la pérdida medida debe igualar la fórmula.</li>
+  </ul>
+</section>
+
+<!-- ============================================================ 12 -->
+<section class="sec">
+  <div class="sec-cab"><span class="sec-num">12</span><h2>Errores frecuentes</h2><span class="lead">CASI TODO SE RESUELVE AQUÍ</span></div>
+  <table>
+    <tr><th style="width:38%">SÍNTOMA</th><th>CAUSA Y SOLUCIÓN</th></tr>
+    <tr><td class="pk">«el ejemplo de la lámina» falla por poco</td><td>Dividiste antes de multiplicar, o aplicaste la comisión a la salida. Revisa el orden de la fórmula del paso 2.</td></tr>
+    <tr><td class="pk">cotizar devuelve 0</td><td>Olvidaste multiplicar <code>rEntrada</code> por <code>BPS</code> en el denominador: el numerador está 10 000 veces «inflado» y el denominador no.</td></tr>
+    <tr><td class="pk">«k nunca baja» falla</td><td>Sumaste <code>entradaNeta</code> (sin comisión) a la reserva en vez de <code>montoEntrada</code>. La comisión debe QUEDARSE en el pool.</td></tr>
+    <tr><td class="pk">«retirar todas las participaciones» da montos raros</td><td>Leíste <code>totalSupply()</code> después de <code>_burn</code>. Léelo antes.</td></tr>
+    <tr><td class="pk"><code>ERC20InsufficientAllowance</code> en un script propio</td><td>Falta <code>approve</code> del usuario al pool. En las pruebas ya está hecho.</td></tr>
+    <tr><td class="pk"><code>PrecioViejo</code> en Sepolia</td><td><code>maxAntiguedad</code> menor que el heartbeat de 3 600 s. El script usa 7 200.</td></tr>
+    <tr><td class="pk">precioEth da un número 10<sup>10</sup> veces mayor</td><td>Multiplicaste por <code>10 ** 18</code> en vez de <code>10 ** (18 - d)</code>.</td></tr>
+    <tr><td class="pk">En Sepolia «insufficient funds»</td><td>Sin ETH de prueba en la billetera del curso: pídelo al docente.</td></tr>
+    <tr><td class="pk">La verificación en Etherscan falla</td><td>Falta <code>ETHERSCAN_API_KEY</code> o Etherscan aún no ve el contrato. Espera y corre <code>npx hardhat ignition verify chain-11155111</code>.</td></tr>
+    <tr><td class="pk">La hoja marca ✘ con valores iguales a la vista</td><td>Números tecleados y redondeados en vez de fórmulas, o la celda del precio final vacía.</td></tr>
+  </table>
+</section>
+
+<!-- ============================================================ 13 -->
+<section class="sec">
+  <div class="sec-cab"><span class="sec-num">13</span><h2>Preguntas de reflexión</h2><span class="lead">CON TUS PROPIOS VALORES</span></div>
+  <ol>
+    <li><strong>k.</strong> Copia de tu salida del paso 4 el valor de <code>k</code> antes y después de la compra. ¿Cuánto creció, y cuánto debería crecer según la comisión cobrada? (Pista: 0,30 % de 2 000 TUSD, al precio del momento.)</li>
+    <li><strong>Medida frente a fórmula.</strong> Con tus números, ¿cuánto vale la diferencia entre la pérdida medida y la de la fórmula, en puntos porcentuales? ¿A quién se le quedó esa diferencia?</li>
+    <li><strong>Simetría.</strong> Con tu hoja, explica por qué A y B dan el mismo porcentaje aunque en A el ETH cae y en B sube. ¿El LP termina con más ETH o con más USDC en cada caso?</li>
+    <li><strong>Comisiones contra pérdida.</strong> Para el escenario C, ¿qué volumen diario de intercambios necesita un pool de 40 000 USDC para que el LP recupere el 20 % en un año con comisión de 0,30 %? Muestra el cálculo.</li>
+    <li><strong>El feed.</strong> En tu corrida de Sepolia, copia <code>updatedAt</code> y la antigüedad. ¿Qué habría pasado con <code>precioEth(600)</code> en ese momento? ¿Qué valor pondrías en un contrato real que vende boletas, y por qué?</li>
+    <li><strong>Manipulación.</strong> La prueba ★ del precio spot mete 100 000 TUSD. Calcula a mano el precio spot después (reservas nuevas) y explica en tres líneas por qué ningún contrato debería usar <code>precioSpotA()</code> como oráculo.</li>
+  </ol>
+</section>
+
+<!-- ============================================================ 14 -->
+<section class="sec">
+  <div class="sec-cab"><span class="sec-num">14</span><h2>Lista de chequeo de entrega</h2></div>
+  <table>
+    <tr><th style="width:8%">✓</th><th>ÍTEM</th></tr>
+    <tr><td>☐</td><td><code>15 passing</code> en <code>test/s14/PoolXYK.test.js</code> con tu código, y salida de <code>pool-en-numeros.js</code>.</td></tr>
+    <tr><td>☐</td><td><code>6 passing</code> en <code>test/s14/Oraculo.test.js</code> con tu código.</td></tr>
+    <tr><td>☐</td><td><code>OraculoConsumidor</code> verificado en Sepolia: dirección y enlace.</td></tr>
+    <tr><td>☐</td><td>Salida de <code>leer-chainlink.js --network sepolia</code> con <code>CONSUMIDOR</code> definido.</td></tr>
+    <tr><td>☐</td><td>Hoja con las filas A, B, C y D en «✔ coincide», hecha con fórmulas.</td></tr>
+    <tr><td>☐</td><td>Párrafo de análisis de un ataque real y las seis respuestas de reflexión.</td></tr>
+    <tr><td>☐</td><td>Ninguna captura muestra una clave privada, frase semilla o URL de RPC con API key.</td></tr>
+  </table>
+</section>
+
+<!-- ============================================================ 15 -->
+<section class="sec">
+  <div class="sec-cab"><span class="sec-num">15</span><h2>Rúbrica</h2><span class="lead">ESCALA DE 0 A 5,0</span></div>
+  <table>
+    <tr><th style="width:18%">CRITERIO</th><th style="width:8%">PESO</th><th style="width:27%">EXCELENTE (5,0)</th><th style="width:24%">ACEPTABLE (3,5)</th><th>INSUFICIENTE (&lt; 3,0)</th></tr>
+    <tr><td class="pk">Mini-AMM</td><td>35 %</td><td>15/15 con código propio; salida del paso 4 idéntica; respuestas 1, 2 y 6 correctas.</td><td>12 a 14 pruebas; salida con diferencias explicadas.</td><td>Menos de 12, o pruebas modificadas.</td></tr>
+    <tr><td class="pk">Oráculo en Sepolia</td><td>30 %</td><td>6/6, contrato verificado y lectura por el consumidor.</td><td>6/6 y desplegado sin verificar.</td><td>Sin evidencia en Sepolia.</td></tr>
+    <tr><td class="pk">Hoja de cálculo</td><td>20 %</td><td>Cuatro ✔ con fórmulas; respuestas 3 y 4 con cálculo.</td><td>Tres ✔, o respuestas sin cálculo.</td><td>Valores tecleados o menos de tres ✔.</td></tr>
+    <tr><td class="pk">Análisis</td><td>15 %</td><td>Ataque real bien descrito y ligado a una defensa concreta del laboratorio.</td><td>Descripción correcta sin conexión con el laboratorio.</td><td>Genérico o con datos sin fuente.</td></tr>
+  </table>
+</section>
+
+<!-- ============================================================ 16 -->
+<section class="sec" style="break-inside:avoid">
+  <div class="sec-cab"><span class="sec-num">16</span><h2>Referencias</h2></div>
+  <ul>
+    <li>Uniswap v2 · <em>How Uniswap works</em>. <code>https://docs.uniswap.org/contracts/v2/concepts/protocol-overview/how-uniswap-works</code></li>
+    <li>Chainlink · <em>Price Feed Contract Addresses</em>. <code>https://docs.chain.link/data-feeds/price-feeds/addresses</code></li>
+    <li>Aave v3 · documentación (factor de salud y liquidaciones). <code>https://aave.com/docs</code></li>
+    <li>Federal Reserve Bank of Richmond (2022). <em>Why Stablecoins Fail: An Economist's Post-Mortem on Terra</em>, Economic Brief 22-24. <code>https://www.richmondfed.org/publications/research/economic_brief/2022/eb_22-24</code></li>
+    <li>U.S. Attorney's Office, SDNY (11-dic-2025). Sentencia de Do Kwon. <code>https://www.justice.gov/usao-sdny/pr/crypto-enabled-fraudster-sentenced-orchestrating-40-billion-fraud</code></li>
+    <li>Tablero de ataques a DeFi: <code>https://rekt.news/leaderboard/</code> y <code>https://defillama.com/hacks</code></li>
+  </ul>
+</section>
+
+</body>
+</html>

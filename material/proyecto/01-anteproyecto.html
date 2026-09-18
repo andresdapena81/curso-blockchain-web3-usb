@@ -1,0 +1,259 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<title>Proyecto integrador · Anteproyecto</title>
+<!--ESTILOS-->
+<style>
+  table{ break-inside:auto; } tr{ break-inside:avoid; } th{ break-after:avoid; }
+  .sec-cab, h3{ break-after:avoid; }
+  h3{ font-size:11pt; margin:5mm 0 2mm; }
+  .check{ list-style:none; padding-left:0; }
+  .check li{ padding-left:7mm; position:relative; }
+  .check li::before{ content:""; position:absolute; left:0; top:1mm; width:3.2mm; height:3.2mm; border:1.5px solid var(--tinta); }
+  .rub td{ font-size:8.6pt; }
+  .ejemplo{ border:2px solid var(--gris-claro); border-left:5px solid var(--verde); padding:4mm 5mm; margin:3mm 0 5mm; }
+  .ejemplo.malo{ border-left-color:var(--rojo); }
+  .ejemplo h4{ font-family:"Courier New",monospace; font-size:7.5pt; letter-spacing:.12em; margin:3mm 0 1mm; color:var(--tinta); }
+  .ejemplo h4:first-child{ margin-top:0; }
+  .ejemplo p, .ejemplo li{ font-size:9pt; }
+  .nota{ display:block; font-family:"Courier New",monospace; font-size:7.8pt; color:var(--rojo); margin:0 0 2.5mm; }
+  .nota.ok{ color:var(--verde); }
+</style>
+</head>
+<body>
+
+<section class="barra">
+  <div class="kicker">PROYECTO INTEGRADOR · ENTREGA 1 DE 4 · SESIÓN 6</div>
+  <h1><em>ANTEPROYECTO</em><br>PLANTILLA, FILTRO<br>Y RÚBRICA</h1>
+  <div class="sub">Tres páginas para decidir qué problema van a resolver, por qué necesita una cadena de bloques,<br>y —sobre todo— qué NO van a construir este semestre.</div>
+</section>
+
+<dl class="datos">
+  <div><dt>CUÁNDO</dt><dd>Sesión 6<br>al iniciar la clase</dd></div>
+  <div><dt>MODALIDAD</dt><dd>Equipo de 3<br>(el del semestre)</dd></div>
+  <div><dt>EXTENSIÓN</dt><dd>Máximo<br>3 páginas</dd></div>
+  <div><dt>PESO</dt><dd>5 % (tabla de<br>entregas, plan §8)</dd></div>
+</dl>
+
+<div class="caja clave">
+  <div class="caja-et">LA ENTREGA QUE MÁS SE SUBESTIMA</div>
+  <p>Vale solo el 5 %, pero es donde el docente <strong>aprueba, recorta o devuelve</strong> el proyecto. Un anteproyecto vago produce un semestre entero mal dirigido, y eso sí se cobra en las tres entregas siguientes. La idea que lo ordena todo es la misma del proyecto del docente: <strong>el alcance no es lo que van a hacer; es lo que decidieron NO hacer.</strong></p>
+</div>
+
+<!-- ============================================================ 1 -->
+<section class="sec">
+  <div class="sec-cab"><span class="sec-num">01</span><h2>Qué se entrega y cómo</h2></div>
+  <table>
+    <tr><th style="width:26%">ASPECTO</th><th>REGLA</th></tr>
+    <tr><td class="pk">Formato</td><td>Un PDF, tamaño carta o A4, letra de 10 a 11 puntos. Nombre: <code>anteproyecto-equipo-NN.pdf</code>.</td></tr>
+    <tr><td class="pk">Extensión</td><td><strong>Máximo tres páginas</strong>, contando el diagrama. No hay anexos: lo que no cabe, no cuenta. Si no cabe, todavía no está decidido.</td></tr>
+    <tr><td class="pk">Estructura</td><td>Las siete secciones de la sección 02, en ese orden y con esos títulos.</td></tr>
+    <tr><td class="pk">Cuándo</td><td>Al <strong>inicio</strong> de la Sesión 6, en la plataforma del curso. El docente lo lee durante el laboratorio y da retroalimentación en el bloque C.</td></tr>
+    <tr><td class="pk">Uso de IA</td><td>Permitido y declarado en una línea al final: para qué se usó. Lo que no se permite es presentar como propio un recorrido del árbol que el equipo no hizo: en la Sesión 6 se pregunta en voz alta.</td></tr>
+    <tr><td class="pk">Respuesta del docente</td><td>Antes de la Sesión 7: aprobado, aprobado con recorte o devuelto (sección 03).</td></tr>
+  </table>
+  <div class="caja alerta">
+    <div class="caja-et">⚠ SOBRE EL PESO</div>
+    <p>La tabla de entregas del plan (§8) le asigna 5 % de la nota final; el esquema por cortes (§9) le asigna 20 % del primer corte, es decir 6 %. Las dos no pueden regir a la vez (ver <code>proyecto/README.md</code>). El docente anuncia cuál aplica antes de la Sesión 6. Lo que no cambia es la rúbrica de la sección 04.</p>
+  </div>
+</section>
+
+<!-- ============================================================ 2 -->
+<section class="sec">
+  <div class="sec-cab"><span class="sec-num">02</span><h2>La plantilla, sección por sección</h2><span class="lead">COPIEN ESTOS SIETE TÍTULOS</span></div>
+
+  <h3>1 · El problema <span style="font-family:Courier New,monospace;font-size:8pt;color:var(--gris)">· MEDIA PÁGINA COMO MÁXIMO</span></h3>
+  <p>Quién sufre qué, con qué frecuencia y cuánto le cuesta. <strong>Enunciado sin nombrar la tecnología</strong>: si para contar el problema necesitan la palabra «blockchain», todavía están describiendo una solución. Escriban el punto de vista con la fórmula que usó el docente en su propio proyecto:</p>
+  <pre>[quién] necesita [qué] porque [por qué, y que sorprenda]</pre>
+  <p>La tercera parte es la que hace el trabajo. Si el «porque» es obvio, el problema no da para un semestre. Y acoten desde la primera línea: un caso real y concreto (una facultad, un evento con su aforo, una asociación con su número de socios), no «cualquier organización».</p>
+
+  <h3>2 · Usuarios</h3>
+  <p>Una tabla con cada rol, qué hace en el sistema y qué le importa. Incluyan a quien <strong>no</strong> usa el sistema pero se ve afectado, y a quien podría querer hacer trampa: en una cadena pública, el adversario también es un usuario.</p>
+
+  <h3>3 · Por qué blockchain · la prueba de la base de datos</h3>
+  <p>Es la sección que más pesa. Tiene tres partes obligatorias:</p>
+  <ol>
+    <li><strong>El recorrido del árbol de decisión de la Sesión 1</strong>, en orden estricto, con una línea de respuesta por paso y el argumento de cada una:</li>
+  </ol>
+  <table>
+    <tr><th style="width:44%">PASO DEL ÁRBOL</th><th style="width:22%">SI LA RESPUESTA ES…</th><th>ENTONCES</th></tr>
+    <tr><td class="pk">1 · ¿Hay más de una parte que escriba en el registro?</td><td>No</td><td>Base de datos. Un solo escritor no tiene problema de consenso.</td></tr>
+    <tr><td class="pk">2 · ¿Tienen intereses divergentes, al punto de querer alterar el registro?</td><td>No</td><td>Base de datos compartida con control de acceso.</td></tr>
+    <tr><td class="pk">3 · ¿Existe un tercero de confianza aceptable para todos y disponible?</td><td>Sí</td><td>Úsenlo: más barato, más rápido y con recurso legal.</td></tr>
+    <tr><td class="pk">4 · ¿El dato es personal o sensible?</td><td>Sí</td><td>En cadena solo el hash; el dato, fuera (Ley 1581 de 2012).</td></tr>
+    <tr><td class="pk">5 · ¿Tolera latencia de segundos a minutos y un costo por operación?</td><td>No</td><td>Capa 2 (Sesión 16) o, con honestidad, arquitectura convencional.</td></tr>
+    <tr><td class="pk">6 · ¿Es un problema de registro o de captura del dato?</td><td>Captura</td><td>La cadena garantiza integridad, no veracidad: digan quién introduce el dato.</td></tr>
+  </table>
+  <ol start="2">
+    <li><strong>La alternativa sin cadena que consideraron</strong>, descrita en concreto (qué base de datos, administrada por quién), y la razón precisa por la que no basta. «Una base de datos se puede hackear» no es una razón: una cadena también se puede usar mal. La razón suele estar en el paso 2 o en el 3: <em>quién</em> controlaría esa base de datos y por qué los demás no lo aceptarían.</li>
+    <li><strong>El oráculo:</strong> para cada dato que viene del mundo exterior, quién lo introduce y por qué habría que creerle. «Lo pone el usuario» es válido si aceptan explícitamente que el sistema no verifica su veracidad.</li>
+  </ol>
+
+  <h3>4 · Qué va en la cadena y qué va fuera</h3>
+  <p>Una tabla: dato · dónde vive (contrato, almacenamiento descentralizado, servidor propio, papel) · por qué ahí. Si el proyecto maneja datos de personas, esta tabla tiene que mostrar que en la cadena no queda ninguno: solo hashes o identificadores que no permitan reconocer a nadie. <strong>Un proyecto con datos personales en cadena se devuelve sin calificar el resto.</strong> Cuidado con los hashes de datos cortos (una cédula, un correo): se adivinan por fuerza bruta y siguen siendo datos personales.</p>
+
+  <h3>5 · Alcance</h3>
+  <p>Cuatro piezas, todas obligatorias:</p>
+  <ul>
+    <li><strong>Las historias del mínimo</strong>, entre cuatro y seis, con la forma <code>Como [rol], quiero [acción] para [beneficio]</code>, su talla relativa (P, M, G) y <strong>un criterio de aceptación</strong> observable: <code>Dado que … Cuando … Entonces …</code>. Es lo mismo que hacían las pruebas de los laboratorios: la prueba es la especificación.</li>
+    <li><strong>La lista explícita de lo que queda fuera.</strong> Es la parte que el docente lee primero, y la que podrán señalar cuando alguien —o ustedes mismos— quiera añadir algo a mitad de semestre.</li>
+    <li><strong>La prueba que define el proyecto:</strong> qué tiene que fallar, aunque alguien escriba su propio programa y no use su interfaz. Si esa regla solo la aplica el frontend, no construyeron nada que no hiciera una base de datos.</li>
+    <li><strong>El supuesto más riesgoso</strong> y cómo lo van a comprobar primero. El mínimo lo define el riesgo, no el conteo de funciones.</li>
+  </ul>
+
+  <h3>6 · Arquitectura preliminar</h3>
+  <p>Un diagrama de cajas y flechas, no más de un tercio de página: contratos (cuántos y qué hace cada uno), interfaces (quién las usa, con billetera o sin ella), servicios externos (almacenamiento descentralizado, oráculos, servidor propio) y la red (Sepolia). Debajo, tres o cuatro líneas: dónde vive cada regla del negocio. La regla que justifica la cadena tiene que vivir en el contrato.</p>
+
+  <h3>7 · Equipo</h3>
+  <p>Tres integrantes, con un rol inicial y un responsable por rol. Todos programan; el rol dice quién responde por cada frente. Una distribución que funciona: <strong>contratos y pruebas</strong> · <strong>interfaz e integración</strong> · <strong>seguridad, documentación y entregas</strong>. Digan cómo se van a coordinar (repositorio, frecuencia de reunión).</p>
+</section>
+
+<!-- ============================================================ 3 -->
+<section class="sec salto">
+  <div class="sec-cab"><span class="sec-num">03</span><h2>El filtro de alcance que aplica el docente</h2></div>
+  <p>El plan del curso lo fija como la mitigación del riesgo de «proyectos sobredimensionados»: el docente aprueba o recorta explícitamente. Se aplica en este orden.</p>
+
+  <table>
+    <tr><th style="width:8%">#</th><th>LAS TRES PREGUNTAS QUE SE HACEN PRIMERO</th></tr>
+    <tr><td class="pk">1</td><td>¿Se puede enunciar el problema sin nombrar la tecnología?</td></tr>
+    <tr><td class="pk">2</td><td>¿Qué alternativa sin cadena de bloques se consideró, y por qué no basta?</td></tr>
+    <tr><td class="pk">3</td><td>¿Cabe el alcance —lo que entra y lo que no— en una sola página?</td></tr>
+  </table>
+  <p>Si alguna respuesta es no, el anteproyecto vuelve. Después se aplican las devoluciones automáticas y, por último, la rúbrica.</p>
+
+  <table>
+    <tr><th style="width:22%">DECISIÓN</th><th style="width:38%">CUÁNDO</th><th>QUÉ PASA DESPUÉS</th></tr>
+    <tr><td class="pk">Aprobado</td><td>Problema claro, justificación sólida, alcance que cabe en el semestre.</td><td>Se empieza a construir en la Sesión 7. El alcance aprobado es el contrato del equipo consigo mismo.</td></tr>
+    <tr><td class="pk">Aprobado con recorte</td><td>Buena idea, demasiado grande. Es lo más frecuente.</td><td>El docente marca qué historias salen. El equipo acepta o argumenta por escrito en 48 horas. Pasado ese plazo, rige el recorte.</td></tr>
+    <tr><td class="pk">Devuelto</td><td>Se enuncia desde la tecnología, una base de datos lo resolvería mejor, o incurre en una devolución automática.</td><td>Nueva versión para la Sesión 7. No se pierde el proyecto: se pierde una semana. Se califica la segunda versión.</td></tr>
+  </table>
+
+  <div class="caja peligro">
+    <div class="caja-et">DEVOLUCIÓN AUTOMÁTICA, SIN IMPORTAR EL RESTO</div>
+    <ul>
+      <li>Datos personales en la cadena (nombres, documentos, correos, datos de salud, o su hash si se pueden adivinar).</li>
+      <li>Más de tres páginas.</li>
+      <li>No hay lista de lo que queda fuera del alcance.</li>
+      <li>Dinero real en cualquier parte del diseño: todo el proyecto vive en red de prueba.</li>
+    </ul>
+  </div>
+
+  <div class="caja">
+    <div class="caja-et">¿Y SI EL ÁRBOL DICE «BASE DE DATOS»?</div>
+    <p>Entonces el recorrido está bien hecho y el problema no sirve para <em>este</em> curso. Eso no se castiga: se reorienta. Busquen un problema vecino donde sí haya varias partes que escriben, con intereses que chocan y sin un tercero que todas acepten. Los ejemplos de proyectos viables del plan (certificados, trazabilidad agrícola, votación estudiantil, entradas con reventa controlada, tesorería multifirma de un semillero, registro con sellado temporal, fidelización entre comercios) son buenos puntos de partida, pero ninguno se aprueba por estar en la lista: se aprueba por el recorrido. El proyecto de entradas es el del docente y no se puede repetir.</p>
+  </div>
+</section>
+
+<!-- ============================================================ 4 -->
+<section class="sec">
+  <div class="sec-cab"><span class="sec-num">04</span><h2>Rúbrica</h2></div>
+  <table class="rub">
+    <tr><th style="width:16%">CRITERIO</th><th style="width:7%">PESO</th><th>EXCELENTE (5,0)</th><th>ACEPTABLE (3,5)</th><th>INSUFICIENTE (&lt; 3,0)</th></tr>
+    <tr><td class="pk">Problema y usuarios</td><td>20 %</td><td>Punto de vista con «porque» que sorprende, sin nombrar la tecnología; caso concreto y acotado; roles completos, incluido el adversario.</td><td>Problema claro pero genérico o sin acotar; roles incompletos.</td><td>Se enuncia desde la tecnología o no se entiende a quién le duele.</td></tr>
+    <tr><td class="pk">Por qué blockchain</td><td>30 %</td><td>Recorre los seis pasos con argumentos propios; describe la alternativa centralizada y la descarta con una razón precisa; dice quién introduce cada dato externo.</td><td>Recorrido completo pero superficial, o la alternativa se descarta con argumentos genéricos.</td><td>Sin recorrido, o una base de datos resolvería mejor y no se reconoce.</td></tr>
+    <tr><td class="pk">Qué va en cadena</td><td>10 %</td><td>Tabla completa; nada personal en cadena; justifica cada ubicación.</td><td>Correcta pero sin justificar.</td><td>Ausente o con datos personales (devolución automática).</td></tr>
+    <tr><td class="pk">Alcance</td><td>25 %</td><td>4 a 6 historias con talla y criterio de aceptación; lista de fuera explícita; la prueba que define el proyecto; supuesto más riesgoso con plan para comprobarlo.</td><td>Historias sin criterios, o lista de fuera escueta.</td><td>Sin lista de fuera o alcance que no cabe en un semestre.</td></tr>
+    <tr><td class="pk">Arquitectura y equipo</td><td>15 %</td><td>Diagrama coherente con las historias; la regla central vive en el contrato; tres roles con responsable y forma de coordinación.</td><td>Diagrama genérico o roles sin responsable.</td><td>Sin diagrama o la regla central vive solo en la interfaz.</td></tr>
+  </table>
+  <p>Nota = suma ponderada. Es coherente con el criterio «Pertinencia de la solución» (15 %) de la rúbrica del proyecto final: lo que aquí se justifica se vuelve a defender en la sustentación de la Sesión 17.</p>
+</section>
+
+<!-- ============================================================ 5 -->
+<section class="sec salto">
+  <div class="sec-cab"><span class="sec-num">05</span><h2>Un ejemplo breve, bien hecho</h2><span class="lead">RESUMIDO · EL REAL OCUPA 3 PÁGINAS</span></div>
+  <div class="ejemplo">
+    <h4>1 · PROBLEMA</h4>
+    <p>Los coordinadores de tres semilleros de investigación de tres universidades distintas de Medellín <strong>necesitan</strong> manejar el fondo común con el que organizan un encuentro anual (unos 40 pagos al año) <strong>porque</strong> ninguna de las tres universidades acepta que otra lo administre sola, y hoy el dinero vive en la cuenta personal de un coordinador, que asume todo el riesgo y a quien los demás le piden cuentas por chat.</p>
+    <span class="nota ok">✔ No nombra la tecnología. El «porque» es un conflicto de confianza, no una preferencia técnica. Caso concreto y acotado.</span>
+
+    <h4>2 · USUARIOS</h4>
+    <p>Coordinadores (3): proponen y aprueban pagos. Integrantes de los semilleros (unos 60): consultan saldo e historial. Proveedores: reciben pagos. Adversario: un coordinador que quiera pagarse a sí mismo o a un conocido sin que los otros lo aprueben.</p>
+
+    <h4>3 · POR QUÉ BLOCKCHAIN</h4>
+    <p>Paso 1: escriben tres partes. Paso 2: sus intereses chocan (cada universidad quiere que se cubran sus gastos). Paso 3: el tercero existe —una fiduciaria o una de las universidades—, pero la fiduciaria exige trámites y costos desproporcionados para un fondo pequeño, y ninguna universidad acepta que otra decida. Paso 4: no hay datos personales; en cadena van montos, direcciones y el hash de cada factura. Paso 5: un pago puede esperar horas; son unas 40 operaciones al año. <strong>Alternativa descartada:</strong> una hoja de cálculo compartida con historial de versiones; la controla quien la creó y puede borrar ese historial. <strong>Límite (paso 6):</strong> la cadena no sabe si la factura es real; la verificación es humana, y por eso cada pago exige dos de tres aprobaciones.</p>
+    <span class="nota ok">✔ Recorre los seis pasos, describe la alternativa en concreto y reconoce lo que no resuelve.</span>
+
+    <h4>4 · EN CADENA / FUERA</h4>
+    <p>En cadena: monto, destinatario, aprobaciones, hash de la factura. Fuera: la factura en PDF (carpeta compartida del encuentro), nombres de los proveedores.</p>
+
+    <h4>5 · ALCANCE</h4>
+    <p>H1 (M) Como coordinador, propongo un pago con monto, destinatario y hash de factura. H2 (P) Como coordinador, apruebo un pago que propuso otro. H3 (M) Como coordinador, ejecuto un pago con dos aprobaciones. H4 (P) Como integrante, consulto saldo e historial sin billetera. <em>Criterio de H3:</em> Dado que el pago 4 tiene una sola aprobación, cuando alguien intenta ejecutarlo, entonces la transacción revierte. <strong>Prueba que define el proyecto:</strong> ejecutar un pago con una sola aprobación falla aunque se llame al contrato sin la interfaz. <strong>Fuera:</strong> pagos en pesos (todo en ETH de prueba), app móvil, cambio de coordinadores (se describe, no se implementa), reportes contables. <strong>Supuesto más riesgoso:</strong> que los tres coordinadores usen una billetera; se comprueba en la semana 1 con una prueba de uso.</p>
+
+    <h4>6 · ARQUITECTURA · 7 · EQUIPO</h4>
+    <pre>[Interfaz de coordinadores] --firma--&gt; [Contrato FondoComun · Sepolia] &lt;--lee-- [Página pública]
+                                           |  la regla 2 de 3 vive AQUÍ
+[Carpeta compartida: facturas PDF] --hash--+</pre>
+    <p>Contratos y pruebas: integrante A · Interfaz e integración: integrante B · Seguridad, documentación y entregas: integrante C. Reunión semanal y tablero en el repositorio.</p>
+  </div>
+</section>
+
+<!-- ============================================================ 6 -->
+<section class="sec salto">
+  <div class="sec-cab"><span class="sec-num">06</span><h2>Un ejemplo breve, mal hecho</h2><span class="lead">CON LOS COMENTARIOS DEL DOCENTE</span></div>
+  <div class="ejemplo malo">
+    <h4>1 · PROBLEMA</h4>
+    <p>«MediChain: una plataforma blockchain descentralizada e inmutable para que todas las EPS e IPS de Colombia compartan las historias clínicas de los pacientes de forma segura y transparente.»</p>
+    <span class="nota">✘ Nombra la tecnología en el problema. No dice quién sufre qué ni cuánto le cuesta. «Todas las EPS de Colombia» no cabe en un semestre ni en diez.</span>
+
+    <h4>2 · USUARIOS</h4>
+    <p>«Pacientes, médicos, EPS, IPS, el Ministerio de Salud y cualquier persona interesada.»</p>
+    <span class="nota">✘ Una lista, no roles: no dice qué hace cada uno. «Cualquier persona interesada» leyendo historias clínicas es, además, una violación de la ley.</span>
+
+    <h4>3 · POR QUÉ BLOCKCHAIN</h4>
+    <p>«Porque blockchain es inmutable, seguro y transparente, y así nadie puede hackear las historias clínicas.»</p>
+    <span class="nota">✘ Sin recorrido del árbol. Paso 1: cada historia la escribe su IPS, un solo escritor por registro. Paso 3: existe un tercero con mandato legal: la Ley 2015 de 2020 encarga al Gobierno nacional la plataforma de interoperabilidad de la historia clínica electrónica. Paso 4: son datos de salud, los más sensibles que existen. Ninguna alternativa considerada.</span>
+
+    <h4>4 · EN CADENA / FUERA</h4>
+    <p>«En la blockchain se guarda la historia clínica cifrada, así que es privada.»</p>
+    <span class="nota">✘ Devolución automática. Cifrado no es supresión: lo escrito no se puede borrar y el cifrado de hoy se puede romper mañana. Choca con la Ley 1581 de 2012.</span>
+
+    <h4>5 · ALCANCE</h4>
+    <p>«Registro de pacientes, citas, fórmulas, laboratorios, imágenes diagnósticas, pagos con criptomonedas, app móvil, inteligencia artificial para diagnósticos y un token de incentivos.»</p>
+    <span class="nota">✘ Sin historias ni criterios. Sin lista de fuera. «Pagos con criptomonedas» implica dinero real. Nada dice qué tiene que fallar.</span>
+
+    <h4>6 · ARQUITECTURA · 7 · EQUIPO</h4>
+    <p>«Frontend en React, backend en blockchain. Todos hacemos de todo.»</p>
+    <span class="nota">✘ Sin diagrama, sin saber dónde vive cada regla. «Todos hacemos de todo» significa que nadie responde por nada.</span>
+  </div>
+  <div class="caja clave">
+    <div class="caja-et">CÓMO SE PODRÍA RESCATAR</div>
+    <p>No es un mal tema: es un mal planteamiento. Un problema vecino que sí pasa el árbol sería, por ejemplo, el <strong>registro verificable de consentimientos informados para un estudio de investigación entre tres grupos de universidades distintas</strong>: varias partes que escriben, un incentivo real a alterar fechas, y en cadena solo el hash del documento firmado y su marca de tiempo. Acotado a un estudio, con un aforo y unas historias que caben en un semestre.</p>
+  </div>
+</section>
+
+<!-- ============================================================ 7 -->
+<section class="sec">
+  <div class="sec-cab"><span class="sec-num">07</span><h2>Lista de chequeo antes de entregar</h2></div>
+  <ul class="check">
+    <li>Siete secciones con los títulos de la plantilla, en orden, en tres páginas o menos.</li>
+    <li>El problema se entiende sin la palabra «blockchain» y trae un caso concreto.</li>
+    <li>Los seis pasos del árbol, con respuesta y argumento en cada uno.</li>
+    <li>La alternativa sin cadena descrita en concreto y descartada con una razón precisa.</li>
+    <li>Quién introduce cada dato del mundo exterior y por qué creerle.</li>
+    <li>Tabla de qué va en cadena y qué fuera; ningún dato personal en cadena.</li>
+    <li>Entre cuatro y seis historias con talla y criterio de aceptación.</li>
+    <li>Lista explícita de lo que queda fuera.</li>
+    <li>La prueba que define el proyecto: qué tiene que fallar aunque no usen su interfaz.</li>
+    <li>El supuesto más riesgoso y cómo lo comprobarán primero.</li>
+    <li>Diagrama donde se ve que la regla central vive en el contrato.</li>
+    <li>Tres integrantes, tres roles, un responsable por rol.</li>
+    <li>Todo en red de prueba; ninguna clave ni frase de recuperación en el documento.</li>
+    <li>Declaración de uso de IA en una línea.</li>
+  </ul>
+</section>
+
+<!-- ============================================================ 8 -->
+<section class="sec" style="break-inside:avoid">
+  <div class="sec-cab"><span class="sec-num">08</span><h2>Para leer antes de escribir</h2></div>
+  <ul>
+    <li>Sesión 1, bloque A.7: el árbol de decisión y el problema del oráculo.</li>
+    <li>Sesión 4, lámina A.22: cómo elegir el consenso para un problema.</li>
+    <li>Sesión 6, bloque C: la prueba de la base de datos y el filtro.</li>
+    <li>«Proyecto del docente · acotar el alcance» (deck) y el enunciado <code>proyecto-entradas.html</code>: un alcance completo, con sus historias, su lista de fuera y los intercambios que acepta.</li>
+    <li>Plan de estudio, sección 8: entregas, ejemplos de proyectos viables y rúbrica del proyecto final.</li>
+  </ul>
+</section>
+
+</body>
+</html>

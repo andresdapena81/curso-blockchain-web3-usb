@@ -356,6 +356,7 @@ async function construir() {
     s.addText("Blockchain y Web 3.0 · Ingeniería de Sistemas\nUniversidad de San Buenaventura Medellín", {
       x: 4.8, y: 5.35, w: 7.95, h: 0.8, fontFace: F.body, fontSize: 13.5, color: "8B8697", margin: 0, valign: "top", lineSpacingMultiple: 1.25,
     });
+    s.addNotes("Presentar el propósito: mostrar con un caso real cómo se acota un alcance antes del anteproyecto. El proyecto del docente crece una pieza por sesión, a la vista de todos. 2 minutos.");
     nSlide++;
   }
 
@@ -398,7 +399,7 @@ async function construir() {
   }
 
   /* ---------- DIVISOR A ---------- */
-  await divisor({ letra: "A", titulo: "Cómo se acota un alcance", sub: "Lo que separa un proyecto que se termina de uno que se abandona en la semana diez.", minutos: "LO QUE HAY QUE APRENDER HOY", ic: "tijera" });
+  (await divisor({ letra: "A", titulo: "Cómo se acota un alcance", sub: "Lo que separa un proyecto que se termina de uno que se abandona en la semana diez.", minutos: "LO QUE HAY QUE APRENDER HOY", ic: "tijera" })).addNotes("Lo que hay que aprender hoy: el error de partida, el doble diamante, el punto de vista, las historias con criterios de aceptación y el corte vertical. Cada idea se muestra aplicada al caso de las entradas.");
 
   /* ---------- El error de partida ---------- */
   {
@@ -439,7 +440,7 @@ async function construir() {
       s.addText(e[2], { x: e[0], y: dy + dh + 0.08, w: 2.5, h: 0.3, fontFace: F.mono, fontSize: 9.5, color: C.gris, align: "center", margin: 0, valign: "middle" });
     });
 
-    const r = await ficha(s, { tipo: "pregunta", etiqueta: "El error que hay que evitar", x: M, y: 5.5, w: CW, h: 1.15 });
+    const r = await ficha(s, { tipo: "pregunta", etiqueta: "El error que hay que evitar", x: M, y: 5.42, w: CW, h: 1.28 });
     parrafo(s, "Saltar directo al segundo diamante. Llegar con la solución significa empezar en el paso 3 sin haber hecho nunca el 1 ni el 2 — y entonces el proyecto resuelve un problema que nadie examinó.", { x: r.x, y: r.y - 0.06, w: r.w, h: 0.6, size: 13, color: C.tinta });
     s.addNotes("El primer diamante es el que casi nadie hace. Es también el más barato: son conversaciones, no código.");
   }
@@ -456,14 +457,15 @@ async function construir() {
       ["EL HALLAZGO QUE NO ESPERABA", "La plataforma que vende las entradas COBRA COMISIÓN POR CADA REVENTA. Es el actor con menos incentivo para limitarla — y es justo a quien el organizador le delegó el problema."],
     ];
     hallazgos.forEach((h, i) => {
-      const y = 2.65 + i * 1.05;
+      const y = 2.55 + i * 0.95;
       const ultimo = i === 3;
-      caja(s, { x: M, y, w: CW, h: 0.9, fill: ultimo ? C.blanco : C.superf, line: ultimo ? C.naranja : C.tinta, sombraColor: ultimo ? C.naranja : C.tinta, sombra: ultimo });
-      s.addText(h[0], { x: M + 0.28, y: y + 0.1, w: 3.6, h: 0.3, fontFace: F.mono, fontSize: 10, bold: true, color: ultimo ? C.ocre : C.gris, charSpacing: 1.15, margin: 0, valign: "middle" });
-      parrafo(s, h[1], { x: M + 0.28, y: y + 0.42, w: CW - 0.56, h: 0.45, size: 12.5, color: ultimo ? C.tinta : C.tintaSuav });
+      const hc = ultimo ? 1.0 : 0.8;
+      caja(s, { x: M, y, w: CW, h: hc, fill: ultimo ? C.blanco : C.superf, line: ultimo ? C.naranja : C.tinta, sombraColor: ultimo ? C.naranja : C.tinta, sombra: ultimo });
+      s.addText(h[0], { x: M + 0.28, y: y + 0.08, w: 3.6, h: 0.3, fontFace: F.mono, fontSize: 10, bold: true, color: ultimo ? C.ocre : C.gris, charSpacing: 1.15, margin: 0, valign: "middle" });
+      parrafo(s, h[1], { x: M + 0.28, y: y + 0.4, w: CW - 0.56, h: hc - 0.44, size: 12.5, color: ultimo ? C.tinta : C.tintaSuav });
     });
 
-    parrafo(s, "Ese último renglón cambió el proyecto. Sin él, la respuesta obvia habría sido «que el organizador monte su propia plataforma».", { y: 6.95, h: 0.4, size: 12.5, color: C.gris });
+    parrafo(s, "Ese último renglón cambió el proyecto. Sin él, la respuesta obvia habría sido «que el organizador monte su propia plataforma».", { y: 6.5, h: 0.3, size: 12.5, color: C.gris });
     s.addNotes("Divergir cuesta una semana de conversaciones y no cuesta una línea de código. Es la fase con mejor retorno de todo el proyecto.");
   }
 
@@ -478,10 +480,10 @@ async function construir() {
       ["El pago al artista se demora", "Real, pero es un problema contractual entre dos partes que ya se conocen y tienen contrato firmado."],
       ["La entrada se falsifica", "Es la mitad del problema, y se resuelve sin cadena: un código dinámico desde un servidor basta."],
       ["LA REGLA DE REVENTA NO SE PUEDE HACER CUMPLIR", "ELEGIDO. Es el único donde hay partes con intereses opuestos y el árbitro disponible es parte interesada."],
-    ], { y: 2.55, h: 3.7, colW: [4.8, 7.293], size: 11.5 });
+    ], { y: 2.45, h: 3.25, colW: [4.8, 7.293], size: 11.5 });
 
-    const r = await ficha(s, { tipo: "pregunta", etiqueta: "El criterio de corte", x: M, y: 6.45, w: CW, h: 0.9 });
-    s.addText("Me quedé con el único problema donde la tecnología aporta algo que la organización no puede aportar sola.", { x: r.x, y: r.y - 0.16, w: r.w, h: 0.4, fontFace: F.display, fontSize: 14, color: C.tinta, margin: 0, valign: "middle" });
+    const r = await ficha(s, { tipo: "pregunta", etiqueta: "El criterio de corte", x: M, y: 5.9, w: CW, h: 0.85 });
+    s.addText("Me quedé con el único problema donde la tecnología aporta algo que la organización no puede aportar sola.", { x: r.x, y: r.y - 0.12, w: r.w, h: 0.3, fontFace: F.display, fontSize: 14, color: C.tinta, margin: 0, valign: "middle" });
     s.addNotes("Los cuatro descartados son buenos problemas. Simplemente no son problemas de este curso, y decirlo así es más honesto que forzarlos.");
   }
 
@@ -496,9 +498,9 @@ async function construir() {
       ["Plataforma propia con tope", "Sí", "Sí, si toda la reventa pasa por ahí", "Sí, del todo"],
       ["Código dinámico desde un servidor", "Sí", "No", "Sí, del todo"],
       ["La regla dentro de un contrato", "Sí", "Sí, y no se puede rodear", "No"],
-    ], { y: 2.5, h: 3.5, colW: [3.6, 2.7, 3.0, 2.793], size: 11 });
+    ], { y: 2.4, h: 3.1, colW: [3.35, 2.5, 2.75, 3.493], size: 11 });
 
-    const r = await ficha(s, { tipo: "alerta", etiqueta: "Lectura honesta de la tabla", x: M, y: 6.2, w: CW, h: 1.15 });
+    const r = await ficha(s, { tipo: "alerta", etiqueta: "Lectura honesta de la tabla", x: M, y: 5.62, w: CW, h: 1.15 });
     parrafo(s, "La tercera opción —plataforma propia— resuelve las dos columnas del medio y es mucho más barata de construir. Si el organizador fuera de fiar, sería la respuesta correcta y este proyecto no existiría.", { x: r.x, y: r.y - 0.06, w: r.w, h: 0.6, size: 12.5 });
     s.addNotes("No esconder que hay una solución más simple. Reconocerla y explicar por qué no sirve AQUÍ es lo que sostiene el criterio de pertinencia.");
   }
@@ -511,7 +513,7 @@ async function construir() {
     s.addText("LA ÚNICA COLUMNA QUE LO DECIDE", { x: M + 0.32, y: 2.12, w: 6, h: 0.32, fontFace: F.mono, fontSize: 10.5, bold: true, color: C.violetaOs, charSpacing: 1.3, margin: 0, valign: "middle" });
     parrafo(s, "La última: «¿exige confiar en el organizador?». Y esa columna solo importa por el hallazgo del primer diamante — que el intermediario gana con la reventa. Sin ese dato, ninguna de las dos últimas opciones se distinguiría.", { x: M + 0.32, y: 2.5, w: CW - 0.64, h: 0.8, size: 13.5 });
 
-    parrafo(s, "Elegir no es solo quedarse con lo bueno. Es aceptar lo que viene con ello:", { y: 3.6, h: 0.4, size: 14 });
+    parrafo(s, "Elegir no es solo quedarse con lo bueno. Es aceptar lo que viene con ello:", { y: 3.55, h: 0.4, size: 14 });
 
     const costos = [
       ["LO QUE GANO", "La regla se ejecuta sola. Nadie puede rodearla, ni siquiera el organizador."],
@@ -519,13 +521,13 @@ async function construir() {
       ["LO QUE NO RESUELVO", "Que quien escanea en la puerta haga bien su trabajo. Eso sigue siendo un problema humano."],
     ];
     costos.forEach((c, i) => {
-      const y = 4.15 + i * 0.9;
-      caja(s, { x: M, y, w: CW, h: 0.78, fill: i === 0 ? C.superf : C.blanco, line: i === 0 ? C.tinta : C.naranja, sombraColor: i === 0 ? C.tinta : C.naranja, sombra: false });
-      s.addText(c[0], { x: M + 0.28, y, w: 2.9, h: 0.78, fontFace: F.mono, fontSize: 10, bold: true, color: i === 0 ? C.tinta : C.ocre, charSpacing: 1.15, margin: 0, valign: "middle" });
-      parrafo(s, c[1], { x: M + 3.3, y: y + 0.16, w: CW - 3.6, h: 0.5, size: 12.5 });
+      const y = 4.05 + i * 0.8;
+      caja(s, { x: M, y, w: CW, h: 0.68, fill: i === 0 ? C.superf : C.blanco, line: i === 0 ? C.tinta : C.naranja, sombraColor: i === 0 ? C.tinta : C.naranja, sombra: false });
+      s.addText(c[0], { x: M + 0.28, y, w: 2.9, h: 0.68, fontFace: F.mono, fontSize: 10, bold: true, color: i === 0 ? C.tinta : C.ocre, charSpacing: 1.15, margin: 0, valign: "middle" });
+      s.addText(c[1], { x: M + 3.3, y, w: CW - 3.6, h: 0.68, fontFace: F.body, fontSize: 12.5, color: C.tintaSuav, margin: 0, valign: "middle" });
     });
 
-    parrafo(s, "Un equipo que solo enumera la primera fila no terminó de decidir: solo eligió lo que le gustaba.", { y: 6.9, h: 0.4, size: 12.5, color: C.gris });
+    parrafo(s, "Un equipo que solo enumera la primera fila no terminó de decidir: solo eligió lo que le gustaba.", { y: 6.5, h: 0.3, size: 12.5, color: C.gris });
     s.addNotes("Cerrar el diamante es aceptar el costo, no solo el beneficio. Es la diferencia entre elegir y desear.");
   }
 
@@ -589,7 +591,7 @@ async function construir() {
       const esBuena = i === 2;
       caja(s, { x: M, y, w: CW, h: 1.05, fill: esBuena ? C.blanco : C.superf, line: esBuena ? C.naranja : C.tinta, sombraColor: esBuena ? C.naranja : C.tinta, sombra: esBuena });
       s.addText(e[0], { x: M + 0.3, y: y + 0.12, w: 3.2, h: 0.3, fontFace: F.mono, fontSize: 10, bold: true, color: esBuena ? C.ocre : C.gris, charSpacing: 1.2, margin: 0, valign: "middle" });
-      s.addText(e[1], { x: M + 0.3, y: y + 0.45, w: CW - 3.6, h: 0.45, fontFace: F.body, fontSize: 14, bold: esBuena, color: C.tinta, margin: 0, valign: "middle" });
+      s.addText(e[1], { x: M + 0.3, y: y + 0.45, w: CW - 0.6, h: 0.45, fontFace: F.body, fontSize: 14, bold: esBuena, color: C.tinta, margin: 0, valign: "middle" });
       s.addText(e[2], { x: M + CW - 3.2, y: y + 0.12, w: 2.9, h: 0.3, fontFace: F.mono, fontSize: 9.5, color: C.gris, align: "right", margin: 0, valign: "middle" });
     });
     parrafo(s, "Escriban tres. La buena casi nunca es la primera.", { y: 6.55, h: 0.4, size: 13, color: C.gris });
@@ -606,7 +608,7 @@ async function construir() {
 
     parrafo(s, "Y el trozo no está listo cuando «funciona», sino cuando se cumple una condición observable que se escribió ANTES. Eso es un criterio de aceptación:", { y: 3.75, h: 0.55, size: 13.5 });
 
-    caja(s, { x: M, y: 4.4, w: CW, h: 1.5, fill: C.tinta, line: C.tinta });
+    caja(s, { x: M, y: 4.4, w: CW, h: 1.2, fill: C.tinta, line: C.tinta });
     s.addText([
       { text: "DADO QUE   ", options: { color: C.naranja } },
       { text: "Ana es dueña de la entrada 7 y la puso en venta en el tope\n", options: { color: "F4F2F7" } },
@@ -614,10 +616,10 @@ async function construir() {
       { text: "Bruno paga exactamente ese precio\n", options: { color: "F4F2F7" } },
       { text: "ENTONCES   ", options: { color: C.naranja } },
       { text: "Bruno queda como dueño y a Ana se le acredita el monto", options: { color: "F4F2F7" } },
-    ], { x: M + 0.3, y: 4.62, w: CW - 0.6, h: 1.1, fontFace: F.mono, fontSize: 12.5, lineSpacingMultiple: 1.3, margin: 0, valign: "top" });
+    ], { x: M + 0.3, y: 4.56, w: CW - 0.6, h: 0.95, fontFace: F.mono, fontSize: 12.5, lineSpacingMultiple: 1.3, margin: 0, valign: "top" });
 
-    const r = await ficha(s, { tipo: "pregunta", etiqueta: "Esto ya lo hicieron", x: M, y: 5.95, w: CW, h: 1.0 });
-    s.addText("Es lo mismo que hacían las pruebas del laboratorio: la prueba es la especificación, y el trabajo termina cuando pasa.", { x: r.x, y: r.y - 0.16, w: r.w, h: 0.42, fontFace: F.display, fontSize: 14, color: C.tinta, margin: 0, valign: "middle" });
+    const r = await ficha(s, { tipo: "pregunta", etiqueta: "Esto ya lo hicieron", x: M, y: 5.7, w: CW, h: 1.12 });
+    s.addText("Es lo mismo que hacían las pruebas del laboratorio: la prueba es la especificación, y el trabajo termina cuando pasa.", { x: r.x, y: r.y - 0.14, w: r.w, h: 0.5, fontFace: F.display, fontSize: 14, color: C.tinta, margin: 0, valign: "middle" });
     s.addNotes("Conectar explícitamente con los laboratorios 1 y 2: allí las pruebas venían dadas. Aquí se las escriben ellos, y son lo mismo.");
   }
 
@@ -645,26 +647,26 @@ async function construir() {
 
     const capas = ["CONTRATO", "INTERFAZ", "INTEGRACIÓN"];
     capas.forEach((c, i) => {
-      const y = 2.65 + i * 0.62;
-      caja(s, { x: M, y, w: 5.3, h: 0.5, fill: C.superf, sombra: false });
-      s.addText(c, { x: M + 0.2, y, w: 5.0, h: 0.5, fontFace: F.mono, fontSize: 10.5, bold: true, color: C.gris, charSpacing: 1.2, margin: 0, valign: "middle" });
+      const y = 2.95 + i * 0.6;
+      caja(s, { x: M, y, w: 5.3, h: 0.48, fill: C.superf, sombra: false });
+      s.addText(c, { x: M + 0.2, y, w: 5.0, h: 0.48, fontFace: F.mono, fontSize: 10.5, bold: true, color: C.gris, charSpacing: 1.2, margin: 0, valign: "middle" });
     });
-    s.addText("POR CAPAS", { x: M, y: 2.25, w: 5.3, h: 0.3, fontFace: F.mono, fontSize: 10.5, bold: true, color: C.tinta, charSpacing: 1.3, margin: 0, valign: "middle" });
-    linea(s, M + 0.5, 2.8, M + 4.8, 4.4, C.ocre, 3);
-    linea(s, M + 4.8, 2.8, M + 0.5, 4.4, C.ocre, 3);
-    parrafo(s, "Nada funciona hasta el final. Y el riesgo se descubre en la última semana.", { x: M, y: 4.62, w: 5.3, h: 0.6, size: 12.5, color: C.ocre });
+    s.addText("POR CAPAS", { x: M, y: 2.55, w: 5.3, h: 0.3, fontFace: F.mono, fontSize: 10.5, bold: true, color: C.tinta, charSpacing: 1.3, margin: 0, valign: "middle" });
+    linea(s, M + 0.5, 3.05, M + 4.8, 4.58, C.ocre, 3);
+    linea(s, M + 4.8, 3.05, M + 0.5, 4.58, C.ocre, 3);
+    parrafo(s, "Nada funciona hasta el final. Y el riesgo se descubre en la última semana.", { x: M, y: 4.72, w: 5.3, h: 0.55, size: 12.5, color: C.ocre });
 
     const x2 = M + 6.5;
     capas.forEach((c, i) => {
-      const y = 2.65 + i * 0.62;
-      caja(s, { x: x2, y, w: 5.59, h: 0.5, fill: C.superf, sombra: false });
-      s.addText(c, { x: x2 + 0.2, y, w: 3.0, h: 0.5, fontFace: F.mono, fontSize: 10.5, bold: true, color: C.gris, charSpacing: 1.2, margin: 0, valign: "middle" });
+      const y = 2.95 + i * 0.6;
+      caja(s, { x: x2, y, w: 5.59, h: 0.48, fill: C.superf, sombra: false });
+      s.addText(c, { x: x2 + 0.2, y, w: 3.0, h: 0.48, fontFace: F.mono, fontSize: 10.5, bold: true, color: C.gris, charSpacing: 1.2, margin: 0, valign: "middle" });
     });
-    s.addText("POR CORTE VERTICAL", { x: x2, y: 2.25, w: 5.59, h: 0.3, fontFace: F.mono, fontSize: 10.5, bold: true, color: C.tinta, charSpacing: 1.3, margin: 0, valign: "middle" });
-    s.addShape(pres.ShapeType.rect, { x: x2 + 3.6, y: 2.6, w: 1.5, h: 1.79, fill: { type: "none" }, line: { color: C.naranja, width: 3 } });
-    parrafo(s, "Una entrada, de punta a punta, en la semana dos. Fea, pero completa.", { x: x2, y: 4.62, w: 5.59, h: 0.6, size: 12.5, color: C.ocre });
+    s.addText("POR CORTE VERTICAL", { x: x2, y: 2.55, w: 5.59, h: 0.3, fontFace: F.mono, fontSize: 10.5, bold: true, color: C.tinta, charSpacing: 1.3, margin: 0, valign: "middle" });
+    s.addShape(pres.ShapeType.rect, { x: x2 + 3.6, y: 2.9, w: 1.5, h: 1.73, fill: { type: "none" }, line: { color: C.naranja, width: 3 } });
+    parrafo(s, "Una entrada, de punta a punta, en la semana dos. Fea, pero completa.", { x: x2, y: 4.72, w: 5.59, h: 0.55, size: 12.5, color: C.ocre });
 
-    enunciado(s, "El primer objetivo no es que esté bien hecho: es que exista un camino completo por el que pase un caso real.", { y: 5.4, h: 1.1, size: 18 });
+    enunciado(s, "El primer objetivo no es que esté bien hecho: es que exista un camino completo por el que pase un caso real.", { y: 5.45, h: 1.1, size: 18 });
     s.addNotes("Se llama esqueleto ambulante. Es feo a propósito. Lo que importa es que a partir de ahí cada mejora se puede probar de verdad.");
   }
 
@@ -766,15 +768,15 @@ async function construir() {
       ["«Es solo un campo más»", "Ningún campo es solo un campo: es interfaz, validación, prueba y documentación."],
       ["«Vi una librería que hace esto mejor»", "Si el corte vertical ya funciona, se evalúa. Si todavía no, se anota y se sigue."],
       ["«El profesor dijo que estaría bien que…»", "Preguntar si es requisito o sugerencia. Casi siempre es sugerencia."],
-    ], { y: 2.7, h: 3.0, colW: [5.0, 7.093], size: 12 });
+    ], { y: 2.65, h: 2.8, colW: [5.0, 7.093], size: 12 });
 
-    const r = await ficha(s, { tipo: "pregunta", etiqueta: "La regla de una línea", x: M, y: 5.95, w: CW, h: 0.95 });
+    const r = await ficha(s, { tipo: "pregunta", etiqueta: "La regla de una línea", x: M, y: 5.65, w: CW, h: 0.95 });
     s.addText("Si entra algo nuevo, sale algo. El presupuesto de esfuerzo no crece porque aparezca una buena idea.", { x: r.x, y: r.y - 0.12, w: r.w, h: 0.4, fontFace: F.display, fontSize: 15, color: C.tinta, margin: 0, valign: "middle" });
     s.addNotes("Este intercambio explícito —entra uno, sale uno— es lo que convierte la conversación sobre alcance en una decisión y no en una discusión.");
   }
 
   /* ---------- DIVISOR B ---------- */
-  await divisor({ letra: "B", titulo: "Qué aplica y qué no", sub: "Estas disciplinas están pensadas para equipos grandes y proyectos largos. No todo se traslada.", minutos: "HONESTIDAD METODOLÓGICA", ic: "rombo" });
+  (await divisor({ letra: "B", titulo: "Qué aplica y qué no", sub: "Estas disciplinas están pensadas para equipos grandes y proyectos largos. No todo se traslada.", minutos: "HONESTIDAD METODOLÓGICA", ic: "rombo" })).addNotes("Honestidad metodológica: estas disciplinas vienen de equipos grandes y proyectos largos. Decir qué se toma y qué no para un equipo de tres en un semestre.");
 
   /* ---------- Sí aplica ---------- */
   {
@@ -803,14 +805,14 @@ async function construir() {
   }
 
   /* ---------- DIVISOR C ---------- */
-  await divisor({ letra: "C", titulo: "El alcance de nuestro proyecto", sub: "Todo lo anterior, aplicado. Con el porqué de cada recorte, y lo que cada recorte costó.", minutos: "EL CASO COMPLETO", ic: "tijera" });
+  (await divisor({ letra: "C", titulo: "El alcance de nuestro proyecto", sub: "Todo lo anterior, aplicado. Con el porqué de cada recorte, y lo que cada recorte costó.", minutos: "EL CASO COMPLETO", ic: "tijera" })).addNotes("El caso completo: el alcance del proyecto del docente con el porqué de cada recorte y lo que cada recorte costó. Es el modelo de lo que se espera en el anteproyecto.");
 
   /* ---------- C.1 · el alcance en una lámina ---------- */
   {
     const s = await lamina({ kicker: "C.1 · el alcance, de un vistazo", titulo: "Dentro y fuera", ic: "corte", tituloSize: 30 });
     parrafo(s, "Cinco historias dentro, todo lo demás fuera. Esta lámina es el contrato conmigo mismo: lo que esté a la izquierda se termina, lo que esté a la derecha no se toca.", { y: 1.88, h: 0.6, size: 13.5 });
 
-    caja(s, { x: M, y: 2.5, w: CW / 2 - 0.12, h: 3.3, fill: C.blanco, line: C.violeta, sombraColor: C.violeta });
+    caja(s, { x: M, y: 2.5, w: CW / 2 - 0.12, h: 3.08, fill: C.blanco, line: C.violeta, sombraColor: C.violeta });
     s.addText("DENTRO · se termina", { x: M + 0.3, y: 2.72, w: 4.5, h: 0.32, fontFace: F.mono, fontSize: 10.5, bold: true, color: C.violetaOs, charSpacing: 1.2, margin: 0, valign: "middle" });
     lista(s, [
       "Emitir un lote con aforo fijo.",
@@ -819,9 +821,9 @@ async function construir() {
       "Comprarla en reventa.",
       "Validar en puerta que quien llega es el dueño.",
       "Que el organizador retire lo recaudado.",
-    ], { x: M + 0.3, y: 3.12, w: CW / 2 - 0.72, h: 2.55, size: 12.5, gap: 4 });
+    ], { x: M + 0.3, y: 3.12, w: CW / 2 - 0.72, h: 2.35, size: 12.5, gap: 4 });
 
-    caja(s, { x: M + CW / 2 + 0.12, y: 2.5, w: CW / 2 - 0.12, h: 3.3, fill: C.superf, sombra: false });
+    caja(s, { x: M + CW / 2 + 0.12, y: 2.5, w: CW / 2 - 0.12, h: 3.08, fill: C.superf, sombra: false });
     s.addText("FUERA · ni se empieza", { x: M + CW / 2 + 0.42, y: 2.72, w: 4.5, h: 0.32, fontFace: F.mono, fontSize: 10.5, bold: true, color: C.gris, charSpacing: 1.2, margin: 0, valign: "middle" });
     lista(s, [
       "Pago con dinero real.",
@@ -830,9 +832,9 @@ async function construir() {
       "Categorías de entrada y mapa de asientos.",
       "Recuperación de cuentas.",
       "Estadísticas para el organizador.",
-    ], { x: M + CW / 2 + 0.42, y: 3.12, w: CW / 2 - 0.72, h: 2.55, size: 12.5, gap: 4, color: C.gris });
+    ], { x: M + CW / 2 + 0.42, y: 3.12, w: CW / 2 - 0.72, h: 2.35, size: 12.5, gap: 4, color: C.gris });
 
-    const r = await ficha(s, { tipo: "pregunta", etiqueta: "La prueba de que está acotado", x: M, y: 5.95, w: CW, h: 0.9 });
+    const r = await ficha(s, { tipo: "pregunta", etiqueta: "La prueba de que está acotado", x: M, y: 5.75, w: CW, h: 0.9 });
     s.addText("Cabe en una lámina. Si no cupiera, todavía no estaría decidido.", { x: r.x, y: r.y - 0.16, w: r.w, h: 0.4, fontFace: F.display, fontSize: 15, color: C.tinta, margin: 0, valign: "middle" });
     s.addNotes("La columna derecha no es una lista de fracasos: es la lista que se señala cuando alguien —incluido yo— quiera añadir algo en la semana ocho.");
   }
@@ -885,9 +887,9 @@ async function construir() {
       ["La puerta funciona sin conexión.", "Nadie puede vender su entrada en las últimas horas, que es cuando más falta hace."],
       ["Todo movimiento queda registrado y es auditable.", "El tope es público. El organizador pierde margen de maniobra comercial."],
       ["El organizador no puede alterar el registro.", "Tampoco puede corregir un error de emisión. La inmutabilidad corta para los dos lados."],
-    ], { y: 2.5, h: 3.6, colW: [5.4, 6.693], size: 11.5 });
+    ], { y: 2.45, h: 3.1, colW: [5.4, 6.693], size: 11.5 });
 
-    const r = await ficha(s, { tipo: "alerta", etiqueta: "Lo que se pregunta en la sustentación", x: M, y: 6.2, w: CW, h: 1.05 });
+    const r = await ficha(s, { tipo: "alerta", etiqueta: "Lo que se pregunta en la sustentación", x: M, y: 5.75, w: CW, h: 0.95 });
     parrafo(s, "Esta lámina, o su equivalente. Un equipo que solo puede llenar la columna izquierda no ha terminado de decidir: todavía está deseando.", { x: r.x, y: r.y - 0.08, w: r.w, h: 0.45, size: 12.5 });
     s.addNotes("La última fila es la más incómoda y la más importante: la inmutabilidad no es un beneficio unilateral. Corta también contra quien la eligió.");
   }
@@ -938,7 +940,7 @@ async function construir() {
 
   /* ---------- Lo que viene ---------- */
   {
-    const s = await lamina({ kicker: "Entrega 2 · la próxima sesión", titulo: "Lo que sigue: arquitectura y especificación", ic: "capas", tituloSize: 25 });
+    const s = await lamina({ kicker: "Entrega 2 · la próxima sesión", titulo: "Lo que sigue: arquitectura y especificación", ic: "corte", tituloSize: 25 });
     parrafo(s, "El alcance dice QUÉ se va a construir. La arquitectura dice CÓMO se reparte, y la especificación dice exactamente qué hace cada pieza. Se presenta por partes porque en ese orden se puede corregir barato.", { y: 1.9, h: 0.7, size: 14 });
 
     const partes = [
@@ -947,16 +949,16 @@ async function construir() {
       ["ENTREGA 3", "PLAN DE TRABAJO", "Quién hace qué, en qué orden, y contra qué riesgo.", false],
     ];
     partes.forEach((p, i) => {
-      const y = 2.7 + i * 1.08;
-      caja(s, { x: M, y, w: CW, h: 0.92, fill: p[3] ? C.superf : C.blanco, line: i === 1 ? C.naranja : C.tinta, sombraColor: i === 1 ? C.naranja : C.tinta, sombra: i === 1 });
+      const y = 2.65 + i * 1.0;
+      caja(s, { x: M, y, w: CW, h: 0.86, fill: p[3] ? C.superf : C.blanco, line: i === 1 ? C.naranja : C.tinta, sombraColor: i === 1 ? C.naranja : C.tinta, sombra: i === 1 });
       s.addText(p[0], { x: M + 0.3, y: y + 0.1, w: 1.9, h: 0.34, fontFace: F.mono, fontSize: 10, bold: true, color: p[3] ? C.gris : C.ocre, charSpacing: 1.2, margin: 0, valign: "middle" });
       s.addText(p[1], { x: M + 0.3, y: y + 0.46, w: 4.5, h: 0.38, fontFace: F.display, fontSize: 15, color: p[3] ? C.gris : C.tinta, margin: 0, valign: "middle" });
       parrafo(s, p[2], { x: M + 5.2, y: y + 0.2, w: CW - 5.5, h: 0.65, size: 12.5, color: p[3] ? C.gris : C.tintaSuav });
       if (p[3]) s.addText("HECHA", { x: M + CW - 1.5, y: y + 0.1, w: 1.2, h: 0.34, fontFace: F.mono, fontSize: 9.5, bold: true, color: C.gris, align: "right", margin: 0, valign: "middle" });
     });
 
-    const r = await ficha(s, { tipo: "pregunta", etiqueta: "Por qué en este orden", x: M, y: 5.95, w: CW, h: 0.95 });
-    s.addText("Cambiar el alcance cuesta una conversación. Cambiar la arquitectura cuesta una semana. Cambiar el código cuesta el semestre.", { x: r.x, y: r.y - 0.16, w: r.w, h: 0.4, fontFace: F.display, fontSize: 14, color: C.tinta, margin: 0, valign: "middle" });
+    const r = await ficha(s, { tipo: "pregunta", etiqueta: "Por qué en este orden", x: M, y: 5.66, w: CW, h: 1.04 });
+    s.addText("Cambiar el alcance cuesta una conversación. Cambiar la arquitectura cuesta una semana. Cambiar el código cuesta el semestre.", { x: r.x, y: r.y - 0.14, w: r.w, h: 0.5, fontFace: F.display, fontSize: 14, color: C.tinta, margin: 0, valign: "middle" });
     s.addNotes("La entrega 2 traerá el diagrama de contexto, el reparto en componentes, la interfaz del contrato función por función, y el flujo crítico en secuencia.");
   }
 
@@ -974,6 +976,7 @@ async function construir() {
     s.addText("Universidad de San Buenaventura Medellín · Facultad de Ingeniería\nBlockchain y Web 3.0 · El proyecto del docente · Acotar el alcance", {
       x: M, y: 6.0, w: 9.5, h: 0.8, fontFace: F.mono, fontSize: 10, color: "6E6A7C", margin: 0, valign: "top", lineSpacingMultiple: 1.35,
     });
+    s.addNotes("Leer la frase en voz alta y cerrar. La entrega 1 de los equipos es su alcance en una página; la próxima entrega es arquitectura y especificación. 1 minuto.");
     nSlide++;
   }
 

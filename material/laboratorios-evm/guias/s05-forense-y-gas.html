@@ -1,0 +1,468 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<title>Guía · Laboratorio 05 · Forense y gas</title>
+<!--ESTILOS-->
+<style>.sec-cab,h3{break-after:avoid}</style>
+</head>
+<body>
+
+<section class="barra">
+  <div class="kicker">LABORATORIO 05 · SESIÓN 5 · ETHEREUM Y LA MÁQUINA VIRTUAL · EVIDENCIA CALIFICABLE</div>
+  <h1>ANÁLISIS <em>FORENSE</em> DE<br>TRANSACCIONES Y<br>MEDICIÓN DE <em>GAS</em></h1>
+  <div class="sub">Leer la cadena como un investigador: qué pasó, quién pagó, cuánto y por qué.<br>Después, predecir el costo de cada instrucción y comprobarlo midiendo.</div>
+</section>
+
+<dl class="datos">
+  <div><dt>MODALIDAD</dt><dd>En parejas</dd></div>
+  <div><dt>DURACIÓN</dt><dd>60 min en clase<br>+ informe en casa</dd></div>
+  <div><dt>RED</dt><dd>Sepolia (lectura)<br>y red local</dd></div>
+  <div><dt>ENTREGA</dt><dd>Informe de 2 páginas<br>antes de la S6</dd></div>
+</dl>
+
+<div class="caja clave">
+  <div class="caja-et">CÓMO LEER ESTA GUÍA</div>
+  <p>Está escrita para que puedan hacer el laboratorio <strong>sin ayuda de nadie</strong>, incluso si nunca han abierto un explorador de bloques. Cada paso dice exactamente dónde hacer clic o qué escribir, qué deberían ver y cómo saber que funcionó. Si algo no sale como se describe, vayan a la sección <strong>«Errores frecuentes»</strong>. Hoy no se firma ni se gasta nada: la parte A solo <strong>lee</strong> la cadena y la parte B corre en una red local dentro de su computador.</p>
+</div>
+
+<!-- ============================================================ 1 -->
+<section class="sec">
+  <div class="sec-cab"><span class="sec-num">01</span><h2>Qué van a hacer, y por qué</h2><span class="lead">LEER PRIMERO</span></div>
+
+  <p><strong>Objetivo:</strong> leer en un explorador el costo real de una transacción, descomponerlo en sus partes (tarifa base quemada y propina del validador), interpretar el campo <code>data</code> y los eventos, y comprobar con mediciones propias por qué unas instrucciones de la EVM cuestan miles de veces más que otras.</p>
+  <p><strong>Resultado de aprendizaje:</strong> RA2 (arquitectura y costos) y, de forma complementaria, RA3 (base para programar contratos). Es una de las cuatro evidencias de laboratorio del primer corte.</p>
+
+  <table>
+    <tr><th style="width:24%">PARTE</th><th style="width:14%">TIEMPO</th><th>QUÉ HACEN</th><th style="width:20%">LÁMINAS DE LA CLASE</th></tr>
+    <tr><td class="pk">0 · Billeteras</td><td>5 min</td><td>Punto de control: la billetera de la Sesión 2 funciona y tiene fondos de prueba.</td><td>B.1</td></tr>
+    <tr><td class="pk">A · Forense</td><td>30 min</td><td>Encontrar tres transacciones reales de Sepolia y llenar una hoja de trabajo por cada una.</td><td>A.9 a A.15, A.21</td></tr>
+    <tr><td class="pk">B · Gas</td><td>25 min</td><td>Predecir el gas de 12 operaciones, medirlo con un script y explicar las diferencias.</td><td>A.16 a A.19</td></tr>
+    <tr><td class="pk">Informe</td><td>en casa</td><td>Dos páginas con la plantilla de la sección 10.</td><td>C.1</td></tr>
+  </table>
+
+  <div class="caja peligro">
+    <div class="caja-et">REGLAS DE SEGURIDAD · NO TIENEN EXCEPCIÓN</div>
+    <ul>
+      <li>Solo redes de prueba. La billetera del curso <strong>nunca</strong> se usa con dinero real.</li>
+      <li>La frase de recuperación no se comparte con nadie: ni con el compañero, ni con el docente, ni con un «soporte técnico».</li>
+      <li>Hoy no hay que firmar nada. Si algo les pide una firma durante este laboratorio, <strong>no la den</strong> y avisen.</li>
+      <li>Ninguna clave ni URL de nodo se escribe en un archivo del repositorio. Hoy no hacen falta.</li>
+    </ul>
+  </div>
+</section>
+
+<!-- ============================================================ 2 -->
+<section class="sec">
+  <div class="sec-cab"><span class="sec-num">02</span><h2>Qué se entrega</h2></div>
+  <table>
+    <tr><th style="width:22%">PARTE</th><th>CONTENIDO</th><th style="width:10%">PESO</th></tr>
+    <tr><td class="pk">A · forense</td><td>Tres hojas de trabajo (una por transacción) con el hash como enlace que abre, las sumas comprobadas y las cuatro preguntas de la sección 05.6 respondidas.</td><td>50 %</td></tr>
+    <tr><td class="pk">B · gas</td><td>La tabla de 12 operaciones con predicción, medición y diferencia, y la explicación de las dos diferencias más grandes.</td><td>35 %</td></tr>
+    <tr><td class="pk">Reflexión</td><td>Un párrafo: después de hoy, ¿qué operación evitarían en un contrato real y qué harían en su lugar?</td><td>15 %</td></tr>
+  </table>
+  <p>Un informe por pareja, <strong>máximo dos páginas</strong>, con la plantilla de la sección 10. Se sube a la plataforma del curso antes de la Sesión 6.</p>
+  <div class="caja alerta">
+    <div class="caja-et">POLÍTICA DE LABORATORIOS</div>
+    <p>Sin hashes de transacción que abran en <code>sepolia.etherscan.io</code>, la parte A no se califica. Una transacción inventada —por ejemplo, por un asistente de IA— no existe en la cadena, y eso se comprueba en diez segundos.</p>
+  </div>
+</section>
+
+<!-- ============================================================ 3 -->
+<section class="sec salto">
+  <div class="sec-cab"><span class="sec-num">03</span><h2>Preparación desde cero</h2><span class="lead">ANTES DE LA CLASE SI ES POSIBLE</span></div>
+
+  <p>La parte A solo necesita un navegador. La parte B necesita <strong>Node.js 22 LTS</strong> y el repositorio del curso <code>laboratorios-evm</code>, instalado una sola vez en el semestre.</p>
+
+  <div class="pregunta">
+    <div class="cab"><div class="n">1</div><div class="enun"><span class="tema">COMPROBAR · NODE.JS Y NPM</span>¿Está instalado Node.js?</div></div>
+    <div class="just">
+      Abran una terminal (Windows: tecla Windows, escriban <code>PowerShell</code>, Enter · macOS: <code>Terminal</code> · Linux: Ctrl + Alt + T) y escriban:
+      <pre>node --version
+npm --version</pre>
+      <strong>Salida esperada:</strong> algo como <code>v22.12.0</code> y <code>10.9.0</code>. El primer número de Node debe ser <strong>22</strong>.<br>
+      <strong>Si dice «no se reconoce»:</strong> instalen la versión LTS desde <code>nodejs.org</code>, cierren la terminal y ábranla de nuevo.
+    </div>
+  </div>
+
+  <div class="pregunta">
+    <div class="cab"><div class="n">2</div><div class="enun"><span class="tema">UNA SOLA VEZ · INSTALAR EL REPOSITORIO</span>Dependencias del proyecto</div></div>
+    <div class="just">
+      Entren a la carpeta del repositorio y descarguen las dependencias:
+      <pre>cd ruta/a/laboratorios-evm
+npm install</pre>
+      <strong>Salida esperada:</strong> tarda uno o dos minutos y termina con una línea como <code>added … packages</code>. Las advertencias en amarillo (<code>npm warn</code>) no son errores.<br>
+      <strong>Cómo sé que funcionó:</strong>
+      <pre>npx hardhat --version</pre>
+      debe responder <code>3.16.0</code>. Las versiones están congeladas en <code>versiones.md</code>: no se actualizan a mitad de semestre.
+    </div>
+  </div>
+
+  <div class="pregunta">
+    <div class="cab"><div class="n">3</div><div class="enun"><span class="tema">EL EXPLORADOR</span>Abrir el explorador correcto</div></div>
+    <div class="just">
+      Abran <code>https://sepolia.etherscan.io</code>. <strong>Miren la dirección:</strong> tiene que decir <code>sepolia.</code> al principio. El explorador de la red principal (<code>etherscan.io</code> a secas) se ve casi igual, y en él sus transacciones de prueba no existen. Es el error número uno del laboratorio.
+    </div>
+  </div>
+</section>
+
+<!-- ============================================================ 4 -->
+<section class="sec">
+  <div class="sec-cab"><span class="sec-num">04</span><h2>Punto de control de billeteras</h2><span class="lead">5 MINUTOS · OBLIGATORIO</span></div>
+  <p>La Sesión 6 despliega un contrato en Sepolia. Sin billetera con fondos de prueba, no se puede. Por eso se revisa hoy, no allá.</p>
+  <table>
+    <tr><th style="width:6%">#</th><th style="width:40%">QUÉ HACER</th><th>CÓMO SÉ QUE ESTÁ BIEN</th></tr>
+    <tr><td class="pk">1</td><td>Abrir la billetera creada en la Sesión 2 y desbloquearla con su contraseña.</td><td>Ven su dirección, que empieza por <code>0x</code>.</td></tr>
+    <tr><td class="pk">2</td><td>Elegir la red <strong>Sepolia</strong> en el selector de redes. Si no aparece, activar «mostrar redes de prueba» en la configuración de la billetera.</td><td>El selector dice <strong>Sepolia</strong>, no «Ethereum Mainnet».</td></tr>
+    <tr><td class="pk">3</td><td>Mirar el saldo.</td><td>Hay ETH de prueba (SepoliaETH). Si es cero, avisar al docente: se reparte desde la billetera institucional.</td></tr>
+    <tr><td class="pk">4</td><td>Confirmar que la frase de recuperación está en papel, fuera del computador.</td><td>Saben dónde está el papel. No la escriben en ningún lado ahora.</td></tr>
+    <tr><td class="pk">5</td><td>Copiar su dirección y pegarla en <code>sepolia.etherscan.io</code>.</td><td>Aparece su saldo y, si recibieron fondos, la transacción de llegada. <strong>Esa es su transacción 1.</strong></td></tr>
+  </table>
+  <div class="caja peligro">
+    <div class="caja-et">QUIEN PERDIÓ LA BILLETERA LA REHACE HOY</div>
+    <p>Creen una nueva siguiendo el procedimiento de la Sesión 2, anoten la frase en papel y pidan fondos al docente. No esperen a la Sesión 6. Y si alguien les pide la frase «para revisarla», es un intento de robo, aunque venga de alguien conocido.</p>
+  </div>
+</section>
+
+<!-- ============================================================ 5 -->
+<section class="sec salto">
+  <div class="sec-cab"><span class="sec-num">05</span><h2>Parte A · Análisis forense</h2><span class="lead">30 MINUTOS</span></div>
+
+  <p>Van a encontrar <strong>tres transacciones reales de tipos distintos</strong> en Sepolia y a llenar una hoja de trabajo por cada una. No pueden usar las de los ejemplos de esta guía ni las de las láminas: cada pareja trae las suyas.</p>
+
+  <h3 style="font-size:11pt;margin:4mm 0 2mm">05.1 · Cómo encontrar cada transacción</h3>
+
+  <div class="pregunta">
+    <div class="cab"><div class="n">1</div><div class="enun"><span class="tema">TRANSACCIÓN 1 · TRANSFERENCIA DE ETH</span>Un pago simple, sin contrato</div></div>
+    <div class="just">
+      <strong>Dónde:</strong> la página de su propia dirección (paso 5 del punto de control). En la lista <em>Transactions</em>, la fila con la que les llegaron los fondos de prueba.<br>
+      <strong>Si no tienen ninguna:</strong> abran cualquier bloque reciente (en la portada del explorador, <em>Latest Blocks</em> → un número de bloque → <em>Transactions</em>) y busquen una fila cuyo <em>Method</em> diga <code>Transfer</code> y cuyo <em>To</em> no tenga el ícono de documento (el ícono indica contrato).<br>
+      <strong>Cómo sé que es la correcta:</strong> al abrirla, <em>Input Data</em> dice <code>0x</code> (vacío) y <em>Value</em> es mayor que cero.
+    </div>
+  </div>
+
+  <div class="pregunta">
+    <div class="cab"><div class="n">2</div><div class="enun"><span class="tema">TRANSACCIÓN 2 · TRANSFERENCIA DE UN TOKEN ERC-20</span>Mover tokens es llamar a un contrato</div></div>
+    <div class="just">
+      <strong>Dónde:</strong> busquen en el explorador uno de estos dos contratos de prueba, ambos verificados:
+      <br>· LINK de prueba: <code>0x779877A7B0D9E8603169DdbD7836e478b4624789</code>
+      <br>· USDC de prueba (Circle): <code>0x1c7D4B196Cb0C7B01d743Fbc6116a902379C7238</code><br>
+      En la página del contrato, pestaña <em>Transactions</em>, elijan una fila cuyo <em>Method</em> sea <code>Transfer</code> y ábranla. (La pestaña <em>Token Transfers</em> también sirve, pero ahí aparecen además transferencias hechas por otros contratos; para este ejercicio queremos una llamada directa a <code>transfer</code>.)<br>
+      <strong>Cómo sé que es la correcta:</strong> <em>To</em> es el contrato del token, <em>Value</em> es 0 ETH, y el <em>Input Data</em> empieza por <code>0xa9059cbb</code>.
+    </div>
+  </div>
+
+  <div class="pregunta">
+    <div class="cab"><div class="n">3</div><div class="enun"><span class="tema">TRANSACCIÓN 3 · UNA QUE FALLÓ</span>Revertida, pero cobrada</div></div>
+    <div class="just">
+      <strong>Dónde:</strong> en la lista de transacciones de un contrato con mucho uso (los dos tokens anteriores sirven, o cualquier contrato que vean activo en un bloque reciente), busquen una fila con el <strong>ícono rojo de error</strong> junto al hash. Si en la primera página no hay ninguna, pasen a la siguiente o prueben con otro contrato.<br>
+      <strong>Cómo sé que es la correcta:</strong> al abrirla, <em>Status</em> dice <code>Fail</code>, casi siempre con un motivo: <code>Fail with error '...'</code> o <code>Fail With Custom Error '...'</code>.
+    </div>
+  </div>
+
+  <h3 style="font-size:11pt;margin:5mm 0 2mm">05.2 · Qué mirar, campo por campo</h3>
+  <p>Al abrir una transacción, la vista <em>Overview</em> muestra los campos principales. Hagan clic en <strong>«Click to show more»</strong> (o «More Details») para ver el resto. Esto es lo que significa cada uno:</p>
+
+  <table>
+    <tr><th style="width:21%">CAMPO</th><th style="width:40%">QUÉ SIGNIFICA</th><th>ERROR TÍPICO AL LEERLO</th></tr>
+    <tr><td class="pk">Transaction Hash</td><td>El identificador: el hash de la transacción firmada. Es lo que se pega en el informe.</td><td>Copiar el hash del bloque en vez del de la transacción.</td></tr>
+    <tr><td class="pk">Status</td><td><code>Success</code> o <code>Fail</code>.</td><td>Creer que un Fail no costó nada.</td></tr>
+    <tr><td class="pk">Block</td><td>Número del bloque que la incluyó y cuántas confirmaciones lleva encima.</td><td>Confundir confirmada con finalizada (Sesión 4).</td></tr>
+    <tr><td class="pk">From</td><td>Quien firmó. Siempre una cuenta externa (EOA).</td><td>—</td></tr>
+    <tr><td class="pk">To</td><td>La cuenta o el contrato al que se dirigió. Un ícono de documento indica contrato.</td><td>En un token, To es el CONTRATO del token, no quien recibe.</td></tr>
+    <tr><td class="pk">Value</td><td>ETH enviado junto con la llamada.</td><td>Pensar que 0 ETH significa que no se movió nada.</td></tr>
+    <tr><td class="pk">Transaction Fee</td><td>Lo que pagó el remitente en total por el gas.</td><td>Confundirlo con el valor transferido.</td></tr>
+    <tr><td class="pk">Gas Price</td><td>El precio <strong>efectivo</strong> por unidad de gas: tarifa base + propina, sin pasar del máximo.</td><td>Usar el máximo firmado para calcular el costo.</td></tr>
+    <tr><td class="pk">Gas Limit &amp; Usage by Txn</td><td>El tope firmado y lo que se consumió, con el porcentaje.</td><td>Creer que se cobra el límite completo cuando terminó bien.</td></tr>
+    <tr><td class="pk">Gas Fees</td><td><em>Base</em> (tarifa base del bloque), <em>Max</em> (maxFeePerGas firmado) y <em>Max Priority</em> (propina máxima firmada).</td><td>Creer que la base la eligió el usuario.</td></tr>
+    <tr><td class="pk">Burnt &amp; Txn Savings Fees</td><td><em>Burnt</em>: lo quemado (gas usado × base). <em>Savings</em>: lo que se firmó como máximo y no se cobró.</td><td>Creer que lo quemado lo recibió el validador.</td></tr>
+    <tr><td class="pk">Nonce</td><td>El contador de la cuenta remitente para esta transacción.</td><td>—</td></tr>
+    <tr><td class="pk">Input Data</td><td>El campo <code>data</code>: selector de 4 bytes y argumentos. Con <em>Decode Input Data</em> se ve la función y sus valores.</td><td>No ver nada útil porque el contrato no está verificado.</td></tr>
+    <tr><td class="pk">Pestaña Logs</td><td>Los eventos que emitió la ejecución.</td><td>Ignorarlos: son la forma más confiable de saber qué pasó.</td></tr>
+  </table>
+</section>
+
+<section class="sec salto">
+  <h3 style="font-size:11pt;margin:0 0 2mm">05.3 · El Input Data, decodificado a mano</h3>
+  <p>El explorador decodifica solo si el contrato está verificado. Pero ustedes pueden hacerlo a mano, y el informe lo pide al menos una vez. Tomen el <em>Input Data</em> en vista <em>Original</em> (hexadecimal) y pártanlo así:</p>
+  <pre>0xa9059cbb                                                         &lt;- selector: 4 bytes
+0000000000000000000000009d7fcbbaaa3c17d31b39c7e46241bd65743125db   &lt;- argumento 1: 32 bytes
+0000000000000000000000000000000000000000000000000000000001142f20   &lt;- argumento 2: 32 bytes</pre>
+  <table>
+    <tr><th style="width:22%">TROZO</th><th>CÓMO SE LEE</th></tr>
+    <tr><td class="pk">Selector</td><td><code>a9059cbb</code> son los primeros 4 bytes de <code>keccak256("transfer(address,uint256)")</code>. El mismo selector en cualquier token ERC-20 del mundo.</td></tr>
+    <tr><td class="pk">Argumento 1</td><td>La dirección de destino: los últimos 20 bytes (40 caracteres). Los 24 ceros de la izquierda son relleno para completar 32 bytes.</td></tr>
+    <tr><td class="pk">Argumento 2</td><td>El monto, en hexadecimal y en la unidad mínima del token. <code>0x1142f20</code> = 18 100 000. USDC tiene <strong>6</strong> decimales: 18 100 000 ÷ 10⁶ = <strong>18,1 USDC</strong>. LINK tiene 18.</td></tr>
+  </table>
+  <p>Para convertir hexadecimal a decimal: en la consola del navegador (F12 → <em>Console</em>) escriban <code>BigInt("0x1142f20")</code> y Enter. Para saber los decimales de un token: en la página del contrato, pestaña <em>Contract</em> → <em>Read Contract</em> (o <em>Read as Proxy</em>) → <code>decimals</code>.</p>
+
+  <h3 style="font-size:11pt;margin:5mm 0 2mm">05.4 · Los logs, decodificados</h3>
+  <p>Un evento <code>Transfer</code> de un token aparece en la pestaña <em>Logs</em> con esta forma:</p>
+  <table>
+    <tr><th style="width:22%">PARTE DEL LOG</th><th>QUÉ CONTIENE</th></tr>
+    <tr><td class="pk">Address</td><td>El contrato que emitió el evento. Tiene que ser el token esperado: un evento de otro contrato no prueba nada.</td></tr>
+    <tr><td class="pk">Topics[0]</td><td><code>0xddf252ad…b3ef</code> = keccak256(<code>"Transfer(address,address,uint256)"</code>): la firma del evento.</td></tr>
+    <tr><td class="pk">Topics[1] · [2]</td><td>Los parámetros <code>indexed</code>: origen y destino, rellenados a 32 bytes.</td></tr>
+    <tr><td class="pk">Data</td><td>Los parámetros no indexados: el monto. Debe coincidir con el argumento 2 del Input Data.</td></tr>
+  </table>
+  <p>Comprobar que el monto del log coincide con el del Input Data es exactamente el tipo de verificación cruzada que hace un auditor.</p>
+
+  <h3 style="font-size:11pt;margin:5mm 0 2mm">05.5 · Las cuentas: descomponer el costo</h3>
+  <p>Con EIP-1559 (láminas A.13 a A.15), para cada transacción:</p>
+  <pre>precio efectivo  = mín( Max , Base + Max Priority )
+Transaction Fee  = Gas Used × precio efectivo
+Burnt            = Gas Used × Base
+propina          = Gas Used × (precio efectivo − Base)  =  Fee − Burnt
+no cobrado       = Gas Used × (Max − precio efectivo)</pre>
+  <p>Trabajen en <strong>gwei</strong> y conviertan al final: 1 gwei = 0,000000001 ETH. Escriban la multiplicación completa en el informe; la calculadora del computador sirve. <strong>La suma Burnt + propina tiene que dar exactamente el Fee.</strong> Si no da, algo se copió mal.</p>
+</section>
+
+<section class="sec">
+  <div class="caja clave">
+    <div class="caja-et">EJEMPLO RESUELTO · TRANSFERENCIA DE USDC · SEPOLIA · BLOQUE 11 727 240</div>
+    <p>Hash <code>0xe51f75bad82aceb9e03cbf9af64d080df91203c43f801b99f7d71556654fbf0a</code>, consultada el 17 de septiembre de 2026. Es el modelo de precisión que se espera; no la usen en su informe.</p>
+    <table>
+      <tr><th style="width:34%">CAMPO</th><th>VALOR</th></tr>
+      <tr><td class="pk">Tipo · Status</td><td>Transferencia de token (llamada a contrato) · Success</td></tr>
+      <tr><td class="pk">To · ¿persona o contrato?</td><td><code>0x1c7D…7238</code> · contrato (USDC, detrás de un proxy)</td></tr>
+      <tr><td class="pk">Value</td><td>0 ETH</td></tr>
+      <tr><td class="pk">Gas Limit · Gas Used</td><td>69 301 · 62 171 (89,7 % del límite)</td></tr>
+      <tr><td class="pk">Base · Max · Max Priority</td><td>0,961679578 · 1,158789515 · 0,0011 gwei</td></tr>
+      <tr><td class="pk">Precio efectivo</td><td>mín(1,158789515 ; 0,961679578 + 0,0011) = 0,962779578 gwei</td></tr>
+      <tr><td class="pk">Transaction Fee</td><td>62 171 × 0,962779578 gwei = 0,000059856969143838 ETH</td></tr>
+      <tr><td class="pk">Burnt</td><td>62 171 × 0,961679578 gwei = 0,000059788581043838 ETH</td></tr>
+      <tr><td class="pk">Propina</td><td>62 171 × 0,0011 gwei = 0,0000000683881 ETH · comprobación: Burnt + propina = Fee ✔</td></tr>
+      <tr><td class="pk">Selector</td><td><code>0xa9059cbb</code> · <code>transfer(address,uint256)</code></td></tr>
+      <tr><td class="pk">Argumentos</td><td>destino <code>0x9d7f…25db</code> · monto 18 100 000 = 18,1 USDC</td></tr>
+      <tr><td class="pk">Logs</td><td>1 evento <code>Transfer</code> emitido por el contrato de USDC, con el mismo destino y el mismo monto ✔</td></tr>
+    </table>
+    <p><strong>Lo que un buen informe añade:</strong> el bloque 11 727 240 usó el 99,98 % de su límite; por eso, según la fórmula de EIP-1559, la tarifa base del bloque siguiente subió de 0,961679578 a 1,081844398 gwei (+12,5 %). La propina fue casi nula porque Sepolia tiene poca competencia por espacio.</p>
+  </div>
+
+  <div class="caja">
+    <div class="caja-et">EJEMPLO DE UNA TRANSACCIÓN FALLIDA · BLOQUE 11 727 244</div>
+    <p>Hash <code>0xcb485277658bbe9d1d9133078f1f9ea543a1b9091fa03a3fdbf68d055cf278da</code>. El remitente llamó a <code>transfer</code> en un token «confidencial» que no admite esa función. El explorador muestra <code>Fail With Custom Error 'FHERC20IncompatibleFunction()'</code>. Firmó un límite de 500 000; la ejecución revirtió tras consumir <strong>22 550</strong> de gas y pagó 22 550 × 1,947200913 gwei = <strong>0,0000439 ETH</strong> por un resultado nulo. No hay logs: una ejecución revertida no deja eventos.</p>
+  </div>
+
+  <h3 style="font-size:11pt;margin:5mm 0 2mm">05.6 · Las cuatro preguntas que el informe responde</h3>
+  <ol>
+    <li><strong>Transacción 1:</strong> ¿el gas usado es exactamente 21 000? Si no lo es, ¿qué indica sobre el destinatario o sobre la red? (Vean la caja de la sección 07.)</li>
+    <li><strong>Transacción 2:</strong> el campo <em>Value</em> dice 0 ETH. ¿Dónde está entonces el monto transferido? Muéstrenlo en el <em>Input Data</em> decodificado a mano y en el evento <code>Transfer</code>, y comprueben que coinciden. ¿El selector es <code>0xa9059cbb</code>? Si no, ¿qué función se llamó?</li>
+    <li><strong>Transacción 3:</strong> ¿por qué falló? ¿Cuánto gas consumió frente al límite firmado? ¿Cuánto pagó el remitente a pesar del fallo? ¿Qué quedó en los logs?</li>
+    <li><strong>Las tres:</strong> comprueben a mano que <code>Fee = Gas Used × precio efectivo</code> y que <code>Burnt + propina = Fee</code>. Escriban las multiplicaciones.</li>
+  </ol>
+</section>
+
+<!-- ============================================================ 6 -->
+<section class="sec">
+  <div class="sec-cab"><span class="sec-num">06</span><h2>Parte B · Predecir y medir el gas</h2><span class="lead">25 MINUTOS</span></div>
+
+  <p>El instrumento es el contrato <code>contracts/s05/Operaciones.sol</code>: cada función hace <strong>una sola cosa costosa</strong>, para poder aislar su gas. No es un contrato útil: es un aparato de medición.</p>
+
+  <div class="pregunta">
+    <div class="cab"><div class="n">1</div><div class="enun"><span class="tema">10 MINUTOS · SIN CORRER NADA</span>Predecir</div></div>
+    <div class="just">
+      Abran <code>contracts/s05/Operaciones.sol</code> en su editor y lean cada función. Con la tabla de la lámina A.17 escriban su predicción en la columna correspondiente. <strong>Se evalúa el razonamiento, no el acierto.</strong> Anoten al lado de cada número de dónde salió («21 000 de base + 22 100 de SSTORE nuevo»).
+      <br><strong>Recuerden sumar siempre:</strong> 21 000 de base + el costo de los datos de la llamada (4 por byte en cero, 16 por byte distinto de cero; una llamada con un <code>uint256</code> pequeño lleva 36 bytes: 4 del selector y 32 del número) + las instrucciones caras + un pequeño resto que pone Solidity.
+    </div>
+  </div>
+
+  <table>
+    <tr><th style="width:44%">OPERACIÓN</th><th>PREDICCIÓN</th><th>MEDICIÓN</th><th>DIFERENCIA</th><th>¿POR QUÉ?</th></tr>
+    <tr><td class="pk">Transferir ETH sin contrato</td><td></td><td></td><td></td><td></td></tr>
+    <tr><td class="pk">Desplegar el contrato</td><td></td><td></td><td></td><td></td></tr>
+    <tr><td class="pk">Escribir en una ranura vacía (0 → 42)</td><td></td><td></td><td></td><td></td></tr>
+    <tr><td class="pk">Sobrescribir una ranura ocupada (42 → 43)</td><td></td><td></td><td></td><td></td></tr>
+    <tr><td class="pk">Leer la ranura, dentro de una transacción</td><td></td><td></td><td></td><td></td></tr>
+    <tr><td class="pk">Borrar la ranura (43 → 0)</td><td></td><td></td><td></td><td></td></tr>
+    <tr><td class="pk">Emitir un evento con dos datos</td><td></td><td></td><td></td><td></td></tr>
+    <tr><td class="pk">Sumar 50 números · memory</td><td></td><td></td><td></td><td></td></tr>
+    <tr><td class="pk">Sumar 50 números · calldata</td><td></td><td></td><td></td><td></td></tr>
+    <tr><td class="pk">Primer elemento de un arreglo</td><td></td><td></td><td></td><td></td></tr>
+    <tr><td class="pk">Agregar 1 elemento más</td><td></td><td></td><td></td><td></td></tr>
+    <tr><td class="pk">Agregar 10 elementos más</td><td></td><td></td><td></td><td></td></tr>
+  </table>
+
+  <div class="pregunta">
+    <div class="cab"><div class="n">2</div><div class="enun"><span class="tema">2 MINUTOS · COMPROBAR EL ENTORNO</span>Correr las pruebas de la sesión</div></div>
+    <div class="just">
+      En la carpeta <code>laboratorios-evm</code>:
+      <pre>npx hardhat test test/s05/Operaciones.test.js</pre>
+      <strong>Salida esperada:</strong> compila los contratos (la primera vez tarda) y muestra siete líneas con ✔, terminando en <code>7 passing</code>. Las pruebas no verifican cifras exactas sino las <strong>relaciones</strong> que la clase afirma: que una transferencia simple cuesta 21 000, que estrenar una ranura es mucho más caro que sobrescribirla, que un evento es más barato que escribir, que calldata es más barato que memory.<br>
+      <strong>Cómo sé que funcionó:</strong> <code>7 passing</code> y ningún <code>failing</code>.
+    </div>
+  </div>
+
+  <div class="pregunta">
+    <div class="cab"><div class="n">3</div><div class="enun"><span class="tema">3 MINUTOS · MEDIR</span>Correr el script de medición</div></div>
+    <div class="just">
+      <pre>npx hardhat run scripts/s05/medir-gas.js</pre>
+      El script despliega <code>Operaciones</code> en la <strong>red local de Hardhat</strong> (dentro de su computador: no gasta ETH de prueba ni necesita internet), ejecuta cada operación y lee el <code>gasUsed</code> de cada recibo. <strong>Salida esperada</strong> (Hardhat 3.16, Solidity 0.8.28, optimizador con 200 ejecuciones):
+      <pre>  OPERACIÓN                                            GAS USADO
+  ────────────────────────────────────────────────────────────────
+  Transferir ETH entre cuentas (sin contrato)              21.000
+  Desplegar el contrato                                   271.161
+  Escribir en una ranura vacía (0 → 42)                    43.602
+  Sobrescribir una ranura ocupada (42 → 43)                26.479
+  Leer la ranura, dentro de una transacción                23.364
+  Borrar la ranura (43 → 0)                                21.445
+  Emitir un evento con dos datos                           22.862
+  Sumar 50 números · parámetro en memory                   42.058
+  Sumar 50 números · parámetro en calldata                 39.360
+  Primer elemento de un arreglo (estrena el largo)         65.895
+  Agregar 1 elemento más                                   48.795
+  Agregar 10 elementos más                                251.250
+
+  Con 2 gwei por unidad de gas, escribir una ranura nueva cuesta 0.000087204 ETH.</pre>
+      <strong>Cómo sé que funcionó:</strong> la tabla sale completa, con 12 filas. Si sus cifras difieren en unas pocas unidades, revisen la versión del compilador; las proporciones deben mantenerse.
+    </div>
+  </div>
+
+  <div class="pregunta">
+    <div class="cab"><div class="n">4</div><div class="enun"><span class="tema">10 MINUTOS · COMPARAR</span>Explicar las dos diferencias más grandes</div></div>
+    <div class="just">
+      Copien las mediciones a su tabla, calculen la diferencia y elijan las <strong>dos mayores</strong> (en valor absoluto). Para cada una, escriban qué no tuvieron en cuenta. Pistas, sin dar la respuesta:
+      <br>· La <strong>base de 21 000</strong> se paga en toda transacción: réstenla antes de comparar con la tabla de instrucciones.
+      <br>· El <strong>primer acceso</strong> a una ranura dentro de una transacción cuesta 2 100 adicionales (acceso «frío», EIP-2929).
+      <br>· <strong>Borrar</strong> una ranura (volverla a cero) genera un reembolso de 4 800, con tope de un quinto del gas usado (EIP-3529).
+      <br>· El <strong>primer</strong> elemento de un arreglo estrena además la ranura donde se guarda su largo.
+      <br>· Los <strong>argumentos</strong> también cuestan: 4 por byte en cero y 16 por byte distinto de cero.
+      <br>· Las dos filas de «sumar 50 números» se miden con <code>estimateGas</code>: el arreglo viaja en la llamada, y copiarlo a memoria tiene precio.
+    </div>
+  </div>
+
+  <div class="caja">
+    <div class="caja-et">UN EJEMPLO DE DESCOMPOSICIÓN · LO QUE SE ESPERA EN «¿POR QUÉ?»</div>
+    <p><strong>Escribir en una ranura vacía = 43 602.</strong> Base 21 000 + datos 204 (el selector y el número 42 ocupan 36 bytes: 31 en cero × 4 = 124 y 5 distintos de cero × 16 = 80) + <code>SSTORE</code> de cero a un valor, con primer acceso: 20 000 + 2 100 = 22 100 + resto de Solidity 298 (comparar el selector, decodificar el argumento, saltar a la función). Total: 21 000 + 204 + 22 100 + 298 = 43 602 ✔.</p>
+  </div>
+</section>
+
+<!-- ============================================================ 7 -->
+<section class="sec">
+  <div class="sec-cab"><span class="sec-num">07</span><h2>Puntos de control</h2><span class="lead">¿VOY BIEN?</span></div>
+  <table>
+    <tr><th style="width:14%">MINUTO</th><th>DEBERÍAN TENER</th></tr>
+    <tr><td class="pk">5</td><td>Billetera en Sepolia, con saldo, y su dirección abierta en el explorador.</td></tr>
+    <tr><td class="pk">15</td><td>Transacción 1 encontrada y su hoja de trabajo llena, con la suma Burnt + propina = Fee comprobada.</td></tr>
+    <tr><td class="pk">25</td><td>Transacción 2 con el Input Data partido en selector y argumentos, y el monto del log igual al del argumento.</td></tr>
+    <tr><td class="pk">35</td><td>Transacción 3 con el motivo del fallo anotado. Empiezan la parte B.</td></tr>
+    <tr><td class="pk">45</td><td>Tabla de predicciones completa, sin haber corrido el script.</td></tr>
+    <tr><td class="pk">55</td><td><code>7 passing</code> y la tabla de mediciones copiada. Diferencias calculadas.</td></tr>
+  </table>
+  <div class="caja alerta">
+    <div class="caja-et">SI SEPOLIA YA ACTIVÓ LA ACTUALIZACIÓN GLAMSTERDAM</div>
+    <p>A la fecha de esta guía estaba prevista para Sepolia el 6 de octubre de 2026, y cambia varios precios: entre otros, baja el costo base de una transacción simple y sube el de crear estado. Si su transacción 1 no gastó 21 000, <strong>no es un error de ustedes</strong>: anoten el valor real, averigüen en qué fecha se activó la actualización en Sepolia y úsenlo para responder la pregunta 1. La red local de Hardhat de la parte B conserva los precios de la tabla de la clase, y comparar las dos redes es un hallazgo que suma.</p>
+  </div>
+</section>
+
+<!-- ============================================================ 8 -->
+<section class="sec">
+  <div class="sec-cab"><span class="sec-num">08</span><h2>Errores frecuentes</h2><span class="lead">CASI TODO SE RESUELVE AQUÍ</span></div>
+  <table>
+    <tr><th style="width:40%">SÍNTOMA</th><th>CAUSA Y SOLUCIÓN</th></tr>
+    <tr><td class="pk">El explorador no encuentra mi dirección o mi hash</td><td>Están en <code>etherscan.io</code> (red principal). Usen <code>sepolia.etherscan.io</code>.</td></tr>
+    <tr><td class="pk">«Value: 0» en una transferencia de token</td><td>Correcto: el token no es ETH. El monto está en el Input Data y en los logs.</td></tr>
+    <tr><td class="pk">El Input Data es ilegible y no hay botón Decode</td><td>El contrato no está verificado. Decodifiquen a mano (05.3) o elijan uno de los dos tokens sugeridos.</td></tr>
+    <tr><td class="pk">El monto del token parece absurdo (millones)</td><td>No dividieron por los decimales. USDC usa 6, LINK usa 18. Consulten <code>decimals</code> en Read Contract.</td></tr>
+    <tr><td class="pk">Burnt + propina no da el Fee</td><td>Usaron <em>Max</em> en vez del precio efectivo, o copiaron la base de otro bloque. Rehagan con 05.5.</td></tr>
+    <tr><td class="pk">No encuentro ninguna transacción fallida</td><td>Cambien de página en la lista del contrato o prueben con otro contrato activo de un bloque reciente.</td></tr>
+    <tr><td class="pk">La transacción 1 no gastó 21 000</td><td>El destinatario es un contrato (tiene código y ejecutó algo), o Sepolia ya cambió sus precios (caja de la sección 07).</td></tr>
+    <tr><td class="pk"><code>node</code> o <code>npx</code> no se reconoce</td><td>Node.js no está instalado o la terminal se abrió antes de instalarlo. Instalen Node 22 LTS y abran otra terminal.</td></tr>
+    <tr><td class="pk"><code>npm install</code> falla en la sala</td><td>Restricción de red. Plan B: el docente comparte la carpeta <code>node_modules</code> por red local.</td></tr>
+    <tr><td class="pk">Error que menciona «No Hardhat config file found»</td><td>La terminal no está en la carpeta <code>laboratorios-evm</code>. Usen <code>cd</code> para entrar.</td></tr>
+    <tr><td class="pk">Las cifras del script difieren un poco de la guía</td><td>Otra versión del compilador u optimizador. Revisen <code>versiones.md</code>; las proporciones deben mantenerse.</td></tr>
+    <tr><td class="pk">La billetera pide firmar algo</td><td>Hoy no se firma nada. Rechacen y avisen al docente.</td></tr>
+  </table>
+</section>
+
+<!-- ============================================================ 9 -->
+<section class="sec salto">
+  <div class="sec-cab"><span class="sec-num">09</span><h2>Preguntas de reflexión</h2><span class="lead">RESPONDER MIRANDO SUS DATOS</span></div>
+  <p>Estas preguntas se responden con <strong>sus</strong> transacciones y <strong>sus</strong> mediciones. Una respuesta genérica, sin cifras propias, no puntúa. Elijan al menos dos para el informe, además de la reflexión obligatoria.</p>
+  <ol>
+    <li>En su transacción 2, ¿qué porcentaje del límite firmado se usó? Si el límite lo propuso una billetera, ¿qué margen dejó sobre la estimación? ¿Qué habría pasado con un límite 10 % menor que el gas usado?</li>
+    <li>Busquen la tarifa base del bloque de su transacción 1 y la del bloque siguiente. Con la fórmula de la lámina A.14, ¿el cambio corresponde a un bloque más lleno o más vacío que la mitad? Compruébenlo mirando el <em>Gas Used</em> del bloque.</li>
+    <li>En su transacción fallida, ¿cuánto del límite firmado quedó sin cobrar? ¿Por qué el protocolo cobra el gas consumido aunque el estado no cambie?</li>
+    <li>En su medición, ¿cuántas veces más caro es «agregar 10 elementos» que «agregar 1»? ¿Por qué no es exactamente 10?</li>
+    <li>Con su medición de «escribir en una ranura vacía» y la tarifa base de su transacción 1, ¿cuánto costaría en Sepolia guardar 1 000 números nuevos, uno por transacción? ¿Qué cambiarían en el diseño?</li>
+    <li><strong>Reflexión obligatoria:</strong> después de hoy, ¿qué operación evitarían en un contrato real y qué harían en su lugar?</li>
+  </ol>
+</section>
+
+<!-- ============================================================ 10 -->
+<section class="sec">
+  <div class="sec-cab"><span class="sec-num">10</span><h2>Plantilla del informe corto de evidencia</h2><span class="lead">MÁXIMO 2 PÁGINAS</span></div>
+  <p>Copien esta estructura en su documento. Las tablas pueden ir en letra pequeña; lo que no puede faltar son los hashes y las cuentas.</p>
+  <pre>INFORME · LABORATORIO 05 · FORENSE Y GAS
+Pareja: Nombre 1 · Nombre 2                Fecha: DD/MM/AAAA
+Explorador: sepolia.etherscan.io           Consultado: DD/MM/AAAA
+
+1. TRANSACCIONES ANALIZADAS
+   T1 · transferencia de ETH   · https://sepolia.etherscan.io/tx/0x…
+   T2 · transferencia de token · https://sepolia.etherscan.io/tx/0x…
+   T3 · transacción fallida    · https://sepolia.etherscan.io/tx/0x…
+
+2. HOJA DE TRABAJO (una columna por transacción)
+   Tipo · Status · Bloque · From · To (¿persona o contrato?) · Value
+   Gas Limit · Gas Used (% del límite)
+   Base · Max · Max Priority · precio efectivo (gwei)
+   Transaction Fee · Burnt · propina · no cobrado (ETH)
+   Comprobación: Burnt + propina = Fee   [escribir la suma]
+   Selector · función · argumentos decodificados
+   Logs: evento, emisor, monto
+
+3. LAS CUATRO PREGUNTAS (sección 05.6), con cifras
+
+4. GAS: tabla de 12 filas (predicción · medición · diferencia · por qué)
+   Las dos diferencias mayores, explicadas en 3-5 líneas cada una
+
+5. REFLEXIÓN (un párrafo) + al menos dos preguntas de la sección 09
+
+6. DECLARACIÓN DE USO DE IA: para qué se usó, o «no se usó»</pre>
+</section>
+
+<!-- ============================================================ 11 -->
+<section class="sec">
+  <div class="sec-cab"><span class="sec-num">11</span><h2>Lista de chequeo antes de entregar</h2></div>
+  <table>
+    <tr><th style="width:6%">✔</th><th>COMPROBACIÓN</th></tr>
+    <tr><td class="pk">☐</td><td>Los tres hashes abren en <code>sepolia.etherscan.io</code> (probado el día de la entrega, desde otro navegador o en modo incógnito).</td></tr>
+    <tr><td class="pk">☐</td><td>Las tres transacciones son de tipos distintos y ninguna es de los ejemplos de la guía o de las láminas.</td></tr>
+    <tr><td class="pk">☐</td><td>En las tres, Burnt + propina = Fee, con la suma escrita.</td></tr>
+    <tr><td class="pk">☐</td><td>La transacción 2 tiene el Input Data partido a mano y el monto convertido con los decimales correctos.</td></tr>
+    <tr><td class="pk">☐</td><td>La transacción 3 tiene el motivo del fallo y cuánto pagó.</td></tr>
+    <tr><td class="pk">☐</td><td>La tabla de gas tiene las 12 predicciones escritas <strong>antes</strong> de medir, y las 12 mediciones.</td></tr>
+    <tr><td class="pk">☐</td><td>Las dos mayores diferencias están explicadas con la descomposición (base + datos + instrucciones + resto).</td></tr>
+    <tr><td class="pk">☐</td><td>Hay reflexión, al menos dos preguntas de la sección 09 y la declaración de uso de IA.</td></tr>
+    <tr><td class="pk">☐</td><td>Dos páginas como máximo. Ningún dato de la billetera más allá de la dirección pública. Ninguna frase ni clave.</td></tr>
+  </table>
+</section>
+
+<!-- ============================================================ 12 -->
+<section class="sec">
+  <div class="sec-cab"><span class="sec-num">12</span><h2>Rúbrica</h2></div>
+  <table>
+    <tr><th style="width:20%">CRITERIO</th><th style="width:8%">PESO</th><th>EXCELENTE (5,0)</th><th>ACEPTABLE (3,5)</th><th>INSUFICIENTE (&lt; 3,0)</th></tr>
+    <tr><td class="pk">A · lectura y costos</td><td>30 %</td><td>Tres transacciones verificables de tipos distintos, todos los campos, sumas exactas.</td><td>Algún campo o suma con errores menores.</td><td>Hashes que no abren, tipos repetidos o cuentas sin hacer.</td></tr>
+    <tr><td class="pk">A · data y logs</td><td>20 %</td><td>Input Data partido a mano, decimales correctos, monto cruzado con el log, motivo del fallo explicado.</td><td>Solo la versión decodificada por el explorador.</td><td>No identifica selector ni monto.</td></tr>
+    <tr><td class="pk">B · predicción y medición</td><td>35 %</td><td>Predicciones razonadas antes de medir; las dos mayores diferencias explicadas con la descomposición.</td><td>Predicciones sin razonamiento o explicación vaga.</td><td>Predicciones copiadas de la medición o faltantes.</td></tr>
+    <tr><td class="pk">Reflexión</td><td>15 %</td><td>Responde con cifras propias y propone una alternativa de diseño concreta.</td><td>Correcta pero genérica.</td><td>Ausente o sin relación con los datos.</td></tr>
+  </table>
+</section>
+
+<!-- ============================================================ 13 -->
+<section class="sec" style="break-inside:avoid">
+  <div class="sec-cab"><span class="sec-num">13</span><h2>Referencias</h2></div>
+  <ul>
+    <li>Buterin, V. et al. (2019). <em>EIP-1559: Fee market change for ETH 1.0 chain</em>. <code>https://eips.ethereum.org/EIPS/eip-1559</code></li>
+    <li>Buterin, V. y Swende, M. (2020). <em>EIP-2929: Gas cost increases for state access opcodes</em>. <code>https://eips.ethereum.org/EIPS/eip-2929</code></li>
+    <li>Buterin, V. y Swende, M. (2021). <em>EIP-3529: Reduction in refunds</em>. <code>https://eips.ethereum.org/EIPS/eip-3529</code></li>
+    <li>Referencia interactiva de instrucciones y costos: <code>https://www.evm.codes/</code></li>
+    <li>ethereum.org. <em>Gas and fees</em>. <code>https://ethereum.org/developers/docs/gas/</code></li>
+    <li>ethereum.org. <em>Glamsterdam</em> (estado de la actualización). <code>https://ethereum.org/roadmap/glamsterdam/</code></li>
+    <li>Explorador de Sepolia: <code>https://sepolia.etherscan.io</code></li>
+  </ul>
+</section>
+
+</body>
+</html>

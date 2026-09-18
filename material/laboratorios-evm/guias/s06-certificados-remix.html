@@ -1,0 +1,478 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<title>Guía · Laboratorio 06 · Certificados en Remix</title>
+<!--ESTILOS-->
+<style>.sec-cab,h3{break-after:avoid}</style>
+</head>
+<body>
+
+<section class="barra">
+  <div class="kicker">LABORATORIO 06 · SESIÓN 6 · SOLIDITY I · EVIDENCIA CALIFICABLE</div>
+  <h1>REGISTRO DE<br><em>CERTIFICADOS</em> ACADÉMICOS<br>EN REMIX, PASO A PASO</h1>
+  <div class="sub">Su primer contrato: escrito, probado, desplegado en Sepolia y verificado en el explorador.<br>Al final, cualquier persona podrá comprobar un diploma sin cuenta y sin pagar.</div>
+</section>
+
+<dl class="datos">
+  <div><dt>MODALIDAD</dt><dd>En parejas</dd></div>
+  <div><dt>DURACIÓN</dt><dd>80 min en clase</dd></div>
+  <div><dt>RED</dt><dd>Remix VM<br>y Sepolia</dd></div>
+  <div><dt>META</dt><dd>Contrato verificado<br>+ 18 pruebas</dd></div>
+</dl>
+
+<div class="caja clave">
+  <div class="caja-et">CÓMO LEER ESTA GUÍA</div>
+  <p>Está escrita para que puedan hacer el laboratorio <strong>solos</strong>, aunque sea la primera vez que abren Remix. Cada paso dice qué hacer, qué deberían ver y cómo saber que funcionó. Avancen en orden: cada paso supone que el anterior salió bien. Si algo no coincide con lo descrito, vayan a <strong>«Errores frecuentes»</strong> (sección 14). La interfaz de Remix cambia de vez en cuando: si un botón no está exactamente donde dice la guía, busquen el nombre de la acción; la lógica no cambia.</p>
+</div>
+
+<!-- ============================================================ 1 -->
+<section class="sec">
+  <div class="sec-cab"><span class="sec-num">01</span><h2>Qué van a construir, y por qué</h2><span class="lead">LEER PRIMERO</span></div>
+  <p>Un registro donde la oficina de registro de la universidad publica el <strong>hash</strong> de cada diploma que emite. Una empresa que recibe el PDF de un diploma calcula su hash y le pregunta al contrato: ¿lo emitió la universidad?, ¿sigue vigente? La respuesta no depende de llamar a nadie ni de confiar en el PDF que le enviaron.</p>
+  <p><strong>Objetivo:</strong> escribir, desplegar y verificar un primer contrato funcional en una red de prueba. <strong>Resultado de aprendizaje:</strong> RA3 (programar contratos inteligentes en Solidity).</p>
+  <table>
+    <tr><th style="width:26%">FUNCIÓN</th><th>QUÉ HACE</th><th style="width:22%">QUIÉN LA LLAMA</th></tr>
+    <tr><td class="pk">emitir(hash, programa)</td><td>Registra el hash de un diploma nuevo con su programa y la fecha del bloque.</td><td>Solo el emisor</td></tr>
+    <tr><td class="pk">revocar(hash, motivo)</td><td>Marca un diploma como revocado. No lo borra: queda la historia.</td><td>Solo el emisor</td></tr>
+    <tr><td class="pk">verificar(hash)</td><td>Devuelve si es válido, el programa, la fecha y si fue revocado. Es <code>view</code>: gratis.</td><td>Cualquiera</td></tr>
+    <tr><td class="pk">cambiarEmisor(nueva)</td><td>Traspasa el rol de emisor a otra dirección.</td><td>Solo el emisor</td></tr>
+  </table>
+  <div class="caja peligro">
+    <div class="caja-et">LA REGLA DE DISEÑO QUE NO SE NEGOCIA · LEY 1581 DE 2012</div>
+    <p>En la cadena <strong>no</strong> va el nombre, ni la cédula, ni ningún dato personal. Solo el hash del archivo. La cadena es pública e inmutable, y la Ley Estatutaria 1581 de 2012 da a toda persona derecho a actualizar, rectificar y pedir la supresión de sus datos. Un hash del archivo completo no identifica a nadie por sí solo: quien tiene el PDF puede verificar; quien no lo tiene, no aprende nada. Tampoco usen un diploma real para el laboratorio: el repositorio trae uno ficticio.</p>
+  </div>
+  <div class="caja peligro">
+    <div class="caja-et">SEGURIDAD</div>
+    <ul>
+      <li>Solo Sepolia y la Remix VM. La billetera del curso nunca se usa con dinero real.</li>
+      <li>La frase de recuperación no se escribe en Remix, ni en un archivo, ni en un chat. Nadie legítimo la pide.</li>
+      <li>Antes de confirmar cualquier firma: qué red, a qué dirección, cuánto. No se firma lo que no se entiende.</li>
+      <li>El contrato es material de clase, sin auditar.</li>
+    </ul>
+  </div>
+</section>
+
+<!-- ============================================================ 2 -->
+<section class="sec">
+  <div class="sec-cab"><span class="sec-num">02</span><h2>Qué se entrega</h2></div>
+  <table>
+    <tr><th style="width:24%">EVIDENCIA</th><th>DETALLE</th><th style="width:9%">PESO</th></tr>
+    <tr><td class="pk">Contrato verificado</td><td>Dirección de su contrato en Sepolia, con la marca de código verificado en <code>sepolia.etherscan.io</code>.</td><td>35 %</td></tr>
+    <tr><td class="pk">Tres transacciones</td><td>Hashes de: una emisión, una revocación y un intento <strong>fallido</strong> de emitir desde una cuenta que no es el emisor.</td><td>30 %</td></tr>
+    <tr><td class="pk">Prueba de alteración</td><td>Los dos hashes (original y alterado) y las capturas de <code>verificar</code> con cada uno, desde el explorador.</td><td>20 %</td></tr>
+    <tr><td class="pk">Una respuesta</td><td>¿Por qué el contrato revoca en lugar de borrar? Un párrafo, con referencia a su propia transacción de revocación.</td><td>15 %</td></tr>
+  </table>
+  <p>Un documento por pareja, con la plantilla de la sección 16, antes de la Sesión 7. Sin dirección de contrato que abra en el explorador, el laboratorio no se califica.</p>
+</section>
+
+<!-- ============================================================ 3 -->
+<section class="sec salto">
+  <div class="sec-cab"><span class="sec-num">03</span><h2>Preparación desde cero</h2><span class="lead">5 MINUTOS</span></div>
+  <table>
+    <tr><th style="width:30%">NECESITAN</th><th>CÓMO COMPRUEBAN QUE LO TIENEN</th></tr>
+    <tr><td class="pk">Navegador con la billetera del curso</td><td>Chrome, Edge, Brave o Firefox con la billetera de la Sesión 2 instalada y desbloqueada.</td></tr>
+    <tr><td class="pk">Red Sepolia y saldo</td><td>La billetera muestra la red <strong>Sepolia</strong> y un saldo mayor que cero (el punto de control de la Sesión 5). Para desplegar y usar el contrato basta con unos 0,003 ETH de prueba.</td></tr>
+    <tr><td class="pk">Dos billeteras en la pareja</td><td>El intento fallido se hace desde la billetera del compañero. Si solo una tiene saldo, pasen un poco (0,001 ETH de prueba) de una a otra.</td></tr>
+    <tr><td class="pk">El andamiaje</td><td>El archivo <code>andamiaje/s06/CertificadosUSB.sol</code> del repositorio <code>laboratorios-evm</code>, abierto en un editor o en el navegador para copiarlo.</td></tr>
+    <tr><td class="pk">Opcional: Node.js 22</td><td>Para calcular el hash con los scripts y correr las pruebas. <code>node --version</code> debe decir <code>v22…</code>. Sin Node, usen los hashes de la sección 07.</td></tr>
+  </table>
+  <p>Los archivos del laboratorio en el repositorio:</p>
+  <table>
+    <tr><th style="width:44%">ARCHIVO</th><th>PARA QUÉ</th></tr>
+    <tr><td class="pk">andamiaje/s06/CertificadosUSB.sol</td><td>La versión de trabajo, con siete TODO. <strong>Compila tal como está.</strong></td></tr>
+    <tr><td class="pk">test/s06/CertificadosUSB.test.js</td><td>18 pruebas que definen el comportamiento correcto.</td></tr>
+    <tr><td class="pk">scripts/s06/diploma-de-prueba.pdf</td><td>Un diploma ficticio, sin datos de ninguna persona.</td></tr>
+    <tr><td class="pk">scripts/s06/hash-documento.js</td><td>Calcula el keccak256 de los bytes de un archivo.</td></tr>
+    <tr><td class="pk">scripts/s06/alterar-un-byte.js</td><td>Crea una copia del archivo con un solo bit cambiado.</td></tr>
+  </table>
+</section>
+
+<!-- ============================================================ 4 -->
+<section class="sec">
+  <div class="sec-cab"><span class="sec-num">04</span><h2>Paso 1 · Remix desde cero</h2><span class="lead">10 MINUTOS</span></div>
+
+  <div class="pregunta">
+    <div class="cab"><div class="n">1</div><div class="enun"><span class="tema">ABRIR REMIX</span>Un entorno completo dentro del navegador</div></div>
+    <div class="just">
+      Vayan a <code>https://remix.ethereum.org</code> <strong>en el mismo navegador donde está la billetera</strong>. Remix no pide cuenta ni instalar nada. A la izquierda hay una barra de íconos: cada ícono es un complemento (<em>plugin</em>). Los tres que usan hoy son el <strong>explorador de archivos</strong>, el <strong>compilador de Solidity</strong> y <strong>Deploy &amp; Run Transactions</strong>. Abajo, la <strong>terminal</strong> muestra cada transacción.<br>
+      <strong>Cómo sé que funcionó:</strong> ven un espacio de trabajo con las carpetas <code>contracts</code>, <code>scripts</code> y <code>tests</code>.
+    </div>
+  </div>
+
+  <div class="pregunta">
+    <div class="cab"><div class="n">2</div><div class="enun"><span class="tema">CREAR EL ARCHIVO</span>Pegar el andamiaje</div></div>
+    <div class="just">
+      En el explorador de archivos, clic derecho sobre <code>contracts</code> → <em>New File</em> → nómbrenlo <code>CertificadosUSB.sol</code>. Copien <strong>todo</strong> el contenido de <code>andamiaje/s06/CertificadosUSB.sol</code> y péguenlo.<br>
+      <strong>Lean el archivo antes de seguir.</strong> Tiene el estado (<code>struct Certificado</code>, <code>emisor</code>, <code>emitidos</code>, el <code>mapping</code>), los siete errores, los tres eventos y cinco bloques con comentarios <code>// TODO</code>.
+    </div>
+  </div>
+
+  <div class="pregunta">
+    <div class="cab"><div class="n">3</div><div class="enun"><span class="tema">CONFIGURAR EL COMPILADOR</span>Las mismas opciones que usarán al verificar</div></div>
+    <div class="just">
+      Ícono <strong>Solidity Compiler</strong>:
+      <br>· <em>Compiler</em>: <code>0.8.28+commit.7893614a</code>. Elíjanla exacta aunque Remix proponga una más nueva: es la versión congelada del curso.
+      <br>· <em>Advanced Configurations</em>: activar <strong>Enable optimization</strong> con <strong>200</strong> ejecuciones. <em>EVM Version</em>: dejar la predeterminada (<code>default</code>).
+      <br><strong>Anoten estas tres opciones:</strong> el paso de verificación en el explorador exige repetirlas idénticas.
+    </div>
+  </div>
+
+  <div class="pregunta">
+    <div class="cab"><div class="n">4</div><div class="enun"><span class="tema">COMPILAR</span>Antes de escribir una sola línea</div></div>
+    <div class="just">
+      Clic en <strong>Compile CertificadosUSB.sol</strong> (o Ctrl + S).<br>
+      <strong>Salida esperada:</strong> una marca verde sobre el ícono del compilador. Pueden aparecer <strong>advertencias amarillas</strong> («Unused function parameter»): son normales, porque los parámetros todavía no se usan. Desaparecen al completar los TODO.<br>
+      <strong>Si aparece un error rojo:</strong> no se copió el archivo completo, o la versión elegida es menor que 0.8.28. El andamiaje compila tal como viene.
+    </div>
+  </div>
+</section>
+
+<!-- ============================================================ 5 -->
+<section class="sec salto">
+  <div class="sec-cab"><span class="sec-num">05</span><h2>Paso 2 · Los siete TODO, uno por uno</h2><span class="lead">35 MINUTOS</span></div>
+  <p><strong>El ciclo, después de cada TODO:</strong> compilar → pestaña Deploy &amp; Run con <em>Environment</em> en <strong>Remix VM</strong> → <em>Deploy</em> → probar a mano con la prueba indicada. Avanzar de uno en uno ahorra la mitad del tiempo de depuración. Cada vez que despliegan se crea un contrato <strong>nuevo y vacío</strong>: usen siempre el último de <em>Deployed Contracts</em>.</p>
+
+  <div class="pregunta">
+    <div class="cab"><div class="n">1</div><div class="enun"><span class="tema">TODO 1 · MODIFICADOR soloEmisor</span>La puerta de todas las funciones que escriben</div></div>
+    <div class="just">
+      <strong>Qué hace:</strong> si quien llama (<code>msg.sender</code>) no es el <code>emisor</code>, revierte con <code>NoEsEmisor(msg.sender)</code>. Si sí es, sigue.<br>
+      <strong>Qué escribir:</strong> una línea <code>if (…) revert NoEsEmisor(msg.sender);</code> <strong>antes</strong> del <code>_;</code> que ya está. El <code>_;</code> marca dónde se inserta el cuerpo de la función protegida: no lo borren.<br>
+      <strong>Cómo probarlo:</strong> después del TODO 2 (sin constructor, el emisor es la dirección cero y nadie podría emitir).
+    </div>
+  </div>
+
+  <div class="pregunta">
+    <div class="cab"><div class="n">2</div><div class="enun"><span class="tema">TODO 2 · CONSTRUCTOR</span>Quién queda a cargo</div></div>
+    <div class="just">
+      <strong>Qué hace:</strong> se ejecuta una sola vez, al desplegar. Guarda a quien despliega como emisor y lo anuncia.<br>
+      <strong>Qué escribir:</strong> <code>emisor = msg.sender;</code> y <code>emit EmisorCambiado(address(0), msg.sender);</code><br>
+      <strong>Cómo probarlo:</strong> desplegar y pulsar el botón azul <code>emisor</code>: debe mostrar la misma dirección que el selector <em>Account</em>. Luego cambien de <em>Account</em>, llamen <code>emitir</code> con cualquier hash: la terminal debe mostrar el error <code>NoEsEmisor</code> (esto prueba el TODO 1).
+    </div>
+  </div>
+
+  <div class="pregunta">
+    <div class="cab"><div class="n">3</div><div class="enun"><span class="tema">TODO 3 · VALIDACIONES DE emitir</span>Rechazar todo lo inválido antes de tocar el estado</div></div>
+    <div class="just">
+      <strong>Qué hace:</strong> tres comprobaciones, en este orden: hash en cero → <code>HashVacio()</code>; programa vacío → <code>ProgramaVacio()</code>; hash ya registrado → <code>YaEmitido(hashDocumento)</code>.<br>
+      <strong>Pistas:</strong> el hash en cero es <code>bytes32(0)</code>. Un string no tiene <code>.length</code>: conviértanlo con <code>bytes(programa).length</code>. Para saber si ya existe, lean el campo <code>existe</code> del certificado guardado en <code>_certificados[hashDocumento]</code> (toda clave de un mapping «existe» y devuelve ceros: por eso hace falta ese campo).<br>
+      <strong>Cómo probarlo:</strong> emitir con hash <code>0x0000000000000000000000000000000000000000000000000000000000000000</code> → debe fallar con <code>HashVacio</code>.
+    </div>
+  </div>
+
+  <div class="pregunta">
+    <div class="cab"><div class="n">4</div><div class="enun"><span class="tema">TODO 4 · EFECTOS DE emitir</span>Guardar, contar, avisar</div></div>
+    <div class="just">
+      <strong>Qué hace:</strong> guarda el certificado, suma uno al contador y emite el evento.<br>
+      <strong>Pistas:</strong> la fecha es <code>uint64(block.timestamp)</code>; guárdenla en una variable local para usar el mismo valor en el struct y en el evento. Un struct se crea así: <code>Certificado({ programa: programa, fechaEmision: ahora, revocado: false, existe: true })</code>. Luego <code>emitidos += 1;</code> y <code>emit CertificadoEmitido(hashDocumento, programa, ahora);</code><br>
+      <strong>Cómo probarlo:</strong> emitir el hash de prueba <code>0x87daf6ef2771bae4d21b7fb938774a35b9bd4a1a6989dd253c6694e9dcbed455</code> con programa <code>Ingenieria de Sistemas</code>; <code>emitidos</code> debe dar <code>1</code>. Emitirlo otra vez: debe fallar con <code>YaEmitido</code>. En la terminal, desplieguen la transacción exitosa: el campo <code>logs</code> muestra <code>CertificadoEmitido</code>.
+    </div>
+  </div>
+
+  <div class="pregunta">
+    <div class="cab"><div class="n">5</div><div class="enun"><span class="tema">TODO 5 · revocar</span>Marcar sin borrar</div></div>
+    <div class="just">
+      <strong>Qué hace:</strong> busca el certificado; si no existe → <code>NoExiste(hashDocumento)</code>; si ya está revocado → <code>YaRevocado(hashDocumento)</code>; si no, lo marca y emite <code>CertificadoRevocado(hashDocumento, motivo)</code>.<br>
+      <strong>La trampa:</strong> <code>Certificado storage c = _certificados[hashDocumento];</code> — con <code>storage</code>, <code>c</code> apunta al dato guardado y <code>c.revocado = true;</code> queda escrito. Con <code>memory</code> modificarían una copia que desaparece al terminar: compila, no da error, y no revoca nada.<br>
+      <strong>Cómo probarlo:</strong> revocar el hash emitido con motivo <code>prueba</code>; revocarlo otra vez → <code>YaRevocado</code>; revocar un hash nunca emitido → <code>NoExiste</code>.
+    </div>
+  </div>
+
+  <div class="pregunta">
+    <div class="cab"><div class="n">6</div><div class="enun"><span class="tema">TODO 6 · verificar</span>La consulta que hace el mundo</div></div>
+    <div class="just">
+      <strong>Qué hace:</strong> devuelve cuatro valores: <code>valido</code> (existe <strong>y</strong> no revocado), <code>programa</code>, <code>fechaEmision</code> y <code>revocado</code>.<br>
+      <strong>Pista:</strong> lean el certificado con <code>storage</code> (aquí no se modifica, solo evita copiarlo) y devuelvan la tupla <code>return (c.existe &amp;&amp; !c.revocado, c.programa, c.fechaEmision, c.revocado);</code><br>
+      <strong>Cómo probarlo:</strong> el botón <code>verificar</code> es azul (view): responde al instante, sin transacción. Antes de revocar: <code>true</code>, el programa y una fecha. Después: <code>false</code> y <code>revocado = true</code>. Con un hash nunca emitido: <code>false</code> y fecha <code>0</code>.
+    </div>
+  </div>
+
+  <div class="pregunta">
+    <div class="cab"><div class="n">7</div><div class="enun"><span class="tema">TODO 7 · cambiarEmisor</span>Traspasar el rol</div></div>
+    <div class="just">
+      <strong>Qué hace:</strong> rechaza <code>address(0)</code> con <code>DireccionCero()</code>, emite <code>EmisorCambiado(emisor, nuevo)</code> <strong>antes</strong> de cambiarlo (para que el evento lleve el emisor anterior) y actualiza <code>emisor</code>.<br>
+      <strong>Cómo probarlo:</strong> copien otra dirección de la lista <em>Account</em> (ícono de copiar), llamen <code>cambiarEmisor</code> con ella; luego intenten emitir con la cuenta original → <code>NoEsEmisor</code>; cambien a la cuenta nueva y emitan → funciona.
+    </div>
+  </div>
+</section>
+
+<!-- ============================================================ 6 -->
+<section class="sec salto">
+  <div class="sec-cab"><span class="sec-num">06</span><h2>Paso 3 · La batería de pruebas a mano en la Remix VM</h2><span class="lead">ANTES DE IR A SEPOLIA</span></div>
+  <p>Con los siete TODO completos, desplieguen una vez más en la <strong>Remix VM</strong> (gratis e instantánea) y recorran esta tabla completa. Si todas las filas dan lo esperado, el contrato está listo para una red pública. Equivocarse aquí no cuesta nada; en Sepolia, cada error es una transacción pagada y un contrato que ya no se puede corregir.</p>
+  <table>
+    <tr><th style="width:5%">#</th><th style="width:42%">ACCIÓN (CUENTA)</th><th>RESULTADO ESPERADO</th></tr>
+    <tr><td class="pk">1</td><td><code>emisor</code></td><td>La cuenta con la que desplegaron.</td></tr>
+    <tr><td class="pk">2</td><td><code>emitir(0x87da…d455, "Ingenieria de Sistemas")</code> (emisor)</td><td>Transacción exitosa (✔ verde en la terminal). <code>emitidos</code> = 1.</td></tr>
+    <tr><td class="pk">3</td><td>El mismo <code>emitir</code> otra vez</td><td>Falla con <code>YaEmitido</code>.</td></tr>
+    <tr><td class="pk">4</td><td><code>emitir(0x00…00, "x")</code></td><td>Falla con <code>HashVacio</code>.</td></tr>
+    <tr><td class="pk">5</td><td><code>emitir(otro hash, "")</code></td><td>Falla con <code>ProgramaVacio</code>.</td></tr>
+    <tr><td class="pk">6</td><td><code>emitir(otro hash, "x")</code> desde OTRA cuenta</td><td>Falla con <code>NoEsEmisor</code> y la dirección de esa cuenta.</td></tr>
+    <tr><td class="pk">7</td><td><code>verificar(0x87da…d455)</code></td><td><code>true</code>, <code>Ingenieria de Sistemas</code>, fecha ≠ 0, <code>false</code>.</td></tr>
+    <tr><td class="pk">8</td><td><code>verificar(0xc89d…3951)</code> (el alterado)</td><td><code>false</code>, texto vacío, <code>0</code>, <code>false</code>.</td></tr>
+    <tr><td class="pk">9</td><td><code>revocar(0x87da…d455, "prueba")</code>, y otra vez</td><td>La primera funciona; la segunda falla con <code>YaRevocado</code>.</td></tr>
+    <tr><td class="pk">10</td><td><code>verificar(0x87da…d455)</code></td><td><code>false</code>, el programa, la misma fecha, <code>true</code>.</td></tr>
+    <tr><td class="pk">11</td><td><code>emitir(0x87da…d455, "x")</code></td><td>Falla con <code>YaEmitido</code>: un hash revocado no se reutiliza.</td></tr>
+    <tr><td class="pk">12</td><td><code>cambiarEmisor(0x0000…0000)</code></td><td>Falla con <code>DireccionCero</code>.</td></tr>
+  </table>
+</section>
+
+<!-- ============================================================ 7 -->
+<section class="sec">
+  <div class="sec-cab"><span class="sec-num">07</span><h2>Paso 4 · El hash del diploma</h2><span class="lead">5 MINUTOS</span></div>
+  <p>Lo que se registra no es el diploma sino su huella: el keccak256 de <strong>todos los bytes</strong> del archivo. En la carpeta <code>laboratorios-evm</code>:</p>
+  <pre>node scripts/s06/hash-documento.js scripts/s06/diploma-de-prueba.pdf
+
+  archivo : scripts/s06/diploma-de-prueba.pdf
+  tamaño  : 2.226 bytes
+  keccak  : 0x87daf6ef2771bae4d21b7fb938774a35b9bd4a1a6989dd253c6694e9dcbed455</pre>
+  <p>Ahora alteren un solo bit (el script crea una copia; el original no se toca) y calculen de nuevo:</p>
+  <pre>node scripts/s06/alterar-un-byte.js scripts/s06/diploma-de-prueba.pdf
+node scripts/s06/hash-documento.js scripts/s06/diploma-de-prueba-alterado.pdf
+
+  keccak  : 0xc89d02a9a7f8b6660f3567945455456ed1e2b96cdd0637371b863b2c0f913951</pre>
+  <p>El PDF alterado se abre igual y se ve idéntico, pero su hash no tiene nada que ver: es el efecto avalancha de la Sesión 2. Esos dos valores son los que se usan en Sepolia.</p>
+  <div class="caja">
+    <div class="caja-et">VARIANTES</div>
+    <p><strong>Con un documento propio:</strong> cualquier PDF que ustedes creen, <strong>sin datos personales</strong>, sirve igual; su hash será distinto al de esta guía. <strong>Sin Node.js:</strong> usen el diploma del repositorio y los dos valores de arriba, que son exactos. <strong>Nunca</strong> un diploma real.</p>
+  </div>
+</section>
+
+<!-- ============================================================ 8 -->
+<section class="sec salto">
+  <div class="sec-cab"><span class="sec-num">08</span><h2>Paso 5 · Conectar la billetera y desplegar en Sepolia</h2><span class="lead">15 MINUTOS</span></div>
+
+  <div class="pregunta">
+    <div class="cab"><div class="n">1</div><div class="enun"><span class="tema">ENTORNO</span>De la máquina virtual a una red pública</div></div>
+    <div class="just">
+      Deploy &amp; Run → <em>Environment</em>: elijan la opción de la billetera del navegador. Según la versión de Remix se llama <strong>Browser Extension</strong> (y dentro, MetaMask) o <strong>Injected Provider – MetaMask</strong>. La billetera abre una ventana pidiendo <strong>conectar</strong> la cuenta a Remix: acepten solo la cuenta del curso.<br>
+      <strong>Cómo sé que funcionó:</strong> debajo de <em>Environment</em> aparece la red: <strong>Sepolia (11155111)</strong>. En <em>Account</em> aparece su dirección con su saldo real de ETH de prueba.<br>
+      <strong>Si aparece otra red:</strong> cámbienla a Sepolia en la billetera; Remix se actualiza solo.
+    </div>
+  </div>
+
+  <div class="pregunta">
+    <div class="cab"><div class="n">2</div><div class="enun"><span class="tema">DESPLEGAR</span>La primera transacción que crea un contrato</div></div>
+    <div class="just">
+      Confirmen que en <em>Contract</em> está seleccionado <code>CertificadosUSB</code> y pulsen <strong>Deploy</strong>. La billetera muestra la transacción. <strong>Antes de confirmar, revisen:</strong>
+      <br>· <strong>Red:</strong> Sepolia. Si dice cualquier otra, rechacen.
+      <br>· <strong>Tipo:</strong> despliegue de contrato («Contract deployment»), sin destinatario.
+      <br>· <strong>Valor:</strong> 0 ETH.
+      <br>· <strong>Costo estimado:</strong> del orden de 0,0005 a 0,002 ETH de prueba. El despliegue consume unas 555 000 unidades de gas (medido en la red local); el precio depende de la tarifa base del momento.<br>
+      Confirmen. <strong>Salida esperada:</strong> en 12 a 30 segundos la terminal de Remix muestra la transacción con ✔ y en <em>Deployed Contracts</em> aparece <code>CERTIFICADOSUSB AT 0x…</code>. <strong>Copien esa dirección</strong> (ícono de copiar) y guárdenla: es la evidencia principal.
+    </div>
+  </div>
+
+  <div class="pregunta">
+    <div class="cab"><div class="n">3</div><div class="enun"><span class="tema">USAR EL CONTRATO EN SEPOLIA</span>Las transacciones de la evidencia</div></div>
+    <div class="just">
+      Ahora cada botón naranja abre la billetera y cuesta gas real de prueba. En orden:
+      <br>1. <code>emitir</code> con el hash original y el programa. Confirmen. Guarden el hash de la transacción (clic en la línea de la terminal → <em>transaction hash</em>).
+      <br>2. <code>verificar</code> con el hash original (debe dar <code>true</code>) y con el alterado (<code>false</code>). Son lecturas: no abren la billetera.
+      <br>3. <strong>Intento fallido:</strong> en Remix, el compañero abre Remix en <strong>su</strong> navegador con <strong>su</strong> billetera, pega y compila el mismo código, pega la dirección del contrato en <em>At Address</em> y llama <code>emitir</code> con otro hash. Remix avisará <em>Gas estimation failed</em> y ofrecerá enviarla igual: <strong>envíenla a propósito</strong>. Quedará en la cadena con Status Fail y costará muy poco. Guarden su hash.
+      <br>4. Con la cuenta del emisor, <code>revocar</code> el diploma con un motivo que <strong>no</strong> contenga datos personales (por ejemplo, <code>prueba de laboratorio</code>). Guarden el hash.
+    </div>
+  </div>
+</section>
+
+<!-- ============================================================ 9 -->
+<section class="sec">
+  <div class="sec-cab"><span class="sec-num">09</span><h2>Paso 6 · Ver el evento en el explorador</h2><span class="lead">5 MINUTOS</span></div>
+  <p>Abran <code>https://sepolia.etherscan.io</code> y peguen la dirección del contrato. La página muestra la transacción de creación (<em>Contract Creation</em>) y las de uso. Abran la de <code>emitir</code> → pestaña <strong>Logs</strong>:</p>
+  <table>
+    <tr><th style="width:20%">PARTE</th><th>QUÉ DEBEN VER</th></tr>
+    <tr><td class="pk">Address</td><td>La dirección de <strong>su</strong> contrato.</td></tr>
+    <tr><td class="pk">Topics[0]</td><td><code>0x774ca613bc69539f740c09dc7a428006e870e9cb3dff99a89fbd49088e2c3fd6</code>: el keccak256 de <code>CertificadoEmitido(bytes32,string,uint64)</code>. Es igual para todas las parejas, porque es la firma del evento.</td></tr>
+    <tr><td class="pk">Topics[1]</td><td>El hash del diploma, completo: es el parámetro <code>indexed</code>.</td></tr>
+    <tr><td class="pk">Data</td><td>El programa y la fecha, codificados. Antes de verificar el código se ven en hexadecimal; después, el explorador los traduce.</td></tr>
+  </table>
+  <p>Abran también la transacción fallida: <em>Status</em> dice <code>Fail</code> y, cuando el código esté verificado, el motivo aparece como <code>NoEsEmisor</code>. No tiene logs: una ejecución revertida no deja eventos.</p>
+</section>
+
+<!-- ============================================================ 10 -->
+<section class="sec salto">
+  <div class="sec-cab"><span class="sec-num">10</span><h2>Paso 7 · Verificar el código fuente</h2><span class="lead">10 MINUTOS</span></div>
+  <p>Verificar es publicar el código fuente y dejar que el explorador compruebe que, compilado con las mismas opciones, produce <strong>exactamente</strong> el bytecode desplegado. Sin eso, nadie puede saber qué hace su contrato.</p>
+
+  <div class="pregunta">
+    <div class="cab"><div class="n">1</div><div class="enun"><span class="tema">OPCIÓN A · FORMULARIO DEL EXPLORADOR</span>Verify and Publish en Etherscan</div></div>
+    <div class="just">
+      En la página del contrato → pestaña <strong>Contract</strong> → <strong>Verify and Publish</strong>. Primera pantalla:
+      <br>· <em>Compiler Type</em>: <strong>Solidity (Single file)</strong>.
+      <br>· <em>Compiler Version</em>: <strong>v0.8.28+commit.7893614a</strong>.
+      <br>· <em>Open Source License Type</em>: <strong>MIT License (MIT)</strong> (la del encabezado SPDX).
+      <br>Segunda pantalla: peguen el código <strong>exacto</strong> que compilaron en Remix, completo. <em>Optimization</em>: <strong>Yes</strong>; en la configuración avanzada, <em>Runs</em>: <strong>200</strong> y <em>EVM Version</em>: <strong>default</strong>. <em>Constructor Arguments</em>: vacío (el constructor no recibe parámetros). Completen la verificación anti-bots y envíen.<br>
+      <strong>Salida esperada:</strong> «Successfully generated Bytecode and ABI for Contract Address». En la pestaña <em>Contract</em> aparece una marca verde y las subpestañas <em>Read Contract</em> y <em>Write Contract</em>.
+    </div>
+  </div>
+
+  <div class="pregunta">
+    <div class="cab"><div class="n">2</div><div class="enun"><span class="tema">OPCIÓN B · DESDE REMIX</span>El complemento Contract Verification</div></div>
+    <div class="just">
+      En Remix, <em>Plugin Manager</em> → activar <strong>Contract Verification</strong>. Permite verificar en Sourcify sin clave de API (Etherscan, en cambio, exige una clave propia). Elijan la red Sepolia, peguen la dirección del contrato y verifiquen. Sourcify es un verificador independiente y de código abierto; si el explorador no muestra la marca verde, usen la opción A para la evidencia.
+    </div>
+  </div>
+
+  <div class="pregunta">
+    <div class="cab"><div class="n">3</div><div class="enun"><span class="tema">LA PRUEBA FINAL</span>Verificar un diploma sin billetera</div></div>
+    <div class="just">
+      En el explorador → <em>Contract</em> → <strong>Read Contract</strong> → <code>verificar</code>: peguen el hash original y pulsen <em>Query</em>; luego el alterado. Tomen captura de ambos resultados. <strong>Esto es lo que se construyó:</strong> cualquier persona, desde cualquier computador, sin cuenta y sin pagar, comprueba el diploma.
+    </div>
+  </div>
+</section>
+
+<!-- ============================================================ 11 -->
+<section class="sec">
+  <div class="sec-cab"><span class="sec-num">11</span><h2>Las pruebas automáticas del andamiaje</h2><span class="lead">PLAN B Y COMPROBACIÓN FINAL</span></div>
+  <p>El repositorio trae 18 pruebas en <code>test/s06/CertificadosUSB.test.js</code>. Sirven de <strong>plan B</strong> si la sala bloquea Remix, y de <strong>comprobación final</strong> para todos: si su código pasa las 18, el comportamiento es el correcto. Requieren Node.js 22 y <code>npm install</code> hecho una vez (Sesión 5).</p>
+  <div class="pregunta">
+    <div class="cab"><div class="n">1</div><div class="enun"><span class="tema">COPIAR SU VERSIÓN SOBRE LA DEL REPOSITORIO</span>Qué archivo prueban las pruebas</div></div>
+    <div class="just">
+      Las pruebas compilan lo que haya en <code>contracts/s06/CertificadosUSB.sol</code>, que en el repositorio es la solución de referencia. Para probar <strong>su</strong> trabajo, reemplácenlo en su copia local: o con el andamiaje (para trabajar ahí) o pegando lo que escribieron en Remix.
+      <pre>cp andamiaje/s06/CertificadosUSB.sol contracts/s06/CertificadosUSB.sol       (macOS, Linux, Git Bash)
+copy andamiaje\s06\CertificadosUSB.sol contracts\s06\CertificadosUSB.sol    (Windows cmd / PowerShell)</pre>
+    </div>
+  </div>
+  <div class="pregunta">
+    <div class="cab"><div class="n">2</div><div class="enun"><span class="tema">CORRER</span>Leer el rojo como una lista de tareas</div></div>
+    <div class="just">
+      <pre>npx hardhat test test/s06/CertificadosUSB.test.js</pre>
+      <strong>Con el andamiaje sin tocar:</strong> <code>4 passing</code> y <code>14 failing</code>. Pasan las tres de <em>verificar</em> que esperan ceros y la de privacidad; el resto falla porque los TODO están vacíos. Cada prueba en rojo dice qué comportamiento falta, por ejemplo <code>quien despliega queda como emisor</code> → TODO 2.<br>
+      <strong>Con los siete TODO bien:</strong> <code>18 passing</code>. Ese es el criterio de terminado.
+    </div>
+  </div>
+  <div class="caja alerta">
+    <div class="caja-et">PARA RECUPERAR LA SOLUCIÓN DE REFERENCIA</div>
+    <p>Si trabajan sobre un clon del repositorio: <code>git checkout contracts/s06/CertificadosUSB.sol</code>. No suban la solución a su repositorio de entrega. El despliegue con script a Sepolia (con las claves en el almacén cifrado: <code>npx hardhat keystore set …</code>, nunca en archivos) se hace en la Sesión 8.</p>
+  </div>
+</section>
+
+<!-- ============================================================ 12 -->
+<section class="sec salto">
+  <div class="sec-cab"><span class="sec-num">12</span><h2>Puntos de control</h2><span class="lead">¿VOY BIEN?</span></div>
+  <table>
+    <tr><th style="width:14%">MINUTO</th><th>DEBERÍAN TENER</th></tr>
+    <tr><td class="pk">10</td><td>El andamiaje compilado en Remix con 0.8.28 y optimización 200.</td></tr>
+    <tr><td class="pk">25</td><td>TODO 1, 2, 3 y 4: emitir funciona y <code>emitidos</code> = 1 en la Remix VM.</td></tr>
+    <tr><td class="pk">45</td><td>Los siete TODO y la tabla de la sección 06 recorrida sin sorpresas.</td></tr>
+    <tr><td class="pk">50</td><td>Los dos hashes del diploma calculados (o tomados de la sección 07).</td></tr>
+    <tr><td class="pk">65</td><td>Contrato desplegado en Sepolia y las cuatro transacciones hechas: emisión, lecturas, intento fallido, revocación.</td></tr>
+    <tr><td class="pk">80</td><td>Código verificado, Logs revisados y capturas de Read Contract.</td></tr>
+  </table>
+</section>
+
+<!-- ============================================================ 13 -->
+<section class="sec">
+  <div class="sec-cab"><span class="sec-num">13</span><h2>Cómo saber que terminaron</h2></div>
+  <ul>
+    <li>La dirección del contrato abre en <code>sepolia.etherscan.io</code> con la marca verde de código verificado.</li>
+    <li>La pestaña <em>Logs</em> muestra <code>CertificadoEmitido</code> y <code>CertificadoRevocado</code> emitidos por <strong>su</strong> contrato.</li>
+    <li>Hay una transacción con <em>Status</em> <code>Fail</code> desde una cuenta que no es el emisor.</li>
+    <li><em>Read Contract</em> → <code>verificar</code> responde <code>false</code> para el hash alterado, y <code>false</code> con <code>revocado = true</code> para el original.</li>
+    <li>Opcional pero recomendado: <code>18 passing</code> con su código en Hardhat.</li>
+  </ul>
+</section>
+
+<!-- ============================================================ 14 -->
+<section class="sec">
+  <div class="sec-cab"><span class="sec-num">14</span><h2>Errores frecuentes</h2><span class="lead">CASI TODO SE RESUELVE AQUÍ</span></div>
+  <table>
+    <tr><th style="width:38%">SÍNTOMA</th><th>CAUSA Y SOLUCIÓN</th></tr>
+    <tr><td class="pk">Error rojo al compilar el andamiaje</td><td>Archivo incompleto o versión de compilador menor a 0.8.28.</td></tr>
+    <tr><td class="pk">«Gas estimation failed» al emitir</td><td>Una validación revierte: hash en cero, programa vacío, hash ya emitido o cuenta distinta del emisor. Lean el error que muestra la terminal.</td></tr>
+    <tr><td class="pk">Nadie puede emitir, ni siquiera quien desplegó</td><td>Falta el TODO 2: el emisor quedó en la dirección cero.</td></tr>
+    <tr><td class="pk"><code>revocar</code> no cambia nada</td><td>Usaron <code>Certificado memory c</code> en lugar de <code>storage</code>: modificaron una copia.</td></tr>
+    <tr><td class="pk"><code>verificar</code> dice válido un hash nunca emitido</td><td>Olvidaron exigir <code>c.existe</code>.</td></tr>
+    <tr><td class="pk">Los certificados «desaparecieron»</td><td>Redesplegaron: cada Deploy crea un contrato nuevo y vacío. Usen el último o <em>At Address</em> con la dirección anterior.</td></tr>
+    <tr><td class="pk">«Operator == not compatible with types string»</td><td>No se comparan strings con <code>==</code>. Usen <code>bytes(programa).length == 0</code> para el vacío.</td></tr>
+    <tr><td class="pk">Remix no ve la billetera</td><td>Recarguen Remix, desbloqueen la billetera, acepten la conexión. Debe ser el mismo navegador.</td></tr>
+    <tr><td class="pk">La billetera dice «saldo insuficiente»</td><td>Pidan fondos de prueba al docente. No intenten desplegar en otra red.</td></tr>
+    <tr><td class="pk">La transacción queda «pendiente» mucho tiempo</td><td>Tarifa muy baja o red congestionada. Esperen o usen «acelerar» en la billetera; no reenvíen la misma acción dos veces.</td></tr>
+    <tr><td class="pk">La verificación en el explorador falla</td><td>Versión del compilador, optimización, runs o EVM Version distintos al despliegue, o el código pegado no es exactamente el desplegado (un espacio cambia los metadatos).</td></tr>
+    <tr><td class="pk">En Hardhat: «HH… not found» o «No Hardhat config»</td><td>La terminal no está en la carpeta <code>laboratorios-evm</code>, o falta <code>npm install</code>.</td></tr>
+  </table>
+</section>
+
+<!-- ============================================================ 15 -->
+<section class="sec salto">
+  <div class="sec-cab"><span class="sec-num">15</span><h2>Preguntas de reflexión</h2><span class="lead">CON SU CONTRATO DELANTE</span></div>
+  <p>Respondan mirando <strong>su</strong> contrato desplegado y <strong>sus</strong> transacciones. La primera es obligatoria; elijan dos más.</p>
+  <ol>
+    <li><strong>Obligatoria:</strong> ¿por qué el contrato revoca en lugar de borrar? Usen como argumento lo que muestra el explorador sobre su transacción de revocación y lo que devuelve <code>verificar</code> después.</li>
+    <li>En su transacción de emisión, ¿cuánto gas se usó? Compárenlo con el de la revocación. Con lo visto en la Sesión 5, ¿qué explica la diferencia?</li>
+    <li>¿Cuánto gas consumió su intento fallido y cuánto pagó el compañero? ¿Qué habría pasado si hubieran firmado un límite de gas menor que ese consumo?</li>
+    <li>Busquen en la pestaña <em>Logs</em> de su emisión el valor de Topics[1]. ¿Por qué ese parámetro está marcado <code>indexed</code> y el programa no?</li>
+    <li>Supongan que alguien roba la clave del emisor. Con su contrato desplegado delante, ¿qué puede hacer y qué no? ¿Qué quedaría registrado?</li>
+    <li>Su contrato guarda <code>programa</code> como texto. ¿Hay algún escenario en el que eso sea un dato personal? ¿Y el motivo de revocación?</li>
+  </ol>
+</section>
+
+<!-- ============================================================ 16 -->
+<section class="sec">
+  <div class="sec-cab"><span class="sec-num">16</span><h2>Plantilla de entrega</h2></div>
+  <pre>EVIDENCIA · LABORATORIO 06 · CERTIFICADOS EN REMIX
+Pareja: Nombre 1 · Nombre 2                 Fecha: DD/MM/AAAA
+
+1. CONTRATO
+   Dirección: https://sepolia.etherscan.io/address/0x…   (verificado: sí)
+   Compilador: 0.8.28 · optimización 200 · EVM default
+
+2. TRANSACCIONES
+   Emisión   : https://sepolia.etherscan.io/tx/0x…   gas usado: …
+   Revocación: https://sepolia.etherscan.io/tx/0x…   gas usado: …
+   Fallida   : https://sepolia.etherscan.io/tx/0x…   motivo: NoEsEmisor
+
+3. PRUEBA DE ALTERACIÓN
+   Hash original : 0x…      verificar → true / false (tras revocar)
+   Hash alterado : 0x…      verificar → false
+   [capturas de Read Contract con ambos]
+
+4. PRUEBAS AUTOMÁTICAS (opcional): resultado de npx hardhat test
+
+5. RESPUESTAS: la obligatoria y dos más de la sección 15
+
+6. DECLARACIÓN DE USO DE IA: para qué se usó, o «no se usó»</pre>
+</section>
+
+<!-- ============================================================ 17 -->
+<section class="sec">
+  <div class="sec-cab"><span class="sec-num">17</span><h2>Lista de chequeo antes de entregar</h2></div>
+  <table>
+    <tr><th style="width:6%">✔</th><th>COMPROBACIÓN</th></tr>
+    <tr><td class="pk">☐</td><td>La dirección del contrato abre en el explorador de Sepolia y tiene la marca de verificado.</td></tr>
+    <tr><td class="pk">☐</td><td>Los tres hashes de transacción abren y son de SU contrato.</td></tr>
+    <tr><td class="pk">☐</td><td>La transacción fallida viene de una cuenta distinta del emisor.</td></tr>
+    <tr><td class="pk">☐</td><td>Hay capturas de <code>verificar</code> con el hash original y con el alterado.</td></tr>
+    <tr><td class="pk">☐</td><td>Ningún dato personal en el contrato: ni en <code>programa</code>, ni en el motivo de revocación, ni en el documento hasheado.</td></tr>
+    <tr><td class="pk">☐</td><td>Ninguna frase de recuperación, clave privada ni URL con clave en el documento o en un repositorio.</td></tr>
+    <tr><td class="pk">☐</td><td>Respuesta obligatoria y dos más; declaración de uso de IA.</td></tr>
+  </table>
+</section>
+
+<!-- ============================================================ 18 -->
+<section class="sec">
+  <div class="sec-cab"><span class="sec-num">18</span><h2>Rúbrica</h2></div>
+  <table>
+    <tr><th style="width:20%">CRITERIO</th><th style="width:8%">PESO</th><th>EXCELENTE (5,0)</th><th>ACEPTABLE (3,5)</th><th>INSUFICIENTE (&lt; 3,0)</th></tr>
+    <tr><td class="pk">Contrato verificado</td><td>35 %</td><td>Desplegado y verificado; se comporta como la tabla de la sección 06.</td><td>Desplegado sin verificar, o con un comportamiento incorrecto.</td><td>Sin dirección verificable.</td></tr>
+    <tr><td class="pk">Transacciones</td><td>30 %</td><td>Las tres, de su contrato, con el motivo del fallo identificado.</td><td>Falta una o el motivo no se identifica.</td><td>Hashes que no abren o de otro contrato.</td></tr>
+    <tr><td class="pk">Alteración</td><td>20 %</td><td>Dos hashes y dos capturas coherentes desde el explorador.</td><td>Capturas solo desde Remix.</td><td>Ausente.</td></tr>
+    <tr><td class="pk">Respuesta</td><td>15 %</td><td>Argumenta con su propia transacción de revocación y con la confianza que da la historia.</td><td>Correcta pero genérica.</td><td>Ausente o incorrecta.</td></tr>
+  </table>
+</section>
+
+<!-- ============================================================ 19 -->
+<section class="sec" style="break-inside:avoid">
+  <div class="sec-cab"><span class="sec-num">19</span><h2>Referencias</h2></div>
+  <ul>
+    <li>Remix IDE: <code>https://remix.ethereum.org</code> · documentación: <code>https://remix-ide.readthedocs.io</code></li>
+    <li>Remix · Contract Verification: <code>https://remix-ide.readthedocs.io/en/latest/contract_verification.html</code></li>
+    <li>Solidity, documentación oficial: <code>https://docs.soliditylang.org</code></li>
+    <li>Sourcify: <code>https://sourcify.dev</code></li>
+    <li>Explorador de Sepolia: <code>https://sepolia.etherscan.io</code></li>
+    <li>Ley Estatutaria 1581 de 2012: <code>https://www.funcionpublica.gov.co/eva/gestornormativo/norma.php?i=49981</code></li>
+  </ul>
+</section>
+
+</body>
+</html>

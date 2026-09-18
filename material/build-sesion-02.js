@@ -357,6 +357,7 @@ async function construir() {
       s.addText(m[0], { x, y: 5.72, w: 1.85, h: 0.5, fontFace: F.mono, fontSize: 11.5, bold: true, color: C.blanco, margin: 0, valign: "top", lineSpacingMultiple: 1.05 });
       s.addText(m[1].toUpperCase(), { x, y: 6.24, w: 1.85, h: 0.28, fontFace: F.mono, fontSize: 8.5, color: "A39EAF", charSpacing: 1.2, margin: 0, valign: "top" });
     });
+    s.addNotes("Abrir con la plenaria de la pregunta de la semana de la Sesión 1. Anunciar el formato de hoy: demostración en vivo, billetera propia, teoría del hash y código en parejas. Comprobar quién llegó sin entorno. 2 minutos.");
     nSlide++;
   }
 
@@ -370,15 +371,15 @@ async function construir() {
       ["03", "PAPEL Y LAPICERO", "Para la frase semilla del bloque B. No sirve el teléfono, y la razón se explica ahí mismo."],
     ];
     items.forEach((it, i) => {
-      const y = 2.3 + i * 1.35;
+      const y = 2.2 + i * 1.2;
       s.addText(it[0], { x: M, y: y + 0.05, w: 0.8, h: 0.5, fontFace: F.display, fontSize: 26, color: C.naranja, margin: 0, valign: "middle" });
       s.addText(it[1], { x: M + 0.95, y, w: 5.0, h: 0.4, fontFace: F.mono, fontSize: 11.5, bold: true, color: C.tinta, charSpacing: 1.2, margin: 0, valign: "middle" });
       parrafo(s, it[2], { x: M + 6.1, y: y - 0.02, w: CW - 6.1, h: 1.1, size: 13 });
       linea(s, M, y - 0.18, M + CW, y - 0.18, C.grisClaro, 1);
     });
-    linea(s, M, 2.12 + 3 * 1.35, M + CW, 2.12 + 3 * 1.35, C.grisClaro, 1);
-    const r = await ficha(s, { tipo: "alerta", etiqueta: "Si llega sin entorno", x: M, y: 6.0, w: CW, h: 0.9 });
-    parrafo(s, "Trabaja en pareja con alguien que sí lo tenga, y resuelve su instalación fuera de clase.", { x: r.x, y: r.y - 0.14, w: r.w, h: 0.4, size: 12.5 });
+    linea(s, M, 2.02 + 3 * 1.2, M + CW, 2.02 + 3 * 1.2, C.grisClaro, 1);
+    const r = await ficha(s, { tipo: "alerta", etiqueta: "Si llega sin entorno", x: M, y: 5.8, w: CW, h: 0.9 });
+    parrafo(s, "Trabajen en pareja con alguien que sí lo tenga, y resuelvan su instalación fuera de clase.", { x: r.x, y: r.y - 0.14, w: r.w, h: 0.4, size: 12.5 });
     s.addNotes("Comprobar entornos en la apertura, no al empezar el bloque D.");
   }
 
@@ -423,7 +424,7 @@ async function construir() {
   }
 
   /* ---------- 05 · DIVISOR A ---------- */
-  await divisor({ letra: "A", titulo: "Demostración en vivo", sub: "Siete demostraciones proyectadas. Convierte en datos concretos todo lo que la Sesión 1 dejó en abstracto.", minutos: "MIN 10 — 55 · EL DOCENTE EJECUTA Y NARRA", ic: "pantalla" });
+  (await divisor({ letra: "A", titulo: "Demostración en vivo", sub: "Siete demostraciones proyectadas. Convierte en datos concretos todo lo que la Sesión 1 dejó en abstracto.", minutos: "MIN 10 — 55 · EL DOCENTE EJECUTA Y NARRA", ic: "pantalla" })).addNotes("Min 10–55. El docente ejecuta y narra; ustedes miran y anotan. Todo ocurre en red de prueba: nunca dinero real.");
 
   /* ---------- 06 · Qué se demuestra ---------- */
   {
@@ -450,7 +451,7 @@ async function construir() {
   }
 
   /* ---------- 08 · DIVISOR B ---------- */
-  await divisor({ letra: "B", titulo: "Billetera propia", sub: "Quince minutos, inmediatamente después de haberlo visto hacer. Es el momento de máxima comprensión.", minutos: "MIN 55 — 70 · CADA ESTUDIANTE EN SU MÁQUINA", ic: "llave" });
+  (await divisor({ letra: "B", titulo: "Billetera propia", sub: "Quince minutos, inmediatamente después de haberlo visto hacer. Es el momento de máxima comprensión.", minutos: "MIN 55 — 70 · CADA ESTUDIANTE EN SU MÁQUINA", ic: "llave" })).addNotes("Min 55–70. Cada estudiante crea su billetera justo después de verla crear. La frase semilla va en papel, nunca en foto ni en archivo, y no se comparte con nadie, tampoco con el docente.");
 
   /* ---------- 09 · Reglas ---------- */
   {
@@ -493,7 +494,7 @@ async function construir() {
   }
 
   /* ---------- 11 · DIVISOR C ---------- */
-  await divisor({ letra: "C", titulo: "Integridad verificable", sub: "Qué es realmente un hash, qué propiedades debe cumplir y cómo se resume un conjunto entero en un solo valor.", minutos: "MIN 70 — 112 · EXPOSICIÓN DIALOGADA", ic: "funcion" });
+  (await divisor({ letra: "C", titulo: "Integridad verificable", sub: "Qué es realmente un hash, qué propiedades debe cumplir y cómo se resume un conjunto entero en un solo valor.", minutos: "MIN 70 — 112 · EXPOSICIÓN DIALOGADA", ic: "funcion" })).addNotes("Min 70–112. Exposición dialogada: qué es un hash, qué propiedades debe cumplir y cómo un árbol de Merkle resume un conjunto. Todo lo de este bloque se ejecuta después en el bloque D.");
 
   /* ---------- 12 · C.1 apertura ---------- */
   {
@@ -571,7 +572,7 @@ async function construir() {
       ["Resistencia a colisiones", "Es inviable encontrar CUALQUIER par m₁ ≠ m₂ con el mismo hash.", "Un atacante prepararía de antemano dos documentos con el mismo hash y cambiaría uno por otro después de que el primero fuera aceptado."],
     ], { y: 1.95, h: 3.3, colW: [3.0, 4.5, 4.593], size: 11.5 });
 
-    const r = await ficha(s, { tipo: "termino", etiqueta: "Ficha de término 02 · están ordenadas de más difícil a más fácil", x: M, y: 5.45, w: CW, h: 1.05 });
+    const r = await ficha(s, { tipo: "termino", etiqueta: "Ficha de término 02 · están ordenadas de más difícil a más fácil", x: M, y: 5.4, w: CW, h: 1.25 });
     parrafo(s, "En una preimagen el objetivo está fijo. En una segunda preimagen hay un mensaje dado que igualar. En una colisión el atacante elige LOS DOS mensajes, y esa libertad la hace mucho más barata.", { x: r.x, y: r.y - 0.08, w: r.w, h: 0.45, size: 12.5 });
     s.addNotes("Por eso una función puede seguir siendo resistente a preimagen cuando ya se le encontraron colisiones, que es lo que ocurrió con funciones hoy retiradas.");
   }
@@ -624,7 +625,7 @@ async function construir() {
     tabla(s, ["función", "origen", "dónde se usa"], [
       ["SHA-256", "Familia SHA-2, publicada por el instituto de estándares estadounidense en 2001.", "Bitcoin, en casi todo: identificadores de transacción, árboles de Merkle y prueba de trabajo — habitualmente aplicada dos veces seguidas."],
       ["Keccak-256", "Algoritmo ganador del concurso público que buscaba el sucesor de SHA-2.", "Ethereum, en todo: identificadores, derivación de direcciones, firmas de función en los contratos y el operador keccak256 de Solidity."],
-    ], { y: 2.45, h: 2.3, colW: [2.0, 4.4, 5.693], size: 11.5 });
+    ], { y: 2.56, h: 2.25, colW: [2.0, 4.4, 5.693], size: 11.5 });
 
     const r = await ficha(s, { tipo: "profundidad", etiqueta: "Por qué dos familias y no una", x: M, y: 4.95, w: CW, h: 1.55 });
     parrafo(s, "Están construidas sobre principios estructurales distintos, y esa diversidad es deliberada: si apareciera un ataque contra una de las dos familias, la otra no quedaría comprometida por la misma vía. Es el mismo argumento que en la Sesión 1 justificaba tener varias implementaciones del cliente — la monocultura es frágil.", { x: r.x, y: r.y - 0.04, w: r.w, h: 0.9, size: 13 });
@@ -723,7 +724,7 @@ async function construir() {
     parrafo(s, "Quien recibe la prueba parte del dato, calcula su hash, lo combina con el primer hash de la prueba, hashea el resultado, lo combina con el siguiente, y así sucesivamente. Si el valor al que llega coincide con la raíz que ya tenía, el elemento estaba en el conjunto. Si no coincide, no estaba.", { x: r.x, y: r.y + 0.95, w: r.w, h: 1.1, size: 13.5 });
     parrafo(s, "Lo notable es lo que NO hace falta: no se necesitan los otros elementos, ni confiar en quien envía la prueba. Una prueba falsa no cuadra con la raíz.", { x: r.x, y: r.y + 2.05, w: r.w, h: 0.7, size: 13.5, color: C.tinta });
 
-    const r2 = await ficha(s, { tipo: "alerta", etiqueta: "Trampa del laboratorio", x: M, y: 5.45, w: CW, h: 1.05 });
+    const r2 = await ficha(s, { tipo: "alerta", etiqueta: "Trampa del laboratorio", x: M, y: 5.4, w: CW, h: 1.25 });
     parrafo(s, "La prueba debe guardar si cada hermano estaba a la izquierda o a la derecha. Si se concatena siempre en el mismo orden, la verificación falla la mitad de las veces.", { x: r2.x, y: r2.y - 0.08, w: r2.w, h: 0.45, size: 12.5 });
     s.addNotes("Este es el error número uno de la parte 3 del laboratorio. Anticiparlo ahorra veinte minutos de depuración.");
   }
@@ -737,7 +738,7 @@ async function construir() {
       ["1 024", "10", "320 bytes"],
       ["1 048 576", "20", "640 bytes"],
       ["1 000 000 000", "30", "960 bytes"],
-    ], { y: 2.5, h: 2.35, colW: [3.5, 3.2, 5.393], size: 12.5 });
+    ], { y: 2.6, h: 2.3, colW: [3.5, 3.2, 5.393], size: 12.5 });
 
     enunciado(s, "Multiplicar el conjunto por mil añade diez hashes a la prueba. Un teléfono verifica la pertenencia a un conjunto de mil millones de elementos con menos de un kilobyte.", { y: 5.1, h: 1.4, size: 18 });
     s.addNotes("Aquí conviene detenerse: es el resultado más contraintuitivo de la sesión y el que hace posibles las billeteras móviles.");
@@ -762,7 +763,7 @@ async function construir() {
   }
 
   /* ---------- 28 · DIVISOR D ---------- */
-  await divisor({ letra: "D", titulo: "El código, en vivo", sub: "Recorremos la implementación completa, la ejecutan ustedes, y de ahí sale el trabajo del semestre.", minutos: "MIN 120 — 170 · EN MÁQUINA, EN PAREJAS", ic: "matraz" });
+  (await divisor({ letra: "D", titulo: "El código, en vivo", sub: "Recorremos la implementación completa, la ejecutan ustedes, y de ahí sale el trabajo del semestre.", minutos: "MIN 120 — 170 · EN MÁQUINA, EN PAREJAS", ic: "matraz" })).addNotes("Después de la pausa, min 120–170, en parejas. Verificar primero que cada pareja tenga Python o Node funcionando; si no, emparejar con quien sí. El código se entrega completo: se lee, se ejecuta y se rompe.");
 
   /* ---------- 29 · Cómo vamos a trabajar ---------- */
   {
@@ -776,15 +777,15 @@ async function construir() {
       ["04", "LO CONVIERTEN EN ALGO SUYO", "El trabajo del semestre parte de aquí: construir una interfaz sobre este código."],
     ];
     pasos.forEach((p, i) => {
-      const y = 2.8 + i * 0.95;
+      const y = 2.74 + i * 0.8;
       s.addText(p[0], { x: M, y: y + 0.04, w: 0.7, h: 0.44, fontFace: F.display, fontSize: 22, color: C.naranja, margin: 0, valign: "middle" });
       s.addText(p[1], { x: M + 0.8, y, w: 4.5, h: 0.36, fontFace: F.mono, fontSize: 10.5, bold: true, color: C.tinta, charSpacing: 1.1, margin: 0, valign: "middle" });
-      parrafo(s, p[2], { x: M + 5.5, y: y - 0.02, w: CW - 5.5, h: 0.8, size: 12.5 });
+      parrafo(s, p[2], { x: M + 5.5, y: y - 0.02, w: CW - 5.5, h: 0.66, size: 12.5 });
       linea(s, M, y - 0.14, M + CW, y - 0.14, C.grisClaro, 1);
     });
-    linea(s, M, 2.66 + 4 * 0.95, M + CW, 2.66 + 4 * 0.95, C.grisClaro, 1);
+    linea(s, M, 2.6 + 4 * 0.8, M + CW, 2.6 + 4 * 0.8, C.grisClaro, 1);
 
-    const r = await ficha(s, { tipo: "pregunta", etiqueta: "Por qué así", x: M, y: 6.05, w: CW, h: 0.85 });
+    const r = await ficha(s, { tipo: "pregunta", etiqueta: "Por qué así", x: M, y: 5.88, w: CW, h: 0.85 });
     s.addText("Leer código ajeno y entenderlo es una competencia profesional. Escribirlo desde cero, hoy, no lo es todavía.", { x: r.x, y: r.y - 0.16, w: r.w, h: 0.4, fontFace: F.display, fontSize: 14, color: C.tinta, margin: 0, valign: "middle" });
     s.addNotes("El código completo está en la carpeta del laboratorio, en Python y en JavaScript. Se entrega antes de empezar el recorrido para que puedan seguirlo en pantalla.");
   }
@@ -978,16 +979,16 @@ async function construir() {
       ["04", "PEDIR UNA PRUEBA", "generar_prueba(lotes, 2) devuelve 3 hashes. Verifíquenla. Después verifiquen un dato que NO está y comprueben que devuelve falso."],
     ];
     pasos.forEach((p, i) => {
-      const y = 2.5 + i * 1.08;
+      const y = 2.45 + i * 0.86;
       s.addText(p[0], { x: M, y: y + 0.04, w: 0.7, h: 0.44, fontFace: F.display, fontSize: 22, color: C.naranja, margin: 0, valign: "middle" });
       s.addText(p[1], { x: M + 0.8, y, w: 3.5, h: 0.36, fontFace: F.mono, fontSize: 10.5, bold: true, color: C.tinta, charSpacing: 1.1, margin: 0, valign: "middle" });
-      parrafo(s, p[2], { x: M + 4.5, y: y - 0.02, w: CW - 4.5, h: 0.95, size: 12.5 });
+      parrafo(s, p[2], { x: M + 4.5, y: y - 0.02, w: CW - 4.5, h: 0.72, size: 12.5 });
       linea(s, M, y - 0.14, M + CW, y - 0.14, C.grisClaro, 1);
     });
-    linea(s, M, 2.36 + 4 * 1.08, M + CW, 2.36 + 4 * 1.08, C.grisClaro, 1);
+    linea(s, M, 2.31 + 4 * 0.86, M + CW, 2.31 + 4 * 0.86, C.grisClaro, 1);
 
-    caja(s, { x: M, y: 6.05, w: CW, h: 0.85, fill: C.blanco, line: C.naranja, sombraColor: C.naranja });
-    s.addText("RAÍZ DE REFERENCIA  ·  53c895e4efd5451ab9e313d532203158e907660d0e5d860a5a5cc99ada592fa3", { x: M + 0.25, y: 6.05, w: CW - 0.5, h: 0.85, fontFace: F.mono, fontSize: 11.5, bold: true, color: C.ocre, align: "center", valign: "middle", margin: 0 });
+    caja(s, { x: M, y: 5.92, w: CW, h: 0.72, fill: C.blanco, line: C.naranja, sombraColor: C.naranja });
+    s.addText("RAÍZ DE REFERENCIA  ·  53c895e4efd5451ab9e313d532203158e907660d0e5d860a5a5cc99ada592fa3", { x: M + 0.25, y: 5.92, w: CW - 0.5, h: 0.72, fontFace: F.mono, fontSize: 11.5, bold: true, color: C.ocre, align: "center", valign: "middle", margin: 0 });
     s.addNotes("Circular durante estos quince minutos. El fallo más común es que no instalaron nada y no pueden ejecutar: emparejar con quien sí.");
   }
 
@@ -1004,14 +1005,14 @@ async function construir() {
     ];
     funciones.forEach((f, i) => {
       const x = M + (i % 2) * (CW / 2 + 0.12);
-      const y = 2.75 + Math.floor(i / 2) * 1.5;
-      caja(s, { x, y, w: CW / 2 - 0.12, h: 1.3, fill: i === 3 ? C.blanco : C.superf, line: i === 3 ? C.naranja : C.tinta, sombraColor: i === 3 ? C.naranja : C.tinta, sombra: i === 3 });
+      const y = 2.65 + Math.floor(i / 2) * 1.4;
+      caja(s, { x, y, w: CW / 2 - 0.12, h: 1.22, fill: i === 3 ? C.blanco : C.superf, line: i === 3 ? C.naranja : C.tinta, sombraColor: i === 3 ? C.naranja : C.tinta, sombra: i === 3 });
       s.addText(f[0], { x: x + 0.3, y: y + 0.16, w: CW / 2 - 0.72, h: 0.3, fontFace: F.mono, fontSize: 10.5, bold: true, color: i === 3 ? C.ocre : C.tinta, charSpacing: 1.2, margin: 0, valign: "middle" });
       parrafo(s, f[1], { x: x + 0.3, y: y + 0.52, w: CW / 2 - 0.72, h: 0.7, size: 12.5 });
     });
 
-    const r = await ficha(s, { tipo: "pregunta", etiqueta: "Lo importante", x: M, y: 5.85, w: CW, h: 1.0 });
-    s.addText("La raíz del visor y la de su código deben ser idénticas. Si no lo son, la diferencia está en una de las tres convenciones.", { x: r.x, y: r.y - 0.1, w: r.w, h: 0.42, fontFace: F.display, fontSize: 15, color: C.tinta, margin: 0, valign: "middle" });
+    const r = await ficha(s, { tipo: "pregunta", etiqueta: "Lo importante", x: M, y: 5.45, w: CW, h: 1.25 });
+    s.addText("La raíz del visor y la de su código deben ser idénticas. Si no lo son, la diferencia está en una de las tres convenciones.", { x: r.x, y: r.y - 0.1, w: r.w, h: 0.6, fontFace: F.display, fontSize: 15, color: C.tinta, margin: 0, valign: "middle" });
     s.addNotes("Proyectar el visor en vivo mientras se explica. Editar un dato delante del grupo y dejar que vean la raíz anterior tachada.");
   }
 
@@ -1064,7 +1065,7 @@ async function construir() {
   }
 
   /* ---------- 36 · DIVISOR E ---------- */
-  await divisor({ letra: "E", titulo: "Cierre", sub: "Qué llevarse, qué entregar y qué viene en la Sesión 3.", minutos: "MIN 170 — 180 · PLENARIA", ic: "bandera" });
+  (await divisor({ letra: "E", titulo: "Cierre", sub: "Qué llevarse, qué entregar y qué viene en la Sesión 3.", minutos: "MIN 170 — 180 · PLENARIA", ic: "bandera" })).addNotes("Min 170–180. Síntesis, entregable y lo que viene en la Sesión 3. No abrir temas nuevos.");
 
   /* ---------- 37 · Qué llevarse ---------- */
   {
@@ -1118,9 +1119,13 @@ async function construir() {
     ["SHA-256", "", "Función hash de 256 bits de la familia SHA-2. La que usa Bitcoin en identificadores, árboles de Merkle y prueba de trabajo."],
   ];
   {
-    const POR_PAG = 7, PAGS = Math.ceil(glosario.length / POR_PAG);
+    /* Reparto fijo 6 + 7 y alto de fila según el largo de la definición:
+       con filas iguales, las definiciones de tres renglones pisaban la siguiente. */
+    const paginas = [glosario.slice(0, 6), glosario.slice(6)];
+    const PAGS = paginas.length;
+    const altoFila = (g) => (g[2].length > 190 ? 0.83 : 0.63);
     for (let p = 0; p < PAGS; p++) {
-      const trozo = glosario.slice(p * POR_PAG, (p + 1) * POR_PAG);
+      const trozo = paginas[p];
       const s = await lamina({
         kicker: `Anexo · glosario de la sesión · ${p + 1} de ${PAGS}`,
         titulo: p === 0 ? "Glosario de la sesión" : "Glosario · continuación",
@@ -1128,14 +1133,16 @@ async function construir() {
       });
       if (p === 0) parrafo(s, "Solo los términos que introduce esta sesión. Los de la Sesión 1 no se repiten y siguen siendo exigibles.", { y: 1.88, h: 0.35, size: 12.5, color: C.gris });
       const y0 = p === 0 ? 2.35 : 1.98;
-      trozo.forEach((g, i) => {
-        const y = y0 + i * 0.63;
+      let yAcum = y0;
+      trozo.forEach((g) => {
+        const y = yAcum;
+        yAcum += altoFila(g);
         s.addText(g[0], { x: M, y, w: 2.6, h: 0.36, fontFace: F.mono, fontSize: 10.5, bold: true, color: C.tinta, margin: 0, valign: "top", lineSpacingMultiple: 1.05 });
         if (g[1]) s.addText(g[1], { x: M + 2.7, y: y + 0.03, w: 1.8, h: 0.3, fontFace: F.mono, fontSize: 9, color: C.violetaOs, margin: 0, valign: "top" });
-        parrafo(s, g[2], { x: M + 4.65, y: y - 0.03, w: CW - 4.65, h: 0.56, size: 11.5 });
+        parrafo(s, g[2], { x: M + 4.65, y: y - 0.03, w: CW - 4.65, h: altoFila(g) - 0.07, size: 11.5 });
         linea(s, M, y - 0.12, M + CW, y - 0.12, C.grisClaro, 1);
       });
-      linea(s, M, y0 - 0.12 + trozo.length * 0.63, M + CW, y0 - 0.12 + trozo.length * 0.63, C.grisClaro, 1);
+      linea(s, M, yAcum - 0.12, M + CW, yAcum - 0.12, C.grisClaro, 1);
       s.addNotes("Glosario acumulativo del curso: cada sesión añade entradas y ninguna se elimina.");
     }
   }
@@ -1184,6 +1191,7 @@ async function construir() {
     s.addText("Universidad de San Buenaventura Medellín · Facultad de Ingeniería\nBlockchain y Web 3.0 · Unidad I · Sesión 02 de 17", {
       x: M, y: 5.95, w: 9.5, h: 0.8, fontFace: F.mono, fontSize: 10, color: "6E6A7C", margin: 0, valign: "top", lineSpacingMultiple: 1.35,
     });
+    s.addNotes("Cerrar con la próxima sesión: firmas digitales y la mini-blockchain. Recordar el entregable (repositorio con la suite de pruebas pasando, antes de que empiece la Sesión 3) y que el laboratorio 02 trae una dependencia nueva que hay que instalar antes. 1 minuto.");
     nSlide++;
   }
 

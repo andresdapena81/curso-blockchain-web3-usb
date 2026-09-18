@@ -11,7 +11,8 @@ import {Porcentajes} from "./Porcentajes.sol";
  *
  * Copien este archivo sobre contracts/s07/Subasta.sol y corran:
  *     npx hardhat test test/s07/Subasta.test.js
- * El laboratorio está completo cuando pasan las 21 pruebas.
+ * Al empezar: 7 passing, 16 failing. El laboratorio está completo cuando
+ * pasan las 23 pruebas. Guía: guias/s07-subasta-patrones.pdf
  *
  * Compila tal como está. Completen los TODO en orden.
  */

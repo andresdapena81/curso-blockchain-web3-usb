@@ -1,0 +1,191 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<title>Planilla de sustentación · Demo Day</title>
+<!--ESTILOS-->
+<style>
+  body{ font-size:9pt; line-height:1.35; }
+  .hoja{ break-after:page; }
+  .hoja:last-child{ break-after:auto; }
+  .cab{ display:flex; justify-content:space-between; align-items:flex-end; background:var(--tinta); color:var(--blanco); padding:2.8mm 5mm; margin-bottom:2mm; }
+  .cab h1{ color:var(--blanco); font-size:15pt; }
+  .cab h1 em{ font-style:normal; color:var(--naranja); }
+  .cab .k{ font-family:"Courier New",monospace; font-size:7pt; letter-spacing:.14em; color:var(--naranja); margin-bottom:1.5mm; }
+  .cab .der{ font-family:"Courier New",monospace; font-size:7pt; color:#B9B4C4; text-align:right; letter-spacing:.08em; }
+  .campos{ display:grid; grid-template-columns:repeat(6,1fr); gap:0 4mm; margin-bottom:2.5mm; }
+  .campo{ border-bottom:1.5px solid var(--tinta); padding-top:4.2mm; font-family:"Courier New",monospace; font-size:6.5pt; color:var(--gris); letter-spacing:.08em; }
+  .c2{ grid-column:span 2; } .c3{ grid-column:span 3; } .c4{ grid-column:span 4; } .c6{ grid-column:span 6; }
+  .et{ font-family:"Courier New",monospace; font-size:6.8pt; font-weight:bold; letter-spacing:.1em; color:var(--tinta); margin:2.4mm 0 1.2mm; }
+  table{ margin:1mm 0 2.5mm; font-size:8pt; }
+  th{ padding:1.6mm 2mm; font-size:6.8pt; }
+  td{ padding:1.1mm 2mm; vertical-align:middle; }
+  .cas{ white-space:nowrap; text-align:center; }
+  .cas span{ display:inline-block; width:5.6mm; height:5.6mm; border:1.5px solid var(--tinta); margin:0 .5mm; font-family:"Arial Black",Arial,sans-serif; font-size:6.5pt; line-height:5.2mm; text-align:center; color:var(--gris); }
+  .vacio{ border:1.5px solid var(--tinta); height:6.5mm; min-width:13mm; }
+  td.desc{ font-size:6.8pt; color:var(--gris); line-height:1.25; }
+  td.crit{ font-weight:bold; color:var(--tinta); font-size:8.3pt; }
+  td.peso{ font-family:"Arial Black",Arial,sans-serif; color:var(--naranja); text-align:center; white-space:nowrap; }
+  .chk span{ display:inline-block; width:3.4mm; height:3.4mm; border:1.5px solid var(--tinta); margin-right:1.5mm; vertical-align:-0.6mm; }
+  .chk{ font-size:7.4pt; margin-right:2.6mm; white-space:nowrap; }
+  .fila{ display:flex; flex-wrap:wrap; gap:1.5mm 0; margin-bottom:1.5mm; }
+  .linea{ border-bottom:1px solid var(--gris-claro); height:6.2mm; }
+  .total{ display:flex; gap:4mm; align-items:stretch; margin-top:2mm; }
+  .total .f{ flex:1; border:2px solid var(--tinta); padding:2.5mm 3.5mm; font-size:8pt; }
+  .total .n{ width:38mm; border:2.5px solid var(--naranja); box-shadow:3px 3px 0 var(--naranja); padding:2mm 3mm; font-family:"Courier New",monospace; font-size:6.8pt; letter-spacing:.1em; color:var(--ocre); }
+  .firma{ margin-top:3mm; }
+  .aud td{ height:15mm; }
+  .aud td.q{ width:44%; }
+  .corte{ border-top:1.5px dashed var(--gris); margin:5mm 0; position:relative; }
+  .corte::after{ content:"✂  cortar por aquí"; position:absolute; top:-2.4mm; left:6mm; background:var(--blanco); padding:0 2mm; font-family:"Courier New",monospace; font-size:6.5pt; color:var(--gris); }
+  .mitad{ height:118mm; }
+  .caja{ margin:2mm 0 3mm; padding:3mm 4mm; }
+  .caja p{ margin-bottom:1.5mm; }
+</style>
+</head>
+<body>
+
+<!-- ================================================================ HOJA 1 -->
+<section class="hoja">
+  <div class="cab">
+    <div><div class="k">DEMO DAY · SESIÓN 17 · PARA EL DOCENTE</div><h1>PLANILLA DE <em>SUSTENTACIÓN</em></h1></div>
+    <div class="der">UNA HOJA POR EQUIPO<br>IMPRIMIR N COPIAS DE ESTA PÁGINA</div>
+  </div>
+
+  <div class="campos">
+    <div class="campo">EQUIPO N.º</div>
+    <div class="campo c3">NOMBRE DEL PROYECTO</div>
+    <div class="campo">TURNO</div>
+    <div class="campo">HORA DE INICIO</div>
+    <div class="campo c2">INTEGRANTE 1</div>
+    <div class="campo c2">INTEGRANTE 2</div>
+    <div class="campo c2">INTEGRANTE 3</div>
+    <div class="campo c2">EQUIPO QUE LOS AUDITA (PREGUNTA)</div>
+    <div class="campo c2">EQUIPO QUE ELLOS AUDITAN</div>
+    <div class="campo c2">TIEMPO REAL DE PRESENTACIÓN (MIN:SEG)</div>
+  </div>
+
+  <div class="et">CINCO PARTES OBLIGATORIAS · MARCAR LAS QUE SE VIERON</div>
+  <div class="fila">
+    <span class="chk"><span></span>1 · Problema y por qué blockchain</span>
+    <span class="chk"><span></span>2 · Arquitectura y decisiones</span>
+    <span class="chk"><span></span>3 · Demo en testnet</span>
+    <span class="chk"><span></span>4 · Seguridad</span>
+    <span class="chk"><span></span>5 · Límites, costos, futuro</span>
+  </div>
+  <div class="fila">
+    <span class="chk" style="font-weight:bold">DEMO:</span>
+    <span class="chk"><span></span>En vivo, completa</span>
+    <span class="chk"><span></span>Video · fallo externo</span>
+    <span class="chk"><span></span>Video · fallo del código</span>
+    <span class="chk"><span></span>Sin demo ni video</span>
+    <span class="chk"><span></span>Evidencia en el explorador</span>
+  </div>
+  <div class="fila">
+    <span class="chk" style="font-weight:bold">REGLAS:</span>
+    <span class="chk"><span></span>Hablaron los tres</span>
+    <span class="chk"><span></span>Solo red de prueba</span>
+    <span class="chk"><span></span>Sin claves ni semilla en pantalla</span>
+    <span class="chk"><span></span>Sin datos personales reales</span>
+  </div>
+
+  <div class="et">CRITERIOS · 5 EXCELENTE (5,0) · 3–4 ACEPTABLE (3,5) · 1–2 INSUFICIENTE (&lt; 3,0) · «NOTA» ADMITE DÉCIMAS</div>
+  <table>
+    <tr><th style="width:22%">CRITERIO</th><th style="width:7%">PESO</th><th style="width:30%">SE MIRA (DESCRIPTOR EXCELENTE)</th><th style="width:21%">1 · 2 · 3 · 4 · 5</th><th style="width:10%">NOTA</th><th>PESO × NOTA</th></tr>
+    <tr><td class="crit">Pertinencia de la solución</td><td class="peso">15 %</td><td class="desc">Justifica con rigor por qué blockchain es necesaria; descarta alternativas centralizadas con argumentos.</td><td class="cas"><span>1</span><span>2</span><span>3</span><span>4</span><span>5</span></td><td><div class="vacio"></div></td><td><div class="vacio"></div></td></tr>
+    <tr><td class="crit">Calidad de los contratos</td><td class="peso">25 %</td><td class="desc">Código limpio, modular, estándares aplicados correctamente, gas optimizado, eventos bien diseñados.</td><td class="cas"><span>1</span><span>2</span><span>3</span><span>4</span><span>5</span></td><td><div class="vacio"></div></td><td><div class="vacio"></div></td></tr>
+    <tr><td class="crit">Pruebas y despliegue</td><td class="peso">20 %</td><td class="desc">Cobertura ≥ 80 %, casos límite y de reversión probados, despliegue reproducible y verificado.</td><td class="cas"><span>1</span><span>2</span><span>3</span><span>4</span><span>5</span></td><td><div class="vacio"></div></td><td><div class="vacio"></div></td></tr>
+    <tr><td class="crit">Seguridad</td><td class="peso">20 %</td><td class="desc">Análisis de vulnerabilidades documentado, mitigaciones implementadas y justificadas, análisis estático sin hallazgos críticos.</td><td class="cas"><span>1</span><span>2</span><span>3</span><span>4</span><span>5</span></td><td><div class="vacio"></div></td><td><div class="vacio"></div></td></tr>
+    <tr><td class="crit">Integración e interfaz</td><td class="peso">10 %</td><td class="desc">dApp funcional, estados de transacción manejados, UX comprensible para un usuario no experto.</td><td class="cas"><span>1</span><span>2</span><span>3</span><span>4</span><span>5</span></td><td><div class="vacio"></div></td><td><div class="vacio"></div></td></tr>
+    <tr><td class="crit">Sustentación y documentación<br><span style="font-weight:normal;font-size:7pt;color:var(--gris)">a · desempeño propio (80 %)</span></td><td class="peso">10 %</td><td class="desc">Claridad, dominio técnico, responde con solvencia; README completo y reproducible.</td><td class="cas"><span>1</span><span>2</span><span>3</span><span>4</span><span>5</span></td><td><div class="vacio"></div></td><td rowspan="2" style="vertical-align:middle"><div class="vacio" style="height:16mm"></div><div style="font-size:6.3pt;color:var(--gris);margin-top:1mm">0,10 × (0,8·a + 0,2·b)</div></td></tr>
+    <tr><td class="crit" style="font-weight:normal;font-size:7pt;color:var(--gris)">b · nota de su pregunta como auditores (20 %)</td><td></td><td class="desc">Se copia de la hoja «Auditoría cruzada #2» (0 a 5).</td><td class="cas" style="font-size:7pt;color:var(--gris)">de la hoja 2 →</td><td><div class="vacio"></div></td></tr>
+  </table>
+
+  <div class="total">
+    <div class="f"><strong>Nota del proyecto final</strong> = suma de la columna «peso × nota», redondeada a una décima.<br>Ejemplo: 4,5 · 3,8 · 4,0 · 3,5 · 4,2 · (a 4,0 · b 3,0 → 3,8) = 0,675 + 0,950 + 0,800 + 0,700 + 0,420 + 0,380 = 3,925 ≈ <strong>3,9</strong></div>
+    <div class="n">NOTA FINAL (0,0–5,0)</div>
+  </div>
+
+  <div class="et">PREGUNTAS DEL DOCENTE Y DEL PÚBLICO · A QUIÉN · CALIDAD DE LA RESPUESTA</div>
+  <div class="linea"></div><div class="linea"></div><div class="linea"></div>
+
+  <div class="et">OBSERVACIONES (FORTALEZAS · A MEJORAR · EVIDENCIA QUE FALTÓ)</div>
+  <div class="linea"></div><div class="linea"></div><div class="linea"></div>
+
+  <div class="firma">
+    <div>EVALUADOR</div><div>FIRMA</div><div>FECHA</div>
+  </div>
+</section>
+
+<!-- ================================================================ HOJA 2 -->
+<section class="hoja">
+  <div class="cab">
+    <div><div class="k">DEMO DAY · SESIÓN 17 · PARA EL DOCENTE</div><h1>AUDITORÍA <em>CRUZADA #2</em></h1></div>
+    <div class="der">UNA SOLA HOJA PARA TODOS<br>SE CALIFICA AL EQUIPO QUE PREGUNTA</div>
+  </div>
+
+  <div class="caja clave">
+    <div class="caja-et">ESCALA · SE CALIFICA LA PREGUNTA, NO LA RESPUESTA DEL OTRO EQUIPO</div>
+    <p><strong>5</strong> Función concreta y riesgo real (caso límite, ataque o supuesto de confianza) que el equipo evaluado NO documentó. · <strong>4</strong> Técnica y específica del proyecto, sobre un riesgo ya documentado. · <strong>3</strong> Técnica pero genérica, o repetida de otro equipo. · <strong>2</strong> Conceptual o de sí/no, sin tocar el código. · <strong>1</strong> Trivial o de forma. · <strong>0</strong> No formuló pregunta.</p>
+    <p>La nota va a la casilla <strong>b</strong> del criterio «Sustentación y documentación» del equipo que PREGUNTA (20 % de ese criterio).</p>
+  </div>
+
+  <table class="aud">
+    <tr><th style="width:8%">AUDITOR</th><th style="width:8%">AUDITA A</th><th>PREGUNTA FORMULADA (RESUMEN) · FUNCIÓN O ARCHIVO</th><th style="width:25%">0 · 1 · 2 · 3 · 4 · 5</th><th style="width:9%">¿REPE­TIDA?</th></tr>
+    <tr><td></td><td></td><td class="q"></td><td class="cas"><span>0</span><span>1</span><span>2</span><span>3</span><span>4</span><span>5</span></td><td class="cas"><span></span></td></tr>
+    <tr><td></td><td></td><td class="q"></td><td class="cas"><span>0</span><span>1</span><span>2</span><span>3</span><span>4</span><span>5</span></td><td class="cas"><span></span></td></tr>
+    <tr><td></td><td></td><td class="q"></td><td class="cas"><span>0</span><span>1</span><span>2</span><span>3</span><span>4</span><span>5</span></td><td class="cas"><span></span></td></tr>
+    <tr><td></td><td></td><td class="q"></td><td class="cas"><span>0</span><span>1</span><span>2</span><span>3</span><span>4</span><span>5</span></td><td class="cas"><span></span></td></tr>
+    <tr><td></td><td></td><td class="q"></td><td class="cas"><span>0</span><span>1</span><span>2</span><span>3</span><span>4</span><span>5</span></td><td class="cas"><span></span></td></tr>
+    <tr><td></td><td></td><td class="q"></td><td class="cas"><span>0</span><span>1</span><span>2</span><span>3</span><span>4</span><span>5</span></td><td class="cas"><span></span></td></tr>
+    <tr><td></td><td></td><td class="q"></td><td class="cas"><span>0</span><span>1</span><span>2</span><span>3</span><span>4</span><span>5</span></td><td class="cas"><span></span></td></tr>
+    <tr><td></td><td></td><td class="q"></td><td class="cas"><span>0</span><span>1</span><span>2</span><span>3</span><span>4</span><span>5</span></td><td class="cas"><span></span></td></tr>
+    <tr><td></td><td></td><td class="q"></td><td class="cas"><span>0</span><span>1</span><span>2</span><span>3</span><span>4</span><span>5</span></td><td class="cas"><span></span></td></tr>
+    <tr><td></td><td></td><td class="q"></td><td class="cas"><span>0</span><span>1</span><span>2</span><span>3</span><span>4</span><span>5</span></td><td class="cas"><span></span></td></tr>
+  </table>
+
+  <div class="caja">
+    <div class="caja-et">RECORDATORIOS PARA CALIFICAR</div>
+    <p>Rotación: cada equipo audita al que presenta justo después; el último turno audita al primero. Una pregunta repetida vale como máximo 3: si el auditor trae una de reserva y la usa, se califica la de reserva. Una pregunta excelente sin respuesta sigue valiendo 5. El equipo auditor entrega su hoja (hoja 3) al terminar de preguntar.</p>
+  </div>
+</section>
+
+<!-- ================================================================ HOJA 3 -->
+<section class="hoja">
+  <div class="mitad">
+    <div class="cab">
+      <div><div class="k">AUDITORÍA CRUZADA #2 · LA LLENA EL EQUIPO AUDITOR</div><h1>NUESTRAS <em>DOS PREGUNTAS</em></h1></div>
+      <div class="der">SE ENTREGA AL DOCENTE<br>AL TERMINAR DE PREGUNTAR</div>
+    </div>
+    <div class="campos">
+      <div class="campo c2">EQUIPO AUDITOR N.º</div>
+      <div class="campo c4">EQUIPO AUDITADO (N.º Y PROYECTO)</div>
+    </div>
+    <div class="et">PREGUNTA 1 · función o archivo al que apunta: ______________________________</div>
+    <div class="linea"></div><div class="linea"></div><div class="linea"></div>
+    <div class="et">PREGUNTA 2 (RESERVA) · función o archivo: ______________________________</div>
+    <div class="linea"></div><div class="linea"></div><div class="linea"></div>
+    <div class="fila" style="margin-top:2.5mm"><span class="chk"><span></span>Formulamos la 1</span><span class="chk"><span></span>Formulamos la 2 (la 1 ya se había respondido o repetido)</span></div>
+    <p style="font-size:7.5pt;color:var(--gris);margin-top:1.5mm">Receta: «¿Qué pasa si [actor] hace [acción] en [función] cuando [condición]?». Si se responde con sí o no, casi nunca pasa de 2.</p>
+  </div>
+  <div class="corte"></div>
+  <div class="mitad">
+    <div class="cab">
+      <div><div class="k">AUDITORÍA CRUZADA #2 · LA LLENA EL EQUIPO AUDITOR</div><h1>NUESTRAS <em>DOS PREGUNTAS</em></h1></div>
+      <div class="der">SE ENTREGA AL DOCENTE<br>AL TERMINAR DE PREGUNTAR</div>
+    </div>
+    <div class="campos">
+      <div class="campo c2">EQUIPO AUDITOR N.º</div>
+      <div class="campo c4">EQUIPO AUDITADO (N.º Y PROYECTO)</div>
+    </div>
+    <div class="et">PREGUNTA 1 · función o archivo al que apunta: ______________________________</div>
+    <div class="linea"></div><div class="linea"></div><div class="linea"></div>
+    <div class="et">PREGUNTA 2 (RESERVA) · función o archivo: ______________________________</div>
+    <div class="linea"></div><div class="linea"></div><div class="linea"></div>
+    <div class="fila" style="margin-top:2.5mm"><span class="chk"><span></span>Formulamos la 1</span><span class="chk"><span></span>Formulamos la 2 (la 1 ya se había respondido o repetido)</span></div>
+    <p style="font-size:7.5pt;color:var(--gris);margin-top:1.5mm">Receta: «¿Qué pasa si [actor] hace [acción] en [función] cuando [condición]?». Si se responde con sí o no, casi nunca pasa de 2.</p>
+  </div>
+</section>
+
+</body>
+</html>

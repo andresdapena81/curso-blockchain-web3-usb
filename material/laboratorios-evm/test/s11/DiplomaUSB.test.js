@@ -2,6 +2,10 @@
  * Laboratorio 11 · NFT de credenciales con metadata en IPFS
  *
  *     npx hardhat test test/s11/DiplomaUSB.test.js
+ *
+ * Con el andamiaje (andamiaje/s11/DiplomaUSB.sol copiado sobre
+ * contracts/s11/DiplomaUSB.sol) fallan las pruebas marcadas con ★:
+ * son exactamente las que dependen de los TODO de emitir() y totalEmitidos().
  */
 import { expect } from "chai";
 import { network } from "hardhat";
@@ -9,17 +13,19 @@ import { network } from "hardhat";
 const { ethers, networkHelpers } = await network.create();
 const { loadFixture } = networkHelpers;
 
-const URI1 = "ipfs://bafybeigdyrindexamplecid0001/1.json";
-const URI2 = "ipfs://bafybeigdyrindexamplecid0002/2.json";
+// CID con forma real (CIDv1, base32), pero de ejemplo: no apunta a nada.
+const URI1 = "ipfs://bafkreiexamplecidparaelprimerdiplomadelaboratorio1111/1.json";
+const URI2 = "ipfs://bafkreiexamplecidparaelsegundodiplomadelaboratorio222/2.json";
+const TOPE = 3n;
 
 async function desplegar() {
   const [universidad, ana, beto] = await ethers.getSigners();
-  const d = await ethers.deployContract("DiplomaUSB");
+  const d = await ethers.deployContract("DiplomaUSB", [TOPE]);
   return { d, universidad, ana, beto };
 }
 
 describe("S11 · DiplomaUSB · no fungibilidad", () => {
-  it("cada token tiene un id único y consecutivo", async () => {
+  it("★ cada token tiene un id único y consecutivo", async () => {
     const { d, ana, beto } = await loadFixture(desplegar);
     await d.emitir(ana.address, URI1);
     await d.emitir(beto.address, URI2);
@@ -28,7 +34,7 @@ describe("S11 · DiplomaUSB · no fungibilidad", () => {
     expect(await d.totalEmitidos()).to.equal(2n);
   });
 
-  it("cada token apunta a su propia metadata en IPFS", async () => {
+  it("★ cada token apunta a su propia metadata en IPFS", async () => {
     const { d, ana, beto } = await loadFixture(desplegar);
     await d.emitir(ana.address, URI1);
     await d.emitir(beto.address, URI2);
@@ -36,10 +42,37 @@ describe("S11 · DiplomaUSB · no fungibilidad", () => {
     expect(await d.tokenURI(2)).to.equal(URI2);
   });
 
-  it("emite el evento con el id, el destinatario y el uri", async () => {
+  it("★ emite el evento con el id, el destinatario y el uri", async () => {
     const { d, ana } = await loadFixture(desplegar);
     await expect(d.emitir(ana.address, URI1))
       .to.emit(d, "DiplomaEmitido").withArgs(1, ana.address, URI1);
+  });
+
+  it("★ emitir también emite el Transfer estándar desde la dirección cero", async () => {
+    const { d, ana } = await loadFixture(desplegar);
+    await expect(d.emitir(ana.address, URI1))
+      .to.emit(d, "Transfer").withArgs(ethers.ZeroAddress, ana.address, 1);
+  });
+});
+
+describe("S11 · DiplomaUSB · control de suministro", () => {
+  it("el tope queda fijado al desplegar", async () => {
+    const { d } = await loadFixture(desplegar);
+    expect(await d.tope()).to.equal(TOPE);
+    expect(await d.totalEmitidos()).to.equal(0n);
+  });
+
+  it("★ no se puede emitir por encima del tope", async () => {
+    const { d, ana } = await loadFixture(desplegar);
+    for (let i = 0; i < Number(TOPE); i++) await d.emitir(ana.address, URI1);
+    await expect(d.emitir(ana.address, URI1))
+      .to.be.revertedWithCustomError(d, "TopeAlcanzado").withArgs(TOPE);
+  });
+
+  it("★ rechaza un tokenURI vacío", async () => {
+    const { d, ana } = await loadFixture(desplegar);
+    await expect(d.emitir(ana.address, ""))
+      .to.be.revertedWithCustomError(d, "URIVacio");
   });
 });
 
@@ -62,7 +95,7 @@ describe("S11 · DiplomaUSB · control y estándar", () => {
     await expect(d.ownerOf(99)).to.be.revertedWithCustomError(d, "ERC721NonexistentToken");
   });
 
-  it("el dueño puede transferir su diploma", async () => {
+  it("★ el dueño puede transferir su diploma (es un ERC-721 normal)", async () => {
     const { d, ana, beto } = await loadFixture(desplegar);
     await d.emitir(ana.address, URI1);
     await d.connect(ana).transferFrom(ana.address, beto.address, 1);

@@ -29,14 +29,19 @@ Por eso el material insiste en verificar en vez de creer: los estudiantes compru
 ```
 Plan-de-estudio-Blockchain-Web3.md   carta descriptiva completa, RA y evaluación
 material/
-├── Sesion-NN-Blockchain-Web3.pptx   las 17 presentaciones
+├── Sesion-NN-Blockchain-Web3.pptx   las 17 presentaciones (y su versión .pdf)
 ├── build-sesion-NN.js               el código que genera cada presentación
 ├── lib/                             motor de decks con validación de maqueta
 ├── actividad-04-estonia/            actividad de investigación + guía en PDF
+├── proyecto/                        proyecto integrador: anteproyecto, avances,
+│                                    entrega final, ensayo, auditoría cruzada, planillas
 ├── laboratorio-02/ 03/ 04/          labs en Python y JavaScript (andamiaje + pruebas)
-├── laboratorios-evm/                un solo proyecto Hardhat para las sesiones 5 a 16
-└── dapp-ficha/                      dApp de referencia en un archivo (ethers v6)
+├── laboratorio-12/                  dApp en un archivo (ethers v6), como andamiaje
+└── laboratorios-evm/                un solo proyecto Hardhat para las sesiones 5 a 16,
+                                     con una guía en PDF por laboratorio
 ```
+
+Cada laboratorio trae una **guía en PDF exageradamente detallada**: preparación desde cero, cada paso con su comando y la salida esperada, errores frecuentes, preguntas de reflexión y rúbrica.
 
 ## Las presentaciones se generan con código
 
@@ -55,10 +60,12 @@ Todos traen pruebas automáticas: el laboratorio está terminado cuando pasan en
 
 | Lab | Tema | Cómo se corre |
 |---|---|---|
-| 02 | Hash y árboles de Merkle | Python y JavaScript |
+| 02 | Hash y árboles de Merkle | Python y JavaScript · código de demostración, completo |
 | 03 | Firmas digitales y mini-blockchain | Python y JavaScript |
-| 04 | Minería y ataque del 51 % | Python · con guía en PDF paso a paso |
-| 05–16 | Solidity, seguridad, tokens, NFT, DeFi, gobernanza | Hardhat (un solo proyecto) |
+| 04 | Minería y ataque del 51 % | Python |
+| 05–11 | EVM y gas, Solidity, patrones, pruebas y mutantes, seguridad, ERC-20, NFT e IPFS | Hardhat |
+| 12 | Frontend Web3 | HTML + ethers v6, sin herramientas de compilación |
+| 13–16 | Firmas EIP-712, DeFi (AMM y oráculos), DAO con timelock y multisig, capa 2 | Hardhat |
 
 ```bash
 cd material/laboratorios-evm
@@ -66,7 +73,7 @@ npm install
 npx hardhat test
 ```
 
-> **Los laboratorios 06 y 07 vienen como andamiaje**, con sus funciones por completar: sus pruebas **fallan a propósito** hasta que se resuelven. Es el ejercicio, no un error. Lo mismo con los laboratorios 02, 03 y 04.
+> **Los ejercicios vienen como andamiaje**, con sus funciones por completar: sus pruebas **fallan a propósito** hasta que se resuelven. Es el ejercicio, no un error. Hoy, en un clon limpio, `npx hardhat test` da 57 pruebas en verde y 97 en rojo, todas de las sesiones 06, 07, 10, 11, 13, 14 y 15. Lo mismo pasa con los laboratorios 03, 04 y 12.
 
 ## Versiones congeladas
 

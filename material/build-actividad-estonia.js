@@ -1,6 +1,6 @@
 ﻿/* =====================================================================
    Blockchain y Web 3.0 — Universidad de San Buenaventura Medellín
-   Generador del deck de la Sesión 01
+   Generador del deck de la Actividad 04 · El caso Estonia
    Identidad: brutalismo digital sobre la paleta institucional de usbmed.edu.co
    ===================================================================== */
 
@@ -383,7 +383,7 @@ async function construir() {
   }
 
   /* =================== DIVISOR A =================== */
-  await divisor({ letra: "A", titulo: "El caso", sub: "Una afirmación que se repite tanto que dejó de examinarse. Vamos a examinarla.", minutos: "APROXIMADAMENTE 22 MINUTOS", ic: "lupa" });
+  (await divisor({ letra: "A", titulo: "El caso", sub: "Una afirmación que se repite tanto que dejó de examinarse. Vamos a examinarla.", minutos: "APROXIMADAMENTE 22 MINUTOS", ic: "lupa" })).addNotes("Unos 22 minutos. Presentar el caso sin revelar un veredicto: el objetivo es que examinen la afirmación, no que adopten la del docente.");
 
   /* ---------- A.1 · la afirmación ---------- */
   {
@@ -498,22 +498,22 @@ async function construir() {
 
     enunciado(s, "Cuando alguien dice «esto es seguro porque está en blockchain», está pidiendo prestada una reputación.", { y: 2.5, h: 1.2, size: 21 });
 
-    parrafo(s, "Esa reputación viene de propiedades muy concretas. Un sistema puede tener integridad criptográfica impecable y no tener ninguna de ellas:", { y: 3.9, h: 0.5, size: 13.5 });
+    parrafo(s, "Esa reputación viene de propiedades muy concretas. Un sistema puede tener integridad criptográfica impecable y no tener ninguna de ellas:", { y: 3.82, h: 0.45, size: 13.5 });
 
     lista(s, [
       "Que cualquiera pueda participar sin pedir permiso.",
       "Que nadie pueda censurar una operación.",
       "Que no exista una entidad capaz de apagar el sistema.",
       "Que reescribir la historia cueste energía real.",
-    ], { y: 4.5, h: 1.5, size: 13.5, gap: 5 });
+    ], { y: 4.35, h: 1.4, size: 13.5, gap: 4 });
 
-    const r = await ficha(s, { tipo: "alerta", etiqueta: "El punto que quiero que se lleven", x: M, y: 5.95, w: CW, h: 0.9 });
+    const r = await ficha(s, { tipo: "alerta", etiqueta: "El punto que quiero que se lleven", x: M, y: 5.85, w: CW, h: 0.85 });
     parrafo(s, "Si el sistema depende de que una empresa siga existiendo, la confianza no se eliminó: se movió de sitio.", { x: r.x, y: r.y - 0.14, w: r.w, h: 0.4, size: 13.5 });
     s.addNotes("Enlazar con el árbol de decisión de la sesión 1: la pregunta no es «¿es blockchain?» sino «¿qué propiedad necesito y este sistema la tiene?».");
   }
 
   /* =================== DIVISOR B =================== */
-  await divisor({ letra: "B", titulo: "El encargo", sub: "Seis tareas. Tres de ellas no se pueden resolver sin abrir documentos y mirar.", minutos: "APROXIMADAMENTE 18 MINUTOS", ic: "lista" });
+  (await divisor({ letra: "B", titulo: "El encargo", sub: "Seis tareas. Tres de ellas no se pueden resolver sin abrir documentos y mirar.", minutos: "APROXIMADAMENTE 18 MINUTOS", ic: "lista" })).addNotes("Unos 18 minutos. Presentar las seis tareas y marcar las tres NO-IA. Insistir en que las fuentes se abren y se miran; lo que no se abrió no se cita.");
 
   /* ---------- B.1 · la pregunta ---------- */
   {
@@ -590,14 +590,17 @@ async function construir() {
     const s = await lamina({ kicker: "B.4 · tarea 2 · no-IA", titulo: "Vean cómo cambió el discurso", ic: "archivo", tituloSize: 29 });
     parrafo(s, "Las páginas web cambian de redacción con los años, y casi nadie lo nota. La Wayback Machine guarda las versiones antiguas.", { y: 1.9, h: 0.55, size: 14.5 });
 
-    definicion(s, "WAYBACK MACHINE · web.archive.org — el servicio de paginas archivadas de la fundacion Internet Archive", { x: M, y: 2.6, w: CW, h: 0.62 });
+    definicion(s, "WAYBACK MACHINE · web.archive.org — el servicio de páginas archivadas de la fundación Internet Archive", { x: M, y: 2.6, w: CW, h: 0.62 });
 
     parrafo(s, "Peguen ahí la dirección de las páginas de e-Estonia sobre KSI o blockchain y recuperen capturas de al menos dos momentos distintos, separados por varios años.", { y: 3.4, h: 0.55, size: 14 });
 
     nodo(s, { x: M, y: 4.05, w: 3.5, h: 0.95, titulo: "~ 2016 / 2017", sub: "la frase de entonces", fill: C.superf });
     flecha(s, M + 3.7, 4.52, M + 5.0, 4.52, C.naranja, 2.5);
     nodo(s, { x: M + 5.2, y: 4.05, w: 3.5, h: 0.95, titulo: "HOY", sub: "la frase de ahora", fill: C.blanco, line: C.naranja });
-    s.addText("¿QUÉ CAMBIÓ?", { x: M + 9.0, y: 4.05, w: 3.0, h: 0.95, fontFace: F.display, fontSize: 15, color: C.naranja, align: "center", valign: "middle", margin: 0 });
+    flecha(s, M + 8.9, 4.52, M + 9.35, 4.52, C.naranja, 2.5);
+    caja(s, { x: M + 9.5, y: 4.05, w: 2.59, h: 0.95, fill: C.naranja, line: C.naranja, sombra: false });
+    s.addText("¿QUÉ CAMBIÓ?", { x: M + 9.5, y: 4.05, w: 2.59, h: 0.62, fontFace: F.display, fontSize: 15, color: C.tinta, align: "center", valign: "middle", margin: 0 });
+    s.addText("y por qué", { x: M + 9.5, y: 4.55, w: 2.59, h: 0.3, fontFace: F.mono, fontSize: 10, color: C.tinta, align: "center", valign: "middle", margin: 0 });
 
     const r = await ficha(s, { tipo: "pregunta", etiqueta: "Dónde mirar con lupa", x: M, y: 5.25, w: CW, h: 1.4 });
     parrafo(s, "En los adjetivos que acompañan a la palabra «blockchain», y en las fechas que se citan como origen del proyecto. Entregan las dos capturas con su fecha y enlace permanente, la frase literal de cada una, y una interpretación de por qué pudo cambiar.", { x: r.x, y: r.y - 0.06, w: r.w, h: 0.75, size: 13 });
@@ -683,7 +686,7 @@ async function construir() {
   }
 
   /* =================== DIVISOR C =================== */
-  await divisor({ letra: "C", titulo: "La entrega", sub: "Un documento y cinco minutos. Con preguntas al final, y con la fuente abierta para responderlas.", minutos: "APROXIMADAMENTE 5 MINUTOS", ic: "bandera" });
+  (await divisor({ letra: "C", titulo: "La entrega", sub: "Un documento y cinco minutos. Con preguntas al final, y con la fuente abierta para responderlas.", minutos: "APROXIMADAMENTE 5 MINUTOS", ic: "bandera" })).addNotes("Unos 5 minutos. Formato de la exposición de la próxima sesión, rúbrica y reglas sobre IA. Resolver dudas de entrega antes de cerrar.");
 
   /* ---------- C.1 · la exposición ---------- */
   {
@@ -771,6 +774,7 @@ async function construir() {
     s.addText("PRÓXIMA SESIÓN · EXPOSICIÓN DE 5 MINUTOS POR EQUIPO · CON LAS FUENTES ABIERTAS", {
       x: M + 0.3, y: 5.85, w: CW - 0.6, h: 0.75, fontFace: F.mono, fontSize: 11.5, color: C.naranja, charSpacing: 1.4, margin: 0, valign: "middle",
     });
+    s.addNotes("Leer la frase y cerrar. Recordar: la próxima sesión, cinco minutos por equipo, con las fuentes abiertas para responder preguntas. 1 minuto.");
     nSlide++;
   }
 

@@ -3,23 +3,21 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>FichaUSB · dApp de referencia</title>
+<title>FichaUSB · Laboratorio 12 · versión de trabajo</title>
 <!--
-  dApp de referencia · Laboratorio 12 · Blockchain y Web 3.0 · USB Medellín
+  Laboratorio 12 · VERSIÓN DE TRABAJO · Blockchain y Web 3.0 · USB Medellín
 
-  Un solo archivo, sin paso de compilación: se abre en el navegador y funciona.
-  Es el ANDAMIAJE que se explica en clase; el laboratorio pide reconstruir cada
-  parte y conectar el token propio.
+  La misma dApp de referencia de la clase, con las funciones clave vacías.
+  Completen los TODO en orden (1 a 8). La guía en PDF explica cada uno.
 
-  Lo que demuestra, que es el punto de la sesión:
-    - conectar MetaMask y leer la dirección y la red
-    - una LECTURA (balanceOf) que no cuesta gas
-    - una ESCRITURA (transfer) que sí, con sus estados
-    - los CUATRO estados de error que todo principiante ignora
-    - escuchar eventos y refrescar la interfaz sola
+  Un solo archivo, sin compilar nada. Pero NO se abre con doble clic
+  (file://): MetaMask no se conecta ahí. Se sirve con un servidor local:
+      npx serve .              (y abrir http://localhost:3000)
+      python -m http.server    (y abrir http://localhost:8000)
 
-  ethers.js v6 se carga desde el CDN permitido (jsDelivr). Necesita internet
-  la primera vez; después el navegador lo cachea.
+  Mientras un TODO no esté hecho, la caja «Estado» dice cuál falta.
+  ethers.js v6 se carga desde jsDelivr: la primera vez necesita internet.
+  Solo redes de prueba o red local. Nunca dinero real.
 -->
 <style>
   :root{
@@ -58,7 +56,7 @@
 </head>
 <body>
 <header>
-  <h1>FichaUSB · dApp de referencia</h1>
+  <h1>FichaUSB · Laboratorio 12 (versión de trabajo)</h1>
   <p>Blockchain y Web 3.0 · USB Medellín · Sesión 12</p>
 </header>
 
@@ -109,10 +107,10 @@
 <script src="https://cdn.jsdelivr.net/npm/ethers@6.15.0/dist/ethers.umd.min.js"></script>
 <script>
 /* =====================================================================
-   CONFIGURACIÓN — cambiar por los valores de tu despliegue
+   CONFIGURACIÓN — cambiar por los valores de SU despliegue (guía, paso 6)
    ===================================================================== */
-const DIRECCION_FICHA = "0x0000000000000000000000000000000000000000"; // ← tu FichaUSB en Sepolia
-const CHAIN_ID_SEPOLIA = 11155111n;
+const DIRECCION_FICHA = "0x0000000000000000000000000000000000000000"; // ← su FichaUSB
+const CHAIN_ID_SEPOLIA = 11155111n;   // ← 31337n si usan la red local de Hardhat
 
 // Solo las funciones que esta interfaz usa: no hace falta el ABI completo.
 const ABI = [
@@ -127,78 +125,87 @@ let provider, signer, contrato, cuenta, decimales = 18, simbolo = "FUSB";
 
 const $ = (id) => document.getElementById(id);
 const estado = (texto, clase = "") => { $("estado").textContent = texto; $("estado").className = clase; };
+// Mientras un TODO no esté hecho, la interfaz lo dice en vez de fallar en silencio.
+const falta = (que) => estado("Falta completar " + que + " en el código de index.html.", "error");
 
 $("dirContrato").textContent = DIRECCION_FICHA;
 
-/* ---------- deteccion de billetera ---------- */
-if (typeof window.ethereum === "undefined") {
-  $("sinWallet").hidden = false;
-  $("btnConectar").disabled = true;
-}
+/* ---------- ESTADO DE ERROR 2 · billetera no instalada ----------
+   TODO 1 · si window.ethereum no existe (typeof ... === "undefined"):
+     - mostrar el aviso:     $("sinWallet").hidden = false;
+     - desactivar el botón:  $("btnConectar").disabled = true;
+   Pruébenlo abriendo la página en un navegador SIN MetaMask.             */
+
 
 /* ---------- conectar ---------- */
 $("btnConectar").addEventListener("click", async () => {
   try {
     estado("Conectando…", "pendiente");
-    provider = new ethers.BrowserProvider(window.ethereum);
-    await provider.send("eth_requestAccounts", []);   // pide permiso al usuario
-    signer = await provider.getSigner();
-    cuenta = await signer.getAddress();
 
-    const red = await provider.getNetwork();
-    $("cuenta").textContent = cuenta.slice(0, 6) + "…" + cuenta.slice(-4);
-    $("red").textContent = red.name + " (" + red.chainId + ")";
-    $("infoConexion").hidden = false;
+    /* TODO 2 · conectar la billetera:
+         provider = new ethers.BrowserProvider(window.ethereum);
+         await provider.send("eth_requestAccounts", []);   // MetaMask pide permiso
+         signer   = await provider.getSigner();
+         cuenta   = await signer.getAddress();
+       y mostrar cuenta y red:
+         const red = await provider.getNetwork();
+         $("cuenta").textContent = cuenta.slice(0, 6) + "…" + cuenta.slice(-4);
+         $("red").textContent = red.name + " (" + red.chainId + ")";
+         $("infoConexion").hidden = false;                                  */
+    return falta("el TODO 2 (conectar)");   // ← borren esta línea al completar el TODO 2
 
-    // ESTADO DE ERROR 1 · red equivocada
-    if (red.chainId !== CHAIN_ID_SEPOLIA) {
-      $("avisoRed").hidden = false;
-      $("avisoRed").textContent = "Estás en la red equivocada. Cambia a Sepolia en la billetera y reconecta.";
-      $("btnEnviar").disabled = true;
-      estado("Red equivocada: cambia a Sepolia.", "error");
-      return;
-    }
-    $("avisoRed").hidden = true;
+    /* TODO 3 · ESTADO DE ERROR 1 · red equivocada:
+         si red.chainId !== CHAIN_ID_SEPOLIA:
+           - mostrar $("avisoRed") con un texto que diga a qué red cambiar,
+           - dejar $("btnEnviar").disabled = true,
+           - estado("Red equivocada: …", "error") y return.
+         si no, ocultar $("avisoRed").
+       OJO: chainId es un BigInt (11155111n). Comparen BigInt con BigInt.   */
 
-    contrato = new ethers.Contract(DIRECCION_FICHA, ABI, signer);
-    simbolo = await contrato.symbol();
-    decimales = Number(await contrato.decimals());
-    await refrescarSaldo();
-    $("btnEnviar").disabled = false;
-    estado("Conectado. Listo para transferir.", "ok");
+    /* TODO 4 · crear el contrato y hacer las dos primeras LECTURAS:
+         contrato  = new ethers.Contract(DIRECCION_FICHA, ABI, signer);
+         simbolo   = await contrato.symbol();
+         decimales = Number(await contrato.decimals());
+       luego: await refrescarSaldo(); suscribirEventos();
+              $("btnEnviar").disabled = false;
+              estado("Conectado. Listo para transferir.", "ok");              */
   } catch (e) {
     manejarError(e);
   }
 });
 
-/* ---------- lectura: balanceOf (gratis) ---------- */
+/* ---------- LECTURA: balanceOf (gratis, sin firma) ---------- */
 async function refrescarSaldo() {
-  const bruto = await contrato.balanceOf(cuenta);
-  $("saldo").textContent = ethers.formatUnits(bruto, decimales) + " " + simbolo;
+  /* TODO 5 · leer el saldo de `cuenta` y mostrarlo legible:
+       const bruto = await contrato.balanceOf(cuenta);          // BigInt, en unidades mínimas
+       $("saldo").textContent = ethers.formatUnits(bruto, decimales) + " " + simbolo;
+     Pregunta para el informe: ¿qué número exacto devuelve balanceOf si tienen 1000 FUSB? */
+  falta("el TODO 5 (leer saldo)");
 }
 
-/* ---------- escritura: transfer (cuesta gas) ---------- */
+/* ---------- ESCRITURA: transfer (cuesta gas, pide firma) ---------- */
 $("btnEnviar").addEventListener("click", async () => {
   const dest = $("dest").value.trim();
   const monto = $("monto").value.trim();
 
+  // Validar ANTES de molestar a la billetera (esto ya está hecho).
   if (!ethers.isAddress(dest)) { estado("La dirección de destino no es válida.", "error"); return; }
   if (!monto || Number(monto) <= 0) { estado("La cantidad debe ser mayor que cero.", "error"); return; }
 
   try {
     $("btnEnviar").disabled = true;
     estado("Confirma la transacción en la billetera…", "pendiente");
-    const cantidad = ethers.parseUnits(monto, decimales);
 
-    const tx = await contrato.transfer(dest, cantidad);   // aquí la billetera pide confirmación
-    estado("Transacción enviada. Esperando confirmación… " + tx.hash.slice(0, 10) + "…", "pendiente");
-
-    const recibo = await tx.wait();                        // espera a que se mine
-    // ESTADO DE ERROR 4 · transacción revertida (status 0)
-    if (recibo.status === 0) { estado("La transacción se revirtió en la cadena.", "error"); return; }
-
-    await refrescarSaldo();
-    estado("¡Listo! Transferencia confirmada en el bloque " + recibo.blockNumber + ".", "ok");
+    /* TODO 6 · enviar y ESPERAR, con un mensaje distinto en cada momento:
+         const cantidad = ethers.parseUnits(monto, decimales);   // "2.5" -> 2500000000000000000n
+         const tx = await contrato.transfer(dest, cantidad);      // aquí MetaMask pide firmar
+         estado("Transacción enviada. Esperando confirmación… " + tx.hash.slice(0, 10) + "…", "pendiente");
+         const recibo = await tx.wait();                          // aquí espera a que se MINE
+         if (recibo.status === 0) { estado("La transacción se revirtió en la cadena.", "error"); return; }
+         await refrescarSaldo();
+         estado("¡Listo! Transferencia confirmada en el bloque " + recibo.blockNumber + ".", "ok");
+       El error que se combate: decir «listo» después de transfer() y ANTES de wait().  */
+    falta("el TODO 6 (transferir)");
   } catch (e) {
     manejarError(e);
   } finally {
@@ -206,38 +213,36 @@ $("btnEnviar").addEventListener("click", async () => {
   }
 });
 
-/* ---------- manejo de los cuatro estados de error ---------- */
+/* ---------- manejo de errores: un mensaje claro para cada caso ---------- */
 function manejarError(e) {
-  // ESTADO DE ERROR 3 · el usuario rechazó la firma
-  if (e.code === "ACTION_REJECTED" || e.code === 4001) {
-    estado("Rechazaste la transacción en la billetera.", "error");
-    return;
-  }
-  // saldo insuficiente para el gas o para el monto
-  if (e.code === "INSUFFICIENT_FUNDS") {
-    estado("No tienes ETH de prueba suficiente para el gas.", "error");
-    return;
-  }
-  // reversión con motivo, si el contrato lo da
-  const motivo = e.reason || e.shortMessage || e.message || "error desconocido";
-  estado("Error: " + motivo, "error");
+  /* TODO 7 · en este orden, cada uno con su estado(…, "error") y return:
+       a) ESTADO 3 · rechazo del usuario:
+            e.code === "ACTION_REJECTED" || e.code === 4001
+       b) ESTADO 4 · el contrato revirtió (al simular o ya minada):
+            e.code === "CALL_EXCEPTION" || /revert/i.test(e.message || "")
+            Pista: si existe e.receipt, ya se minó y se pagó el gas;
+            si no, falló al simular y no se gastó nada. Díganlo en el mensaje.
+       c) sin ETH para el gas:  e.code === "INSUFFICIENT_FUNDS"
+       d) cualquier otro: "Error: " + (e.reason || e.shortMessage || e.message)
+     Mientras no lo completen, todo cae en el mensaje genérico de abajo.        */
+  estado("Error (sin clasificar todavía, TODO 7): " + (e.shortMessage || e.message || e), "error");
   console.error(e);
 }
 
-/* ---------- reaccionar a cambios en la billetera ---------- */
+/* ---------- reaccionar a cambios en la billetera (ya está hecho) ---------- */
 if (window.ethereum) {
   window.ethereum.on?.("accountsChanged", () => location.reload());
   window.ethereum.on?.("chainChanged", () => location.reload());
 }
 
-/* ---------- escuchar el evento Transfer y refrescar solo ----------
-   Se suscribe cuando ya hay contrato; refresca el saldo si la cuenta
-   aparece como emisor o receptor de cualquier transferencia. */
+/* ---------- EVENTOS: que el saldo se actualice solo ---------- */
 function suscribirEventos() {
   if (!contrato) return;
-  contrato.on("Transfer", (from, to) => {
-    if (from === cuenta || to === cuenta) refrescarSaldo();
-  });
+  /* TODO 8 · escuchar el evento Transfer del contrato:
+       contrato.on("Transfer", (from, to) => {
+         if (from === cuenta || to === cuenta) refrescarSaldo();
+       });
+     Pruébenlo: que un compañero les transfiera y miren el saldo SIN recargar. */
 }
 </script>
 </body>

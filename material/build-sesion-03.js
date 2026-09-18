@@ -356,6 +356,7 @@ async function construir() {
       s.addText(m[0], { x, y: 5.72, w: 1.85, h: 0.5, fontFace: F.mono, fontSize: 11.5, bold: true, color: C.blanco, margin: 0, valign: "top", lineSpacingMultiple: 1.05 });
       s.addText(m[1].toUpperCase(), { x, y: 6.24, w: 1.85, h: 0.28, fontFace: F.mono, fontSize: 8.5, color: "A39EAF", charSpacing: 1.2, margin: 0, valign: "top" });
     });
+    s.addNotes("Abrir con la plenaria de la pregunta de la semana: ¿qué le falta a un hash para demostrar además quién escribió el dato? Recoger dos o tres propuestas y anunciar que hoy se responde. Esta sesión cierra la parte técnica de la Unidad I. 3 minutos.");
     nSlide++;
   }
 
@@ -369,14 +370,14 @@ async function construir() {
       ["03", "LA PREGUNTA DE LA SEMANA PENSADA", "Qué le falta a un hash para demostrar además quién escribió el dato. Abre la sesión."],
     ];
     items.forEach((it, i) => {
-      const y = 2.3 + i * 1.35;
+      const y = 2.2 + i * 1.2;
       s.addText(it[0], { x: M, y: y + 0.05, w: 0.8, h: 0.5, fontFace: F.display, fontSize: 26, color: C.naranja, margin: 0, valign: "middle" });
       s.addText(it[1], { x: M + 0.95, y, w: 5.2, h: 0.4, fontFace: F.mono, fontSize: 11, bold: true, color: C.tinta, charSpacing: 1.15, margin: 0, valign: "middle" });
       parrafo(s, it[2], { x: M + 6.3, y: y - 0.02, w: CW - 6.3, h: 1.1, size: 13 });
       linea(s, M, y - 0.18, M + CW, y - 0.18, C.grisClaro, 1);
     });
-    linea(s, M, 2.12 + 3 * 1.35, M + CW, 2.12 + 3 * 1.35, C.grisClaro, 1);
-    const r = await ficha(s, { tipo: "pregunta", etiqueta: "Dónde estamos", x: M, y: 5.92, w: CW, h: 1.0 });
+    linea(s, M, 2.02 + 3 * 1.2, M + CW, 2.02 + 3 * 1.2, C.grisClaro, 1);
+    const r = await ficha(s, { tipo: "pregunta", etiqueta: "Dónde estamos", x: M, y: 5.78, w: CW, h: 0.92 });
     s.addText("Esta sesión cierra la Unidad I: después de hoy, todo lo que la Sesión 1 afirmó queda demostrado y programado.", { x: r.x, y: r.y - 0.14, w: r.w, h: 0.4, fontFace: F.display, fontSize: 13.5, color: C.tinta, margin: 0, valign: "middle" });
     s.addNotes("Comprobar entornos en la apertura.");
   }
@@ -401,7 +402,7 @@ async function construir() {
   }
 
   /* ---------- DIVISOR A ---------- */
-  await divisor({ letra: "A", titulo: "Criptografía asimétrica", sub: "Cómo se demuestra la autoría ante alguien que no te conoce, sin revelarle ningún secreto.", minutos: "MIN 10 — 70 · EXPOSICIÓN DIALOGADA", ic: "llave" });
+  (await divisor({ letra: "A", titulo: "Criptografía asimétrica", sub: "Cómo se demuestra la autoría ante alguien que no te conoce, sin revelarle ningún secreto.", minutos: "MIN 10 — 70 · EXPOSICIÓN DIALOGADA", ic: "llave" })).addNotes("Min 10–70. Criptografía asimétrica sin matemática pesada: la idea, un ejemplo real y los errores de concepto típicos. Todo lo que se muestra aquí se programa en el bloque C.");
 
   /* ---------- A.1 el problema ---------- */
   {
@@ -451,14 +452,14 @@ async function construir() {
     const s = await lamina({ kicker: "A.2 · min 25–42", titulo: "Una función de un solo sentido, con trampa", ic: "llave", tituloSize: 27 });
     parrafo(s, "Ya conocemos una función de un solo sentido: el hash de la Sesión 2. Pero al hash le falta algo — es DEMASIADO irreversible, no deja ninguna puerta. Lo que hace falta es una que sea irreversible para todo el mundo salvo para quien conoce un dato secreto.", { y: 1.9, h: 0.85 });
 
-    const r = await ficha(s, { tipo: "profundidad", etiqueta: "Analogía · el candado abierto", x: M, y: 2.9, w: CW, h: 1.9 });
+    const r = await ficha(s, { tipo: "profundidad", etiqueta: "Analogía · el candado abierto", x: M, y: 2.9, w: CW, h: 2.05 });
     parrafo(s, "Imagine que reparte por la ciudad candados abiertos con su nombre grabado, y se queda con la única llave. Cualquiera puede cerrar uno de sus candados; solo usted puede abrirlo.", { x: r.x, y: r.y, w: r.w, h: 0.7, size: 13.5 });
     parrafo(s, "Para la FIRMA hay que darle la vuelta: usted usa la llave para producir algo que solo su llave puede producir, y cualquiera comprueba con el candado que salió de allí. La operación privada produce; la pública verifica.", { x: r.x, y: r.y + 0.72, w: r.w, h: 0.7, size: 13.5, color: C.tinta });
 
     tabla(s, ["operación", "coste"], [
       ["Dados k y G, calcular P = k · G", "BARATO. Hay atajos que lo resuelven en unos cientos de operaciones aunque k tenga 256 bits."],
       ["Dados P y G, recuperar k", "INVIABLE. No se conoce método sustancialmente mejor que probar valores. Con 256 bits está fuera del alcance de cualquier cómputo concebible."],
-    ], { y: 5.05, h: 1.5, colW: [4.0, 8.093], size: 12 });
+    ], { y: 5.12, h: 1.45, colW: [4.0, 8.093], size: 12 });
     s.addNotes("Esa asimetría es toda la construcción: k es la clave privada, P es la clave pública. El problema se llama logaritmo discreto sobre curvas elípticas.");
   }
 
@@ -553,25 +554,25 @@ async function construir() {
       ["Que el mensaje no cambió ni un byte después de firmarse.", "Que el firmante entendiera lo que firmaba. Es la base de casi todos los robos a usuarios."],
       ["Que la firma corresponde a ese mensaje y no a otro.", "Cuándo se firmó. No hay marca temporal dentro de la firma."],
       ["Que nadie sin la clave pudo fabricarla.", "Que el firmante fuera el dueño legítimo de la clave, y no alguien que se la robó."],
-    ], { y: 1.95, h: 3.5, colW: [6.0, 6.093], size: 12 });
+    ], { y: 1.95, h: 3.3, colW: [6.0, 6.093], size: 12 });
 
-    const r = await ficha(s, { tipo: "pregunta", etiqueta: "Lo que hay que retener", x: M, y: 5.65, w: CW, h: 1.0 });
-    s.addText("Una firma prueba que se usó una clave. Todo lo demás son supuestos que hay que sostener por otros medios.", { x: r.x, y: r.y - 0.1, w: r.w, h: 0.42, fontFace: F.display, fontSize: 15, color: C.tinta, margin: 0, valign: "middle" });
+    const r = await ficha(s, { tipo: "pregunta", etiqueta: "Lo que hay que retener", x: M, y: 5.45, w: CW, h: 1.2 });
+    s.addText("Una firma prueba que se usó una clave. Todo lo demás son supuestos que hay que sostener por otros medios.", { x: r.x, y: r.y - 0.1, w: r.w, h: 0.58, fontFace: F.display, fontSize: 15, color: C.tinta, margin: 0, valign: "middle" });
     s.addNotes("La columna derecha es la que importa para el proyecto: cada supuesto de la columna derecha que un diseño necesite tiene que resolverse fuera de la criptografía.");
   }
 
   /* ---------- A.3 alerta nonce ---------- */
   {
     const s = await lamina({ kicker: "A.3 · alerta crítica", titulo: "El número que no se puede repetir", ic: "alerta", tituloSize: 29 });
-    const r = await ficha(s, { tipo: "alerta", etiqueta: "Repetirlo revela la clave privada", x: M, y: 1.95, w: CW, h: 2.6 });
+    const r = await ficha(s, { tipo: "alerta", etiqueta: "Repetirlo revela la clave privada", x: M, y: 1.95, w: CW, h: 2.45 });
     parrafo(s, "Cada firma ECDSA necesita internamente un número aleatorio de un solo uso. Si ese número SE REPITE en dos firmas hechas con la misma clave, cualquiera que vea ambas puede despejar la clave privada con álgebra elemental. No hace falta romper nada: basta resolver un sistema de dos ecuaciones.", { x: r.x, y: r.y, w: r.w, h: 1.05, size: 13.5 });
     parrafo(s, "Ha ocurrido en producción más de una vez, con consecuencias graves: consolas cuya clave de firmado quedó expuesta, y billeteras móviles vaciadas porque el generador del sistema devolvía valores repetidos.", { x: r.x, y: r.y + 1.1, w: r.w, h: 0.85, size: 13.5, color: C.tinta });
 
-    caja(s, { x: M, y: 4.75, w: CW, h: 1.15, fill: C.superf });
-    s.addText("LA DEFENSA ESTÁNDAR", { x: M + 0.3, y: 4.95, w: 4, h: 0.3, fontFace: F.mono, fontSize: 10.5, bold: true, color: C.ocre, charSpacing: 1.3, margin: 0, valign: "middle" });
-    parrafo(s, "Derivar ese número de forma determinista a partir de la clave privada y del mensaje, en lugar de sortearlo. Así nunca se repite mientras el mensaje sea distinto, y no depende del azar del dispositivo.", { x: M + 0.3, y: 5.3, w: CW - 0.7, h: 0.55, size: 13 });
+    caja(s, { x: M, y: 4.55, w: CW, h: 1.08, fill: C.superf });
+    s.addText("LA DEFENSA ESTÁNDAR", { x: M + 0.3, y: 4.68, w: 4, h: 0.3, fontFace: F.mono, fontSize: 10.5, bold: true, color: C.ocre, charSpacing: 1.3, margin: 0, valign: "middle" });
+    parrafo(s, "Derivar ese número de forma determinista a partir de la clave privada y del mensaje, en lugar de sortearlo. Así nunca se repite mientras el mensaje sea distinto, y no depende del azar del dispositivo.", { x: M + 0.3, y: 5.02, w: CW - 0.7, h: 0.55, size: 13 });
 
-    enunciado(s, "No se implementa criptografía a mano. Se usan bibliotecas establecidas y se comprueban contra vectores de prueba conocidos.", { y: 6.05, h: 0.85, size: 17 });
+    enunciado(s, "No se implementa criptografía a mano. Se usan bibliotecas establecidas y se comprueban contra vectores de prueba conocidos.", { y: 5.8, h: 0.9, size: 17 });
     s.addNotes("Es la moraleja profesional que vale para todo el curso, y se aplica literalmente en el laboratorio de hoy.");
   }
 
@@ -607,25 +608,25 @@ async function construir() {
   /* ---------- A.4 EIP-55 ---------- */
   {
     const s = await lamina({ kicker: "A.4 · ficha de término 04", titulo: "El checksum de EIP-55", ic: "termino", tituloSize: 29 });
-    const r = await ficha(s, { tipo: "termino", etiqueta: "Una suma de verificación que no ocupa un solo byte", x: M, y: 1.9, w: CW, h: 3.15 });
+    const r = await ficha(s, { tipo: "termino", etiqueta: "Una suma de verificación que no ocupa un solo byte", x: M, y: 1.9, w: CW, h: 2.95 });
     parrafo(s, "Se toma la dirección en minúsculas y se calcula su hash. Después, para cada carácter: si es una LETRA y el dígito correspondiente del hash es 8 o mayor, esa letra se escribe en mayúscula. Los dígitos numéricos no cambian, porque no tienen mayúscula.", { x: r.x, y: r.y, w: r.w, h: 1.0, size: 13.5 });
-    caja(s, { x: r.x, y: r.y + 1.05, w: r.w, h: 1.35, fill: C.tinta, line: C.tinta });
+    caja(s, { x: r.x, y: r.y + 1.05, w: r.w, h: 1.15, fill: C.tinta, line: C.tinta });
     s.addText([
       { text: "sin checksum   ", options: { color: "9A95A8" } },
       { text: "0x732805fbe544f6117b755512f2029e3e8b6aa135\n\n", options: { color: "F4F2F7" } },
       { text: "con EIP-55     ", options: { color: "9A95A8" } },
       { text: "0x732805FbE544F6117B755512f2029e3e8B6aa135", options: { color: "FFA41B" } },
-    ], { x: r.x + 0.25, y: r.y + 1.25, w: r.w - 0.5, h: 1.0, fontFace: F.mono, fontSize: 12.5, lineSpacingMultiple: 1.1, margin: 0, valign: "middle" });
+    ], { x: r.x + 0.25, y: r.y + 1.15, w: r.w - 0.5, h: 0.95, fontFace: F.mono, fontSize: 12.5, lineSpacingMultiple: 1.1, margin: 0, valign: "middle" });
 
-    parrafo(s, "Son la MISMA dirección: para la red, las mayúsculas son irrelevantes. Pero un programa que valide el patrón detecta casi cualquier error de transcripción antes de enviar los fondos.", { y: 5.2, h: 0.55, size: 13 });
+    parrafo(s, "Son la MISMA dirección: para la red, las mayúsculas son irrelevantes. Pero un programa que valide el patrón detecta casi cualquier error de transcripción antes de enviar los fondos.", { y: 4.98, h: 0.55, size: 13 });
 
-    const r2 = await ficha(s, { tipo: "alerta", etiqueta: "Lo que el checksum NO hace", x: M, y: 5.78, w: CW, h: 1.15 });
+    const r2 = await ficha(s, { tipo: "alerta", etiqueta: "Lo que el checksum NO hace", x: M, y: 5.62, w: CW, h: 1.05 });
     parrafo(s, "Detecta errores de transcripción, no direcciones inexistentes. Enviar fondos a una dirección bien formada pero sin dueño los destruye para siempre.", { x: r2.x, y: r2.y - 0.14, w: r2.w, h: 0.5, size: 12.5 });
     s.addNotes("Por qué 20 bytes y no 32: por costo. Cada byte almacenado en el estado de todos los nodos del mundo se paga. Es una decisión de ingeniería, no de criptografía.");
   }
 
   /* ---------- DIVISOR B ---------- */
-  await divisor({ letra: "B", titulo: "Anatomía de la cadena", sub: "Ya están todas las piezas. Un bloque es la estructura que las ensambla.", minutos: "MIN 78 — 118 · EXPOSICIÓN DIALOGADA", ic: "capas" });
+  (await divisor({ letra: "B", titulo: "Anatomía de la cadena", sub: "Ya están todas las piezas. Un bloque es la estructura que las ensambla.", minutos: "MIN 78 — 118 · EXPOSICIÓN DIALOGADA", ic: "capas" })).addNotes("Min 78–118, después de la pausa. Ya están todas las piezas; ahora se ensamblan en un bloque. Pedir que tengan a mano la figura del bloque de la Sesión 1.");
 
   /* ---------- B.1 cabecera ---------- */
   {
@@ -709,7 +710,7 @@ async function construir() {
     const s = await lamina({ kicker: "B.3 · min 105–118", titulo: "Propagación por rumor y mempool", ic: "red", tituloSize: 28 });
     parrafo(s, "No hay servidor ni directorio central. Cada nodo mantiene conexiones con un puñado de vecinos y aplica una regla simple: cuando recibo algo válido que no conocía, lo valido y se lo paso a mis vecinos.", { y: 1.9, h: 0.65 });
 
-    const r = await ficha(s, { tipo: "termino", etiqueta: "Ficha de término 06 · mempool", x: M, y: 2.7, w: CW, h: 2.6 });
+    const r = await ficha(s, { tipo: "termino", etiqueta: "Ficha de término 06 · mempool", x: M, y: 2.65, w: CW, h: 2.85 });
     parrafo(s, "Conjunto de transacciones que un nodo ha recibido y considerado válidas, pero que todavía no están en ningún bloque. Es la sala de espera: cuando en la demostración de la Sesión 2 la transacción apareció como «pendiente», estaba aquí.", { x: r.x, y: r.y, w: r.w, h: 0.8, size: 13.5 });
     const puntos = [
       ["CADA NODO TIENE EL SUYO", "y no son idénticos: dependen de qué le llegó a cada uno y en qué orden."],
@@ -717,18 +718,18 @@ async function construir() {
       ["ESTAR AHÍ NO GARANTIZA NADA", "una transacción puede quedarse indefinidamente si nadie tiene incentivo para incluirla."],
     ];
     puntos.forEach((p, i) => {
-      const y = r.y + 0.9 + i * 0.4;
-      s.addText(p[0], { x: r.x, y, w: 3.3, h: 0.32, fontFace: F.mono, fontSize: 9.5, bold: true, color: C.violetaOs, charSpacing: 1.1, margin: 0, valign: "middle" });
-      s.addText(p[1], { x: r.x + 3.5, y, w: r.w - 3.5, h: 0.32, fontFace: F.body, fontSize: 12, color: C.tintaSuav, margin: 0, valign: "middle" });
+      const y = r.y + 0.88 + i * 0.46;
+      s.addText(p[0], { x: r.x, y: y + 0.02, w: 3.3, h: 0.3, fontFace: F.mono, fontSize: 9.5, bold: true, color: C.violetaOs, charSpacing: 1.1, margin: 0, valign: "top" });
+      s.addText(p[1], { x: r.x + 3.5, y, w: r.w - 3.5, h: 0.44, fontFace: F.body, fontSize: 12, color: C.tintaSuav, margin: 0, valign: "top" });
     });
 
-    const r2 = await ficha(s, { tipo: "pregunta", etiqueta: "El conflicto que queda abierto", x: M, y: 5.5, w: CW, h: 1.15 });
+    const r2 = await ficha(s, { tipo: "pregunta", etiqueta: "El conflicto que queda abierto", x: M, y: 5.6, w: CW, h: 1.2 });
     parrafo(s, "Dos nodos producen un bloque válido casi al mismo tiempo, apuntando al mismo padre. Ambos son correctos. Media red ve uno y media red ve el otro. Nada de lo construido hasta hoy resuelve esto.", { x: r2.x, y: r2.y - 0.06, w: r2.w, h: 0.55, size: 13, color: C.tinta });
     s.addNotes("Un nodo completo valida firma, saldos, no repetición y reglas del bloque antes de propagar. Su poder es negarse: un bloque inválido no se propaga, venga de donde venga.");
   }
 
   /* ---------- DIVISOR C ---------- */
-  await divisor({ letra: "C", titulo: "Laboratorio 02", sub: "Doscientas líneas que reúnen toda la Unidad I: firmas, Merkle y encadenamiento. Y después romperlo.", minutos: "MIN 118 — 170 · EN MÁQUINA, EN PAREJAS", ic: "matraz" });
+  (await divisor({ letra: "C", titulo: "Laboratorio 02", sub: "Doscientas líneas que reúnen toda la Unidad I: firmas, Merkle y encadenamiento. Y después romperlo.", minutos: "MIN 118 — 170 · EN MÁQUINA, EN PAREJAS", ic: "matraz" })).addNotes("Min 118–170, en parejas. Laboratorio 02: claves y firmas, dirección y checksum, mini-blockchain. Verificar entornos y dependencia instalada antes de empezar. El error más común está en la serialización.");
 
   /* ---------- LAB partes ---------- */
   const partes = [
@@ -766,14 +767,14 @@ async function construir() {
       ["04", "Romper la cadena", "Alterar el monto de una transacción de un bloque intermedio y validar. Observar QUÉ falla y DÓNDE: primero la firma, después la raíz de Merkle, después el eslabón de todos los posteriores."],
     ];
     pasos.forEach((p, i) => {
-      const y = 1.95 + i * 1.2;
+      const y = 1.9 + i * 1.12;
       s.addText(p[0], { x: M, y: y + 0.04, w: 0.75, h: 0.5, fontFace: F.display, fontSize: 25, color: C.naranja, margin: 0, valign: "top" });
       s.addText(p[1], { x: M + 0.85, y, w: CW - 0.85, h: 0.36, fontFace: F.body, fontSize: 14.5, bold: true, color: C.tinta, margin: 0, valign: "top" });
-      parrafo(s, p[2], { x: M + 0.85, y: y + 0.4, w: CW - 0.85, h: 0.72, size: 12.5 });
-      linea(s, M, y - 0.14, M + CW, y - 0.14, C.grisClaro, 1);
+      parrafo(s, p[2], { x: M + 0.85, y: y + 0.38, w: CW - 0.85, h: 0.66, size: 12.5 });
+      linea(s, M, y - 0.12, M + CW, y - 0.12, C.grisClaro, 1);
     });
-    linea(s, M, 1.81 + 4 * 1.2, M + CW, 1.81 + 4 * 1.2, C.grisClaro, 1);
-    s.addText("EL PASO 04 ES LA COMPROBACIÓN CENTRAL Y EL CIERRE DE LA UNIDAD I: LA FIG. 3, EJECUTÁNDOSE.", { x: M, y: 6.75, w: CW, h: 0.3, fontFace: F.mono, fontSize: 10.5, bold: true, color: C.ocre, charSpacing: 1.1, margin: 0, valign: "middle" });
+    linea(s, M, 1.78 + 4 * 1.12, M + CW, 1.78 + 4 * 1.12, C.grisClaro, 1);
+    s.addText("EL PASO 04 ES LA COMPROBACIÓN CENTRAL Y EL CIERRE DE LA UNIDAD I: LA FIG. 3, EJECUTÁNDOSE.", { x: M, y: 6.4, w: CW, h: 0.3, fontFace: F.mono, fontSize: 10.5, bold: true, color: C.ocre, charSpacing: 1.1, margin: 0, valign: "middle" });
     s.addNotes("Entregable: repositorio con pruebas pasando + media página describiendo qué comprobación falló primero y por qué en ese orden. Antes de la Sesión 4.");
   }
 
@@ -791,7 +792,7 @@ async function construir() {
   }
 
   /* ---------- DIVISOR D ---------- */
-  await divisor({ letra: "D", titulo: "Cierre", sub: "Qué llevarse, qué entregar y el hueco que abre la Sesión 4.", minutos: "MIN 170 — 180 · PLENARIA", ic: "bandera" });
+  (await divisor({ letra: "D", titulo: "Cierre", sub: "Qué llevarse, qué entregar y el hueco que abre la Sesión 4.", minutos: "MIN 170 — 180 · PLENARIA", ic: "bandera" })).addNotes("Min 170–180. Síntesis, entregable y el hueco que abre la Sesión 4. No abrir temas nuevos.");
 
   /* ---------- Qué llevarse ---------- */
   {
@@ -902,6 +903,7 @@ async function construir() {
     s.addText("PRÓXIMA SESIÓN:\nCONSENSO Y EL TRILEMA", { x: M, y: 2.35, w: 11.5, h: 2.0, fontFace: F.display, fontSize: 46, color: C.blanco, margin: 0, valign: "top", lineSpacingMultiple: 0.98 });
     s.addText("Cierra la Unidad I y trae el Quiz 1. Entregable de hoy: la mini-blockchain con las pruebas pasando, antes de que empiece.", { x: M, y: 4.45, w: 9.8, h: 0.95, fontFace: F.body, fontSize: 16, color: "B9B4C4", margin: 0, valign: "top", lineSpacingMultiple: 1.28 });
     s.addText("Universidad de San Buenaventura Medellín · Facultad de Ingeniería\nBlockchain y Web 3.0 · Unidad I · Sesión 03 de 17", { x: M, y: 5.95, w: 9.5, h: 0.8, fontFace: F.mono, fontSize: 10, color: "6E6A7C", margin: 0, valign: "top", lineSpacingMultiple: 1.35 });
+    s.addNotes("Cerrar con la próxima sesión: consenso y trilema, y el Quiz 1 de la Unidad I (sesiones 1 a 4). Entregable de hoy: la mini-blockchain con las pruebas pasando, antes de que empiece la Sesión 4. 1 minuto.");
     nSlide++;
   }
 

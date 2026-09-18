@@ -30,11 +30,11 @@ En Python, `merkle.py` imprime los dos hashes de referencia, los bits distintos,
 
 Si no coincide, la diferencia está en una de las tres convenciones de abajo.
 
-**2 · Romperla.** Cambie un solo carácter de un solo dato y vuelva a ejecutar. La raíz cambia por completo. Eso es el compromiso de la raíz, comprobado en su propia pantalla.
+**2 · Romperla.** Cambien un solo carácter de un solo dato y vuelvan a ejecutar. La raíz cambia por completo. Eso es el compromiso de la raíz, comprobado en su propia pantalla.
 
-**3 · Pedir una prueba.** `generar_prueba(lotes, 2)` devuelve tres hashes para un conjunto de ocho: log₂(8). Verifíquela.
+**3 · Pedir una prueba.** `generar_prueba(lotes, 2)` devuelve tres hashes para un conjunto de ocho: log₂(8). Verifíquenla.
 
-**4 · Rechazar.** Verifique un dato que **no** esté en el conjunto y compruebe que devuelve falso. Una verificación que solo acepta lo correcto está a medio escribir.
+**4 · Rechazar.** Verifiquen un dato que **no** esté en el conjunto y comprueben que devuelve falso. Una verificación que solo acepta lo correcto está a medio escribir.
 
 ---
 
@@ -65,7 +65,7 @@ Una tilde de diferencia. Ese es el efecto avalancha.
 
 Hay una página que implementa exactamente estas mismas tres convenciones: permite editar los datos, ver la raíz cambiar, hacer clic en una hoja para obtener su prueba de inclusión y seguir la verificación paso a paso.
 
-**La raíz del visor y la de este código deben ser idénticas.** Es la forma más rápida de comprobar que su implementación —si decide escribir la suya— está bien.
+**La raíz del visor y la de este código deben ser idénticas.** Es la forma más rápida de comprobar que su implementación —si deciden escribir la suya— está bien.
 
 ---
 
@@ -90,7 +90,7 @@ A partir de este código, **construir una interfaz web que lo haga visible**. No
 
 ---
 
-## Si quiere escribirlo usted mismo
+## Si quieren escribirlo ustedes mismos
 
 `python/andamiaje/` y `js/andamiaje/` contienen el mismo código **vaciado**, con las firmas, la documentación y las pistas intactas. Los archivos de prueba son la especificación.
 
@@ -104,4 +104,4 @@ cd js && cp andamiaje/merkle.js . && node --test
 
 Son 24 pruebas en Python y 23 en JavaScript. **Es opcional** y no sustituye al trabajo de la interfaz: está para quien quiera el ejercicio completo.
 
-Para volver al código resuelto, vuelva a copiarlo desde el repositorio del curso.
+Para volver al código resuelto, vuelvan a copiarlo desde el repositorio del curso.

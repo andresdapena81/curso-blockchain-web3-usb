@@ -11,7 +11,7 @@ import {Ownable} from "@openzeppelin/contracts/access/Ownable.sol";
  * alcanzó la meta, el beneficiario reclama los fondos. Si no, cada aportante
  * recupera exactamente lo que puso.
  *
- * MUTANTE 2 · un error de borde en la meta. No se dice cuál.
+ * MUTANTE 2 · tiene exactamente un error. No se dice cuál ni dónde.
  * Una suite de pruebas buena debe FALLAR contra este contrato.
  * No se usa para nada más.
  *

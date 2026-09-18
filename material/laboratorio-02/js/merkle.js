@@ -1,9 +1,8 @@
 /**
- * Laboratorio 01 · Integridad verificable
+ * Laboratorio · Árbol de Merkle — IMPLEMENTACIÓN COMPLETA
  * Blockchain y Web 3.0 · Universidad de San Buenaventura Medellín
  *
- * Completa los cuerpos marcados con TODO. No modifiques merkle.test.js:
- * las pruebas son la especificación y el laboratorio termina cuando pasan.
+ * Este es el código que recorremos en clase. Para comprobarlo:
  *
  *     node --test
  */
@@ -11,52 +10,33 @@
 import { createHash } from "node:crypto";
 
 /* =====================================================================
-   CONVENCIONES DEL LABORATORIO — acordadas para todo el curso
-
-     1. Las HOJAS son hashHex(dato). Se hashea el dato; no se mete crudo.
+   CONVENCIONES DEL LABORATORIO
+     1. Las HOJAS son hashHex(dato). Se hashea el dato, no se mete crudo.
      2. Al combinar dos nodos se concatenan sus BYTES, no sus cadenas
         hexadecimales.  ->  Buffer.from(hex, "hex")
      3. Si un nivel tiene un número IMPAR de elementos, se DUPLICA el
         último para completar el par.
-
-   Si tu raíz no coincide con la de otra pareja, la causa está casi
-   siempre en una de estas tres.
    ===================================================================== */
 
-/* --------------------------------------------------------------- PARTE 1 */
-
-/**
- * Hash SHA-256 de `dato`, devuelto en hexadecimal (64 caracteres).
- * Debe aceptar string (codificar en utf8) y también Buffer.
- *
- * Pista: createHash("sha256").update(buf).digest("hex")
- */
 export function hashHex(dato) {
-  // TODO
-  throw new Error("Parte 1 · hashHex sin implementar");
+  const buf = typeof dato === "string" ? Buffer.from(dato, "utf8") : dato;
+  return createHash("sha256").update(buf).digest("hex");
 }
 
 /**
- * Número de bits que difieren entre dos hashes hexadecimales.
- *
- * OJO: no compares carácter a carácter. Cada carácter hexadecimal son
- * 4 bits, así que contar caracteres distintos NO da el número de bits.
- *
- * OJO 2: 256 bits no caben en un Number de JavaScript. Usa BigInt:
- *        BigInt("0x" + hash) para convertir, ^ para XOR, y recorre los
- *        bits con & 1n y >>= 1n.
+ * Bits que difieren entre dos hashes hexadecimales.
+ * 256 bits no caben en un Number, así que se usa BigInt.
  */
 export function bitsDistintos(hashA, hashB) {
-  // TODO
-  throw new Error("Parte 1 · bitsDistintos sin implementar");
+  let x = BigInt("0x" + hashA) ^ BigInt("0x" + hashB);
+  let n = 0;
+  while (x > 0n) {
+    if (x & 1n) n++;
+    x >>= 1n;
+  }
+  return n;
 }
 
-/* --------------------------------------------------------------- PARTE 2 */
-
-/**
- * Hash del par de nodos. Ya viene resuelto: fíjate en la convención 2.
- * Se concatenan los BYTES de ambos hashes, no sus cadenas de texto.
- */
 function combinar(izquierdo, derecho) {
   return createHash("sha256")
     .update(Buffer.concat([Buffer.from(izquierdo, "hex"), Buffer.from(derecho, "hex")]))
@@ -64,72 +44,60 @@ function combinar(izquierdo, derecho) {
 }
 
 /**
- * Construye el árbol y devuelve TODOS los niveles, de abajo arriba.
- *
- *   niveles[0]      -> las hojas ya hasheadas
- *   niveles.at(-1)  -> [raíz]
- *
- * Devuelve todos los niveles (no solo la raíz) porque generarPrueba()
- * los necesita. Guarda cada nivel YA RELLENADO —con el último elemento
- * duplicado si eran impares—, para que los índices coincidan después.
- *
- * Debe lanzar un error cuyo mensaje mencione "vacío" si `hojas` lo está.
- *
- * Estructura sugerida:
- *   let nivel = hojas.map(hashHex)
- *   bucle:
- *     si nivel.length > 1 y es impar -> duplicar el último
- *     guardar nivel
- *     si nivel.length === 1 -> devolver
- *     nivel = combinar de dos en dos
+ * Devuelve TODOS los niveles, de abajo arriba y ya rellenados.
+ * niveles[0] = hojas hasheadas · niveles.at(-1) = [raíz]
  */
 export function construirArbol(hojas) {
-  // TODO
-  throw new Error("Parte 2 · construirArbol sin implementar");
+  if (!Array.isArray(hojas) || hojas.length === 0) {
+    throw new Error("El conjunto no puede estar vacío");
+  }
+  let nivel = hojas.map(hashHex);
+  const niveles = [];
+
+  for (;;) {
+    if (nivel.length > 1 && nivel.length % 2 === 1) {
+      nivel = [...nivel, nivel[nivel.length - 1]];      // convención 3
+    }
+    niveles.push(nivel);
+    if (nivel.length === 1) return niveles;
+
+    const siguiente = [];
+    for (let i = 0; i < nivel.length; i += 2) {
+      siguiente.push(combinar(nivel[i], nivel[i + 1]));
+    }
+    nivel = siguiente;
+  }
 }
 
-/** Raíz de Merkle del conjunto. Apóyate en construirArbol(). */
 export function raizDeMerkle(hojas) {
-  // TODO
-  throw new Error("Parte 2 · raizDeMerkle sin implementar");
+  return construirArbol(hojas).at(-1)[0];
 }
-
-/* --------------------------------------------------------------- PARTE 3 */
 
 /**
- * Prueba de inclusión del elemento en la posición `indice`.
- *
- * Devuelve un arreglo de objetos { hash, lado }, donde lado vale "izq"
- * si el hermano va a la IZQUIERDA al concatenar y "der" si va a la
- * DERECHA.
- *
- * GUARDAR EL LADO ES IMPRESCINDIBLE. Si concatenas siempre en el mismo
- * orden, la verificación falla aproximadamente la mitad de las veces:
- * es el error más común de esta parte.
- *
- * Estructura sugerida:
- *   recorrer los niveles menos el último
- *   si el índice es par  -> el hermano está a la derecha (idx + 1)
- *   si es impar          -> el hermano está a la izquierda (idx - 1)
- *   subir de nivel: idx = Math.floor(idx / 2)
+ * Prueba de inclusión: lista de { hash, lado } con lado "izq" | "der".
+ * Guardar el lado es imprescindible.
  */
 export function generarPrueba(hojas, indice) {
-  // TODO
-  throw new Error("Parte 3 · generarPrueba sin implementar");
+  if (!(indice >= 0 && indice < hojas.length)) {
+    throw new RangeError("Índice fuera del conjunto");
+  }
+  const niveles = construirArbol(hojas);
+  const prueba = [];
+  let idx = indice;
+
+  for (let n = 0; n < niveles.length - 1; n++) {
+    const nivel = niveles[n];
+    if (idx % 2 === 0) prueba.push({ hash: nivel[idx + 1], lado: "der" });
+    else prueba.push({ hash: nivel[idx - 1], lado: "izq" });
+    idx = Math.floor(idx / 2);
+  }
+  return prueba;
 }
 
-/**
- * ¿Pertenece `dato` al conjunto cuya raíz de Merkle es `raiz`?
- *
- * Parte del hash del dato y combínalo sucesivamente con cada hermano,
- * RESPETANDO EL LADO. Si el valor final coincide con la raíz, el
- * elemento estaba en el conjunto.
- *
- * Debe devolver false —no lanzar error— cuando la prueba no cuadre.
- * Una verificación que solo acepta lo correcto está a medio escribir:
- * tiene que rechazar lo incorrecto.
- */
 export function verificarPrueba(dato, prueba, raiz) {
-  // TODO
-  throw new Error("Parte 3 · verificarPrueba sin implementar");
+  let actual = hashHex(dato);
+  for (const { hash, lado } of prueba) {
+    actual = lado === "izq" ? combinar(hash, actual) : combinar(actual, hash);
+  }
+  return actual === raiz;
 }

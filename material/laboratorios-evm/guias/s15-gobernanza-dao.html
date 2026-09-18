@@ -1,0 +1,448 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<title>Guía · Laboratorio 15 · Gobernanza DAO</title>
+<!--ESTILOS-->
+</head>
+<body>
+
+<section class="barra">
+  <div class="kicker">LABORATORIO 15 · SESIÓN 15 · UNIDAD IV · EN PAREJAS</div>
+  <h1>UNA DAO CON<br><em>TIMELOCK</em>, UN CICLO<br>COMPLETO Y UN MULTISIG</h1>
+  <div class="sub">Token de voto, Governor, TimelockController y tesorería: armarlos, probar sus defensas, recorrer una propuesta de principio a fin con el tiempo simulado, dejar la evidencia en Sepolia y entender por dentro un multisig 2 de 3.</div>
+</section>
+
+<dl class="datos">
+  <div><dt>MODALIDAD</dt><dd>En parejas<br>entrega por pareja</dd></div>
+  <div><dt>REQUISITOS</dt><dd>Node.js 22 LTS<br>repo laboratorios-evm</dd></div>
+  <div><dt>DURACIÓN</dt><dd>70 min en clase<br>+ 1 h en casa</dd></div>
+  <div><dt>META</dt><dd>27 pruebas en verde<br>+ evidencia en Sepolia</dd></div>
+</dl>
+
+<div class="caja clave">
+  <div class="caja-et">CÓMO LEER ESTA GUÍA</div>
+  <p>Está escrita para que la pareja pueda hacer el laboratorio <strong>sin ayuda</strong>. Cada paso dice qué escribir, qué deberían ver y cómo saber que funcionó. Si algo no sale como aquí se describe, vayan a la sección <strong>11 · Errores frecuentes</strong> antes de llamar al docente. Las partes 1, 2 y 3a corren en la red local de Hardhat: no gastan ETH ni necesitan internet. Solo las partes 3b y 4 tocan Sepolia.</p>
+</div>
+
+<!-- ============================================================ 1 -->
+<section class="sec">
+  <div class="sec-cab"><span class="sec-num">01</span><h2>Objetivo y resultados de aprendizaje</h2><span class="lead">LEER PRIMERO</span></div>
+  <p><strong>Objetivo:</strong> implementar un mecanismo de gobernanza on-chain (<code>ERC20Votes</code> + <code>Governor</code> + <code>TimelockController</code>), recorrer el ciclo propuesta → votación → timelock → ejecución, y configurar un multisig que exija dos firmas.</p>
+  <table>
+    <tr><th style="width:14%">RA</th><th>CÓMO LO TRABAJA ESTE LABORATORIO</th></tr>
+    <tr><td class="pk">RA2</td><td>Comparar arquitecturas de gobierno (multisig frente a votación on-chain) y justificar cuál conviene al proyecto propio.</td></tr>
+    <tr><td class="pk">RA3</td><td>Montar contratos estándar de OpenZeppelin (Governor, Timelock, ERC20Votes) y completar un contrato multisig.</td></tr>
+    <tr><td class="pk">RA4</td><td>Escribir pruebas automatizadas que manipulan el tiempo de la cadena (<code>mine</code>, <code>time.increase</code>) y desplegar en una red de prueba.</td></tr>
+  </table>
+  <table>
+    <tr><th style="width:24%">PARTE</th><th style="width:48%">QUÉ HACEN</th><th>DÓNDE</th></tr>
+    <tr><td class="pk">1 · Armar la DAO</td><td>Leer los cuatro contratos y correr las 11 pruebas de estructura y defensas.</td><td>red local</td></tr>
+    <tr><td class="pk">2 · El ciclo</td><td>Completar <code>CicloGobierno.test.js</code>: delegar, proponer, votar, encolar, esperar, ejecutar.</td><td>red local</td></tr>
+    <tr><td class="pk">3a · MultisigUSB</td><td>Completar <code>confirmar()</code> y <code>ejecutar()</code> de un multisig mínimo.</td><td>red local</td></tr>
+    <tr><td class="pk">3b · Safe 2 de 2</td><td>Crear un Safe en Sepolia y ejecutar una transacción con dos firmantes.</td><td>Sepolia</td></tr>
+    <tr><td class="pk">4 · Evidencia</td><td>Correr <code>scripts/s15/ciclo-gobierno.js</code> en Sepolia: la DAO completa, en cadena.</td><td>Sepolia</td></tr>
+  </table>
+</section>
+
+<!-- ============================================================ 2 -->
+<section class="sec">
+  <div class="sec-cab"><span class="sec-num">02</span><h2>Qué se entrega</h2></div>
+  <ul>
+    <li>En el repositorio de la pareja, carpeta <code>entregas/lab15/</code>: las capturas de las pruebas (con el comando visible), el archivo <code>evidencia.md</code> con direcciones y hashes, y <code>reflexion.md</code> con las respuestas de la sección 12.</li>
+    <li>Los archivos completados: <code>test/s15/CicloGobierno.test.js</code> y <code>contracts/s15/MultisigUSB.sol</code>.</li>
+    <li>Plazo: antes del inicio de la Sesión 16. Política del curso: <strong>sin evidencia verificable, el laboratorio no se califica.</strong></li>
+  </ul>
+  <div class="caja peligro">
+    <div class="caja-et">REGLAS QUE NO ADMITEN EXCEPCIÓN</div>
+    <p>Solo red local y Sepolia: <strong>nunca dinero real</strong>. La frase semilla no se comparte con nadie, tampoco con el docente. No firmen en Safe ni en MetaMask nada que no entiendan: lean el destino y el monto antes. La clave privada y la URL del nodo van <strong>solo</strong> en el keystore de Hardhat, jamás en un archivo del repositorio. Estos contratos son material de clase, sin auditar.</p>
+  </div>
+</section>
+
+<!-- ============================================================ 3 -->
+<section class="sec salto">
+  <div class="sec-cab"><span class="sec-num">03</span><h2>Preparación desde cero</h2><span class="lead">10 MINUTOS</span></div>
+  <p>Si ya hicieron los laboratorios de las sesiones 8 a 14, tienen todo: salten al paso 3.4. Si no, abran una terminal (Windows: tecla Windows, <code>powershell</code>, Enter) y sigan en orden.</p>
+
+  <div class="pregunta">
+    <div class="cab"><div class="n">3.1</div><div class="enun"><span class="tema">COMPROBAR NODE.JS Y GIT</span>Versiones mínimas</div></div>
+    <div class="just">
+      <pre>node --version      # debe decir v22.algo
+git --version       # cualquier versión reciente</pre>
+      <strong>Si falla:</strong> instalen Node.js 22 LTS desde <code>nodejs.org</code> (marcar «Add to PATH»), cierren y vuelvan a abrir la terminal.
+    </div>
+  </div>
+
+  <div class="pregunta">
+    <div class="cab"><div class="n">3.2</div><div class="enun"><span class="tema">ENTRAR AL PROYECTO E INSTALAR</span>Una sola vez por semestre</div></div>
+    <div class="just">
+      <pre>cd "ruta/al/curso/material/laboratorios-evm"
+npm install</pre>
+      <strong>Salida esperada:</strong> termina con <code>added … packages</code> o <code>up to date</code>, sin <code>ERR!</code>. Los avisos <code>WARN</code> se pueden ignorar.
+    </div>
+  </div>
+
+  <div class="pregunta">
+    <div class="cab"><div class="n">3.3</div><div class="enun"><span class="tema">COMPROBAR LAS VERSIONES CONGELADAS</span>Las del archivo versiones.md</div></div>
+    <div class="just">
+      <pre>npx hardhat --version     # 3.16.0</pre>
+      Solidity 0.8.28 y OpenZeppelin 5.6.1 los fija el proyecto: no instalen nada más.
+    </div>
+  </div>
+
+  <div class="pregunta">
+    <div class="cab"><div class="n">3.4</div><div class="enun"><span class="tema">COMPILAR</span>La primera vez tarda un poco</div></div>
+    <div class="just">
+      <pre>npx hardhat compile</pre>
+      <strong>Cómo sé que funcionó:</strong> <code>Compiled … Solidity files with solc 0.8.28</code> (o <code>Nothing to compile</code>). Un aviso <em>«Function state mutability can be restricted to view»</em> en <code>s05/Operaciones.sol</code> es esperado: ese contrato es de otra sesión.
+    </div>
+  </div>
+
+  <div class="caja clave">
+    <div class="caja-et">LOS ARCHIVOS DE ESTE LABORATORIO</div>
+    <pre>contracts/s15/TokenVoto.sol       ERC20Votes + Ownable (acuñar solo el dueño)
+contracts/s15/TimelockUSB.sol     TimelockController de OpenZeppelin
+contracts/s15/GobiernoUSB.sol     Governor + GovernorTimelockControl
+contracts/s15/Tesoreria.sol       fondos cuyo dueño es el TIMELOCK
+contracts/s15/MultisigUSB.sol     multisig mínimo m de n          &lt;- PARTE 3a (TODO 1-2)
+test/s15/Gobierno.test.js         11 pruebas de estructura       &lt;- PARTE 1 (ya pasan)
+test/s15/CicloGobierno.test.js    5 pruebas del ciclo            &lt;- PARTE 2 (TODO 1-5)
+test/s15/Multisig.test.js         11 pruebas del multisig        &lt;- META de la 3a
+scripts/s15/ciclo-gobierno.js     la DAO en Sepolia              &lt;- PARTE 4
+andamiaje/s15/                    copias intactas con los TODO, para empezar de cero</pre>
+    <p><strong>Si su copia de <code>test/s15/CicloGobierno.test.js</code> o de <code>contracts/s15/MultisigUSB.sol</code> ya trae los TODO</strong> (repositorio del estudiante), trabajen directamente ahí. Si no, o si quieren empezar de cero, copien el andamiaje encima:</p>
+    <pre>copy andamiaje\s15\CicloGobierno.test.js test\s15\CicloGobierno.test.js     (Windows)
+copy andamiaje\s15\MultisigUSB.sol contracts\s15\MultisigUSB.sol
+cp andamiaje/s15/CicloGobierno.test.js test/s15/                             (macOS / Linux)
+cp andamiaje/s15/MultisigUSB.sol contracts/s15/</pre>
+  </div>
+</section>
+
+<!-- ============================================================ 4 -->
+<section class="sec">
+  <div class="sec-cab"><span class="sec-num">04</span><h2>Parte 1 · Leer la DAO y probar sus defensas</h2><span class="lead">15 MINUTOS</span></div>
+  <p>Abran los cuatro contratos de gobierno en el editor. Casi no tienen lógica propia: son piezas de OpenZeppelin bien conectadas. Lo que hay que entender es <strong>quién le pide permiso a quién</strong>:</p>
+  <pre>TokenVoto ──(¿cuántos votos tenía X en el bloque B?)──&gt; GobiernoUSB
+GobiernoUSB ──(agenda lo aprobado: solo él es PROPOSER)──&gt; TimelockUSB
+TimelockUSB ──(pasado el retardo, llama a liberar())──&gt; Tesoreria (owner = timelock)</pre>
+  <p>El orden del despliegue está en la función <code>desplegarDAO()</code> de <code>test/s15/Gobierno.test.js</code>. Léanla: el fundador es administrador del timelock <strong>solo un momento</strong>, para repartir los roles al Governor, y luego renuncia.</p>
+
+  <div class="pregunta">
+    <div class="cab"><div class="n">1</div><div class="enun"><span class="tema">CORRER LAS PRUEBAS DE ESTRUCTURA</span>Deben pasar sin tocar nada</div></div>
+    <div class="just">
+      <pre>npx hardhat test test/s15/Gobierno.test.js</pre>
+      <strong>Salida esperada</strong> (los tiempos cambian):
+      <pre>  S15 · TokenVoto · delegación
+    √ los tokens NO cuentan como votos hasta que se delega
+    √ delegar a otra cuenta le presta la voz, no los tokens
+    √ solo el dueño puede acuñar: acuñar libremente sería fabricar votos
+  S15 · roles del timelock
+    √ el Governor es el único proponente y cancelador; ejecutar es abierto
+    √ ★ el fundador renunció: ya no puede repartir roles (no hay dueño escondido)
+    √ nadie puede agendar directamente en el timelock saltándose la votación
+  S15 · la tesorería solo obedece al timelock
+    √ nadie puede sacar fondos directamente: ni el fundador, ni un votante, ni el Governor
+    √ el dueño de la tesorería es el timelock
+  S15 · defensas de la votación
+    √ ★ votos comprados DESPUÉS de proponer no cuentan (defensa contra el préstamo relámpago)
+    √ nadie vota dos veces
+    √ sin quórum, la propuesta es derrotada aunque todos los votos sean a favor
+
+  11 passing</pre>
+      <strong>Cómo sé que funcionó:</strong> <code>11 passing</code> y ningún <code>failing</code>. Si falla aquí, el problema es de instalación (sección 3), no de ustedes.
+    </div>
+  </div>
+
+  <div class="caja alerta">
+    <div class="caja-et">LA PRUEBA QUE EXPLICA BEANSTALK</div>
+    <p>Lean la prueba «★ votos comprados DESPUÉS de proponer no cuentan». Un atacante consigue 1 000 tokens (diez veces todo lo demás) <strong>después</strong> de la propuesta, delega y vota. Su voto pesa <strong>cero</strong>, porque el Governor pregunta por el saldo en el bloque del <em>snapshot</em>, no por el de hoy. En abril de 2022, Beanstalk medía el poder de voto en el momento de votar, y un atacante lo compró con préstamos relámpago por unos USD 1 000 millones dentro de una sola transacción.</p>
+  </div>
+
+  <div class="caja">
+    <div class="caja-et">PUNTO DE CONTROL 1</div>
+    <p>11 pruebas en verde y la pareja puede responder, sin mirar: ¿quién es el dueño de la tesorería? ¿Quién tiene el rol <code>PROPOSER</code> del timelock? ¿Quién tiene el rol <code>DEFAULT_ADMIN</code> al terminar el despliegue? (Timelock · el Governor · nadie.)</p>
+  </div>
+</section>
+
+<!-- ============================================================ 5 -->
+<section class="sec salto">
+  <div class="sec-cab"><span class="sec-num">05</span><h2>Parte 2 · El ciclo completo con tiempo simulado</h2><span class="lead">20 MINUTOS · TODO 1 A 5</span></div>
+  <p>En la red local el tiempo no pasa solo: hay que moverlo. Dos herramientas, <strong>dos relojes distintos</strong>:</p>
+  <table>
+    <tr><th style="width:30%">HERRAMIENTA</th><th style="width:30%">QUÉ AVANZA</th><th>PARA QUÉ</th></tr>
+    <tr><td class="pk">await mine(n)</td><td>n bloques</td><td>El Governor mide el retraso (1) y el periodo de votación (50) en <strong>bloques</strong>, porque usa el reloj del token (<code>clock()</code> = número de bloque).</td></tr>
+    <tr><td class="pk">await time.increase(s)</td><td>s segundos</td><td>El TimelockController mide el retardo en <strong>segundos</strong> (<code>block.timestamp</code>). En las pruebas: 3 600 s.</td></tr>
+  </table>
+  <p>Estados del Governor (OpenZeppelin v5), que las pruebas comparan como números: <code>0 Pending · 1 Active · 2 Canceled · 3 Defeated · 4 Succeeded · 5 Queued · 6 Expired · 7 Executed</code>.</p>
+
+  <div class="pregunta">
+    <div class="cab"><div class="n">0</div><div class="enun"><span class="tema">ANTES DE ESCRIBIR</span>Ver el punto de partida</div></div>
+    <div class="just">
+      <pre>npx hardhat test test/s15/CicloGobierno.test.js</pre>
+      <strong>Salida esperada al empezar:</strong> <code>2 passing · 3 failing</code>. Fallan las tres marcadas con ★. Las dos sin ★ («sin delegar…» y «execute exige los MISMOS datos…») ya están completas: <strong>úsenlas como ejemplo</strong> de cómo se llama cada función.
+    </div>
+  </div>
+
+  <div class="pregunta">
+    <div class="cab"><div class="n">1</div><div class="enun"><span class="tema">TODO 1a · 1b · DELEGAR Y PROPONER</span>Prueba «★ proponer, votar, encolar, esperar y ejecutar»</div></div>
+    <div class="just">
+      <strong>Qué hacer:</strong> que Ana, Beto y Carla se deleguen el voto a sí mismas y minar un bloque; luego que Ana proponga.<br>
+      <strong>Pistas:</strong> <code>await token.connect(ana).delegate(ana.address)</code> (igual para beto y carla), luego <code>await mine(1)</code>. Para proponer: <code>await gobierno.connect(ana).propose(p.targets, p.values, p.calldatas, p.descripcion)</code>. La descripción va en <strong>texto</strong>; su hash (<code>p.hashDescripcion</code>) solo se usa en <code>queue</code> y <code>execute</code>.<br>
+      <strong>Por qué el <code>mine(1)</code>:</strong> el snapshot debe quedar en un bloque POSTERIOR a la delegación; si no, la delegación no cuenta.<br>
+      <strong>Cómo lo compruebo:</strong> la línea ya escrita <code>expect(await gobierno.state(id)).to.equal(ESTADO.Pending)</code> deja de fallar.
+    </div>
+  </div>
+
+  <div class="pregunta">
+    <div class="cab"><div class="n">2</div><div class="enun"><span class="tema">TODO 2a · 2b · 2c · ABRIR, VOTAR Y CERRAR</span>Mover bloques</div></div>
+    <div class="just">
+      <strong>Qué hacer:</strong> avanzar 2 bloques (el retraso es 1), votar Ana a favor y Beto en contra, avanzar 51 bloques (el periodo es 50).<br>
+      <strong>Pistas:</strong> <code>await mine(2)</code> · <code>await gobierno.connect(ana).castVote(id, VOTO.AFavor)</code> · <code>await gobierno.connect(beto).castVote(id, VOTO.Contra)</code> · <code>await mine(51)</code>.<br>
+      <strong>La cuenta:</strong> a favor 60, en contra 30, quórum 4 % de 100 = 4. Hay quórum (60 ≥ 4) y mayoría (60 &gt; 30).<br>
+      <strong>Cómo lo compruebo:</strong> pasan las líneas que esperan <code>Active</code> y luego <code>Succeeded</code>.
+    </div>
+  </div>
+
+  <div class="pregunta">
+    <div class="cab"><div class="n">3</div><div class="enun"><span class="tema">TODO 3a · 3b · ENCOLAR Y ESPERAR</span>El segundo reloj</div></div>
+    <div class="just">
+      <strong>Qué hacer:</strong> encolar en el timelock y esperar el retardo.<br>
+      <strong>Pistas:</strong> <code>await gobierno.queue(p.targets, p.values, p.calldatas, p.hashDescripcion)</code> y luego <code>await time.increase(RETARDO + 1)</code>.<br>
+      <strong>Error típico:</strong> usar <code>mine(3600)</code>. Mina 3 600 bloques, pero en la red local cada bloque avanza apenas un segundo de reloj… y además es lentísimo. El timelock necesita <strong>segundos</strong>.<br>
+      <strong>Cómo lo compruebo:</strong> la prueba entera pasa: <code>execute</code> mueve 2 ETH a Carla (<code>changeEtherBalance</code>) y el estado final es <code>Executed</code>.
+    </div>
+  </div>
+
+  <div class="pregunta">
+    <div class="cab"><div class="n">4</div><div class="enun"><span class="tema">TODO 4a · 4b · EJECUTAR ANTES DE TIEMPO</span>Prueba «★ ejecutar antes de que venza el timelock revierte»</div></div>
+    <div class="just">
+      <strong>Qué hacer:</strong> llevar una propuesta hasta <code>Queued</code> (delegar Ana → <code>mine(1)</code> → proponer → <code>mine(2)</code> → votar a favor → <code>mine(51)</code> → <code>queue</code>) y comprobar que <code>execute</code> revierte <strong>sin</strong> esperar.<br>
+      <strong>Pista:</strong> <code>await expect(gobierno.execute(...)).to.be.revertedWithCustomError(timelock, "TimelockUnexpectedOperationState")</code>. El error es del <strong>timelock</strong>, no del Governor: quien se niega es quien ejecuta. Borren la línea <code>void timelock;</code>.<br>
+      <strong>Cómo lo compruebo:</strong> la prueba pasa y la última línea confirma que la propuesta sigue en <code>Queued</code>.
+    </div>
+  </div>
+
+  <div class="pregunta">
+    <div class="cab"><div class="n">5</div><div class="enun"><span class="tema">TODO 5 · UNA DERROTADA NO AVANZA</span>Prueba «★ una propuesta derrotada no se puede encolar ni ejecutar»</div></div>
+    <div class="just">
+      <strong>Qué hacer:</strong> la propuesta ya está <code>Defeated</code> (60 en contra, 10 a favor). Escriban dos <code>expect</code>: <code>queue(...)</code> y <code>execute(...)</code> deben revertir con <code>revertedWithCustomError(gobierno, "GovernorUnexpectedProposalState")</code>. Borren la línea <code>expect.fail(...)</code>.<br>
+      <strong>Cómo lo compruebo:</strong> <code>npx hardhat test test/s15/CicloGobierno.test.js</code> → <code>5 passing</code>.
+    </div>
+  </div>
+
+  <div class="caja">
+    <div class="caja-et">PUNTO DE CONTROL 2</div>
+    <p><code>5 passing · 0 failing</code>, y la pareja sabe explicar por qué el retraso y el periodo se mueven con <code>mine</code> y el timelock con <code>time.increase</code>. Recuerden: no se valen <code>.to.be.reverted</code> genéricos; siempre el error concreto.</p>
+  </div>
+</section>
+
+<!-- ============================================================ 6 -->
+<section class="sec">
+  <div class="sec-cab"><span class="sec-num">06</span><h2>Parte 3a · Un multisig 2 de 3 por dentro</h2><span class="lead">15 MINUTOS · TODO 1 Y 2</span></div>
+  <p><code>MultisigUSB</code> es un multisig <strong>mínimo</strong>: tres firmantes, umbral 2. El flujo: un firmante <code>proponer()</code> (y con eso ya confirma), otro <code>confirmar()</code>, y con 2 confirmaciones cualquiera de ellos <code>ejecutar()</code>. En la vida real se usa Safe (parte 3b); este contrato existe para ver el mecanismo sin la complejidad de Safe, y como plan B cuando no hay red.</p>
+  <div class="pregunta">
+    <div class="cab"><div class="n">0</div><div class="enun"><span class="tema">PUNTO DE PARTIDA</span>Con los TODO vacíos</div></div>
+    <div class="just">
+      <pre>npx hardhat test test/s15/Multisig.test.js</pre>
+      <strong>Salida esperada al empezar:</strong> <code>4 passing · 7 failing</code>. Pasan las tres de configuración y «un extraño no puede confirmar ni ejecutar» (esas las cubren los modificadores, que ya están escritos). Fallan las 7 marcadas con ★.
+    </div>
+  </div>
+  <div class="pregunta">
+    <div class="cab"><div class="n">1</div><div class="enun"><span class="tema">TODO 1 · confirmar(id)</span>Sumar una firma, una sola vez</div></div>
+    <div class="just">
+      <strong>Qué escribir</strong> (los modificadores ya comprobaron que quien llama es firmante y que la transacción existe y está pendiente):<br>
+      a) si <code>confirmo[id][msg.sender]</code> ya es <code>true</code> → <code>revert YaConfirmo(id)</code>; b) marcarlo en <code>true</code>; c) <code>transacciones[id].confirmaciones += 1</code>; d) <code>emit Confirmada(id, msg.sender)</code>.<br>
+      <strong>Pista:</strong> <code>revocar()</code>, que ya está escrita, hace exactamente lo contrario. Léanla.
+    </div>
+  </div>
+  <div class="pregunta">
+    <div class="cab"><div class="n">2</div><div class="enun"><span class="tema">TODO 2 · ejecutar(id)</span>Verificar → modificar → interactuar</div></div>
+    <div class="just">
+      <strong>Qué escribir, en este orden:</strong><br>
+      a) <code>Transaccion storage t = transacciones[id];</code><br>
+      b) si <code>t.confirmaciones &lt; umbral</code> → <code>revert FaltanConfirmaciones(t.confirmaciones, umbral)</code><br>
+      c) <code>t.ejecutada = true;</code> <strong>antes</strong> de la llamada externa (patrón de la Sesión 9: si fuera después, el destino podría reentrar y ejecutar dos veces)<br>
+      d) <code>(bool ok, ) = t.destino.call{value: t.valor}(t.datos);</code> · e) si <code>!ok</code> → <code>revert EjecucionFallida()</code> · f) <code>emit Ejecutada(id)</code><br>
+      <strong>Cómo lo compruebo:</strong> <code>11 passing</code>. La prueba «★ si la llamada de destino falla…» confirma que un revert deshace también el <code>t.ejecutada = true</code>.
+    </div>
+  </div>
+  <table>
+    <tr><th style="width:18%">ESQUEMA</th><th style="width:26%">SOBREVIVE A PERDER</th><th style="width:26%">RESISTE QUE ROBEN</th><th>REGLA</th></tr>
+    <tr><td class="pk">2 de 3</td><td>1 clave</td><td>1 clave</td><td rowspan="2">sobrevive a perder n − m · resiste que roben m − 1</td></tr>
+    <tr><td class="pk">3 de 5</td><td>2 claves</td><td>2 claves</td></tr>
+  </table>
+</section>
+
+<!-- ============================================================ 7 -->
+<section class="sec">
+  <div class="sec-cab"><span class="sec-num">07</span><h2>Parte 3b · Safe 2 de 2 en Sepolia</h2><span class="lead">20 MINUTOS · NECESITA ETH DE PRUEBA</span></div>
+  <div class="caja clave">
+    <div class="caja-et">VERIFICADO EL 17-09-2026</div>
+    <p>Safe{Wallet} tiene Sepolia habilitada (su servicio de configuración pública responde para la cadena 11155111 y su servicio de transacciones de Sepolia está activo). <strong>OP Sepolia NO aparece</strong> en su lista de redes: no intenten el Safe en OP Sepolia. Con dos o más firmantes, crear el Safe exige pagar el despliegue con ETH de prueba. Si la interfaz cambió, la ayuda oficial está en <code>help.safe.global</code> («Creating a Safe on a Web browser»).</p>
+  </div>
+  <p><strong>Necesitan:</strong> dos billeteras MetaMask <strong>del curso</strong> (una por integrante, cada una en su computador), la de quien crea con al menos 0,01 ETH de Sepolia. Nunca billeteras personales con fondos reales.</p>
+  <table>
+    <tr><th style="width:8%">#</th><th style="width:50%">QUÉ HACER</th><th>QUÉ DEBEN VER / CÓMO SABER QUE FUNCIONÓ</th></tr>
+    <tr><td class="pk">1</td><td>Integrante A entra a <code>app.safe.global</code>, conecta MetaMask y elige la red <strong>Sepolia</strong>.</td><td>Arriba se ve la red Sepolia y la dirección de A.</td></tr>
+    <tr><td class="pk">2</td><td>«Create account». Nombre: <code>lab15-pareja-XX</code> (solo se guarda en el navegador).</td><td>Pide firmantes y umbral.</td></tr>
+    <tr><td class="pk">3</td><td>Firmantes: la dirección de A y la de B (B se la dicta, se verifica carácter por carácter los primeros y últimos 4). Umbral: <strong>2 de 2</strong>.</td><td>Resumen: «2 out of 2 signers».</td></tr>
+    <tr><td class="pk">4</td><td>Revisar y pagar el despliegue. Confirmar en MetaMask leyendo el monto.</td><td>Aparece la dirección del Safe. Anótenla en <code>evidencia.md</code>.</td></tr>
+    <tr><td class="pk">5</td><td>Desde MetaMask de A, enviar 0,002 ETH de Sepolia a la dirección del Safe.</td><td>El saldo del Safe muestra 0,002 ETH.</td></tr>
+    <tr><td class="pk">6</td><td>A: «New transaction» → «Send tokens» → 0,001 ETH a la dirección de B. Firmar.</td><td>La firma es un mensaje, <strong>no</strong> una transacción: no cobra gas. Queda en «Queue» con «1 of 2».</td></tr>
+    <tr><td class="pk">7</td><td>B entra a <code>app.safe.global</code> con SU MetaMask, abre el mismo Safe, revisa destino y monto, y confirma.</td><td>«2 of 2»: ya se puede ejecutar.</td></tr>
+    <tr><td class="pk">8</td><td>Uno de los dos ejecuta (esta sí paga gas).</td><td>Pasa a «History». El hash de la ejecución se abre en <code>sepolia.etherscan.io</code>.</td></tr>
+  </table>
+  <div class="caja alerta">
+    <div class="caja-et">SI NO HAY ETH DE PRUEBA O EL FAUCET FALLA</div>
+    <p>Pidan ETH de prueba al docente (billetera institucional). Si aun así no es posible, entreguen la parte 3a con sus 11 pruebas en verde y documenten el intento de la 3b con capturas: se califica el 3a completo y la explicación de la diferencia entre MultisigUSB (cada confirmación es una transacción) y Safe (confirmaciones fuera de cadena, una sola ejecución).</p>
+  </div>
+</section>
+
+<!-- ============================================================ 8 -->
+<section class="sec">
+  <div class="sec-cab"><span class="sec-num">08</span><h2>Parte 4 · La DAO completa en Sepolia</h2><span class="lead">~15 MINUTOS DE ESPERA</span></div>
+  <p>El script <code>scripts/s15/ciclo-gobierno.js</code> despliega las cuatro piezas, reparte roles, renuncia al admin y recorre una propuesta hasta ejecutarla. En Sepolia una sola cuenta hace todo (fundadora, votante, ejecutora): sirve para ver el ciclo <strong>en cadena</strong>, no para simular una comunidad. Allí el timelock es de 120 s.</p>
+
+  <div class="pregunta">
+    <div class="cab"><div class="n">1</div><div class="enun"><span class="tema">ENSAYO LOCAL</span>Gratis y en segundos</div></div>
+    <div class="just">
+      <pre>npx hardhat run scripts/s15/ciclo-gobierno.js</pre>
+      <strong>Salida esperada</strong> (extracto real; los hashes cambian en cada corrida):
+      <pre>  Red: default · cuenta: 0xf39Fd6e51aad88F6F4ce6aB8827279cffFb92266
+  [   0 s] token        0x5FbDB2315678afecb367f032d93F642f64180aa3
+  [   0 s] votos antes  0.0 (sin delegar no hay votos)
+  [   0 s] delegar      tx 0x2a80…  gas 95.622
+  [   0 s] votos ahora  100.0
+  [   0 s] proponer     tx 0x0ff9…  gas 69.694
+  [   0 s] estado       Active
+  [   0 s] votar        tx 0xde55…  gas 83.256
+  [   0 s] estado       Succeeded
+  [   0 s] encolar      tx 0x46bd…  gas 145.311
+  [   0 s] ejecutar     tx 0x51ed…  gas 98.066
+  [   0 s] estado       Executed
+  [   0 s] tesoreria    0.002 → 0.001 ETH</pre>
+    </div>
+  </div>
+
+  <div class="pregunta">
+    <div class="cab"><div class="n">2</div><div class="enun"><span class="tema">EL KEYSTORE</span>Si no lo configuraron en la Sesión 8</div></div>
+    <div class="just">
+      <pre>npx hardhat keystore set SEPOLIA_RPC_URL        # la URL de Alchemy o Infura para Sepolia
+npx hardhat keystore set SEPOLIA_PRIVATE_KEY    # la clave de la billetera DEL CURSO</pre>
+      La primera vez pide crear una contraseña del keystore; después la pide en cada uso. <strong>Nunca</strong> pongan la clave en un <code>.env</code>, en el código ni en un mensaje.
+    </div>
+  </div>
+
+  <div class="pregunta">
+    <div class="cab"><div class="n">3</div><div class="enun"><span class="tema">CORRER EN SEPOLIA</span>Y no cerrar la terminal</div></div>
+    <div class="just">
+      <pre>npx hardhat run scripts/s15/ciclo-gobierno.js --network sepolia</pre>
+      <strong>Costo medido:</strong> los cuatro despliegues suman 7,57 millones de gas (solo el Governor, 3,93 M) y las transacciones unos 0,66 M más: ≈ 8,2 M de gas. Con el gas a 1 gwei son ≈ 0,0082 ETH de prueba, más 0,002 ETH que van a la tesorería. <strong>Tengan al menos 0,02 ETH.</strong><br>
+      <strong>Tiempos:</strong> la votación dura 50 bloques (≈ 10 minutos con bloques de 12 s) y el timelock 2 minutos. Verán líneas <code>... bloque N, faltan M</code>: es normal.<br>
+      <strong>Cómo sé que terminó:</strong> las últimas líneas dicen <code>estado Executed</code> y <code>tesoreria 0.002 → 0.001 ETH</code>. Copien todas las direcciones y hashes a <code>evidencia.md</code> y abran dos de ellos en <code>sepolia.etherscan.io</code>.
+    </div>
+  </div>
+  <div class="caja">
+    <div class="caja-et">PUNTO DE CONTROL 4</div>
+    <p>En Etherscan, la transacción «ejecutar» debe mostrar en su pestaña de transferencias internas un movimiento de 0,001 ETH <strong>desde la tesorería</strong>, disparado a través del timelock. Si lo ven, entienden la cadena de llamadas completa.</p>
+  </div>
+</section>
+
+<!-- ============================================================ 9 -->
+<section class="sec">
+  <div class="sec-cab"><span class="sec-num">09</span><h2>Resumen de puntos de control</h2></div>
+  <table>
+    <tr><th style="width:26%">PUNTO</th><th style="width:40%">COMANDO</th><th>RESULTADO</th></tr>
+    <tr><td class="pk">1 · estructura</td><td><code>npx hardhat test test/s15/Gobierno.test.js</code></td><td>11 passing</td></tr>
+    <tr><td class="pk">2 · ciclo</td><td><code>npx hardhat test test/s15/CicloGobierno.test.js</code></td><td>5 passing (al empezar: 2 · 3 failing)</td></tr>
+    <tr><td class="pk">3a · multisig</td><td><code>npx hardhat test test/s15/Multisig.test.js</code></td><td>11 passing (al empezar: 4 · 7 failing)</td></tr>
+    <tr><td class="pk">3b · Safe</td><td>app.safe.global · Sepolia</td><td>Ejecución «2 of 2» en History</td></tr>
+    <tr><td class="pk">4 · evidencia</td><td><code>npx hardhat run scripts/s15/ciclo-gobierno.js --network sepolia</code></td><td>estado Executed · tesorería 0.002 → 0.001</td></tr>
+  </table>
+</section>
+
+<!-- ============================================================ 10 -->
+<section class="sec">
+  <div class="sec-cab"><span class="sec-num">10</span><h2>Lo que conviene saber de fondo</h2></div>
+  <table>
+    <tr><th style="width:30%">IDEA</th><th>EXPLICACIÓN CORTA</th></tr>
+    <tr><td class="pk">Quórum</td><td>En el conteo simple de OpenZeppelin se alcanza con votos A FAVOR + ABSTENCIÓN ≥ 4 % del suministro en el snapshot. La mayoría es otra condición: A FAVOR &gt; EN CONTRA.</td></tr>
+    <tr><td class="pk">Snapshot</td><td>Bloque de la propuesta + retraso. El poder de voto se lee en ese bloque: comprar votos después no sirve.</td></tr>
+    <tr><td class="pk">Por qué el timelock ejecuta</td><td>Con <code>GovernorTimelockControl</code>, el Governor agenda y el timelock llama. Los activos y permisos deben pertenecer al <strong>timelock</strong>; lo que se envíe al Governor queda inaccesible para las propuestas.</td></tr>
+    <tr><td class="pk">Renunciar al admin</td><td>Si quien desplegó conserva <code>DEFAULT_ADMIN_ROLE</code>, puede darse <code>PROPOSER</code> y agendar sin votación. OpenZeppelin advierte que dar esos roles a alguien más que el Governor es «muy riesgoso».</td></tr>
+    <tr><td class="pk">TokenVoto con dueño</td><td><code>acunar</code> es <code>onlyOwner</code>: en un token de gobierno, acuñar libremente es fabricar votos. En una DAO real, el dueño del token sería también el timelock.</td></tr>
+  </table>
+</section>
+
+<!-- ============================================================ 11 -->
+<section class="sec">
+  <div class="sec-cab"><span class="sec-num">11</span><h2>Errores frecuentes</h2><span class="lead">CASI TODO SE RESUELVE AQUÍ</span></div>
+  <table>
+    <tr><th style="width:42%">SÍNTOMA</th><th>CAUSA Y SOLUCIÓN</th></tr>
+    <tr><td class="pk">El voto se emite pero la propuesta termina Defeated</td><td>Nadie delegó, o se delegó después del snapshot. Delegar y <code>mine(1)</code> ANTES de <code>propose</code>.</td></tr>
+    <tr><td class="pk">state() revierte con GovernorNonexistentProposal</td><td>Calcularon el <code>id</code> con <code>hashProposal</code> pero nunca llamaron <code>propose</code> (o con otros datos).</td></tr>
+    <tr><td class="pk">castVote revierte con GovernorUnexpectedProposalState</td><td>La votación aún no abre (falta <code>mine(2)</code>) o ya cerró.</td></tr>
+    <tr><td class="pk">execute revierte con TimelockUnexpectedOperationState</td><td>No esperaron el retardo, o lo movieron con <code>mine</code>. Usar <code>time.increase(RETARDO + 1)</code>.</td></tr>
+    <tr><td class="pk">execute revierte con OwnableUnauthorizedAccount</td><td>La tesorería tiene de dueño al Governor. Debe ser el timelock.</td></tr>
+    <tr><td class="pk">queue revierte con GovernorNonexistentProposal</td><td>El hash de la descripción no coincide con el texto propuesto: un espacio o una tilde cambian el <code>id</code>.</td></tr>
+    <tr><td class="pk">TypeError: … is not a function en la prueba</td><td>Usaron <code>.to.be.reverted</code> (deprecado en este proyecto). Usar <code>revertedWithCustomError(contrato, "Nombre")</code>.</td></tr>
+    <tr><td class="pk">Multisig: «YaConfirmo» al proponer</td><td>En <code>confirmar</code> marcaron <code>confirmo</code> antes de comprobarlo. Primero el <code>if</code>, después la marca.</td></tr>
+    <tr><td class="pk">Multisig: la prueba de «llamada que falla» deja ejecutada = true</td><td>No revierten cuando <code>ok</code> es falso. Sin <code>revert</code>, el cambio de estado se queda.</td></tr>
+    <tr><td class="pk">HHE… «configuration variable SEPOLIA_RPC_URL» al usar --network</td><td>Falta el keystore: <code>npx hardhat keystore set SEPOLIA_RPC_URL</code>.</td></tr>
+    <tr><td class="pk">«insufficient funds» en Sepolia</td><td>Menos de 0,02 ETH de prueba. Pedir al faucet o al docente.</td></tr>
+    <tr><td class="pk">En Safe no aparece la red</td><td>Safe no soporta OP Sepolia. Usar Sepolia.</td></tr>
+  </table>
+</section>
+
+<!-- ============================================================ 12 -->
+<section class="sec">
+  <div class="sec-cab"><span class="sec-num">12</span><h2>Preguntas de reflexión</h2><span class="lead">VAN EN reflexion.md</span></div>
+  <p>Se responden mirando <strong>su</strong> corrida, no la teoría. Una respuesta sin el dato concreto de su evidencia vale la mitad.</p>
+  <ol>
+    <li>En su corrida de Sepolia, ¿en qué bloque se propuso, cuál fue el <code>proposalSnapshot</code> y cuál el <code>proposalDeadline</code>? Muestren la resta que da 50 y expliquen por qué la votación empezó un bloque después.</li>
+    <li>Abran en Etherscan la transacción «ejecutar». ¿Qué dirección aparece como <code>From</code>, cuál como <code>To</code>, y desde qué contrato salió el 0,001 ETH? Dibujen la cadena de llamadas con esas direcciones.</li>
+    <li>¿Cuánto gas costó desplegar su Governor en Sepolia y cuánto el TokenVoto? ¿Por qué creen que el Governor es el más caro? (pista: miren cuántas extensiones hereda).</li>
+    <li>En la prueba del préstamo relámpago, ¿qué devolvería <code>getVotes(atacante)</code> y qué <code>getVotes(atacante, snapshot)</code>? ¿Cuál de las dos usa el Governor, y qué habría cambiado en Beanstalk si usaba la segunda?</li>
+    <li>Si su Safe fuera 2 de 3 en vez de 2 de 2, ¿qué habría pasado si uno de ustedes pierde su frase semilla? ¿Y si se la roban? Usen la regla n − m / m − 1.</li>
+    <li>Para el proyecto de su equipo: ¿quién debería ser el dueño de los contratos en producción (una clave, un multisig m de n, o una DAO con timelock)? Justifiquen con las etapas de A.2 del deck. Máximo 150 palabras.</li>
+  </ol>
+</section>
+
+<!-- ============================================================ 13 -->
+<section class="sec">
+  <div class="sec-cab"><span class="sec-num">13</span><h2>Lista de chequeo de entrega</h2></div>
+  <ul>
+    <li>☐ Captura de <code>Gobierno.test.js</code>: 11 passing, con el comando visible.</li>
+    <li>☐ Captura de <code>CicloGobierno.test.js</code>: 5 passing, y el archivo completado en el repositorio.</li>
+    <li>☐ Captura de <code>Multisig.test.js</code>: 11 passing, y <code>MultisigUSB.sol</code> completado.</li>
+    <li>☐ <code>evidencia.md</code>: red, cuenta, direcciones de los 4 contratos, hashes de proponer, votar, encolar y ejecutar (o, en su lugar, dirección del Safe y hash de la ejecución 2 de 2).</li>
+    <li>☐ <code>reflexion.md</code> con las 6 respuestas, cada una con su dato concreto.</li>
+    <li>☐ <code>git status</code> revisado antes del <code>push</code>: ninguna clave, URL con API key ni frase semilla en el repositorio.</li>
+  </ul>
+</section>
+
+<!-- ============================================================ 14 -->
+<section class="sec">
+  <div class="sec-cab"><span class="sec-num">14</span><h2>Rúbrica</h2><span class="lead">PARTE DEL 4 % DE LABORATORIOS S14–S16</span></div>
+  <table>
+    <tr><th style="width:26%">CRITERIO</th><th style="width:8%">PESO</th><th style="width:22%">EXCELENTE (5,0)</th><th style="width:22%">ACEPTABLE (3,5)</th><th>INSUFICIENTE (&lt; 3,0)</th></tr>
+    <tr><td class="pk">Pruebas de gobernanza</td><td>30 %</td><td>11/11 y 5/5, con los errores concretos (sin <code>.reverted</code> genéricos).</td><td>Pasan, pero con atajos o comentarios que no explican.</td><td>Faltan pruebas o no pasan.</td></tr>
+    <tr><td class="pk">Multisig</td><td>20 %</td><td>11/11; orden verificar → modificar → interactuar respetado.</td><td>Pasan, con el orden invertido o sin eventos.</td><td>No pasan.</td></tr>
+    <tr><td class="pk">Evidencia en cadena</td><td>25 %</td><td>Ciclo completo en Sepolia (Executed) o Safe 2 de 2 ejecutado, con hashes verificables.</td><td>Evidencia parcial (desplegado pero sin ejecutar).</td><td>Sin evidencia on-chain.</td></tr>
+    <tr><td class="pk">Reflexión</td><td>25 %</td><td>Las 6 respuestas con datos de su corrida y razonamiento propio.</td><td>Respuestas correctas pero genéricas.</td><td>Respuestas copiadas o sin datos.</td></tr>
+  </table>
+</section>
+
+<!-- ============================================================ 15 -->
+<section class="sec">
+  <div class="sec-cab"><span class="sec-num">15</span><h2>Referencias</h2><span class="lead">CONSULTADAS EL 17-09-2026</span></div>
+  <ul>
+    <li>OpenZeppelin Contracts 5.x · Governance (Governor, GovernorTimelockControl, TimelockController, ERC20Votes). <code>https://docs.openzeppelin.com/contracts/5.x/governance</code></li>
+    <li>Safe · redes soportadas (configuración pública): <code>https://safe-config.safe.global/api/v1/chains/11155111/</code> · ayuda: <code>https://help.safe.global/articles/7267202833-creating-a-safe-on-a-web-browser</code></li>
+    <li>Beanstalk · post-mortem oficial: <code>https://bean.money/blog/beanstalk-governance-exploit</code> · análisis: <code>https://rekt.news/beanstalk-rekt/</code></li>
+    <li>Hardhat 3 · network helpers (<code>mine</code>, <code>time</code>) y keystore: <code>https://hardhat.org/docs</code></li>
+  </ul>
+</section>
+
+</body>
+</html>

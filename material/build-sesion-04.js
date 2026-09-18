@@ -30,16 +30,21 @@ async function construir() {
     notas: "Hay una pausa de 10 minutos entre B y C. El Quiz va al final para no cortar la teoría. El bloque D se explica en 5-8 minutos al cierre: el laboratorio se resuelve fuera de clase con su guía en PDF.",
   });
 
-  await D.objetivo({
-    objetivo: "Comparar mecanismos de consenso y justificar cuál conviene a un problema concreto, con sus costos a la vista.",
-    preguntas: [
-      "¿Cómo se ponen de acuerdo participantes que no confían entre sí y pueden mentir?",
-      "¿Por qué hace falta gastar algo escaso —energía o capital— para votar?",
-      "¿Qué es exactamente una bifurcación, y cuándo una transacción es definitiva?",
-      "¿Por qué ningún diseño consigue a la vez descentralización, seguridad y escala?",
-    ],
-    ra: "RA2 · Comparar mecanismos de consenso y justificar la elección de una arquitectura frente a un problema concreto.",
-  });
+  {
+    /* El RA se dibuja aquí y no con `ra:` de D.objetivo: con cuatro preguntas,
+       la posición que calcula la librería cae sobre el pie de página. */
+    const s = await D.objetivo({
+      objetivo: "Comparar mecanismos de consenso y justificar cuál conviene a un problema concreto, con sus costos a la vista.",
+      preguntas: [
+        "¿Cómo se ponen de acuerdo participantes que no confían entre sí y pueden mentir?",
+        "¿Por qué hace falta gastar algo escaso —energía o capital— para votar?",
+        "¿Qué es exactamente una bifurcación, y cuándo una transacción es definitiva?",
+        "¿Por qué ningún diseño consigue a la vez descentralización, seguridad y escala?",
+      ],
+      notas: "Leer el objetivo en voz alta y las cuatro preguntas. Anunciar que al cierre del bloque A cada una tendrá respuesta, y que las cuatro entran en el Quiz 1. 2 minutos.",
+    });
+    D.definicion(s, "RA2 · Comparar mecanismos de consenso y justificar la elección de una arquitectura frente a un problema concreto.", { x: M, y: 6.36, w: CW, h: 0.42, size: 10.5 });
+  }
 
   await D.glosario({
     items: [
@@ -52,22 +57,23 @@ async function construir() {
       ["Finalidad", "Finality", "El punto a partir del cual revertir una transacción es imposible o prohibitivamente caro."],
       ["Reorg", "Reorganización", "La red abandona los últimos bloques de su cadena porque apareció otra con más peso."],
     ],
+    notas: "No se explica ahora: es el mapa de siglas de hoy. Pedir que la fotografíen o la tengan abierta; cada término se desarrolla en su lámina. Señalar que PoW, PoS y finalidad entran en el Quiz 1. 1 minuto.",
   });
 
   /* ================================================================ A */
-  await D.divisor({ letra: "A", titulo: "Consenso e incentivos", sub: "El acuerdo entre desconocidos no se consigue con criptografía sola. Se consigue haciendo que mentir salga caro.", minutos: "APROXIMADAMENTE 80 MINUTOS", ic: "red" });
+  (await D.divisor({ letra: "A", titulo: "Consenso e incentivos", sub: "El acuerdo entre desconocidos no se consigue con criptografía sola. Se consigue haciendo que mentir salga caro.", minutos: "APROXIMADAMENTE 80 MINUTOS", ic: "red" })).addNotes("Entrada al bloque A, unos 80 minutos. Recordar la pregunta de la lámina 6 antes de mostrarla: si la S3 dejó una cadena que se valida sola, ¿qué falta? Dejar 30 segundos para respuestas y avanzar. 1 minuto.");
 
   {
     const s = await D.lamina({ kicker: "A.1 · de dónde venimos", titulo: "Dos cadenas válidas. ¿Cuál es la buena?", ic: "bifurca", tituloSize: 27 });
-    D.parrafo(s, "En la Sesión 3 construimos una cadena que se valida sola: cada firma verifica, cada bloque apunta al hash del anterior, cada raíz de Merkle coincide. Pero quedó un hueco perfectamente delimitado.", { y: 1.9, h: 0.9, size: 14.5 });
-    D.nodo(s, { x: M, y: 3.05, w: 1.6, h: 0.7, titulo: "BLOQUE 99", fill: C.superf });
-    D.flecha(s, M + 1.6, 3.4, M + 2.3, 3.4, C.tinta, 1.75);
-    D.nodo(s, { x: M + 2.3, y: 3.05, w: 1.6, h: 0.7, titulo: "BLOQUE 100", fill: C.superf });
-    D.flecha(s, M + 3.9, 3.25, M + 4.8, 2.85, C.naranja, 2);
-    D.flecha(s, M + 3.9, 3.55, M + 4.8, 3.95, C.violeta, 2);
-    D.nodo(s, { x: M + 4.8, y: 2.5, w: 3.0, h: 0.7, titulo: "101-A · Ana paga a Beto", line: C.naranja, fill: C.blanco });
-    D.nodo(s, { x: M + 4.8, y: 3.6, w: 3.0, h: 0.7, titulo: "101-B · Ana paga a Carla", line: C.violeta, fill: C.blanco });
-    D.parrafo(s, "Los dos bloques son impecables. Las dos cadenas pasan todas las validaciones del laboratorio. Pero Ana solo tenía dinero para uno de los dos pagos.", { x: M + 8.1, y: 2.55, w: CW - 8.1, h: 1.8, size: 13 });
+    D.parrafo(s, "En la Sesión 3 construimos una cadena que se valida sola: cada firma verifica, cada bloque apunta al hash del anterior, cada raíz de Merkle coincide. Pero quedó un hueco perfectamente delimitado.", { y: 1.9, h: 0.75, size: 14.5 });
+    D.nodo(s, { x: M, y: 3.2, w: 1.6, h: 0.7, titulo: "BLOQUE 99", fill: C.superf });
+    D.flecha(s, M + 1.6, 3.55, M + 2.3, 3.55, C.tinta, 1.75);
+    D.nodo(s, { x: M + 2.3, y: 3.2, w: 1.6, h: 0.7, titulo: "BLOQUE 100", fill: C.superf });
+    D.flecha(s, M + 3.9, 3.4, M + 4.8, 3.0, C.naranja, 2);
+    D.flecha(s, M + 3.9, 3.7, M + 4.8, 4.05, C.violeta, 2);
+    D.nodo(s, { x: M + 4.8, y: 2.72, w: 3.0, h: 0.62, titulo: "101-A · Ana paga a Beto", line: C.naranja, fill: C.blanco });
+    D.nodo(s, { x: M + 4.8, y: 3.76, w: 3.0, h: 0.62, titulo: "101-B · Ana paga a Carla", line: C.violeta, fill: C.blanco });
+    D.parrafo(s, "Los dos bloques son impecables. Las dos cadenas pasan todas las validaciones del laboratorio. Pero Ana solo tenía dinero para uno de los dos pagos.", { x: M + 8.1, y: 2.75, w: CW - 8.1, h: 1.7, size: 13 });
     await D.ficha(s, { tipo: "pregunta", etiqueta: "La pregunta de hoy", x: M, y: 4.75, w: CW, h: 1.45, texto: "La validez dice qué cadenas son posibles. El consenso dice cuál de ellas es la historia. Sin consenso vuelve el doble gasto de la Sesión 1 — ahora con criptografía perfecta.", size: 14 });
     s.addNotes("Esta lámina conecta directamente con el doble gasto de la S1: la criptografía no impide el doble gasto, solo impide falsificar firmas. El orden lo decide el consenso.");
   }
@@ -436,7 +442,7 @@ nonce = 49  ->  00db8fc8ef82dc97...   empieza por 00   GANA`, { x: M, y: 2.7, w:
   }
 
   /* ================================================================ B */
-  await D.divisor({ letra: "B", titulo: "Actividad · el caso Estonia", sub: "Se presenta con su propio deck. Trabajo en equipos de proyecto; se expone la próxima sesión, cinco minutos por equipo.", minutos: "APROXIMADAMENTE 45 MINUTOS", ic: "lupa" });
+  (await D.divisor({ letra: "B", titulo: "Actividad · el caso Estonia", sub: "Se presenta con su propio deck. Trabajo en equipos de proyecto; se expone la próxima sesión, cinco minutos por equipo.", minutos: "APROXIMADAMENTE 45 MINUTOS", ic: "lupa" })).addNotes("Aquí se cambia al deck Actividad-04-El-caso-Estonia-DECK. Antes, dar las láminas 34-35 para conectar la actividad con la teoría de hoy. Conformar los equipos de proyecto si no están ya. 1 minuto.");
 
   {
     const s = await D.lamina({ kicker: "B.1 · por qué esta actividad está aquí", titulo: "El consenso aplicado a un caso real", ic: "lupa", tituloSize: 28 });
@@ -451,7 +457,7 @@ nonce = 49  ->  00db8fc8ef82dc97...   empieza por 00   GANA`, { x: M, y: 2.7, w:
   }
 
   /* ================================================================ C */
-  await D.divisor({ letra: "C", titulo: "Quiz 1 · Unidad I", sub: "Treinta minutos, individual y sin apuntes. Evalúa las sesiones 1 a 4: RA1 y RA2.", minutos: "30 MINUTOS · 12 % DE LA NOTA FINAL", ic: "documento" });
+  (await D.divisor({ letra: "C", titulo: "Quiz 1 · Unidad I", sub: "Treinta minutos, individual y sin apuntes. Evalúa las sesiones 1 a 4: RA1 y RA2.", minutos: "30 MINUTOS · 12 % DE LA NOTA FINAL", ic: "documento" })).addNotes("Después de la pausa. Guardar teléfonos y apuntes antes de repartir. Explicar las reglas de la lámina siguiente y arrancar el reloj: 30 minutos exactos.");
 
   {
     const s = await D.lamina({ kicker: "C.1 · condiciones", titulo: "Cómo es el quiz", ic: "documento", tituloSize: 30 });
@@ -468,7 +474,7 @@ nonce = 49  ->  00db8fc8ef82dc97...   empieza por 00   GANA`, { x: M, y: 2.7, w:
   }
 
   /* ================================================================ D */
-  await D.divisor({ letra: "D", titulo: "Para la casa · Laboratorio 04", sub: "La teoría de hoy, convertida en código que corre. No cabía en clase, así que se explica ahora y se resuelve en casa, con una guía paso a paso.", minutos: "TRABAJO AUTÓNOMO · NO CALIFICABLE · MUY RECOMENDADO", ic: "martillo" });
+  (await D.divisor({ letra: "D", titulo: "Para la casa · Laboratorio 04", sub: "La teoría de hoy, convertida en código que corre. No cabía en clase, así que se explica ahora y se resuelve en casa, con una guía paso a paso.", minutos: "TRABAJO AUTÓNOMO · NO CALIFICABLE · MUY RECOMENDADO", ic: "martillo" })).addNotes("Últimos 5-8 minutos, con el quiz ya recogido. No se resuelve nada aquí: se explica qué hay, dónde está la guía en PDF y cómo saber que terminaron (32 pruebas en verde).");
 
   {
     const s = await D.lamina({ kicker: "D.1 · qué es y por qué en casa", titulo: "Minería y ataque del 51 %, en Python", ic: "codigo", tituloSize: 26 });
@@ -534,6 +540,7 @@ python consenso.py                  # el experimento completo`, { x: M, y: 2.65,
     sub: "Con esto cierra la Unidad I: ya saben cómo se asegura un dato, quién lo escribió y cómo se decide el orden. La Unidad II empieza a programar sobre esa base.",
     proxima: "Sesión 5 · Ethereum y la máquina virtual · exposiciones del caso Estonia",
   });
+  D.pres.slides[D.pres.slides.length - 1].addNotes("Leer la frase en voz alta y cerrar. Recordar: la próxima sesión abre con las exposiciones de Estonia (5 minutos por equipo) y el laboratorio 04 se trae resuelto. 1 minuto.");
 
   return D.guardar(path.join(__dirname, "Sesion-04-Blockchain-Web3.pptx"));
 }

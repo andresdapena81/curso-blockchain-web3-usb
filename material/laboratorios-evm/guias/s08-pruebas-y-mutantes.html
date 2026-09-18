@@ -1,0 +1,454 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<title>Guía · Laboratorio 08 · Pruebas, mutantes y despliegue</title>
+<!--ESTILOS-->
+</head>
+<body>
+
+<section class="barra">
+  <div class="kicker">LABORATORIO 08 · SESIÓN 8 · HARDHAT · EN PAREJAS · CALIFICABLE</div>
+  <h1>PRUEBAS QUE<br>ATRAPAN ERRORES:<br><em>CAZAR MUTANTES</em></h1>
+  <div class="sub">Escribir desde cero la suite de un contrato que no trae pruebas, medir su cobertura, demostrar que atrapa tres errores escondidos y desplegarlo verificado en Sepolia con Hardhat Ignition.</div>
+</section>
+
+<dl class="datos">
+  <div><dt>MODALIDAD</dt><dd>En parejas<br>en la sala</dd></div>
+  <div><dt>DURACIÓN</dt><dd>80 min en clase<br>+ cierre en casa</dd></div>
+  <div><dt>REQUISITO</dt><dd>Node.js 22<br>+ billetera del curso</dd></div>
+  <div><dt>META</dt><dd>≥ 10 pruebas · ≥ 80 %<br>3 mutantes muertos</dd></div>
+</dl>
+
+<div class="caja clave">
+  <div class="caja-et">CÓMO LEER ESTA GUÍA</div>
+  <p>Está escrita para hacer el laboratorio <strong>sin ayuda</strong>, desde un computador de la sala recién encendido. Cada paso dice qué escribir, qué deberían ver y cómo saber que funcionó. Las salidas que se muestran son <strong>reales</strong>: se obtuvieron con este mismo repositorio (Hardhat 3.16.0, Solidity 0.8.28). Si algo no coincide, vayan a <strong>16 · Errores frecuentes</strong>.</p>
+</div>
+
+<!-- ============================================================ 1 -->
+<section class="sec">
+  <div class="sec-cab"><span class="sec-num">01</span><h2>Qué se construye y por qué</h2><span class="lead">LEER PRIMERO</span></div>
+  <p><strong>Objetivo de la sesión (plan del curso):</strong> salir del navegador y trabajar con el flujo real de un equipo de desarrollo blockchain. <strong>Resultado de aprendizaje:</strong> RA4 — construir una suite de pruebas automatizadas y desplegar contratos verificados en una red de prueba usando un entorno profesional.</p>
+  <p><code>contracts/s08/Recaudo.sol</code> es un contrato de recaudo con meta y plazo: un semillero recoge aportes; si al vencer el plazo se alcanzó la meta, el beneficiario reclama los fondos; si no, cada aportante recupera lo suyo. <strong>No trae pruebas: escribirlas es el laboratorio.</strong></p>
+  <p>En la misma carpeta hay tres copias —<code>RecaudoMutante1</code>, <code>2</code> y <code>3</code>— con un error sutil cada una. Una suite de pruebas buena:</p>
+  <ol>
+    <li>pasa <strong>completa</strong> contra <code>Recaudo</code>, y</li>
+    <li><strong>falla</strong> (al menos una prueba) contra <strong>cada</strong> mutante.</li>
+  </ol>
+  <div class="caja alerta">
+    <div class="caja-et">EL DATO QUE MOTIVA TODO EL LABORATORIO</div>
+    <p>Al preparar el curso se escribió una suite de <strong>13 pruebas</strong> para <code>Recaudo</code> que alcanza <strong>88 % de cobertura de líneas</strong> —cumple la meta del curso— y sigue <strong>completamente en verde contra los tres mutantes</strong>. Con tres pruebas de borde más, los tres mueren. La cobertura dice dónde no hay pruebas; no dice que las que hay sirvan.</p>
+  </div>
+  <div class="caja peligro">
+    <div class="caja-et">LA REGLA DEL JUEGO</div>
+    <p><strong>No abran los archivos de los mutantes hasta que los tres estén muertos.</strong> El ejercicio es pensar en los bordes del contrato correcto. Comparar los archivos antes convierte el laboratorio en copiar una diferencia, y lo que se evalúa —y lo que van a necesitar en su proyecto y en el parcial— es el método.</p>
+  </div>
+</section>
+
+<!-- ============================================================ 2 -->
+<section class="sec">
+  <div class="sec-cab"><span class="sec-num">02</span><h2>Qué se entrega</h2><span class="lead">EVIDENCIA DE LA SESIÓN</span></div>
+  <p>La evidencia que pide el plan para la Sesión 8 es <strong>repositorio con suite de pruebas verde y contrato verificado</strong>. En concreto, por pareja:</p>
+  <ol>
+    <li><code>test/s08/Recaudo.test.js</code> con <strong>al menos 10 pruebas</strong>, todas en verde contra <code>Recaudo</code>.</li>
+    <li>Captura del informe de cobertura con <strong>Line % ≥ 80</strong> en la fila de <code>contracts\s08\Recaudo.sol</code>.</li>
+    <li>Salida de <code>node scripts/s08/cazar-mutantes.js</code> con los <strong>tres mutantes muertos</strong>, y la tabla de la sección 10.4.</li>
+    <li>Dirección de <code>Recaudo</code> en Sepolia, <strong>desplegado con Ignition y verificado</strong>, y el hash de al menos un aporte.</li>
+    <li>Las respuestas de reflexión (sección 17).</li>
+  </ol>
+</section>
+
+<!-- ============================================================ 3 -->
+<section class="sec salto">
+  <div class="sec-cab"><span class="sec-num">03</span><h2>Preparación desde cero en la sala</h2><span class="lead">10 MINUTOS</span></div>
+
+  <h3 style="font-size:10.5pt;margin:2mm 0 2mm">3.1 · Abrir una terminal en la carpeta del repositorio</h3>
+  <p>En Windows, abran la carpeta <code>laboratorios-evm</code> en el Explorador, hagan clic en la barra de dirección, escriban <code>powershell</code> y Enter. En macOS o Linux: <code>cd</code> y arrastren la carpeta a la terminal. Comprueben con <code>dir</code> (Windows) o <code>ls</code>: deben ver <code>hardhat.config.js</code> y <code>package.json</code>.</p>
+
+  <h3 style="font-size:10.5pt;margin:4mm 0 2mm">3.2 · Comprobar las herramientas</h3>
+  <pre>node --version            # esperado: v22.x.x
+git --version             # esperado: git version 2.x
+npx hardhat --version     # esperado: 3.16.0</pre>
+  <p>Si <code>node</code> no se reconoce, instalen Node.js 22 LTS desde <code>nodejs.org</code> y abran una terminal nueva. Si Hardhat no responde porque falta <code>node_modules</code>, sigan con 3.3.</p>
+
+  <h3 style="font-size:10.5pt;margin:4mm 0 2mm">3.3 · Instalar las dependencias (una vez por semestre)</h3>
+  <pre>npm install</pre>
+  <p><strong>Qué hace:</strong> lee <code>package.json</code> y <code>package-lock.json</code> y descarga exactamente las versiones congeladas del curso (Hardhat 3.16.0, toolbox 3.0.7, OpenZeppelin 5.6.1). <strong>Salida esperada:</strong> termina con <code>added NNN packages</code>. En la red de la sala puede tardar varios minutos. Las líneas <code>npm WARN</code> no son errores. Si falla por la red, reintenten una vez; si persiste, avisen: el docente tiene una copia del repositorio con <code>node_modules</code> lista.</p>
+
+  <h3 style="font-size:10.5pt;margin:4mm 0 2mm">3.4 · La prueba de humo</h3>
+  <pre>npx hardhat test test/s07/Subasta.test.js</pre>
+  <p><strong>Salida esperada:</strong> <code>23 passing</code>. <strong>Cómo sé que funcionó:</strong> si esto pasa, el compilador, OpenZeppelin, la red local y Mocha funcionan. Si falla, casi siempre es que dejaron su versión incompleta de la S7: <code>git checkout contracts/s07/Subasta.sol</code>. La advertencia sobre <code>Operaciones.sol</code> («can be restricted to view») es intencional y no es un error.</p>
+</section>
+
+<!-- ============================================================ 4 -->
+<section class="sec">
+  <div class="sec-cab"><span class="sec-num">04</span><h2>El proyecto por dentro</h2></div>
+  <table>
+    <tr><th style="width:34%">RUTA</th><th>QUÉ ES</th></tr>
+    <tr><td class="pk">hardhat.config.js</td><td>Compilador 0.8.28 con optimizador (200), redes <code>sepolia</code> y <code>opSepolia</code>, verificación. Los secretos aparecen solo como <code>configVariable("NOMBRE")</code>: nunca el valor.</td></tr>
+    <tr><td class="pk">contracts/s08/Recaudo.sol</td><td>El contrato a probar.</td></tr>
+    <tr><td class="pk">contracts/s08/RecaudoMutante1..3.sol</td><td>Los mutantes. <strong>No se abren</strong> hasta el final.</td></tr>
+    <tr><td class="pk">andamiaje/s08/Recaudo.test.js</td><td>La plantilla de su suite, con dos pruebas de ejemplo y los grupos armados.</td></tr>
+    <tr><td class="pk">scripts/s08/cazar-mutantes.js</td><td>Corre su suite contra el correcto y contra los tres mutantes.</td></tr>
+    <tr><td class="pk">ignition/modules/Recaudo.js</td><td>Cómo se despliega <code>Recaudo</code>, con parámetros.</td></tr>
+    <tr><td class="pk">ignition/parametros/recaudo-sepolia.json</td><td>Los valores para Sepolia: meta 0,005 ETH, plazo 1 800 s (30 min).</td></tr>
+  </table>
+</section>
+
+<!-- ============================================================ 5 -->
+<section class="sec">
+  <div class="sec-cab"><span class="sec-num">05</span><h2>Leer el contrato como quien busca errores</h2><span class="lead">10 MINUTOS · CON LÁPIZ</span></div>
+  <p>Abran <code>contracts/s08/Recaudo.sol</code> completo. Tiene un constructor, una consulta y tres funciones que cambian estado:</p>
+  <table>
+    <tr><th style="width:22%">FUNCIÓN</th><th style="width:44%">QUÉ HACE</th><th>ERRORES QUE PUEDE LANZAR</th></tr>
+    <tr><td class="pk">constructor(meta, duracion)</td><td>Fija la meta, el fin del plazo y el dueño (quien despliega).</td><td><code>ParametrosInvalidos</code></td></tr>
+    <tr><td class="pk">estado()</td><td>Activo, Exitoso o Fallido, calculado con el tiempo y el total.</td><td>—</td></tr>
+    <tr><td class="pk">aportar()</td><td>Suma el aporte a la cuenta y al total. Emite <code>Aporte</code>.</td><td><code>PlazoVencido</code>, <code>AporteCero</code></td></tr>
+    <tr><td class="pk">reclamarFondos()</td><td>Solo el dueño, una vez, si la meta se alcanzó. Emite <code>FondosReclamados</code>.</td><td><code>PlazoVigente</code>, <code>MetaNoAlcanzada</code>, <code>YaReclamado</code>, <code>OwnableUnauthorizedAccount</code></td></tr>
+    <tr><td class="pk">reembolsar()</td><td>Cada aportante recupera lo suyo si la meta NO se alcanzó. Emite <code>Reembolso</code>.</td><td><code>PlazoVigente</code>, <code>MetaAlcanzada</code>, <code>NadaQueReembolsar</code></td></tr>
+  </table>
+  <table>
+    <tr><th style="width:18%">FINAL</th><th style="width:40%">CONDICIÓN, DESPUÉS DEL PLAZO</th><th>QUÉ SE PUEDE HACER</th></tr>
+    <tr><td class="pk">Exitoso</td><td><code>totalRecaudado &gt;= meta</code></td><td>El dueño reclama los fondos, una sola vez.</td></tr>
+    <tr><td class="pk">Fallido</td><td><code>totalRecaudado &lt; meta</code></td><td>Cada aportante recupera exactamente lo suyo.</td></tr>
+  </table>
+
+  <div class="caja clave">
+    <div class="caja-et">EJERCICIO · EL INVENTARIO DE LÍMITES (LLÉNENLO ANTES DE ESCRIBIR PRUEBAS)</div>
+    <p>Por cada comparación (<code>&lt;</code>, <code>&lt;=</code>, <code>&gt;</code>, <code>&gt;=</code>, <code>==</code>) y cada cambio de estado del contrato, una fila. Esta tabla es su lista de pruebas de borde: la sección 10 la usa.</p>
+    <table>
+      <tr><th style="width:18%">FUNCIÓN</th><th style="width:26%">COMPARACIÓN O EFECTO</th><th style="width:28%">¿QUÉ DEBE PASAR EN EL LÍMITE EXACTO?</th><th>PRUEBA QUE LO COMPRUEBA</th></tr>
+      <tr><td class="pk">&nbsp;</td><td></td><td></td><td></td></tr>
+      <tr><td class="pk">&nbsp;</td><td></td><td></td><td></td></tr>
+      <tr><td class="pk">&nbsp;</td><td></td><td></td><td></td></tr>
+      <tr><td class="pk">&nbsp;</td><td></td><td></td><td></td></tr>
+      <tr><td class="pk">&nbsp;</td><td></td><td></td><td></td></tr>
+      <tr><td class="pk">&nbsp;</td><td></td><td></td><td></td></tr>
+      <tr><td class="pk">&nbsp;</td><td></td><td></td><td></td></tr>
+    </table>
+  </div>
+</section>
+
+<!-- ============================================================ 6 -->
+<section class="sec">
+  <div class="sec-cab"><span class="sec-num">06</span><h2>Copiar la plantilla</h2></div>
+  <pre>mkdir test/s08                                             (PowerShell, macOS, Linux)
+cp andamiaje/s08/Recaudo.test.js test/s08/Recaudo.test.js
+npx hardhat test test/s08/Recaudo.test.js</pre>
+  <p>En <code>cmd</code> de Windows: <code>mkdir test\s08</code> y <code>copy andamiaje\s08\Recaudo.test.js test\s08\</code>. Si la carpeta ya existe, <code>mkdir</code> avisa y no pasa nada.</p>
+  <p><strong>Salida esperada:</strong></p>
+  <pre>  S08 · Recaudo · despliegue
+    ✔ fija la meta y el dueño
+  S08 · Recaudo · aportar
+    ✔ rechaza un aporte de cero
+
+  2 passing</pre>
+  <p>La plantilla lee la variable de entorno <code>CONTRATO</code> para que el script de mutantes pueda correr la misma suite contra otro contrato. <strong>No la toquen</strong>: por defecto vale <code>Recaudo</code>.</p>
+</section>
+
+<!-- ============================================================ 7 -->
+<section class="sec salto">
+  <div class="sec-cab"><span class="sec-num">07</span><h2>Las herramientas que van a usar</h2><span class="lead">CHULETA</span></div>
+  <pre>// quién firma
+const [beneficiario, ana, beto, carla] = await ethers.getSigners();   // en la fixture
+await r.connect(ana).aportar({ value: eth(3) });
+
+// el reloj de la red local (time viene de networkHelpers)
+await time.increase(7 * 24 * 60 * 60);   // avanza una semana y mina un bloque
+await time.increaseTo(fin);              // mina un bloque con marca fin: la SIGUIENTE tx cae en fin + 1
+await time.setNextBlockTimestamp(fin);   // la PRÓXIMA transacción cae exactamente en fin
+await time.setNextBlockTimestamp(fin - 1n);   // un segundo antes (fin es BigInt: 1n)
+
+// reversiones: siempre con la razón exacta
+await expect(tx).to.be.revertedWithCustomError(r, "PlazoVencido");
+await expect(tx).to.be.revertedWithCustomError(r, "OwnableUnauthorizedAccount");
+const F = await ethers.getContractFactory(CONTRATO);                 // constructor que revierte
+await expect(F.deploy(0, PLAZO)).to.be.revertedWithCustomError(F, "ParametrosInvalidos");
+
+// eventos y saldos
+await expect(tx).to.emit(r, "Aporte").withArgs(ana.address, monto, total);
+await expect(tx).to.changeEtherBalance(ethers, cuenta, monto);                 // ethers primero
+await expect(tx).to.changeEtherBalances(ethers, [ana, r], [monto, -monto]);
+
+// leer estado
+expect(await r.totalRecaudado()).to.equal(eth(7));
+expect(await r.estado()).to.equal(2n);                                       // enum: 0n, 1n, 2n</pre>
+  <div class="caja alerta">
+    <div class="caja-et">TRES REGLAS DE HARDHAT 3 QUE ROMPEN TUTORIALES VIEJOS</div>
+    <p>1. La red se obtiene con <code>const { ethers, networkHelpers } = await network.create();</code>. 2. <code>loadFixture</code> exige una función <strong>con nombre</strong> (<code>async function desplegar()</code>), no una flecha anónima. 3. No usen <code>.to.be.reverted</code> a secas: está desaconsejado y no dice <strong>por qué</strong> revirtió. Usen <code>revertedWithCustomError</code>.</p>
+  </div>
+  <div class="caja">
+    <div class="caja-et">DEPURAR: console.log DENTRO DEL CONTRATO</div>
+    <p>Si una prueba falla y no entienden por qué, pueden imprimir valores desde Solidity en la red local, <strong>temporalmente</strong>: <code>import "hardhat/console.sol";</code> y <code>console.log("total: %d", totalRecaudado);</code>. Aparece en la salida de <code>npx hardhat test</code>. Bórrenlo antes de desplegar, y no lo dejen en <code>Recaudo.sol</code>: el script de mutantes compara contra ese archivo.</p>
+  </div>
+</section>
+
+<!-- ============================================================ 8 -->
+<section class="sec">
+  <div class="sec-cab"><span class="sec-num">08</span><h2>Parte 1 · Escribir la suite</h2><span class="lead">30 MINUTOS · ≥ 10 PRUEBAS</span></div>
+  <p>Mínimo 10 pruebas en total (los dos ejemplos cuentan), repartidas así:</p>
+  <table>
+    <tr><th style="width:24%">GRUPO</th><th style="width:10%">MÍNIMO</th><th>QUÉ NO OLVIDAR</th></tr>
+    <tr><td class="pk">despliegue</td><td>2</td><td>Los parámetros inválidos del constructor, cada uno.</td></tr>
+    <tr><td class="pk">aportar</td><td>3</td><td>Suma al aportante y al total; evento con argumentos exactos; los límites del plazo.</td></tr>
+    <tr><td class="pk">recaudo exitoso</td><td>3</td><td>Permisos, repeticiones, saldo exacto que recibe el dueño, los límites de la meta.</td></tr>
+    <tr><td class="pk">recaudo fallido</td><td>3</td><td>Cada quien lo suyo; quien no aportó; el dueño no se lleva nada; repeticiones.</td></tr>
+  </table>
+
+  <p><strong>Ejemplo trabajado</strong> de una prueba de caso feliz, para que vean la forma completa (escríbanla ustedes; es una de sus diez):</p>
+  <pre>it("un aporte suma al aportante y al total, y emite Aporte", async () => {
+  const { r, ana, beto } = await loadFixture(desplegar);
+  await expect(r.connect(ana).aportar({ value: eth(2) }))
+    .to.emit(r, "Aporte").withArgs(ana.address, eth(2), eth(2));
+  await r.connect(beto).aportar({ value: eth(3) });
+  expect(await r.aportes(ana.address)).to.equal(eth(2));
+  expect(await r.totalRecaudado()).to.equal(eth(5));
+});</pre>
+  <p><strong>Cómo leerla:</strong> arranca de la instantánea (<code>loadFixture</code>), Ana aporta y se exige el evento con los tres argumentos, Beto aporta, y se comprueba el estado guardado — no solo que no revirtió.</p>
+
+  <div class="caja clave">
+    <div class="caja-et">UNA PRUEBA FALLA POR LA RAZÓN CORRECTA, O NO PRUEBA NADA</div>
+    <p>Antes de dar por buena una prueba de reversión, pregúntense: <strong>¿qué otra cosa podría hacerla revertir?</strong> Si la transacción puede fallar por falta de fondos, por el plazo o por permisos además de por la regla que quieren probar, la prueba pasa aunque la regla esté mal escrita. Diseñen el escenario para que <strong>solo</strong> la regla pueda detenerla, y exijan el error exacto con <code>revertedWithCustomError</code>. Lo mismo al revés: una prueba de caso feliz debe comprobar el resultado (saldo, evento, estado), no solo que no revirtió.</p>
+  </div>
+  <p><strong>Cómo sé que terminé esta parte:</strong> <code>npx hardhat test test/s08/Recaudo.test.js</code> muestra 10 o más <code>passing</code> y ningún <code>failing</code>.</p>
+</section>
+
+<!-- ============================================================ 9 -->
+<section class="sec salto">
+  <div class="sec-cab"><span class="sec-num">09</span><h2>Parte 2 · Medir la cobertura y leer el informe</h2><span class="lead">10 MINUTOS · ≥ 80 %</span></div>
+  <pre>npx hardhat test test/s08/Recaudo.test.js --coverage</pre>
+  <p>Al final aparece una tabla con <strong>todos</strong> los contratos del repositorio. Con solo la plantilla (2 pruebas), la fila de <code>Recaudo</code> se ve así (salida real):</p>
+  <pre>║ File Path                   │ Line % │ Statement % │ Uncovered Lines                                  ║
+║ contracts\s08\Recaudo.sol   │ 11.54  │ 15.79       │ 49, 55-56, 60, 63-64, 66, 70-72, 74-75, ...      ║</pre>
+  <ol>
+    <li><strong>Busquen su fila:</strong> <code>contracts\s08\Recaudo.sol</code>. Las demás filas (y el <code>Total</code>) no importan: incluyen contratos de otras sesiones que su suite no toca. Los mutantes aparecen con 0 %: es lo esperado.</li>
+    <li><strong>Lean <code>Line %</code>.</strong> Meta del curso: <strong>80 o más</strong>.</li>
+    <li><strong>Lean <code>Uncovered Lines</code>.</strong> Cada número es una línea de <code>Recaudo.sol</code> que ninguna prueba ejecutó. Ábranla y pregúntense qué prueba la ejecutaría.</li>
+    <li><strong>Informe navegable:</strong> Hardhat deja además <code>coverage/html/index.html</code>. Ábranlo con el navegador: cada línea aparece en verde (ejecutada) o en rojo (nunca).</li>
+  </ol>
+  <div class="caja alerta">
+    <div class="caja-et">¿Y SI NO LLEGA A 100 %?</div>
+    <p>No hace falta. Las líneas <code>if (!ok) revert EnvioFallido();</code> solo se ejecutan si el receptor del pago lo rechaza, y eso exige un contrato auxiliar que las pruebas del laboratorio no usan. Una suite muy completa se queda en torno al 92 % por eso. Lo importante es que puedan explicar <strong>por qué</strong> cada línea queda sin cubrir: anótenlo en el informe.</p>
+  </div>
+  <p><strong>Cómo sé que terminé esta parte:</strong> <code>Line %</code> ≥ 80 en la fila de <code>Recaudo.sol</code>. Hagan la captura.</p>
+</section>
+
+<!-- ============================================================ 10 -->
+<section class="sec">
+  <div class="sec-cab"><span class="sec-num">10</span><h2>Parte 3 · Cazar los mutantes</h2><span class="lead">20 MINUTOS</span></div>
+  <h3 style="font-size:10.5pt;margin:2mm 0 2mm">10.1 · Correr el cazador</h3>
+  <pre>node scripts/s08/cazar-mutantes.js</pre>
+  <p>El script corre su suite cuatro veces: contra <code>Recaudo</code> y contra cada mutante (cambia la variable <code>CONTRATO</code>). Funciona igual en PowerShell, cmd, macOS y Linux. Con solo la plantilla, la salida real es:</p>
+  <pre>  Suite: test/s08/Recaudo.test.js
+
+  ✔ Recaudo (correcto)      2 pruebas en verde
+
+  ✗ VIVO    RecaudoMutante1   2 pasan · 0 fallan
+  ✗ VIVO    RecaudoMutante2   2 pasan · 0 fallan
+  ✗ VIVO    RecaudoMutante3   2 pasan · 0 fallan
+
+  3 mutante(s) sobrevive(n). Hay un error que su suite no ve: piensen en los bordes.</pre>
+  <p><strong>Cómo leerla:</strong> un mutante está <strong>MUERTO</strong> si al menos una prueba falla contra él (su suite vio el error). Está <strong>VIVO</strong> si todas pasan (ese error llegaría a producción). Si el script dice que contra el contrato <strong>correcto</strong> falla alguna prueba, primero arreglen esa prueba: una suite que falla contra el contrato bueno no sirve para juzgar a nadie.</p>
+
+  <h3 style="font-size:10.5pt;margin:4mm 0 2mm">10.2 · El método, mientras haya vivos</h3>
+  <p>Vuelvan a su inventario de límites (sección 5) y recorran, <strong>para cada función</strong>, las cinco preguntas de borde:</p>
+  <table>
+    <tr><th style="width:18%">BORDE</th><th>LA PREGUNTA</th></tr>
+    <tr><td class="pk">Tiempo</td><td>¿Qué pasa un segundo antes, en el segundo exacto y un segundo después de cada plazo? (sección 7: <code>setNextBlockTimestamp</code>)</td></tr>
+    <tr><td class="pk">Umbral</td><td>¿Qué pasa con el valor exacto de cada límite: ni un wei más, ni uno menos?</td></tr>
+    <tr><td class="pk">Repetición</td><td>¿Qué pasa si la misma cuenta llama dos veces seguidas? ¿Qué impide la segunda: la regla, o algo más?</td></tr>
+    <tr><td class="pk">Cero y vacío</td><td>¿Qué pasa con 0, con la dirección cero?</td></tr>
+    <tr><td class="pk">Quién llama</td><td>¿Qué pasa si llama otra cuenta?</td></tr>
+  </table>
+  <p>Cada vez que agreguen una prueba, corran otra vez el cazador. No hay límite de intentos: el script es la retroalimentación.</p>
+
+  <h3 style="font-size:10.5pt;margin:4mm 0 2mm">10.3 · Cómo sé que terminé</h3>
+  <p>El script termina con <code>Los tres mutantes murieron: su suite detecta los tres errores.</code> Hagan la captura.</p>
+
+  <h3 style="font-size:10.5pt;margin:4mm 0 2mm">10.4 · Solo ahora: abrir los mutantes</h3>
+  <p>Con los tres muertos, abran cada mutante y compárenlo con <code>Recaudo.sol</code> (en VS Code: clic derecho sobre los dos archivos → <em>Compare Selected</em>). Llenen esta tabla para el informe:</p>
+  <table>
+    <tr><th style="width:14%">MUTANTE</th><th style="width:24%">¿CUÁL ERA EL ERROR?</th><th style="width:24%">¿QUÉ PRUEBA LO MATÓ?</th><th style="width:20%">¿POR QUÉ LA COBERTURA NO LO VEÍA?</th><th>¿QUÉ DAÑO HARÍA EN PRODUCCIÓN?</th></tr>
+    <tr><td class="pk">1</td><td></td><td></td><td></td><td></td></tr>
+    <tr><td class="pk">2</td><td></td><td></td><td></td><td></td></tr>
+    <tr><td class="pk">3</td><td></td><td></td><td></td><td></td></tr>
+  </table>
+</section>
+
+<!-- ============================================================ 11 -->
+<section class="sec salto">
+  <div class="sec-cab"><span class="sec-num">11</span><h2>Parte 4a · Desplegar con Ignition en la red local</h2><span class="lead">5 MINUTOS</span></div>
+  <pre>npx hardhat ignition deploy ignition/modules/Recaudo.js</pre>
+  <p><strong>Salida esperada</strong> (real, recortada):</p>
+  <pre>You are running Hardhat Ignition against an in-process instance of Hardhat Network.
+This will execute the deployment, but the results will be lost.
+Hardhat Ignition 🚀
+Deploying [ RecaudoModulo ]
+Batch #1
+  Executed RecaudoModulo#Recaudo
+[ RecaudoModulo ] successfully deployed 🚀
+Deployed Addresses
+RecaudoModulo#Recaudo - 0x5FbDB2315678afecb367f032d93F642f64180aa3</pre>
+  <p><strong>Qué acaba de pasar:</strong> Ignition leyó el módulo, usó los parámetros por defecto (meta 10 ETH, una semana) y desplegó en una red en memoria que desaparece al terminar. <strong>Cómo sé que funcionó:</strong> <code>successfully deployed</code> y una dirección. Si falla aquí, fallará en Sepolia: se corrige aquí, sin gastar ETH de prueba.</p>
+  <div class="caja clave">
+    <div class="caja-et">POR QUÉ IGNITION Y NO UN SCRIPT SUELTO</div>
+    <p>Ignition registra cada paso en <code>ignition/deployments/chain-&lt;id&gt;/</code>. Si la conexión se corta a mitad del despliegue, al repetir el comando retoma donde quedó y no despliega dos veces. El mismo módulo sirve para cualquier red: cambian solo los parámetros (<code>m.getParameter</code>).</p>
+  </div>
+</section>
+
+<!-- ============================================================ 12 -->
+<section class="sec">
+  <div class="sec-cab"><span class="sec-num">12</span><h2>Parte 4b · Los tres secretos, en el keystore</h2><span class="lead">10 MINUTOS · UNA VEZ</span></div>
+  <p>Para Sepolia hacen falta tres valores. Ninguno se escribe en un archivo del repositorio: van al <strong>almacén cifrado de Hardhat</strong> (keystore), que vive en su carpeta de usuario y se protege con una contraseña que ustedes eligen.</p>
+  <table>
+    <tr><th style="width:26%">NOMBRE</th><th style="width:40%">DE DÓNDE SALE</th><th>POR QUÉ ES SECRETO</th></tr>
+    <tr><td class="pk">SEPOLIA_RPC_URL</td><td>Cuenta gratuita en un proveedor RPC (Alchemy o Infura): crear una app para <em>Ethereum Sepolia</em> y copiar la URL HTTPS.</td><td>La URL incluye su clave de API: otro podría gastar su cuota.</td></tr>
+    <tr><td class="pk">SEPOLIA_PRIVATE_KEY</td><td>La clave privada de la cuenta <strong>del curso</strong> en MetaMask (detalles de la cuenta → mostrar clave privada; pide la contraseña de MetaMask).</td><td>Quien la tenga controla la cuenta. Nunca la de una billetera con fondos reales.</td></tr>
+    <tr><td class="pk">ETHERSCAN_API_KEY</td><td>Cuenta gratuita en etherscan.io → <em>API Keys</em> → crear una.</td><td>Identifica sus peticiones de verificación.</td></tr>
+  </table>
+  <pre>npx hardhat keystore set SEPOLIA_RPC_URL
+npx hardhat keystore set SEPOLIA_PRIVATE_KEY
+npx hardhat keystore set ETHERSCAN_API_KEY
+npx hardhat keystore list</pre>
+  <p><strong>Qué esperar:</strong> la primera vez, Hardhat pide <strong>crear una contraseña</strong> para el almacén (y confirmarla); después pide el valor de la variable, sin mostrarlo en pantalla. Las siguientes veces pide la contraseña que crearon. <code>keystore list</code> muestra los <strong>nombres</strong> guardados, nunca los valores. <strong>Cómo sé que funcionó:</strong> <code>list</code> muestra los tres nombres.</p>
+  <div class="caja peligro">
+    <div class="caja-et">LO QUE NO SE HACE NUNCA</div>
+    <p>No pegar la clave privada ni la URL en <code>hardhat.config.js</code>, en un <code>.env</code>, en un chat ni en el informe. La <strong>frase semilla</strong> no va en ningún lado, tampoco en el keystore: Hardhat solo necesita la clave privada de una cuenta. Si una clave se filtra, se da por perdida: se crea una cuenta nueva y no se vuelve a usar.</p>
+  </div>
+</section>
+
+<!-- ============================================================ 13 -->
+<section class="sec">
+  <div class="sec-cab"><span class="sec-num">13</span><h2>Parte 4c · Desplegar y verificar en Sepolia</h2><span class="lead">5 MINUTOS + ESPERA</span></div>
+  <p>Comprueben que la cuenta del curso tiene ETH de Sepolia (al menos 0,01 para desplegar y aportar). Después, en una sola línea:</p>
+  <pre>npx hardhat ignition deploy ignition/modules/Recaudo.js --network sepolia --parameters ignition/parametros/recaudo-sepolia.json --verify</pre>
+  <ol>
+    <li>Hardhat pide la <strong>contraseña del keystore</strong>: es la que crearon en la sección 12.</li>
+    <li>Si Ignition pide confirmar el despliegue en la red <code>sepolia</code>, lean el nombre de la red y confirmen.</li>
+    <li>Ignition envía la transacción y espera a que se incluya en un bloque: en Sepolia son decenas de segundos.</li>
+    <li>Al terminar muestra <code>successfully deployed</code> y la dirección <code>RecaudoModulo#Recaudo - 0x…</code>. <strong>Anótenla.</strong></li>
+    <li>Con <code>--verify</code>, a continuación envía el código fuente al explorador e informa si la verificación tuvo éxito, con un enlace.</li>
+  </ol>
+  <p><strong>Cómo sé que funcionó:</strong> abran <code>https://sepolia.etherscan.io/address/&lt;su dirección&gt;</code>. En la pestaña <em>Contract</em> debe aparecer la marca de verificación y el código de <code>Recaudo.sol</code> legible.</p>
+  <div class="caja alerta">
+    <div class="caja-et">SI LA VERIFICACIÓN FALLA</div>
+    <p>Esperen un minuto y repitan <strong>exactamente el mismo comando</strong>. Ignition sabe, por su registro en <code>ignition/deployments/chain-11155111/</code>, que el contrato ya existe: no lo despliega otra vez y solo reintenta la verificación. Si el error menciona la API key, revisen <code>keystore list</code>.</p>
+  </div>
+</section>
+
+<!-- ============================================================ 14 -->
+<section class="sec">
+  <div class="sec-cab"><span class="sec-num">14</span><h2>Parte 4d · Usar el contrato desde el explorador</h2></div>
+  <ol>
+    <li>En la página del contrato: <em>Contract</em> → <em>Write Contract</em> → <em>Connect to Web3</em>. Conecten MetaMask con la cuenta del curso, en Sepolia.</li>
+    <li><code>aportar</code>: en el campo del valor (<em>payableAmount</em>, en ETH) escriban <code>0.005</code> y <em>Write</em>. Lean la ventana de la billetera antes de firmar: red Sepolia, contrato correcto, 0,005 ETH. Guarden el hash.</li>
+    <li>En <em>Read Contract</em>: <code>totalRecaudado</code> debe mostrar <code>5000000000000000</code>; <code>estado</code>, <code>0</code> (Activo) mientras no pasen los 30 minutos.</li>
+    <li>Pasados los 30 minutos, <code>estado</code> muestra <code>1</code> (Exitoso). Desde la cuenta que desplegó, <code>reclamarFondos</code>. Guarden el hash (opcional; puede hacerse en casa).</li>
+  </ol>
+</section>
+
+<!-- ============================================================ 15 -->
+<section class="sec">
+  <div class="sec-cab"><span class="sec-num">15</span><h2>Antes de cualquier git push</h2></div>
+  <pre>git status
+git diff --staged</pre>
+  <table>
+    <tr><th style="width:50%">SÍ SE SUBE</th><th>NUNCA SE SUBE</th></tr>
+    <tr><td><code>test/s08/Recaudo.test.js</code><br><code>ignition/deployments/chain-11155111/</code> (evidencia reproducible)<br><code>package-lock.json</code></td><td>Claves privadas, frases semilla, URLs de RPC con API key, archivos <code>.env</code><br><code>node_modules/</code>, <code>artifacts/</code>, <code>cache/</code>, <code>coverage/</code><br>Datos personales de cualquier tipo</td></tr>
+  </table>
+  <p>El <code>.gitignore</code> del repositorio ya excluye lo generado. Aun así, <strong>lean</strong> la lista de <code>git status</code> antes de cada <code>push</code>: un secreto borrado en un commit posterior sigue en el historial.</p>
+</section>
+
+<!-- ============================================================ 16 -->
+<section class="sec">
+  <div class="sec-cab"><span class="sec-num">16</span><h2>Errores frecuentes</h2><span class="lead">CASI TODO SE RESUELVE AQUÍ</span></div>
+  <table>
+    <tr><th style="width:40%">SÍNTOMA</th><th>CAUSA Y SOLUCIÓN</th></tr>
+    <tr><td class="pk">«npx no se reconoce»</td><td>Node.js no está instalado o la terminal es anterior a la instalación. Node 22 LTS y terminal nueva.</td></tr>
+    <tr><td class="pk">No encuentra <code>hardhat.config.js</code> o «not inside a Hardhat project»</td><td>La terminal no está en <code>laboratorios-evm</code>. Usen <code>cd</code>.</td></tr>
+    <tr><td class="pk">El cazador dice «No se encontraron pruebas»</td><td>La suite no está en <code>test/s08/Recaudo.test.js</code> (revisen el nombre y la carpeta).</td></tr>
+    <tr><td class="pk">«Contra el contrato CORRECTO fallan N prueba(s)»</td><td>Una de sus pruebas espera algo que el contrato correcto no hace. Arréglenla antes de juzgar mutantes.</td></tr>
+    <tr><td class="pk"><code>loadFixture</code> falla con una función anónima</td><td>La fixture necesita nombre: <code>async function desplegar() { … }</code>.</td></tr>
+    <tr><td class="pk"><code>ethers</code> no está definido, o <code>require is not defined</code></td><td>Código de un tutorial de Hardhat 2. En Hardhat 3 se usa <code>import</code> y la red se obtiene con <code>const { ethers, networkHelpers } = await network.create()</code>.</td></tr>
+    <tr><td class="pk">Una prueba de plazo pasa contra todo</td><td>Nunca llega al segundo que quieren probar. Revisen qué hace cada función de <code>time</code> (sección 7).</td></tr>
+    <tr><td class="pk">Una prueba de reversión pasa, pero no por la regla</td><td>Algo más la hace revertir. Rediseñen el escenario (sección 8) y exijan el error exacto.</td></tr>
+    <tr><td class="pk"><code>changeEtherBalance</code> falla por una cantidad pequeña</td><td>Están comparando saldos a mano y restando mal el gas. Usen el matcher, que ya lo descuenta.</td></tr>
+    <tr><td class="pk">«TypeError: Cannot mix BigInt and other types»</td><td><code>fin</code> y los montos son BigInt: <code>fin - 1n</code>, no <code>fin - 1</code>.</td></tr>
+    <tr><td class="pk">La cobertura muestra 0 % en <code>Recaudo.sol</code></td><td>Corrieron otro archivo de pruebas, o <code>CONTRATO</code> quedó definido en la terminal. Cierren la terminal y abran otra.</td></tr>
+    <tr><td class="pk">El keystore no pide contraseña y falla el despliegue</td><td>La variable no está guardada: <code>npx hardhat keystore list</code>.</td></tr>
+    <tr><td class="pk">«insufficient funds» en Sepolia</td><td>La cuenta del curso no tiene ETH de prueba. Pidan al docente.</td></tr>
+    <tr><td class="pk"><code>--verify</code> falla</td><td>Falta <code>ETHERSCAN_API_KEY</code>, o el explorador aún no indexa el contrato: repetir el mismo comando tras un minuto.</td></tr>
+    <tr><td class="pk">Quieren desplegar otra vez en local con cambios</td><td>La red en memoria no guarda nada: basta repetir. En Sepolia, un segundo despliegue con otros parámetros necesita <code>--deployment-id</code> distinto.</td></tr>
+  </table>
+</section>
+
+<!-- ============================================================ 17 -->
+<section class="sec">
+  <div class="sec-cab"><span class="sec-num">17</span><h2>Preguntas de reflexión</h2><span class="lead">SE RESPONDEN CON SU SUITE Y SU SALIDA</span></div>
+  <ol>
+    <li>¿Qué cobertura tenía su suite la primera vez que superó el 80 %, y cuántos mutantes seguían vivos en ese momento? ¿Qué les dice eso sobre el requisito del 80 %?</li>
+    <li>Elijan una de las pruebas que mató a un mutante. Copien su código y expliquen línea por línea por qué <strong>solo</strong> la regla del contrato podía hacerla fallar.</li>
+    <li>¿Qué líneas de <code>Recaudo.sol</code> quedaron sin cubrir en su informe final? Para cada una: ¿por qué, y qué prueba haría falta?</li>
+    <li>Escojan un mutante y describan un escenario concreto —quién, cuándo, cuánto— en el que ese error le cuesta dinero a una persona real.</li>
+    <li>¿Qué hay en su carpeta <code>ignition/deployments/chain-11155111/</code>? ¿Qué información permitiría a otra persona comprobar su despliegue?</li>
+    <li>La pregunta de la semana: si una suite con 88 % de cobertura dejó pasar tres errores, ¿qué evidencia le pedirían a un proveedor para creerle que su contrato está bien probado?</li>
+  </ol>
+</section>
+
+<!-- ============================================================ 18 -->
+<section class="sec salto">
+  <div class="sec-cab"><span class="sec-num">18</span><h2>Lista de chequeo antes de entregar</h2></div>
+  <ul style="list-style:none;padding-left:0">
+    <li>☐ <code>test/s08/Recaudo.test.js</code> con ≥ 10 pruebas, todas en verde contra <code>Recaudo</code>.</li>
+    <li>☐ Captura de cobertura con Line % ≥ 80 en la fila de <code>Recaudo.sol</code>.</li>
+    <li>☐ Inventario de límites (sección 5) lleno.</li>
+    <li>☐ Captura del cazador con «Los tres mutantes murieron».</li>
+    <li>☐ Tabla de la sección 10.4 llena para los tres mutantes.</li>
+    <li>☐ Dirección de <code>Recaudo</code> en Sepolia con la marca de código verificado, desplegado con Ignition.</li>
+    <li>☐ Hash de al menos un aporte.</li>
+    <li>☐ Respuestas de reflexión.</li>
+    <li>☐ <code>git status</code> revisado: ningún secreto en el repositorio ni en el informe.</li>
+  </ul>
+</section>
+
+<!-- ============================================================ 19 -->
+<section class="sec">
+  <div class="sec-cab"><span class="sec-num">19</span><h2>Rúbrica</h2><span class="lead">LABORATORIO 08 · SEGUNDO CORTE</span></div>
+  <table>
+    <tr><th style="width:18%">CRITERIO</th><th style="width:8%">PESO</th><th style="width:26%">EXCELENTE (5,0)</th><th style="width:24%">ACEPTABLE (3,5)</th><th>INSUFICIENTE (&lt; 3,0)</th></tr>
+    <tr><td class="pk">Suite</td><td>25 %</td><td>≥ 10 pruebas de las cinco familias, nombres que se leen como especificación, razones exactas de reversión.</td><td>≥ 10 pruebas, casi todas de caso feliz.</td><td>Menos de 10, o alguna falla contra el correcto.</td></tr>
+    <tr><td class="pk">Cobertura</td><td>15 %</td><td>≥ 80 % y explicación de cada línea sin cubrir.</td><td>≥ 80 % sin explicación.</td><td>&lt; 80 %.</td></tr>
+    <tr><td class="pk">Mutantes</td><td>35 %</td><td>Los tres muertos; tabla 10.4 completa y correcta; explican por qué la cobertura no los veía.</td><td>Los tres muertos, explicación superficial.</td><td>Algún mutante vivo.</td></tr>
+    <tr><td class="pk">Despliegue</td><td>25 %</td><td>Con Ignition, verificado, con aporte en cadena y ningún secreto en el repositorio.</td><td>Desplegado sin verificar.</td><td>Sin evidencia en cadena: no se califica.</td></tr>
+  </table>
+</section>
+
+<!-- ============================================================ 20 -->
+<section class="sec">
+  <div class="sec-cab"><span class="sec-num">20</span><h2>Trabajo autónomo · el proyecto, en Hardhat</h2><span class="lead">PARA LA SESIÓN 9</span></div>
+  <p>El plan pide llevar los contratos del proyecto a la estructura Hardhat. Estado mínimo del repositorio del equipo para la Sesión 9:</p>
+  <table>
+    <tr><th style="width:26%">PIEZA</th><th>ESTADO MÍNIMO</th></tr>
+    <tr><td class="pk">Repositorio</td><td>En GitHub, los tres integrantes con permisos, el docente como colaborador. Estructura de la lámina C.1 (contracts, test, ignition, docs).</td></tr>
+    <tr><td class="pk">Versiones</td><td>Las del curso, exactas: Hardhat 3.16.0, Solidity 0.8.28, OpenZeppelin 5.6.1 (<code>npm install --save-exact</code>). <code>package-lock.json</code> incluido.</td></tr>
+    <tr><td class="pk">Contrato principal</td><td>Compila con <code>npx hardhat compile</code>. Aplica al menos dos patrones de la Sesión 7.</td></tr>
+    <tr><td class="pk">Suite inicial</td><td>Al menos 5 pruebas, con al menos una de cada familia (caso feliz, reversión, permisos, eventos, borde).</td></tr>
+    <tr><td class="pk">Secretos y .gitignore</td><td>Ninguno en el repositorio. El mismo <code>.gitignore</code> del curso.</td></tr>
+    <tr><td class="pk">README</td><td>Qué hace, cómo instalar y cómo correr las pruebas, en cinco líneas.</td></tr>
+  </table>
+  <p>Además: traer el refactor de <code>CertificadosUSB</code> de la S7 con su suite corriendo en Hardhat, y crear cuenta en <code>ethernaut.openzeppelin.com</code> y resolver el nivel 0.</p>
+</section>
+
+<!-- ============================================================ 21 -->
+<section class="sec">
+  <div class="sec-cab"><span class="sec-num">21</span><h2>Referencias</h2></div>
+  <ul>
+    <li>Hardhat 3 · <em>Configuration variables</em> y keystore. <code>https://hardhat.org/docs/learn-more/configuration-variables</code></li>
+    <li>Hardhat Ignition · <em>Verifying your deployment</em>. <code>https://hardhat.org/ignition/docs/guides/verify</code></li>
+    <li>OpenZeppelin Contracts 5.x · <em>Access Control</em>. <code>https://docs.openzeppelin.com/contracts/5.x/api/access</code></li>
+    <li>ConsenSys · <em>How to Avoid Uploading Your Private Key to GitHub</em>. <code>https://consensys.io/blog/how-to-avoid-uploading-your-private-key-to-github-approaches-to-prevent-making-your-secrets-public</code></li>
+  </ul>
+</section>
+
+</body>
+</html>

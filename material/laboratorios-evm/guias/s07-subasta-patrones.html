@@ -1,0 +1,432 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<title>Guía · Laboratorio 07 · Subasta segura</title>
+<!--ESTILOS-->
+</head>
+<body>
+
+<section class="barra">
+  <div class="kicker">LABORATORIO 07 · SESIÓN 7 · SOLIDITY II · EN PAREJAS · CALIFICABLE</div>
+  <h1>SUBASTA SEGURA:<br>RETIRO, CEI Y<br><em>GAS MEDIDO</em></h1>
+  <div class="sub">Completar una subasta que custodia dinero ajeno, ver cómo un contrato hostil congela la versión ingenua, desplegarla en Sepolia y medir cuánto cuesta defenderse.</div>
+</section>
+
+<dl class="datos">
+  <div><dt>MODALIDAD</dt><dd>En parejas<br>en la sala</dd></div>
+  <div><dt>DURACIÓN</dt><dd>75 min en clase<br>+ informe en casa</dd></div>
+  <div><dt>REQUISITO</dt><dd>Repositorio de la S5<br>+ billetera del curso</dd></div>
+  <div><dt>META</dt><dd>23 pruebas en verde<br>+ subasta en Sepolia</dd></div>
+</dl>
+
+<div class="caja clave">
+  <div class="caja-et">CÓMO LEER ESTA GUÍA</div>
+  <p>Está escrita para que puedan hacer el laboratorio <strong>sin ayuda</strong>, incluso si se perdieron la clase. Cada paso dice qué escribir, qué deberían ver y cómo saber que funcionó. Si algo no sale como aquí se describe, vayan primero a la sección <strong>13 · Errores frecuentes</strong>. Las cifras de gas de esta guía no son estimaciones: se midieron con <code>npx hardhat test --gas-stats</code> sobre este mismo repositorio (Hardhat 3.16.0, Solidity 0.8.28, optimizador con 200 ejecuciones). La red local es determinista: ustedes deben obtener exactamente las mismas.</p>
+</div>
+
+<!-- ============================================================ 1 -->
+<section class="sec">
+  <div class="sec-cab"><span class="sec-num">01</span><h2>Qué se construye y qué se demuestra</h2><span class="lead">LEER PRIMERO</span></div>
+
+  <p><strong>Objetivo de la sesión (plan del curso):</strong> manejar estructuras compuestas y aplicar patrones seguros de manejo de fondos. <strong>Resultado de aprendizaje:</strong> RA3 (programar contratos aplicando patrones de diseño y estándares) y, de forma complementaria, RA5 (base de la seguridad que se profundiza en la Sesión 9).</p>
+
+  <p>El laboratorio tiene cinco partes, cada una atada a láminas concretas de la clase:</p>
+  <table>
+    <tr><th style="width:24%">PARTE</th><th style="width:46%">QUÉ HACEN</th><th>LÁMINAS</th></tr>
+    <tr><td class="pk">1 · Completar</td><td>Seis TODO en <code>Subasta.sol</code> hasta que las 23 pruebas pasen.</td><td>A.1–A.4, A.12–A.16</td></tr>
+    <tr><td class="pk">2 · El ataque</td><td>Ver cómo <code>PostorHostil</code> congela la subasta push y no afecta la pull. Romper su contrato a propósito.</td><td>A.13, A.14</td></tr>
+    <tr><td class="pk">3 · Desplegar</td><td>Llevar la subasta a Sepolia desde Remix y pujar desde dos cuentas.</td><td>B.6</td></tr>
+    <tr><td class="pk">4 · Medir</td><td>Llenar la tabla comparativa de gas push frente a pull con dos escenarios.</td><td>A.17–A.20</td></tr>
+    <tr><td class="pk">5 · Cerrar</td><td>Finalizar la subasta en Sepolia y retirar. Escribir el informe de decisiones de diseño.</td><td>B.8</td></tr>
+  </table>
+
+  <div class="caja alerta">
+    <div class="caja-et">LA LECCIÓN EN UNA FRASE</div>
+    <p>Un contrato que envía dinero depende de que el otro quiera recibirlo. La versión «amable» de la subasta —devolver el dinero al instante— puede ser congelada por un contrato que <strong>no roba nada</strong>: solo se niega a recibir. La versión segura cuesta más gas. Ustedes van a demostrar las dos cosas con pruebas y con cifras propias.</p>
+  </div>
+</section>
+
+<!-- ============================================================ 2 -->
+<section class="sec">
+  <div class="sec-cab"><span class="sec-num">02</span><h2>Qué se entrega</h2><span class="lead">EVIDENCIA DE LA SESIÓN</span></div>
+  <p>La evidencia que pide el plan para la Sesión 7 es <strong>contrato desplegado + informe de decisiones de diseño</strong>. En concreto, un solo PDF por pareja (máximo cuatro páginas con anexos) con:</p>
+  <ol>
+    <li>Captura de la terminal con <code>23 passing</code> para <code>test/s07/Subasta.test.js</code> con <strong>su</strong> versión de <code>Subasta.sol</code>.</li>
+    <li>La <strong>tabla de gas</strong> de la sección 9, llena con sus cifras, y las respuestas a sus tres preguntas.</li>
+    <li>Dirección de su <code>Subasta</code> en Sepolia y los hashes de: dos pujas, la finalización y un retiro.</li>
+    <li>El <strong>informe de decisiones de diseño</strong> (sección 11), con al menos cinco decisiones.</li>
+    <li>Las seis respuestas de reflexión (sección 12).</li>
+  </ol>
+  <p>Sin la evidencia en cadena (dirección y hashes), el laboratorio no se califica: es la política del curso.</p>
+</section>
+
+<!-- ============================================================ 3 -->
+<section class="sec salto">
+  <div class="sec-cab"><span class="sec-num">03</span><h2>Preparación desde cero</h2><span class="lead">10 MINUTOS SI TODO ESTÁ</span></div>
+
+  <p>El laboratorio usa el repositorio único del curso, <code>laboratorios-evm</code>, que se instaló en la Sesión 5. Si ya lo tienen funcionando, comprueben las versiones y salten al paso 3.4.</p>
+
+  <h3 style="font-size:10.5pt;margin:4mm 0 2mm">3.1 · Comprobar Node.js y Git</h3>
+  <p>Abran una terminal (en Windows: tecla Windows, escriban <code>PowerShell</code>, Enter) y escriban:</p>
+  <pre>node --version
+git --version</pre>
+  <p><strong>Salida esperada:</strong> <code>v22.x.x</code> (cualquier 22) y <code>git version 2.x</code>. Si <code>node</code> no se reconoce o la versión es menor que 22, instalen Node.js 22 LTS desde <code>nodejs.org</code>, cierren la terminal y ábranla de nuevo.</p>
+
+  <h3 style="font-size:10.5pt;margin:4mm 0 2mm">3.2 · Instalar las dependencias (solo si no se hizo en la S5)</h3>
+  <pre>cd ruta/a/laboratorios-evm
+npm install</pre>
+  <p><strong>Cómo sé que funcionó:</strong> termina con una línea del tipo <code>added NNN packages</code> y aparece la carpeta <code>node_modules</code>. Puede tardar varios minutos en la sala. Las advertencias <code>npm WARN</code> no son errores.</p>
+
+  <h3 style="font-size:10.5pt;margin:4mm 0 2mm">3.3 · Comprobar la versión de Hardhat</h3>
+  <pre>npx hardhat --version</pre>
+  <p><strong>Salida esperada:</strong> <code>3.16.0</code>. Si sale otra, alguien actualizó el <code>package.json</code>: no sigan, avisen al docente. Las versiones están congeladas en <code>versiones.md</code> y no se cambian a mitad de semestre.</p>
+
+  <h3 style="font-size:10.5pt;margin:4mm 0 2mm">3.4 · Comprobar que el entorno funciona</h3>
+  <pre>npx hardhat test test/s07/Subasta.test.js</pre>
+  <p><strong>Salida esperada, antes de tocar nada:</strong> <code>23 passing</code>. En el repositorio viene la solución de referencia; así se confirma que el entorno está sano <strong>antes</strong> de empezar a romperlo. La primera vez compila unos 25 contratos: es normal que tarde. Una advertencia sobre <code>Operaciones.sol</code> («Function state mutability can be restricted to view») es intencional (Sesión 5) y no es un error.</p>
+
+  <div class="caja peligro">
+    <div class="caja-et">REGLAS DE SEGURIDAD QUE NO CAMBIAN</div>
+    <p>Solo red local y Sepolia; nunca dinero real. La frase semilla no se comparte con nadie, tampoco con el docente. No firmen en la billetera nada cuyo contenido no entiendan: antes de confirmar, lean la red, la función y el valor. Estos contratos son material de clase <strong>sin auditar</strong>.</p>
+  </div>
+</section>
+
+<!-- ============================================================ 4 -->
+<section class="sec">
+  <div class="sec-cab"><span class="sec-num">04</span><h2>El mapa del laboratorio</h2></div>
+  <table>
+    <tr><th style="width:36%">ARCHIVO</th><th style="width:36%">QUÉ ES</th><th>PATRÓN QUE ILUSTRA</th></tr>
+    <tr><td class="pk">contracts/s07/Subasta.sol</td><td>La subasta completa (solución de referencia).</td><td>Ownable, Pausable, retiro, CEI, enum, immutable</td></tr>
+    <tr><td class="pk">andamiaje/s07/Subasta.sol</td><td>La misma subasta con 6 TODO. <strong>Aquí trabajan.</strong></td><td>—</td></tr>
+    <tr><td class="pk">contracts/s07/ISubasta.sol</td><td>La interfaz común: estados, eventos y funciones.</td><td>interface</td></tr>
+    <tr><td class="pk">contracts/s07/Porcentajes.sol</td><td>Porcentajes en puntos básicos.</td><td>library, using for</td></tr>
+    <tr><td class="pk">contracts/s07/SubastaPush.sol</td><td>Versión ingenua que devuelve al instante. No se modifica.</td><td>antipatrón push</td></tr>
+    <tr><td class="pk">contracts/s07/SubastaPullMinima.sol</td><td>Idéntica a la push salvo el patrón.</td><td>comparación justa de gas</td></tr>
+    <tr><td class="pk">contracts/s07/PostorHostil.sol</td><td>El atacante: su <code>receive()</code> revierte.</td><td>receive, denegación de servicio</td></tr>
+    <tr><td class="pk">contracts/s07/Empaquetado.sol</td><td>Dos structs con los mismos datos en distinto orden.</td><td>empaquetado de storage</td></tr>
+    <tr><td class="pk">test/s07/Subasta.test.js</td><td>23 pruebas: la especificación. No se modifica.</td><td>—</td></tr>
+    <tr><td class="pk">test/s07/GasPushPull.test.js</td><td>Escenarios A y B para la tabla de gas.</td><td>medir, no suponer</td></tr>
+  </table>
+  <div class="caja clave">
+    <div class="caja-et">LAS PRUEBAS SON LA ESPECIFICACIÓN</div>
+    <p>No hay que adivinar qué debe hacer cada función: lo dice la prueba. Cuando una prueba falla, lean su nombre y su código antes de tocar el contrato. El laboratorio está terminado cuando las 23 pasan con <strong>su</strong> versión.</p>
+  </div>
+</section>
+
+<!-- ============================================================ 5 -->
+<section class="sec salto">
+  <div class="sec-cab"><span class="sec-num">05</span><h2>Parte 1 · Completar la subasta</h2><span class="lead">35 MINUTOS · 6 TODO</span></div>
+
+  <h3 style="font-size:10.5pt;margin:2mm 0 2mm">5.1 · Copiar el andamiaje sobre la solución</h3>
+  <pre>cp andamiaje/s07/Subasta.sol contracts/s07/Subasta.sol                 (PowerShell, macOS, Linux)
+copy andamiaje\s07\Subasta.sol contracts\s07\Subasta.sol               (cmd de Windows)
+npx hardhat test test/s07/Subasta.test.js</pre>
+  <p><strong>Salida esperada:</strong></p>
+  <pre>  7 passing
+  16 failing</pre>
+  <p>Así se empieza, y es lo correcto. Las 7 que ya pasan prueban cosas que no dependen de los TODO: el constructor con duración cero, que solo el dueño pausa (eso lo hace OpenZeppelin), que el contrato rechaza ether directo, la subasta push, la comparación de dos contratos ya hechos y el empaquetado. Si ven <strong>otro</strong> número, o un error de compilación, paren: el andamiaje compila tal cual y se probó que da exactamente 7 y 16. Repitan la copia.</p>
+
+  <div class="caja">
+    <div class="caja-et">PARA TRABAJAR POR PARTES</div>
+    <p>El resultado completo abruma. Filtren por el nombre del grupo con <code>--grep</code>:</p>
+    <pre>npx hardhat test test/s07/Subasta.test.js --grep "pujar"
+npx hardhat test test/s07/Subasta.test.js --grep "retirar"
+npx hardhat test test/s07/Subasta.test.js --grep "finalizar y estado"</pre>
+    <p>Si en algún momento se pierden por completo, recuperen la solución con <code>git checkout contracts/s07/Subasta.sol</code> y vuelvan a copiar el andamiaje. Mírenla solo como último recurso: el aprendizaje está en escribirla.</p>
+  </div>
+
+  <div class="pregunta">
+    <div class="cab"><div class="n">1</div><div class="enun"><span class="tema">TODO 1 · estado()</span>Calcular en qué estado está la subasta</div></div>
+    <div class="just">
+      <strong>Qué hace:</strong> devuelve <code>Estado.Finalizada</code> si ya se llamó <code>finalizar()</code>; si no, <code>Estado.PorFinalizar</code> si el tiempo llegó a <code>fin</code>; si no, <code>Estado.Abierta</code>.<br>
+      <strong>Qué escribir:</strong> tres líneas con <code>if</code> y <code>return</code>, <strong>en ese orden</strong>. El orden importa: una subasta finalizada también tiene el tiempo vencido.<br>
+      <strong>Pista:</strong> el plazo se compara con <code>block.timestamp &gt;= fin</code> (mayor <strong>o igual</strong>: en el segundo exacto de <code>fin</code> ya no está abierta, igual que en <code>pujar</code>).<br>
+      <strong>Cómo sé que funcionó:</strong> pasa «recorre los tres estados». Las pruebas comparan con <code>0n</code>, <code>1n</code> y <code>2n</code> porque un enum es un entero pequeño (lámina A.4).
+    </div>
+  </div>
+
+  <div class="pregunta">
+    <div class="cab"><div class="n">2</div><div class="enun"><span class="tema">TODO 2 · minimoSiguiente()</span>Lo mínimo que debe ofrecer la próxima puja</div></div>
+    <div class="just">
+      <strong>Qué hace:</strong> si nadie ha pujado (<code>mejorPostor == address(0)</code>), devuelve <code>pujaMinima</code>. Si ya hay postor, devuelve la mejor puja más el 1 %.<br>
+      <strong>Qué escribir:</strong> <code>return mejorPuja + mejorPuja.aplicarBps(INCREMENTO_MINIMO_BPS);</code> — gracias a <code>using Porcentajes for uint256</code>, <code>aplicarBps</code> se llama como si fuera un método del número.<br>
+      <strong>Ejemplo trabajado:</strong> con <code>mejorPuja = 2 ETH = 2·10¹⁸ wei</code>: <code>2·10¹⁸ × 100 / 10 000 = 2·10¹⁶</code> wei = 0,02 ETH. El mínimo siguiente es 2,02 ETH.<br>
+      <strong>Cómo sé que funcionó:</strong> pasan «exige superar la puja anterior al menos en 1 %» y «se usa desde la subasta: 1 % de 2 ETH son 0,02 ETH».
+    </div>
+  </div>
+
+  <div class="pregunta">
+    <div class="cab"><div class="n">3</div><div class="enun"><span class="tema">TODO 3 · pujar() · CHECKS</span>Validar antes de tocar nada</div></div>
+    <div class="just">
+      <strong>Qué hace:</strong> revierte con <code>SubastaCerrada()</code> si <code>block.timestamp &gt;= fin</code> <strong>o</strong> si <code>finalizada</code>. Después calcula <code>uint256 minimo = minimoSiguiente();</code> y revierte con <code>PujaInsuficiente(minimo, msg.value)</code> si <code>msg.value &lt; minimo</code>.<br>
+      <strong>Detalle que evalúan las pruebas:</strong> el error lleva <strong>dos argumentos</strong>, en ese orden. La prueba lo comprueba con <code>.withArgs(MINIMA, eth("0.5"))</code>.<br>
+      <strong>Cómo sé que funcionó:</strong> pasan «rechaza una primera puja por debajo del mínimo» y «no acepta pujas después del cierre».
+    </div>
+  </div>
+
+  <div class="pregunta">
+    <div class="cab"><div class="n">4</div><div class="enun"><span class="tema">TODO 4 · pujar() · EFFECTS</span>Acreditar, nunca enviar</div></div>
+    <div class="just">
+      <strong>Qué hace, en este orden:</strong><br>
+      · Si había mejor postor: <code>pendientes[mejorPostor] += mejorPuja;</code> — con <code>+=</code>, porque el mismo postor puede ser superado varias veces.<br>
+      · <code>mejorPostor = msg.sender; mejorPuja = msg.value;</code><br>
+      · Si <code>!participo[msg.sender]</code>: marcarlo en el mapping y hacer <code>_participantes.push(msg.sender)</code> (lámina A.2).<br>
+      · <code>emit NuevaPuja(msg.sender, msg.value);</code><br>
+      <strong>Lo que NO deben hacer:</strong> enviar el dinero al superado con <code>call</code>. Eso es exactamente la subasta push, y la prueba ★ PULL fallará con <code>EnvioFallido</code>.<br>
+      <strong>Cómo sé que funcionó:</strong> pasan «acepta la primera puja», «al ser superado, el postor NO recibe su dinero», «registra a cada participante una sola vez», «acumula si el mismo postor es superado varias veces» y ★ PULL.
+    </div>
+  </div>
+
+  <div class="pregunta">
+    <div class="cab"><div class="n">5</div><div class="enun"><span class="tema">TODO 5 · retirar()</span>Checks → Effects → Interactions, en el orden exacto</div></div>
+    <div class="just">
+      <strong>Qué escribir, línea por línea:</strong>
+      <pre>uint256 monto = pendientes[msg.sender];                     // leer
+if (monto == 0) revert NadaQueRetirar();                    // 1 · checks
+pendientes[msg.sender] = 0;                                 // 2 · effects
+(bool ok, ) = payable(msg.sender).call{value: monto}("");   // 3 · interaction
+if (!ok) revert EnvioFallido();
+emit Retiro(msg.sender, monto);</pre>
+      <strong>Por qué el orden importa:</strong> si el cero se pusiera <strong>después</strong> del <code>call</code>, el receptor podría volver a llamar <code>retirar()</code> desde su <code>receive()</code> antes de que su saldo quede en cero, y cobrar otra vez (reentrada, lámina A.15; se explota en la Sesión 9). Lo explican en la pregunta 6.<br>
+      <strong>No pongan <code>whenNotPaused</code> aquí.</strong> Retirar lo propio no se pausa nunca (lámina A.16).<br>
+      <strong>Cómo sé que funcionó:</strong> pasan todo el grupo «retirar» y «pausada no acepta pujas, pero SÍ permite retirar».
+    </div>
+  </div>
+
+  <div class="pregunta">
+    <div class="cab"><div class="n">6</div><div class="enun"><span class="tema">TODO 6 · finalizar()</span>Cerrar sin depender del dueño</div></div>
+    <div class="just">
+      <strong>Qué hace:</strong> revierte con <code>SubastaAbierta()</code> si <code>block.timestamp &lt; fin</code>; con <code>YaFinalizada()</code> si ya se finalizó. Marca <code>finalizada = true</code>. Si hubo postor, <code>pendientes[owner()] += mejorPuja;</code> — también el beneficiario retira por el patrón pull. Emite <code>SubastaFinalizada(mejorPostor, mejorPuja)</code>.<br>
+      <strong>Decisión de diseño:</strong> <code>finalizar()</code> <strong>no</strong> es <code>onlyOwner</code>. Si el dueño pierde su clave, los perdedores igual pueden cerrar y retirar (lámina A.12).<br>
+      <strong>Cómo sé que funcionó:</strong> pasa todo el grupo «finalizar y estado», incluida «al final el contrato queda en cero si todos retiran».
+    </div>
+  </div>
+</section>
+
+<!-- ============================================================ 6 -->
+<section class="sec salto">
+  <div class="sec-cab"><span class="sec-num">06</span><h2>Punto de control · las 23 en verde</h2></div>
+  <pre>npx hardhat test test/s07/Subasta.test.js</pre>
+  <p><strong>Salida esperada</strong> (se muestra solo el final):</p>
+  <pre>  S07 · push frente a pull · el postor hostil
+    ✔ ★ contra la subasta PUSH, un postor hostil congela todas las pujas siguientes
+    ✔ ★ contra la subasta PULL, el mismo ataque no bloquea a nadie
+        segunda puja · push: 42280 · pull: 55350 · retiro posterior: 29977
+    ✔ gas, comparación justa: pull cuesta MÁS por puja y además exige un retiro aparte
+
+  S07 · empaquetado de storage
+        desordenado: 88341 gas · ordenado: 66279 gas · ahorro: 22062
+    ✔ ordenar las variables ahorra una ranura: una escritura nueva menos
+
+  S07 · biblioteca Porcentajes
+    ✔ se usa desde la subasta: 1 % de 2 ETH son 0,02 ETH
+
+  23 passing</pre>
+  <p><strong>Cómo sé que terminé:</strong> <code>23 passing</code> y ningún <code>failing</code>. Hagan la captura de pantalla ahora: es el primer ítem de la evidencia. Las cifras impresas deben coincidir exactamente con estas; la red local es determinista.</p>
+  <div class="caja alerta">
+    <div class="caja-et">SI LES DA 22</div>
+    <p>Casi siempre es la de pausa (pusieron <code>whenNotPaused</code> en <code>retirar</code>) o la de «acumula» (usaron <code>=</code> en lugar de <code>+=</code>). Vayan a la sección 13.</p>
+  </div>
+</section>
+
+<!-- ============================================================ 7 -->
+<section class="sec">
+  <div class="sec-cab"><span class="sec-num">07</span><h2>Parte 2 · El ataque del postor hostil</h2><span class="lead">10 MINUTOS</span></div>
+  <pre>npx hardhat test test/s07/Subasta.test.js --grep "postor hostil"</pre>
+  <ol>
+    <li><strong>Lean la prueba ★ PUSH</strong> en <code>test/s07/Subasta.test.js</code>. El contrato hostil puja 1 ETH en <code>SubastaPush</code>. Beto intenta pujar 5 y luego 50 ETH: las dos revierten con <code>EnvioFallido</code>, y <code>mejorPostor</code> sigue siendo el hostil. Sigan la cadena: <code>pujar()</code> de Beto → <code>call</code> de devolución al hostil → <code>receive()</code> del hostil revierte → <code>ok == false</code> → la subasta revierte → la puja de Beto no existe.</li>
+    <li><strong>Lean la prueba ★ PULL.</strong> Mismo ataque contra su <code>Subasta</code>. La puja de Beto entra, y el ETH del hostil queda en <code>pendientes</code>: el hostil solo se perjudica a sí mismo (su contrato no tiene cómo llamar <code>retirar()</code>).</li>
+    <li><strong>Rómpanlo a propósito.</strong> En su <code>Subasta.sol</code>, reemplacen temporalmente la línea <code>pendientes[mejorPostor] += mejorPuja;</code> por un envío:
+      <pre>(bool ok, ) = payable(mejorPostor).call{value: mejorPuja}("");
+if (!ok) revert EnvioFallido();</pre>
+      Corran otra vez la suite. <strong>Salida esperada:</strong> falla la ★ PULL con <code>EnvioFallido</code> (y también las que dependen de <code>pendientes</code>). Acaban de convertir su subasta en la push. <strong>Deshagan el cambio</strong> y confirmen que vuelven las 23.</li>
+  </ol>
+  <p>Anoten la cadena de llamadas: es la pregunta 1 de la reflexión.</p>
+</section>
+
+<!-- ============================================================ 8 -->
+<section class="sec">
+  <div class="sec-cab"><span class="sec-num">08</span><h2>Parte 3 · Desplegar en Sepolia</h2><span class="lead">10 MINUTOS · PRIMERO ESTO</span></div>
+  <p>Se despliega <strong>antes</strong> de la tabla de gas a propósito: el plazo de la subasta (10 minutos) corre mientras trabajan la Parte 4.</p>
+  <ol>
+    <li>Abran <code>remix.ethereum.org</code>. En el explorador de archivos, creen una carpeta <code>s07</code> y dentro <strong>tres</strong> archivos: <code>ISubasta.sol</code>, <code>Porcentajes.sol</code> y <code>Subasta.sol</code>. Peguen en cada uno el contenido de <strong>su</strong> versión. Los tres en la <strong>misma</strong> carpeta: los <code>import "./ISubasta.sol"</code> son relativos.</li>
+    <li>Pestaña <em>Solidity compiler</em>: versión <code>0.8.28</code>, <em>Advanced configurations</em> → <em>Enable optimization</em> con <code>200</code>. Compilen <code>Subasta.sol</code>. Los <code>import</code> de <code>@openzeppelin</code> se descargan solos. <strong>Cómo sé que funcionó:</strong> marca verde en el ícono del compilador.</li>
+    <li>Pestaña <em>Deploy &amp; run</em>: <em>Environment</em> = <em>Injected Provider – MetaMask</em>. La billetera debe estar en <strong>Sepolia</strong> y con la cuenta del curso. Contrato: <code>Subasta</code>.</li>
+    <li>Parámetros del constructor: <code>duracionSegundos</code> = <code>600</code>, <code>pujaMinima_</code> = <code>1000000000000000</code> (eso es 0,001 ETH en wei). Pulsen <em>transact</em>, lean la ventana de la billetera (red, contrato nuevo, sin valor) y confirmen. <strong>Anoten la dirección del contrato.</strong></li>
+    <li><strong>Primera puja</strong> desde la cuenta 1: en el campo <em>Value</em> escriban <code>1</code> y elijan la unidad <code>milliether</code> (o <code>1000000000000000</code> en <code>wei</code>), luego el botón <code>pujar</code>. <strong>Segunda puja</strong> desde la cuenta 2 con <code>2</code> milliether. Guarden los dos hashes de transacción.</li>
+    <li><strong>Cómo sé que funcionó:</strong> <code>mejorPostor</code> muestra la cuenta 2, <code>mejorPuja</code> muestra <code>2000000000000000</code>, <code>pendientes(cuenta 1)</code> muestra <code>1000000000000000</code>, y <code>estado</code> devuelve <code>0</code>.</li>
+  </ol>
+  <div class="caja alerta">
+    <div class="caja-et">SIN FONDOS DE PRUEBA</div>
+    <p>El docente reparte ETH de Sepolia desde la billetera institucional. Si la red está caída, desplieguen en la <em>Remix VM</em> para no perder la práctica y completen la evidencia de Sepolia en casa antes de la entrega.</p>
+  </div>
+</section>
+
+<!-- ============================================================ 9 -->
+<section class="sec">
+  <div class="sec-cab"><span class="sec-num">09</span><h2>Parte 4 · Ejercicio comparativo de gas: push frente a pull</h2><span class="lead">15 MINUTOS</span></div>
+  <p>La prueba <code>test/s07/GasPushPull.test.js</code> juega la <strong>misma</strong> subasta contra tres contratos, en dos escenarios:</p>
+  <ul>
+    <li><strong>Escenario A:</strong> cuatro postores distintos pujan 1, 2, 3 y 4 ETH. Vence, se finaliza y todos los que tienen saldo pendiente retiran (también el beneficiario).</li>
+    <li><strong>Escenario B:</strong> Ana y Beto se alternan seis pujas (1, 2, 3, 4, 5, 6 ETH). Mismo cierre.</li>
+  </ul>
+  <p>Corran <strong>un escenario a la vez</strong> (<code>--gas-stats</code> suma todas las pruebas que corren juntas):</p>
+  <pre>npx hardhat test test/s07/GasPushPull.test.js --grep "escenario A" --gas-stats
+npx hardhat test test/s07/GasPushPull.test.js --grep "escenario B" --gas-stats</pre>
+
+  <p><strong>Cómo leer la salida.</strong> Hay un cuadro por contrato. Cada fila es una función; las columnas <code>Min</code>, <code>Average</code>, <code>Median</code>, <code>Max</code> son el gas de sus llamadas y <code>#calls</code> cuántas hubo. Ejemplo real del cuadro de <code>Empaquetado</code> (de la suite principal):</p>
+  <pre>║ contracts/s07/Empaquetado.sol:Empaquetado                              ║
+║ Function name      │ Min    │ Average │ Median │ Max    │ #calls       ║
+║ guardarDesordenado │ 88341  │ 88341   │ 88341  │ 88341  │ 1            ║
+║ guardarOrdenado    │ 66279  │ 66279   │ 66279  │ 66279  │ 1            ║</pre>
+  <p>En la subasta, la <strong>primera</strong> puja es la más cara (estrena <code>mejorPostor</code> y <code>mejorPuja</code>): es el <code>Max</code>. La suma de todas las pujas es <code>Average × #calls</code>; puede diferir en 1 o 2 unidades de gas del valor exacto porque el promedio se redondea. Además, cada prueba imprime el <code>TOTAL</code> exacto del escenario sumando los recibos: úsenlo para <strong>comprobar</strong> su suma, no para copiarla.</p>
+
+  <table>
+    <tr><th style="width:30%">LLENAR CON SUS CIFRAS</th><th>PUSH · A</th><th>PULL MÍNIMA · A</th><th>PUSH · B</th><th>PULL MÍNIMA · B</th></tr>
+    <tr><td class="pk">pujar · Max (la primera)</td><td></td><td></td><td></td><td></td></tr>
+    <tr><td class="pk">pujar · Min</td><td></td><td></td><td></td><td></td></tr>
+    <tr><td class="pk">pujar · Average × #calls</td><td></td><td></td><td></td><td></td></tr>
+    <tr><td class="pk">finalizar</td><td></td><td></td><td></td><td></td></tr>
+    <tr><td class="pk">retirar · Average × #calls</td><td>—</td><td></td><td>—</td><td></td></tr>
+    <tr><td class="pk">TOTAL del escenario</td><td></td><td></td><td></td><td></td></tr>
+    <tr><td class="pk">pull ÷ push</td><td colspan="2"></td><td colspan="2"></td></tr>
+  </table>
+  <p>Anoten también la fila <code>pujar</code> del cuadro de <code>Subasta.sol</code> (la completa) en el escenario A.</p>
+
+  <div class="caja clave">
+    <div class="caja-et">TRES PREGUNTAS SOBRE LA TABLA (VAN EN EL INFORME)</div>
+    <p><strong>T1.</strong> En el escenario A, ¿cuánto más cuesta pull que push en total, en gas y en porcentaje? ¿Quién paga esa diferencia: el ganador, los perdedores o el beneficiario?</p>
+    <p><strong>T2.</strong> En el escenario B, el <code>Min</code> de <code>pujar</code> en pull es <strong>menor</strong> que en push. Expliquen por qué con los costos de escritura de storage: escribir en una ranura que estaba en cero cuesta 20 000 de gas; modificar una ranura que ya tenía valor cuesta 2 900 (más 2 100 si es el primer acceso en la transacción, EIP-2929). ¿Qué ranura estrena cada puja pull del escenario A que, en las últimas pujas del B, ya tenía valor?</p>
+    <p><strong>T3.</strong> En el escenario A, las pujas de <code>Subasta.sol</code> completa cuestan casi el doble que las de <code>SubastaPullMinima</code>. ¿Qué hace de más? ¿Vale la pena? (Pista: lámina A.2.)</p>
+  </div>
+</section>
+
+<!-- ============================================================ 10 -->
+<section class="sec salto">
+  <div class="sec-cab"><span class="sec-num">10</span><h2>Parte 5 · Cerrar la subasta en Sepolia</h2><span class="lead">5 MINUTOS</span></div>
+  <ol>
+    <li>Cuando hayan pasado 10 minutos desde el despliegue, lean <code>estado</code>: debe devolver <code>1</code> (<code>PorFinalizar</code>). Si devuelve <code>0</code>, esperen: el reloj es el de los bloques de Sepolia, no el de su computador.</li>
+    <li>Llamen <code>finalizar</code> desde <strong>cualquier</strong> cuenta. <strong>Cómo sé que funcionó:</strong> <code>estado</code> devuelve <code>2</code> y en el explorador aparece el evento <code>SubastaFinalizada</code>. Guarden el hash.</li>
+    <li>Desde la cuenta 1 (la superada): <code>retirar</code>. Desde la cuenta que desplegó (la dueña): <code>retirar</code>. Guarden al menos un hash. <strong>Cómo sé que funcionó:</strong> <code>pendientes</code> de las dos cuentas vuelve a <code>0</code> y el saldo del contrato en el explorador es 0 ETH.</li>
+    <li><strong>Opcional, recomendado:</strong> verificar el código en <code>sepolia.etherscan.io</code> → <em>Contract</em> → <em>Verify and Publish</em>. Como el contrato importa otros archivos, el formulario de un solo archivo suele fallar: usen la opción <em>Standard-Json-Input</em> del explorador o el complemento de verificación de Remix. Compilador <code>0.8.28</code> y optimización <code>200</code>, exactamente los mismos del despliegue. En la Sesión 8 esto se automatiza con un solo comando.</li>
+  </ol>
+</section>
+
+<!-- ============================================================ 11 -->
+<section class="sec">
+  <div class="sec-cab"><span class="sec-num">11</span><h2>El informe de decisiones de diseño</h2><span class="lead">LA EVIDENCIA QUE PIDE EL PLAN</span></div>
+  <p>No es un resumen de lo que hicieron: es la <strong>defensa</strong> de por qué el contrato es como es. Un ingeniero que hereda su código debería poder leerlo y entender qué se decidió, qué se descartó y qué cuesta. Mínimo <strong>cinco decisiones</strong>, en esta tabla:</p>
+  <table>
+    <tr><th style="width:19%">DECISIÓN</th><th style="width:19%">ALTERNATIVA DESCARTADA</th><th style="width:24%">POR QUÉ</th><th style="width:22%">EVIDENCIA</th><th>COSTO</th></tr>
+    <tr><td class="pk">Retiro (pull)</td><td>Devolver al superado en la misma puja</td><td>Un receptor que revierte congela la subasta push</td><td>Pruebas ★ PUSH y ★ PULL</td><td>Su cifra de T1</td></tr>
+    <tr><td class="pk">Cero antes del call</td><td>Poner en cero después</td><td>…</td><td>…</td><td>…</td></tr>
+    <tr><td class="pk">retirar sin pausa</td><td>Pausar todas las funciones</td><td>…</td><td>…</td><td>…</td></tr>
+    <tr><td class="pk">(su decisión 4)</td><td></td><td></td><td></td><td></td></tr>
+    <tr><td class="pk">(su decisión 5)</td><td></td><td></td><td></td><td></td></tr>
+  </table>
+  <p><strong>Candidatas para las decisiones 4 y 5:</strong> <code>fin</code> y <code>pujaMinima</code> como <code>immutable</code>; <code>finalizar()</code> sin <code>onlyOwner</code>; no declarar <code>receive()</code> ni <code>fallback()</code>; registrar participantes en un arreglo (¿para qué sirve y qué riesgo tiene?); incremento mínimo del 1 % en puntos básicos; usar <code>call</code> en lugar de <code>transfer</code>.</p>
+  <div class="caja alerta">
+    <div class="caja-et">LA COLUMNA QUE MÁS PESA</div>
+    <p><strong>Evidencia.</strong> Una decisión sin una prueba que la defienda o una cifra medida que la cuantifique es una opinión. Si una decisión no tiene prueba en la suite, díganlo y describan la prueba que haría falta.</p>
+  </div>
+</section>
+
+<!-- ============================================================ 12 -->
+<section class="sec salto">
+  <div class="sec-cab"><span class="sec-num">12</span><h2>Preguntas de reflexión</h2><span class="lead">SE RESPONDEN MIRANDO EL CÓDIGO Y LA SALIDA</span></div>
+  <p>Estas preguntas no se pueden responder bien sin haber corrido el laboratorio: piden datos de <strong>su</strong> terminal, de <strong>su</strong> contrato y de <strong>su</strong> despliegue.</p>
+  <ol>
+    <li>Escriban la cadena exacta de llamadas por la que la puja de 50 ETH de Beto revierte en la subasta push: qué función llama a cuál, dónde se produce el <code>revert</code> y con qué error llega a Beto.</li>
+    <li>¿Por qué el mismo contrato hostil no bloquea la subasta pull? ¿Quién pierde en ese caso, cuánto, y por qué el contrato hostil no puede recuperarlo?</li>
+    <li>Cuando rompieron su contrato a propósito (sección 7, paso 3), ¿cuántas pruebas fallaron y cuáles? ¿Alguna prueba que esperaban que fallara siguió en verde?</li>
+    <li>El struct ordenado ahorra 22 062 de gas. Muestren con los costos de la sección 9 (T2) que esa cifra corresponde a una ranura nueva menos. ¿Qué otra variable del laboratorio ganaría con un mejor orden, si alguna?</li>
+    <li>Si alguien pone <code>whenNotPaused</code> en <code>retirar()</code>, ¿qué prueba falla, con qué error, y qué principio de diseño defiende esa prueba?</li>
+    <li>En <code>retirar()</code>, ¿qué pasaría si el saldo se pusiera en cero <strong>después</strong> del <code>call</code>? ¿Alguna de las 23 pruebas lo detectaría? Describan la prueba que haría falta (qué contrato auxiliar necesitaría y qué comprobaría).</li>
+  </ol>
+</section>
+
+<!-- ============================================================ 13 -->
+<section class="sec">
+  <div class="sec-cab"><span class="sec-num">13</span><h2>Errores frecuentes</h2><span class="lead">CASI TODO SE RESUELVE AQUÍ</span></div>
+  <table>
+    <tr><th style="width:40%">SÍNTOMA</th><th>CAUSA Y SOLUCIÓN</th></tr>
+    <tr><td class="pk">«npx no se reconoce como comando»</td><td>Node.js no está instalado o la terminal se abrió antes de instalarlo. Instalen Node 22 LTS y abran una terminal nueva.</td></tr>
+    <tr><td class="pk">No encuentra <code>@openzeppelin/...</code> o «Cannot find module» al compilar</td><td>Falta <code>npm install</code>, o la terminal no está en la carpeta <code>laboratorios-evm</code>.</td></tr>
+    <tr><td class="pk">Al empezar no ven 7 / 16</td><td>El andamiaje no se copió sobre <code>contracts/s07/Subasta.sol</code>. Repitan la copia; revisen la ruta.</td></tr>
+    <tr><td class="pk">Falla la de retiro: «changed by 0 wei»</td><td>Falta el <code>call</code>: el pendiente se pone en cero pero nunca se envía.</td></tr>
+    <tr><td class="pk">El retiro revierte con <code>NadaQueRetirar</code> la primera vez</td><td>Pusieron el pendiente en cero <strong>antes</strong> de leer el monto: el monto leído es 0. Primero se lee, después se pone en cero.</td></tr>
+    <tr><td class="pk">Falla «acumula si es superado varias veces»</td><td><code>=</code> en lugar de <code>+=</code> al acreditar al superado: se pierde lo acreditado antes.</td></tr>
+    <tr><td class="pk"><code>EnforcedPause</code> al retirar</td><td><code>whenNotPaused</code> en <code>retirar()</code>. Quítenlo: retirar lo propio no se pausa.</td></tr>
+    <tr><td class="pk">El dueño no puede retirar tras finalizar</td><td><code>finalizar()</code> no acredita <code>mejorPuja</code> al <code>owner()</code>.</td></tr>
+    <tr><td class="pk">No acepta la primera puja de 1 ETH</td><td><code>minimoSiguiente()</code> aplica el 1 % aunque no haya postor. Sin postor, devuelve <code>pujaMinima</code> tal cual.</td></tr>
+    <tr><td class="pk">La ★ PULL falla con <code>EnvioFallido</code></td><td>Devolvieron el dinero con <code>call</code> dentro de <code>pujar()</code>: esa es la push.</td></tr>
+    <tr><td class="pk"><code>PujaInsuficiente</code> pasa pero «withArgs» falla</td><td>Los argumentos del error van en orden <code>(minimo, msg.value)</code>.</td></tr>
+    <tr><td class="pk">La tabla de <code>--gas-stats</code> trae cifras mezcladas</td><td>Corrieron los dos escenarios juntos. Usen <code>--grep "escenario A"</code> y luego <code>--grep "escenario B"</code>.</td></tr>
+    <tr><td class="pk">Remix: «not found ISubasta.sol»</td><td>Los tres archivos deben estar en la misma carpeta de Remix.</td></tr>
+    <tr><td class="pk">Remix: «Gas estimation failed» al pujar</td><td>El <em>Value</em> está en cero o por debajo del mínimo, o la subasta ya venció. Revisen la unidad (wei, gwei, milliether).</td></tr>
+    <tr><td class="pk"><code>finalizar</code> revierte en Sepolia</td><td>Aún no pasan los 600 s según el reloj de los bloques. Esperen un minuto y lean <code>estado</code>.</td></tr>
+  </table>
+</section>
+
+<!-- ============================================================ 14 -->
+<section class="sec salto">
+  <div class="sec-cab"><span class="sec-num">14</span><h2>Lista de chequeo antes de entregar</h2></div>
+  <ul style="list-style:none;padding-left:0">
+    <li>☐ Captura con <code>23 passing</code> usando su versión de <code>Subasta.sol</code>.</li>
+    <li>☐ Probaron romper su contrato (sección 7) y lo dejaron como estaba.</li>
+    <li>☐ Tabla de gas completa, con los dos escenarios, y respuestas T1, T2 y T3.</li>
+    <li>☐ Dirección del contrato en Sepolia.</li>
+    <li>☐ Hashes de: dos pujas, la finalización y al menos un retiro.</li>
+    <li>☐ Informe de decisiones de diseño con al menos cinco decisiones, cada una con evidencia.</li>
+    <li>☐ Las seis preguntas de reflexión respondidas con datos propios.</li>
+    <li>☐ Ninguna frase semilla, clave privada ni captura que la muestre en el documento.</li>
+    <li>☐ Nombres de los dos integrantes en la primera página.</li>
+  </ul>
+</section>
+
+<!-- ============================================================ 15 -->
+<section class="sec">
+  <div class="sec-cab"><span class="sec-num">15</span><h2>Rúbrica</h2><span class="lead">LABORATORIO 07 · SEGUNDO CORTE</span></div>
+  <table>
+    <tr><th style="width:22%">CRITERIO</th><th style="width:8%">PESO</th><th style="width:24%">EXCELENTE (5,0)</th><th style="width:24%">ACEPTABLE (3,5)</th><th>INSUFICIENTE (&lt; 3,0)</th></tr>
+    <tr><td class="pk">Subasta completa</td><td>20 %</td><td>23 en verde; código limpio y comentado; CEI exacto.</td><td>23 en verde con código confuso o redundante.</td><td>Menos de 23 en verde.</td></tr>
+    <tr><td class="pk">Despliegue en Sepolia</td><td>20 %</td><td>Dirección y los cuatro hashes; subasta finalizada y retirada; código verificado.</td><td>Dirección y hashes incompletos.</td><td>Sin evidencia en cadena: no se califica.</td></tr>
+    <tr><td class="pk">Tabla de gas</td><td>20 %</td><td>Completa, sumas correctas, T1–T3 explicadas con costos de storage.</td><td>Completa con explicaciones superficiales.</td><td>Incompleta o cifras inventadas.</td></tr>
+    <tr><td class="pk">Informe de decisiones</td><td>25 %</td><td>Cinco o más decisiones, cada una con alternativa, razón, evidencia y costo.</td><td>Cinco decisiones, alguna sin evidencia.</td><td>Menos de cinco, o sin alternativas.</td></tr>
+    <tr><td class="pk">Reflexión</td><td>15 %</td><td>Las seis, con datos de su propia salida.</td><td>Las seis, genéricas.</td><td>Faltan respuestas.</td></tr>
+  </table>
+</section>
+
+<!-- ============================================================ 16 -->
+<section class="sec salto">
+  <div class="sec-cab"><span class="sec-num">16</span><h2>Trabajo autónomo · refactorizar los certificados de la S6</h2><span class="lead">PARA LA SESIÓN 8</span></div>
+  <p>El plan pide refactorizar el contrato de certificados de la Sesión 6 (<code>contracts/s06/CertificadosUSB.sol</code>) aplicando <strong>dos patrones</strong> de hoy. No hay una sola respuesta correcta: se califica que cada patrón resuelva un riesgo real del contrato y que lo justifiquen.</p>
+  <table>
+    <tr><th style="width:24%">PATRÓN CANDIDATO</th><th style="width:40%">QUÉ RIESGO DE CertificadosUSB ATACA</th><th>LA TRAMPA A EVITAR</th></tr>
+    <tr><td class="pk">Ownable2Step</td><td><code>cambiarEmisor</code> traspasa el control en un paso: un error de tipeo pierde el contrato para siempre.</td><td>Reemplazar <code>soloEmisor</code> por <code>onlyOwner</code> cambia el error (<code>NoEsEmisor</code> → <code>OwnableUnauthorizedAccount</code>): las pruebas de la S6 que lo esperan fallarán. Explíquenlo.</td></tr>
+    <tr><td class="pk">Pausable</td><td>Si roban la clave del emisor, el ladrón puede emitir diplomas falsos.</td><td>¿Se pausa <code>revocar</code>? Pausar la revocación impediría anular justo los diplomas falsos. <code>verificar</code> nunca se pausa.</td></tr>
+    <tr><td class="pk">Empaquetado</td><td>El struct <code>Certificado</code> tiene <code>string</code>, <code>uint64</code> y dos <code>bool</code>.</td><td>Midan antes y después con <code>--gas-stats</code> sobre <code>test/s06</code>: si no cambia, díganlo; no inventen el ahorro.</td></tr>
+  </table>
+  <p><strong>Entrega (en la Sesión 8):</strong> el contrato refactorizado, una tabla con los dos patrones (qué cambió, qué riesgo mitiga, qué cuesta en gas, medido) y la salida de <code>npx hardhat test test/s06/CertificadosUSB.test.js</code> contra su versión, explicando cada prueba que falle y por qué. Trabajen en una copia (<code>contracts/s06/CertificadosUSBv2.sol</code>) y no modifiquen el original.</p>
+  <div class="caja clave">
+    <div class="caja-et">LA PREGUNTA DE LA SEMANA</div>
+    <p>El postor hostil no robó nada y aun así ganó. ¿Dónde más —en el curso o en el mundo— alguien bloquea a todos solo con negarse a cooperar? Tráiganla pensada: abre la Sesión 8.</p>
+  </div>
+</section>
+
+<!-- ============================================================ 17 -->
+<section class="sec">
+  <div class="sec-cab"><span class="sec-num">17</span><h2>Referencias</h2></div>
+  <ul>
+    <li>Documentación de Solidity 0.8.28 · <em>Layout of State Variables in Storage</em>. <code>https://docs.soliditylang.org/en/v0.8.28/internals/layout_in_storage.html</code></li>
+    <li>OpenZeppelin Contracts 5.x · <em>Access Control</em> (Ownable, Ownable2Step) y <em>Utils</em> (Pausable). <code>https://docs.openzeppelin.com/contracts/5.x/api/access</code></li>
+    <li>EIP-1884 · <em>Repricing for trie-size-dependent opcodes</em> (SLOAD de 200 a 800). <code>https://eips.ethereum.org/EIPS/eip-1884</code></li>
+    <li>EIP-2929 · <em>Gas cost increases for state access opcodes</em> (2 100 en frío, 2 900 para modificar). <code>https://eips.ethereum.org/EIPS/eip-2929</code></li>
+    <li>ConsenSys Diligence (2019). <em>Stop Using Solidity's transfer() Now</em>.</li>
+    <li>King of the Ether Throne · <em>Post-Mortem Investigation</em> (febrero de 2016). <code>https://www.kingoftheether.com/postmortem.html</code></li>
+  </ul>
+</section>
+
+</body>
+</html>

@@ -1,0 +1,302 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<title>Guía · Laboratorio 10</title>
+<!--ESTILOS-->
+</head>
+<body>
+
+<section class="barra">
+  <div class="kicker">LABORATORIO 10 · TOKENS FUNGIBLES · EL ESTÁNDAR ERC-20</div>
+  <h1>UN TOKEN QUE<br>TODO EL MUNDO<br>YA SABE <em>HABLAR</em></h1>
+  <div class="sub">Construir FichaUSB sobre OpenZeppelin, desplegarla y verificarla en Sepolia,<br>importarla en MetaMask, transferir, y dominar approve / transferFrom con revocación.</div>
+</section>
+
+<dl class="datos">
+  <div><dt>MODALIDAD</dt><dd>En parejas<br>90 minutos</dd></div>
+  <div><dt>REQUISITO</dt><dd>Repo de laboratorios<br>+ MetaMask (curso) en Sepolia</dd></div>
+  <div><dt>META</dt><dd>12 pruebas verdes +<br>token verificado en Sepolia</dd></div>
+  <div><dt>ENTREGA</dt><dd>Token, hashes de transferencia<br>y de canje, tokenómica</dd></div>
+</dl>
+
+<div class="caja peligro">
+  <div class="caja-et">LA REGLA DE ORO</div>
+  <p>Todo ocurre en <strong>Sepolia</strong> (red de prueba) o en la red local, nunca con dinero real. La clave privada es la de la <strong>billetera del curso</strong>, sin fondos reales, y vive <strong>solo en el almacén cifrado</strong> de Hardhat (<code>keystore</code>), jamás en un archivo del repositorio. La frase semilla no se comparte con nadie. Estos contratos son material de clase <strong>sin auditar</strong>.</p>
+</div>
+
+<!-- ============================================================ 1 -->
+<section class="sec">
+  <div class="sec-cab"><span class="sec-num">01</span><h2>Qué vas a construir, y por qué</h2><span class="lead">LEER PRIMERO</span></div>
+
+  <p>Un token ERC-20 no vale por tener el mejor código: vale porque <strong>miles de aplicaciones ya saben hablarle</strong>. Ese acuerdo —seis funciones y dos eventos con nombres fijos— es el estándar. Hoy construyes uno <strong>sobre OpenZeppelin</strong> (auditado), no a mano, y aprendes la mecánica de aprobaciones que usa todo DeFi.</p>
+
+  <table>
+    <tr><th style="width:26%">PIEZA</th><th style="width:44%">QUÉ HACE</th><th>ESTÁNDAR QUE APLICA</th></tr>
+    <tr><td class="pk">FichaUSB</td><td>Token de puntos de un evento, con tope, acuñación controlada y quema.</td><td>ERC20 + Capped + Burnable + Ownable</td></tr>
+    <tr><td class="pk">acunar</td><td>El organizador crea puntos, hasta el tope.</td><td><code>_mint</code> con control de acceso</td></tr>
+    <tr><td class="pk">Canje</td><td>Un puesto que cobra fichas por un premio usando la aprobación.</td><td>approve + transferFrom</td></tr>
+  </table>
+
+  <div class="caja alerta">
+    <div class="caja-et">EL PUNTO DE HOY, EN UNA FRASE</div>
+    <p>Un token es una <strong>tabla de saldos dentro de UN contrato</strong>. Tu billetera no «contiene» tokens: contiene la clave que autoriza a mover una fila de esa tabla. Por eso, cuando despliegues el token, <strong>no aparecerá solo</strong> en MetaMask: habrá que importarlo con la dirección del contrato (paso 8).</p>
+  </div>
+</section>
+
+<!-- ============================================================ 2 -->
+<section class="sec salto">
+  <div class="sec-cab"><span class="sec-num">02</span><h2>Preparar el entorno</h2><span class="lead">UNA SOLA VEZ</span></div>
+
+  <p>Todo vive en el repositorio único de laboratorios, <code>material/laboratorios-evm</code> (Hardhat 3.16, Solidity 0.8.28, OpenZeppelin 5.6.1). Si es la primera vez en esta máquina:</p>
+  <pre>cd material/laboratorios-evm
+npm install
+npx hardhat test          # confirma que el entorno está sano</pre>
+
+  <div class="caja">
+    <div class="caja-et">EL FLUJO DEL LABORATORIO: TE GUÍAN LAS PRUEBAS</div>
+    <p>Recibes un <strong>andamiaje</strong> (en <code>andamiaje/s10/</code>) con los dos contratos incompletos: compilan, pero cuatro <code>// TODO</code> están por escribir. Las cuentas dicen cuándo terminaste. Copia el andamiaje sobre la carpeta de trabajo y corre las pruebas:</p>
+    <pre>copy andamiaje\s10\*.sol contracts\s10\      (Windows)
+cp andamiaje/s10/*.sol contracts/s10/         (macOS / Linux)
+
+npx hardhat test test/s10/FichaUSB.test.js</pre>
+    <p>Al empezar, varias de las <strong>12 pruebas fallan</strong>. Vas completando los TODO y volviendo a correr; el laboratorio está terminado cuando las 12 pasan.</p>
+  </div>
+</section>
+
+<!-- ============================================================ 3 -->
+<section class="sec salto">
+  <div class="sec-cab"><span class="sec-num">03</span><h2>Los cuatro TODO de FichaUSB y Canje</h2><span class="lead">EL CÓDIGO QUE ESCRIBES</span></div>
+
+  <p>Casi todo lo hereda OpenZeppelin. Tú solo escribes las <strong>decisiones de diseño</strong>. Cada TODO trae su pista en el propio archivo; aquí está el porqué.</p>
+
+  <div class="pregunta">
+    <div class="cab"><div class="n">1</div><div class="enun"><span class="tema">TODO 1 · el tope en el constructor</span>Convertir tokens a unidades mínimas</div></div>
+    <div class="just">
+      <strong>El problema:</strong> el tope llega EN TOKENS (p. ej. 1 000 000), pero <code>ERC20Capped</code> lo espera en <strong>unidades mínimas</strong> (1 token = 10¹⁸ unidades).<br>
+      <strong>Qué escribir:</strong> multiplica el parámetro por <code>10 ** decimals()</code> al pasarlo a <code>ERC20Capped(...)</code>.<br>
+      <strong>Por qué:</strong> la EVM no tiene decimales reales (Sesión 5). Si no conviertes, tu «tope de un millón» es en realidad un millón de <em>billonésimas</em> de token: una fracción invisible.
+    </div>
+  </div>
+
+  <div class="pregunta">
+    <div class="cab"><div class="n">2</div><div class="enun"><span class="tema">TODO 2 · la función acunar</span>Crear tokens, en unidades mínimas</div></div>
+    <div class="just">
+      <strong>Qué escribir:</strong> llama a <code>_mint(a, cantidadEnTokens * 10 ** decimals())</code>.<br>
+      <strong>Pistas:</strong> <code>_mint</code> es la función interna de OpenZeppelin que crea tokens. No compruebes el tope aquí: <code>ERC20Capped</code> ya lo hace en <code>_update</code> (TODO 3). El modificador <code>onlyOwner</code> (de <code>Ownable</code>) ya restringe quién puede llamarla.
+    </div>
+  </div>
+
+  <div class="pregunta">
+    <div class="cab"><div class="n">3</div><div class="enun"><span class="tema">TODO 3 · el _update que compone</span>Resolver la herencia múltiple</div></div>
+    <div class="just">
+      <strong>Qué escribir:</strong> una sola línea, <code>super._update(from, to, value);</code>.<br>
+      <strong>Por qué existe:</strong> al heredar de <code>ERC20</code> y de <code>ERC20Capped</code>, las dos definen <code>_update</code>. Solidity te obliga a decir cuál se usa (por eso el <code>override(ERC20, ERC20Capped)</code>). <code>super._update</code> llama primero al de <code>Capped</code> (que revisa el tope) y luego al de <code>ERC20</code> (que mueve los saldos).<br>
+      <strong>Cómo lo notas:</strong> mientras esté vacío, <strong>ninguna transferencia mueve saldos</strong>: casi todas las pruebas fallan.
+    </div>
+  </div>
+
+  <div class="pregunta">
+    <div class="cab"><div class="n">4</div><div class="enun"><span class="tema">TODO 4 · la función canjear</span>Retirar lo aprobado, ni un token más</div></div>
+    <div class="just">
+      <strong>Qué escribir, en orden:</strong>
+      <br>a) Mover <code>precio</code> fichas <strong>desde</strong> <code>msg.sender</code> <strong>hacia</strong> <code>tesoreria</code>. ¿Cuál de las seis funciones del estándar mueve tokens de OTRA cuenta? (<code>transferFrom</code>.)
+      <br>b) Esa función devuelve un <code>bool</code>: si es <code>false</code>, <code>revert TransferenciaFallida()</code>.
+      <br>c) Suma 1 a <code>premiosDe[msg.sender]</code>.
+      <br>d) Emite <code>Canjeado(msg.sender, precio)</code>.<br>
+      <strong>Pregunta para pensar:</strong> ¿por qué aquí NO escribes ningún <code>require</code> sobre la <code>allowance</code>? Pruébalo sin aprobar y mira el error: <code>transferFrom</code> ya revierte solo si no autorizaste lo suficiente.
+    </div>
+  </div>
+
+  <div class="caja clave">
+    <div class="caja-et">LAS CUATRO PRUEBAS ★ SON LA TESIS DE LA SESIÓN</div>
+    <p>No acuñar sobre el tope · quemar libera espacio bajo el tope · el canje retira exactamente lo aprobado · el contrato NO puede llevarse más de lo aprobado. Si esas cuatro pasan, entendiste ERC-20 y el patrón de aprobación. Si te pierdes, vuelve a copiar el andamiaje y empieza de nuevo.</p>
+  </div>
+</section>
+
+<!-- ============================================================ 4 -->
+<section class="sec salto">
+  <div class="sec-cab"><span class="sec-num">04</span><h2>Decimales: el número que confunde a todos</h2><span class="lead">ENTENDER ANTES DE DESPLEGAR</span></div>
+
+  <p>Un token con 18 decimales guarda internamente enteros enormes; la coma es pura presentación. Tenlo claro antes de tocar Sepolia, porque los errores de decimales son silenciosos.</p>
+  <table>
+    <tr><th style="width:44%">LO QUE VE LA PERSONA</th><th>LO QUE GUARDA EL CONTRATO</th></tr>
+    <tr><td class="pk">1 FUSB</td><td>1 000 000 000 000 000 000 &nbsp;(1 × 10¹⁸)</td></tr>
+    <tr><td class="pk">25 FUSB (el precio del canje)</td><td>25 000 000 000 000 000 000</td></tr>
+    <tr><td class="pk">0,5 FUSB</td><td>500 000 000 000 000 000</td></tr>
+    <tr><td class="pk">1 unidad mínima</td><td>1 &nbsp;(indivisible; 0,000000000000000001 FUSB)</td></tr>
+  </table>
+  <p>En pruebas y scripts se usa <code>ethers.parseUnits("25", 18)</code> para escribir y <code>ethers.formatUnits(valor, 18)</code> para leer. <strong>Ojo:</strong> no todos los tokens usan 18 decimales —USDC usa 6, así que 25 USDC son <code>25000000</code>—; por eso siempre se lee <code>decimals()</code> antes de calcular.</p>
+</section>
+
+<!-- ============================================================ 5 -->
+<section class="sec salto">
+  <div class="sec-cab"><span class="sec-num">05</span><h2>Guardar los secretos (keystore)</h2><span class="lead">ANTES DE SEPOLIA</span></div>
+
+  <p>Para desplegar en una red pública hacen falta tres datos. Se guardan en el <strong>almacén cifrado</strong> de Hardhat, no en archivos. La primera vez te pide una contraseña para el almacén:</p>
+  <pre>npx hardhat keystore set SEPOLIA_RPC_URL       # la URL de tu nodo (Infura/Alchemy)
+npx hardhat keystore set SEPOLIA_PRIVATE_KEY    # la clave de la billetera DEL CURSO
+npx hardhat keystore set ETHERSCAN_API_KEY      # para verificar el código</pre>
+
+  <div class="caja peligro">
+    <div class="caja-et">TRES REGLAS QUE NO ADMITEN EXCEPCIÓN</div>
+    <ol>
+      <li>La clave privada es la de la <strong>billetera del curso</strong>, jamás una con fondos reales.</li>
+      <li>Ninguna clave, ninguna URL con API key ni la frase de recuperación se escribe en un archivo del repositorio.</li>
+      <li>Antes de cada <code>git push</code>: <code>git status</code>, y confirmar que no se sube ningún <code>.env</code>, clave ni URL.</li>
+    </ol>
+  </div>
+</section>
+
+<!-- ============================================================ 6 -->
+<section class="sec salto">
+  <div class="sec-cab"><span class="sec-num">06</span><h2>Desplegar y verificar en Sepolia</h2><span class="lead">CON IGNITION</span></div>
+
+  <p>Se usa <strong>Hardhat Ignition</strong> (como en la Sesión 8): registra cada paso, así que si la conexión se corta, al repetir el <em>mismo</em> comando retoma donde quedó y no despliega dos veces. Primero, un ensayo en la red local (no gasta nada):</p>
+  <pre>npx hardhat ignition deploy ignition/modules/s10-FichaCanje.js</pre>
+
+  <p>Luego, en Sepolia, con tus parámetros y verificación. Crea el archivo <code>ignition/parametros/s10-mi-ficha.json</code> con el tope, el precio (en unidades mínimas) y la dirección de tu segunda cuenta como tesorería:</p>
+  <pre>{
+  "FichaCanjeModulo": {
+    "topeEnTokens": 1000000,
+    "precioEnUnidadesMinimas": "25000000000000000000",
+    "tesoreria": "0x...tu segunda cuenta..."
+  }
+}</pre>
+  <pre>npx hardhat ignition deploy ignition/modules/s10-FichaCanje.js \
+  --network sepolia \
+  --parameters ignition/parametros/s10-mi-ficha.json \
+  --verify</pre>
+
+  <div class="caja">
+    <div class="caja-et">QUÉ ESPERAR</div>
+    <p>Ignition despliega <strong>FichaUSB</strong> y, con su dirección, <strong>Canje</strong>. Al final imprime las dos direcciones. <code>--verify</code> sube el código fuente a Etherscan: en unos segundos, la pestaña «Contract» del explorador mostrará el código con el check verde. <strong>Si la verificación falla por tiempo</strong>, espera un minuto y repite el <em>mismo</em> comando: Ignition sabe que ya desplegó y solo reintenta la verificación. Anota la dirección de <strong>FichaUSB</strong>: la necesitas para el paso siguiente.</p>
+  </div>
+</section>
+
+<!-- ============================================================ 7 -->
+<section class="sec salto">
+  <div class="sec-cab"><span class="sec-num">07</span><h2>Importar, transferir y canjear</h2><span class="lead">EN LA BILLETERA</span></div>
+
+  <div class="pregunta">
+    <div class="cab"><div class="n">1</div><div class="enun"><span class="tema">IMPORTAR EL TOKEN</span>Para que MetaMask lo «vea»</div></div>
+    <div class="just">
+      En MetaMask, con Sepolia activa: <strong>«Importar tokens»</strong> → pega la <strong>dirección del contrato</strong> FichaUSB. El símbolo (FUSB) y los decimales (18) se rellenan solos. Recuerda el paso 1: el token no aparece solo porque no vive en tu billetera, vive en el contrato.
+    </div>
+  </div>
+
+  <div class="pregunta">
+    <div class="cab"><div class="n">2</div><div class="enun"><span class="tema">ACUÑAR Y TRANSFERIR</span>Mover puntos entre compañeros</div></div>
+    <div class="just">
+      El organizador (la cuenta que desplegó) <strong>acuña</strong> puntos a un compañero, desde la pestaña «Write Contract» del explorador o con un script. El compañero los ve al importar el token. Luego, una <strong>transferencia</strong> normal entre dos cuentas del curso desde MetaMask. <strong>Guarda el hash</strong> de esa transferencia: es evidencia.
+    </div>
+  </div>
+
+  <div class="pregunta">
+    <div class="cab"><div class="n">3</div><div class="enun"><span class="tema">APROBAR Y CANJEAR</span>El patrón de dos pasos, en vivo</div></div>
+    <div class="just">
+      <strong>a) Aprobar:</strong> desde la cuenta que tiene fichas, llama <code>approve(&lt;dirección de Canje&gt;, 25000000000000000000)</code> — el precio EXACTO, 25 FUSB en unidades mínimas. <strong>No</strong> apruebes una cantidad ilimitada (ver paso 9).<br>
+      <strong>b) Canjear:</strong> llama <code>canjear()</code> en el contrato Canje. Este retira las 25 fichas con <code>transferFrom</code> y te da un premio.<br>
+      <strong>c) Comprobar:</strong> mira <code>allowance(tuCuenta, Canje)</code>: quedó en <strong>0</strong>, la autorización se gastó. Guarda los hashes de <em>approve</em> y de <em>canjear</em>.
+    </div>
+  </div>
+
+  <div class="pregunta">
+    <div class="cab"><div class="n">4</div><div class="enun"><span class="tema">REVOCAR</span>Recoger la llave que diste</div></div>
+    <div class="just">
+      <strong>a)</strong> Aprueba de nuevo el precio (<code>approve(Canje, 25...)</code>).<br>
+      <strong>b) Revoca:</strong> pon la autorización en cero con <code>approve(Canje, 0)</code>. Revocar es exactamente esto.<br>
+      <strong>c) Comprueba:</strong> intenta <code>canjear()</code> otra vez: <strong>revierte</strong> con <code>ERC20InsufficientAllowance</code>. Guarda el hash del intento fallido (o la captura del error): demuestra que la revocación funciona.
+    </div>
+  </div>
+
+  <div class="caja alerta">
+    <div class="caja-et">POR QUÉ TRANSFERIR EN DOS PASOS</div>
+    <p><code>transfer</code> mueve TUS tokens. Pero para que un <strong>contrato</strong> (un canje, un exchange) mueva los tuyos sin tu clave privada, primero lo <strong>autorizas</strong> (<code>approve</code>) por una cantidad acotada, y luego él <strong>retira</strong> (<code>transferFrom</code>) hasta ese límite, ni un token más. Así funciona todo DEX: primero autorizas al contrato, después el contrato mueve tus tokens al hacer el swap.</p>
+  </div>
+</section>
+
+<!-- ============================================================ 8 -->
+<section class="sec salto">
+  <div class="sec-cab"><span class="sec-num">08</span><h2>El riesgo de las aprobaciones ilimitadas</h2><span class="lead">UN CASO REAL</span></div>
+
+  <p>Muchas apps piden aprobar una cantidad gigante «para no molestar otra vez». Es cómodo, y es el origen de robos enormes.</p>
+
+  <div class="caja peligro">
+    <div class="caja-et">BADGER DAO · DICIEMBRE DE 2021 · ~120 MILLONES DE DÓLARES</div>
+    <p>El front-end de Badger DAO fue comprometido: un script malicioso inyectado a través de Cloudflare pedía a los usuarios firmar aprobaciones <strong>ilimitadas</strong>. Unas 500 billeteras firmaron sin mirar; el atacante usó <code>transferFrom</code> y drenó del orden de <strong>120 millones de dólares</strong>. Los contratos estaban bien: el robo entró por una aprobación excesiva que la gente aprobó a ciegas.</p>
+  </div>
+
+  <p><strong>Regla para el proyecto y para la vida:</strong> una aprobación es una llave que se queda con otro. Se entrega la más pequeña que sirva, y se recoge (allowance a cero) cuando ya no se usa. Antes de firmar cada <code>approve</code>, mira <strong>a quién</strong> autorizas y <strong>cuánto</strong>. Puedes ver y revocar tus aprobaciones activas con herramientas como <code>revoke.cash</code> o el «Token Approvals» del explorador (funcionan también en testnet).</p>
+</section>
+
+<!-- ============================================================ 9 -->
+<section class="sec salto">
+  <div class="sec-cab"><span class="sec-num">09</span><h2>Bloque C · ¿tu proyecto lleva token?</h2><span class="lead">PLANTILLA DE DECISIÓN</span></div>
+
+  <p>Muchos proyectos <strong>no necesitan</strong> un token. Decidir eso con honestidad vale tanto como diseñar uno bueno. Completa esta plantilla corta (media página) para el Avance 1. Las dos respuestas —lleva o no lleva— valen igual; lo que no vale es un token decorativo.</p>
+
+  <table>
+    <tr><th style="width:50%">PREGUNTA</th><th>TU RESPUESTA</th></tr>
+    <tr><td class="pk">1. ¿Qué circula entre usuarios y por qué debe ser fungible (cada unidad idéntica a otra)?</td><td>&nbsp;</td></tr>
+    <tr><td class="pk">2. ¿Una simple variable en un contrato lo resolvería sin token? Si sí, no lleva token.</td><td>&nbsp;</td></tr>
+    <tr><td class="pk">3. ¿La interoperabilidad con otras apps (billeteras, exchanges) aporta de verdad, o es adorno?</td><td>&nbsp;</td></tr>
+  </table>
+
+  <p><strong>Si la respuesta es SÍ lleva token</strong>, diseña su tokenómica y justifícala:</p>
+  <table>
+    <tr><th style="width:34%">DECISIÓN</th><th>TU ELECCIÓN Y POR QUÉ</th></tr>
+    <tr><td class="pk">Suministro</td><td>Fijo (tope) o inflacionario. ¿Qué comunica?</td></tr>
+    <tr><td class="pk">Emisión</td><td>¿Quién acuña y bajo qué regla? («El dueño imprime cuando quiere» es señal de alarma.)</td></tr>
+    <tr><td class="pk">Quema</td><td>¿Se pueden destruir tokens? ¿Quién?</td></tr>
+    <tr><td class="pk">Distribución</td><td>¿Cómo se reparte el primer lote? ¿Hay vesting?</td></tr>
+  </table>
+  <p><strong>Si la respuesta es NO lleva token</strong>, escribe por qué en media página. Un diseño sostenible reparte y limita el poder de emisión; un esquema extractivo concentra ambos en quien lo lanzó. Es el mismo criterio de pertinencia de la Sesión 1.</p>
+</section>
+
+<!-- ============================================================ 10 -->
+<section class="sec">
+  <div class="sec-cab"><span class="sec-num">10</span><h2>Errores frecuentes</h2><span class="lead">CASI TODO SE RESUELVE AQUÍ</span></div>
+  <table>
+    <tr><th style="width:42%">SÍNTOMA</th><th>CAUSA Y SOLUCIÓN</th></tr>
+    <tr><td class="pk">Desplegué el token pero no lo veo en MetaMask</td><td>No falló nada. Hay que <strong>importarlo</strong> con la dirección del contrato (paso 7.1). El token vive en el contrato, no en tu billetera.</td></tr>
+    <tr><td class="pk">acunar(ana, 100) y aparece una fracción minúscula</td><td>Olvidaste multiplicar por <code>10 ** decimals()</code> (TODO 1/2). La función habla en tokens; el contrato, en unidades mínimas.</td></tr>
+    <tr><td class="pk">La transferencia revierte con ERC20InsufficientBalance</td><td>Intentas mover más de lo que tienes. Revisa el balance en unidades mínimas.</td></tr>
+    <tr><td class="pk">canjear() revierte con ERC20InsufficientAllowance</td><td>No aprobaste, aprobaste menos que el precio, o ya gastaste/revocaste la aprobación. Vuelve a <code>approve</code> el precio exacto.</td></tr>
+    <tr><td class="pk">El contrato no compila: «_update no override»</td><td>Falta el <code>_update</code> con <code>override(ERC20, ERC20Capped)</code> (TODO 3). Al mezclar ERC20 y Capped hay que resolver cuál gana.</td></tr>
+    <tr><td class="pk">La verificación en Etherscan falla</td><td>Falta <code>ETHERSCAN_API_KEY</code> en el keystore, o hay que esperar un minuto y repetir el mismo comando de despliegue.</td></tr>
+    <tr><td class="pk">«acunar» revierte con OwnableUnauthorizedAccount</td><td>Estás llamando desde una cuenta que no es el dueño. Solo el organizador (quien desplegó) acuña.</td></tr>
+  </table>
+</section>
+
+<!-- ============================================================ 11 -->
+<section class="sec">
+  <div class="sec-cab"><span class="sec-num">11</span><h2>Preguntas de reflexión</h2><span class="lead">MIRA EL ARTEFACTO REAL</span></div>
+  <ol>
+    <li>Entra a tu FichaUSB verificada en <code>sepolia.etherscan.io</code>. En la pestaña «Read Contract», lee <code>totalSupply</code> y <code>cap</code>. ¿Cuántas unidades mínimas son? ¿Cuántos tokens? Explica por qué los dos números difieren en 18 ceros.</li>
+    <li>Mira, en el explorador, el evento <code>Approval</code> de tu <code>approve</code> y el <code>Transfer</code> de tu <code>canjear</code>. ¿Por qué el canje generó un <code>Transfer</code> pero no un segundo <code>Approval</code>? ¿Qué le pasó a la <code>allowance</code>?</li>
+    <li>Después de revocar (allowance a 0), intenta canjear y falla. Explica, con esto delante, por qué una aprobación ilimitada que <em>no</em> se revoca es exactamente la puerta por la que entró el robo de Badger DAO.</li>
+  </ol>
+</section>
+
+<!-- ============================================================ 12 -->
+<section class="sec">
+  <div class="sec-cab"><span class="sec-num">12</span><h2>Lista de chequeo · rúbrica · referencias</h2></div>
+  <table>
+    <tr><th style="width:58%">ANTES DE ENTREGAR</th><th style="width:26%">DETALLE</th><th>PESO</th></tr>
+    <tr><td>Token verificado en Sepolia, importado en la billetera.</td><td>Dirección + captura del check verde.</td><td>35 %</td></tr>
+    <tr><td>Transferencia entre dos cuentas del curso.</td><td>Hash de la transacción.</td><td>20 %</td></tr>
+    <tr><td>Canje completo con revocación.</td><td>Hashes de approve, canjear y el intento fallido.</td><td>30 %</td></tr>
+    <tr><td>Tokenómica del proyecto (plantilla de la sección 9).</td><td>Media página.</td><td>15 %</td></tr>
+  </table>
+  <p>Todo con hashes verificables en el explorador. <strong>Un token que no aparece en la cadena no se califica</strong> (política de laboratorios del curso).</p>
+  <ul>
+    <li>ERC-20 = EIP-20 (Vogelsteller y Buterin, 2015): <code>https://eips.ethereum.org/EIPS/eip-20</code></li>
+    <li>EIP-2612 Permit (Lundfall, 2020): <code>https://eips.ethereum.org/EIPS/eip-2612</code></li>
+    <li>OpenZeppelin ERC20: <code>https://docs.openzeppelin.com/contracts/5.x/erc20</code></li>
+    <li>Revisar y revocar aprobaciones: <code>https://revoke.cash</code></li>
+  </ul>
+</section>
+
+</body>
+</html>

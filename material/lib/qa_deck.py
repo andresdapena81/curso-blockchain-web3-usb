@@ -14,8 +14,10 @@ Control de calidad de un deck ya generado.
 Sale con código 1 si encuentra problemas.
 """
 
+import shutil
 import subprocess
 import sys
+import tempfile
 from pathlib import Path
 
 import fitz  # PyMuPDF
@@ -26,11 +28,18 @@ QA_DIR = Path(__file__).resolve().parent.parent / "_qa"
 
 def convertir(pptx: Path) -> Path:
     QA_DIR.mkdir(exist_ok=True)
+    pdf = QA_DIR / (pptx.stem + ".pdf")
+    if pdf.exists():
+        pdf.unlink()  # que un PDF viejo no pase por el recién generado
+    # Perfil de LibreOffice propio por corrida: con un perfil compartido, dos
+    # conversiones simultáneas se estorban y la segunda falla en silencio.
+    perfil = Path(tempfile.mkdtemp(prefix="usbqa_"))
     subprocess.run(
-        [SOFFICE, "--headless", "--convert-to", "pdf", "--outdir", str(QA_DIR), str(pptx)],
+        [SOFFICE, f"-env:UserInstallation={perfil.as_uri()}", "--headless",
+         "--convert-to", "pdf", "--outdir", str(QA_DIR), str(pptx)],
         capture_output=True,
     )
-    pdf = QA_DIR / (pptx.stem + ".pdf")
+    shutil.rmtree(perfil, ignore_errors=True)
     if not pdf.exists():
         sys.exit(f"LibreOffice no produjo {pdf.name}")
     return pdf

@@ -1,0 +1,252 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<title>Proyecto integrador · Entrega final y sustentación</title>
+<!--ESTILOS-->
+<style>
+  .check{ list-style:none; padding-left:0; }
+  .check li{ padding-left:7mm; position:relative; }
+  .check li::before{ content:""; position:absolute; left:0; top:1mm; width:3.2mm; height:3.2mm; border:1.5px solid var(--tinta); }
+  td.num{ white-space:nowrap; font-family:"Arial Black",Arial,sans-serif; color:var(--naranja); text-align:center; }
+  .rub td{ font-size:8.6pt; }
+  table{ break-inside:auto; } tr{ break-inside:avoid; } th{ break-after:avoid; }
+  .sec-cab{ break-after:avoid; }
+</style>
+</head>
+<body>
+
+<section class="barra">
+  <div class="kicker">PROYECTO INTEGRADOR · ENTREGA 4 DE 4 · SESIÓN 17 · DEMO DAY</div>
+  <h1>ENTREGA FINAL<br>Y <em>SUSTENTACIÓN</em></h1>
+  <div class="sub">Qué se entrega, cómo se sustenta, con qué se califica y cómo funciona la auditoría cruzada #2.<br>Todo lo que el equipo necesita saber antes del Demo Day, en un solo documento.</div>
+</section>
+
+<dl class="datos">
+  <div><dt>CUÁNDO</dt><dd>Sesión 17<br>antes de iniciar</dd></div>
+  <div><dt>MODALIDAD</dt><dd>Equipo de 3<br>(el del semestre)</dd></div>
+  <div><dt>SUSTENTACIÓN</dt><dd>15 min + 5 de<br>preguntas</dd></div>
+  <div><dt>PESO</dt><dd>15 % (tabla de<br>entregas, plan §8)</dd></div>
+</dl>
+
+<div class="caja clave">
+  <div class="caja-et">CÓMO LEER ESTE DOCUMENTO</div>
+  <p>Las secciones 01 y 02 dicen <strong>qué hay que entregar</strong> y cómo debe quedar el repositorio. La 03 explica <strong>la sustentación</strong>, la 04 trae <strong>la rúbrica exacta</strong> con la que se califica, la 05 explica <strong>la auditoría cruzada #2</strong> y la 06 es la <strong>lista de chequeo</strong> para revisar la víspera. Nada de lo que se califica en el Demo Day está fuera de este documento.</p>
+</div>
+
+<!-- ============================================================ 1 -->
+<section class="sec">
+  <div class="sec-cab"><span class="sec-num">01</span><h2>Qué se entrega</h2><span class="lead">CINCO PIEZAS</span></div>
+
+  <p>El plan del curso pide para la Sesión 17 el <strong>proyecto final completo</strong>: repositorio, contratos verificados, dApp desplegada, documentación técnica y video demostrativo de respaldo de 3 minutos. En concreto:</p>
+
+  <table>
+    <tr><th style="width:23%">PIEZA</th><th style="width:47%">QUÉ DEBE CUMPLIR</th><th>CÓMO SE COMPRUEBA</th></tr>
+    <tr><td class="pk">1 · Repositorio</td><td>Público en GitHub (o con acceso dado al docente). Con la etiqueta <code>v1.0-final</code> creada y subida antes de la hora de inicio de la Sesión 17.</td><td>Se evalúa el contenido de esa etiqueta. Sin etiqueta, el último commit anterior a la hora de inicio.</td></tr>
+    <tr><td class="pk">2 · Contratos verificados</td><td>Desplegados en Sepolia (o en la L2 de prueba usada en la Sesión 16) y verificados en el explorador: el código fuente se lee en la pestaña «Contract».</td><td>Las direcciones están en el README con su enlace al explorador.</td></tr>
+    <tr><td class="pk">3 · dApp desplegada</td><td>En una URL pública (GitHub Pages, Netlify, Vercel o IPFS), conectada a los contratos de la red de prueba. No en <code>localhost</code>.</td><td>El docente la abre desde su propio navegador con una billetera de prueba.</td></tr>
+    <tr><td class="pk">4 · Documentación técnica</td><td>README reproducible y la carpeta <code>docs/</code> descrita en la sección 02.</td><td>Otra persona clona, instala y corre las pruebas siguiendo solo el README.</td></tr>
+    <tr><td class="pk">5 · Video de respaldo</td><td>3 minutos como máximo. El flujo principal en la red de prueba, con narración. Enlace en el README, accesible sin pedir permiso.</td><td>Se usa si la demo en vivo falla (sección 03). Se revisa aunque no haga falta.</td></tr>
+  </table>
+
+  <div class="caja peligro">
+    <div class="caja-et">REGLAS DE SEGURIDAD QUE LA ENTREGA DEBE CUMPLIR</div>
+    <ul>
+      <li><strong>Solo red de prueba o red local.</strong> Nunca dinero real, nunca la red principal.</li>
+      <li><strong>Ninguna clave en el repositorio.</strong> Clave privada, URL de RPC y API key del explorador van SOLO en el keystore de Hardhat (<code>npx hardhat keystore set SEPOLIA_PRIVATE_KEY</code>, etc.). Revisen también el historial de commits: una clave borrada en el último commit sigue en los anteriores.</li>
+      <li><strong>Ni la frase semilla ni la clave privada aparecen en el video</strong> ni en la sustentación. Ni siquiera las de la billetera del curso.</li>
+      <li><strong>Ningún dato personal en cadena</strong> (Ley 1581 de 2012). Si el proyecto registra documentos, en la cadena va solo su hash. En la demo, datos inventados.</li>
+      <li>Los contratos son <strong>material académico sin auditar</strong>: el README lo dice explícitamente.</li>
+    </ul>
+  </div>
+</section>
+
+<!-- ============================================================ 2 -->
+<section class="sec">
+  <div class="sec-cab"><span class="sec-num">02</span><h2>Cómo debe quedar el repositorio</h2><span class="lead">ESTRUCTURA MÍNIMA</span></div>
+
+  <p>La estructura puede variar, pero estas piezas deben existir y ser fáciles de encontrar:</p>
+
+<pre>mi-proyecto/
+├── contracts/            contratos en Solidity
+├── test/                 pruebas (cobertura ≥ 80 %)
+├── ignition/modules/     módulos de despliegue (+ parámetros por red)
+├── frontend/             la dApp
+├── docs/
+│   ├── arquitectura.md   diagrama, decisiones y alternativas descartadas
+│   ├── seguridad.md      amenazas, mitigaciones, Slither, auditoría cruzada #1
+│   └── costos.md         gas medido y costo estimado por operación
+├── sustentacion.pdf      las diapositivas del Demo Day
+└── README.md</pre>
+
+  <table>
+    <tr><th style="width:24%">DOCUMENTO</th><th>QUÉ DEBE RESPONDER</th></tr>
+    <tr><td class="pk">README.md</td><td>Qué problema resuelve y para quién. Versiones (Node, Hardhat, Solidity, OpenZeppelin). Cómo instalar, cómo correr las pruebas y la cobertura, cómo desplegar con Ignition y el keystore. Direcciones verificadas con su enlace. URL de la dApp. Enlace al video. Integrantes. Aviso de «material académico sin auditar».</td></tr>
+    <tr><td class="pk">docs/arquitectura.md</td><td>Diagrama de componentes (contratos, frontend, almacenamiento, billetera). <strong>Por qué blockchain</strong>: qué propiedad aporta y qué parte del sistema NO la necesitaba. Cada decisión de diseño con la alternativa descartada. Roles con privilegios (owner, admin) y qué pueden hacer.</td></tr>
+    <tr><td class="pk">docs/seguridad.md</td><td>Vulnerabilidades consideradas (reentrada, control de acceso, oráculos, front-running, denegación de servicio… las que apliquen) y la mitigación de cada una. Salida de Slither y qué se hizo con cada hallazgo. Hallazgos de la auditoría cruzada #1 (Sesión 9) y cómo se atendieron.</td></tr>
+    <tr><td class="pk">docs/costos.md</td><td>Gas medido con <code>npx hardhat test --gas-stats</code> por operación principal, y su costo estimado en la L1 y en la L2 de prueba (con la fecha y el precio de gas usados). Limitaciones conocidas y trabajo futuro.</td></tr>
+  </table>
+
+  <div class="caja">
+    <div class="caja-et">LOS COMANDOS QUE EL DOCENTE VA A CORRER</div>
+<pre>git clone &lt;su-repositorio&gt; &amp;&amp; cd &lt;su-repositorio&gt;
+git checkout v1.0-final
+npm install
+npx hardhat test                  # todas en verde
+npx hardhat test --coverage       # ≥ 80 % de líneas en los contratos propios</pre>
+    <p>Si alguno de estos pasos falla siguiendo solo el README, el criterio «Pruebas y despliegue» no puede pasar de «Aceptable».</p>
+  </div>
+
+  <div class="caja alerta">
+    <div class="caja-et">EL VIDEO DE 3 MINUTOS · REQUISITOS</div>
+    <ul>
+      <li>Duración máxima: 3:00. Lo que pase de ahí no se mira.</li>
+      <li>Muestra el flujo principal completo en la red de prueba: la acción en la dApp, la ventana de la billetera con lo que se firma y la transacción confirmada en el explorador.</li>
+      <li>Narrado por el equipo (voz o subtítulos). Sin música de fondo que tape la voz.</li>
+      <li>Alojado donde se vea sin pedir acceso (YouTube «no listado», Drive con enlace público) <strong>y descargado en el portátil</strong> con el que se sustenta.</li>
+    </ul>
+  </div>
+</section>
+
+<!-- ============================================================ 3 -->
+<section class="sec">
+  <div class="sec-cab"><span class="sec-num">03</span><h2>La sustentación</h2><span class="lead">15 + 5 MINUTOS</span></div>
+
+  <p>Cada equipo tiene <strong>15 minutos de presentación</strong>, cortados a los 15:00, y <strong>5 minutos de preguntas</strong>. El orden se sortea al inicio de la sesión. Hablan los tres integrantes, y cualquier pregunta puede dirigirse a cualquiera: todos deben dominar todo el proyecto. La sustentación tiene <strong>cinco partes obligatorias</strong>:</p>
+
+  <table>
+    <tr><th style="width:21%">PARTE</th><th>QUÉ SE TIENE QUE VER</th><th style="width:8%">MIN</th></tr>
+    <tr><td class="pk">1 · Problema y por qué blockchain</td><td>Quién sufre qué problema. Y con honestidad: ¿lo requiere? Qué propiedad aporta la cadena que una base de datos operada por alguien de confianza no da; qué partes que no confían entre sí participan. Si alguna parte del proyecto no necesitaba cadena, decirlo.</td><td class="num">3</td></tr>
+    <tr><td class="pk">2 · Arquitectura y decisiones</td><td>Contratos, interfaz, almacenamiento. Cada decisión de diseño importante con la alternativa descartada y lo que se sacrificó.</td><td class="num">3</td></tr>
+    <tr><td class="pk">3 · Demo en vivo en testnet</td><td>El flujo principal funcionando: acción en la dApp, lo que se firma en la billetera (y qué significa), el estado de la transacción en la interfaz y la transacción o el evento en el explorador.</td><td class="num">5</td></tr>
+    <tr><td class="pk">4 · Seguridad</td><td>Vulnerabilidades consideradas y mitigaciones aplicadas. Qué dijo Slither. Qué hallazgo de la auditoría cruzada #1 se corrigió.</td><td class="num">2</td></tr>
+    <tr><td class="pk">5 · Limitaciones, costos y trabajo futuro</td><td>El gas medido y el costo estimado por operación, lo que la solución NO resuelve y qué seguiría.</td><td class="num">2</td></tr>
+  </table>
+
+  <p>El tiempo se controla con un <strong>semáforo</strong> visible para todos: verde de 00:00 a 10:00, amarillo de 10:00 a 13:00 (terminar la demo y entrar a seguridad), rojo de 13:00 a 15:00. En los 5 minutos de preguntas, los 2 primeros son para la pregunta del equipo auditor (sección 05) y los 3 restantes para el docente y el público.</p>
+
+  <div class="caja alerta">
+    <div class="caja-et">PLAN B · SI LA DEMO FALLA: LA REGLA DE LOS 2 MINUTOS</div>
+    <ol>
+      <li>El equipo dice en voz alta qué falló y en qué parte.</li>
+      <li>Tiene <strong>2 minutos</strong> para recuperarse (recargar, cambiar de RPC, reconectar la billetera). El cronómetro sigue corriendo.</li>
+      <li>Si no se recupera, proyecta el <strong>video de 3 minutos</strong> y sigue con la parte 4.</li>
+      <li>Abre en el explorador la dirección verificada y una transacción real del flujo mostrado.</li>
+    </ol>
+    <p><strong>Cómo se califica:</strong> si el fallo es de infraestructura externa (RPC caído, faucet sin fondos, red de la sala) y la evidencia en cadena existe, el video no resta en «Integración e interfaz». Si el fallo es del código del equipo (dirección vieja en el frontend, ABI desactualizado, reversión inesperada), cuenta como falla en la demostración. Sin demo, sin video y sin evidencia en cadena: descriptor «Insuficiente».</p>
+  </div>
+
+  <div class="caja">
+    <div class="caja-et">LISTA DE CHEQUEO DE LA DEMO · ANTES DE CONECTAR EL PROYECTOR</div>
+    <ul class="check">
+      <li>Billetera <strong>del curso</strong> con ETH de prueba suficiente, en la red correcta, ya importada (nunca se importa con el proyector conectado).</li>
+      <li>Contrato verificado abierto en el explorador, en otra pestaña.</li>
+      <li>dApp abierta en su URL pública.</li>
+      <li>Zoom del navegador al 125 % y notificaciones del sistema apagadas.</li>
+      <li>Video de respaldo descargado en el portátil.</li>
+    </ul>
+  </div>
+</section>
+
+<!-- ============================================================ 4 -->
+<section class="sec salto">
+  <div class="sec-cab"><span class="sec-num">04</span><h2>Rúbrica del proyecto final</h2><span class="lead">TEXTUAL DEL PLAN · §8</span></div>
+
+  <p>Esta es la rúbrica del plan de estudio, sin cambios. Cada criterio se califica de 0,0 a 5,0; la nota del proyecto final es la suma ponderada.</p>
+
+  <table class="rub">
+    <tr><th style="width:16%">CRITERIO</th><th style="width:9%">PESO</th><th style="width:29%">EXCELENTE (5,0)</th><th style="width:23%">ACEPTABLE (3,5)</th><th>INSUFICIENTE (&lt; 3,0)</th></tr>
+    <tr><td class="pk">Pertinencia de la solución</td><td class="num">15 %</td><td>Justifica con rigor por qué blockchain es necesaria; descarta alternativas centralizadas con argumentos.</td><td>Justificación razonable pero superficial.</td><td>Usa blockchain sin necesidad real; una base de datos resolvería mejor.</td></tr>
+    <tr><td class="pk">Calidad de los contratos</td><td class="num">25 %</td><td>Código limpio, modular, estándares aplicados correctamente, gas optimizado, eventos bien diseñados.</td><td>Funciona, con estructura mejorable.</td><td>No compila, no cumple estándares o la lógica es incorrecta.</td></tr>
+    <tr><td class="pk">Pruebas y despliegue</td><td class="num">20 %</td><td>Cobertura ≥ 80 %, casos límite y de reversión probados, despliegue reproducible y verificado.</td><td>Pruebas de casos felices únicamente.</td><td>Sin pruebas o contrato no verificado.</td></tr>
+    <tr><td class="pk">Seguridad</td><td class="num">20 %</td><td>Análisis de vulnerabilidades documentado, mitigaciones implementadas y justificadas, análisis estático sin hallazgos críticos.</td><td>Identifica riesgos pero mitiga parcialmente.</td><td>Vulnerabilidades explotables evidentes.</td></tr>
+    <tr><td class="pk">Integración e interfaz</td><td class="num">10 %</td><td>dApp funcional, estados de transacción manejados, UX comprensible para un usuario no experto.</td><td>Funciona con fricciones.</td><td>No integra o falla en la demostración.</td></tr>
+    <tr><td class="pk">Sustentación y documentación</td><td class="num">10 %</td><td>Claridad, dominio técnico, responde con solvencia; README completo y reproducible.</td><td>Presentación correcta, dominio parcial.</td><td>No responde preguntas técnicas básicas.</td></tr>
+  </table>
+
+  <div class="caja clave">
+    <div class="caja-et">CÓMO SE CALCULA · EJEMPLO</div>
+    <p>Nota = 0,15·Pertinencia + 0,25·Contratos + 0,20·Pruebas + 0,20·Seguridad + 0,10·Integración + 0,10·Sustentación.</p>
+    <p>Con 4,5 · 3,8 · 4,0 · 3,5 · 4,2 · 3,8: 0,675 + 0,950 + 0,800 + 0,700 + 0,420 + 0,380 = <strong>3,925 ≈ 3,9</strong>.</p>
+    <p>La nota del criterio «Sustentación y documentación» se compone así: 80 % el desempeño propio del equipo al sustentar y documentar, y 20 % la nota de la pregunta que el equipo formuló como auditor (sección 05). En el ejemplo: 0,8 · 4,0 + 0,2 · 3,0 = 3,8.</p>
+  </div>
+
+  <div class="caja">
+    <div class="caja-et">DÓNDE PESA ESTA ENTREGA EN LA NOTA DEL CURSO</div>
+    <p>En la tabla de entregas del plan (sección 8), la <strong>entrega final + sustentación</strong> pesa <strong>15 %</strong>. En el esquema por cortes (sección 9), forma parte del componente «Proyecto final (avances + entrega + sustentación)», que es el 70 % del tercer corte (28 % de la nota final). El índice del proyecto (<code>README.md</code> de esta carpeta) explica cómo se relacionan las dos tablas.</p>
+  </div>
+</section>
+
+<!-- ============================================================ 5 -->
+<section class="sec">
+  <div class="sec-cab"><span class="sec-num">05</span><h2>Auditoría cruzada #2</h2><span class="lead">SE CALIFICA LA PREGUNTA</span></div>
+
+  <p>La auditoría cruzada #1 (Sesión 9) fue escrita: cada equipo auditó el contrato de otro y entregó hallazgos por severidad. La #2 es oral: <strong>cada equipo formula al menos una pregunta técnica al equipo que le tocó evaluar, y se califica la calidad de la pregunta.</strong> Leer código ajeno y encontrarle la grieta es la competencia del RA5.</p>
+
+  <table>
+    <tr><th style="width:24%">REGLA</th><th>DETALLE</th></tr>
+    <tr><td class="pk">Quién audita a quién</td><td>Rotación sobre el orden de presentación: el equipo del turno <em>k</em> audita al del turno <em>k + 1</em> (el que presenta justo después, cuando el auditor ya terminó su propia sustentación); el último turno audita al del turno 1. Si la pareja ya se auditó en la #1, se intercambia con el turno siguiente. La pareja se anuncia en la Sesión 16 con el orden provisional, y se confirma tras el sorteo.</td></tr>
+    <tr><td class="pk">Preparación</td><td>El equipo auditor revisa el repositorio del otro equipo antes del Demo Day: contratos, pruebas y <code>docs/seguridad.md</code>.</td></tr>
+    <tr><td class="pk">Cuántas preguntas</td><td>Trae <strong>dos</strong> escritas en la hoja de auditoría (una por equipo, en la planilla). Formula una; la otra es de reserva por si la primera ya se respondió en la presentación o la hizo otro equipo.</td></tr>
+    <tr><td class="pk">Cuándo y cómo</td><td>En los 2 primeros minutos de preguntas, en voz alta, en máximo 30 segundos. Luego entrega la hoja al docente, con la función o el archivo al que apunta cada pregunta.</td></tr>
+    <tr><td class="pk">Qué se califica</td><td>La calidad de la <strong>pregunta</strong>, al equipo que pregunta. No depende de si el otro equipo supo responder.</td></tr>
+  </table>
+
+  <table>
+    <tr><th style="width:8%">NOTA</th><th style="width:47%">LA PREGUNTA…</th><th>EJEMPLO</th></tr>
+    <tr><td class="num">5</td><td>Apunta a una función concreta y a un riesgo real: un caso límite, un ataque o un supuesto de confianza que el equipo evaluado <strong>no</strong> documentó.</td><td>«Si <code>retirar()</code> se llama dos veces en la misma transacción, ¿qué impide el doble pago?»</td></tr>
+    <tr><td class="num">4</td><td>Es técnica y específica del proyecto, sobre un riesgo que el equipo ya documentó (pide defender la mitigación).</td><td>«Mitigaron la reentrada con un guardia: ¿por qué no bastaba el patrón CEI?»</td></tr>
+    <tr><td class="num">3</td><td>Es técnica pero genérica: serviría para cualquier proyecto. O repite una pregunta de otro equipo.</td><td>«¿Qué pasa si hay reentrada?»</td></tr>
+    <tr><td class="num">2</td><td>Es conceptual o de sí/no, sin tocar el código.</td><td>«¿Usaron OpenZeppelin?»</td></tr>
+    <tr><td class="num">1 · 0</td><td>Es trivial o de forma (1), o el equipo no formuló pregunta (0).</td><td>«¿Cuánto se demoraron?»</td></tr>
+  </table>
+
+  <div class="caja clave">
+    <div class="caja-et">LA RECETA DE UNA BUENA PREGUNTA</div>
+    <p>Función concreta + escenario concreto + consecuencia: <strong>«¿Qué pasa si [actor] hace [acción] en [función] cuando [condición]?»</strong>. Si la pregunta nombra un archivo o una función del otro equipo, va por buen camino. Si se responde con sí o no, casi nunca pasa de 2.</p>
+  </div>
+
+  <div class="caja alerta">
+    <div class="caja-et">A DÓNDE VA ESTA NOTA</div>
+    <p>La nota de la pregunta (0 a 5) es el <strong>20 % del criterio «Sustentación y documentación»</strong> del equipo que pregunta (sección 04). El plan establece que la pregunta se califica; esta forma de integrarla es la regla del curso para este Demo Day y se anuncia desde la Sesión 16.</p>
+  </div>
+</section>
+
+<!-- ============================================================ 6 -->
+<section class="sec">
+  <div class="sec-cab"><span class="sec-num">06</span><h2>Lista de chequeo · la víspera</h2><span class="lead">ANTES DE CREAR LA ETIQUETA</span></div>
+
+  <ul class="check">
+    <li><code>npx hardhat test</code> en verde desde un clon limpio, siguiendo solo el README.</li>
+    <li><code>npx hardhat test --coverage</code> ≥ 80 % en los contratos propios; hay pruebas de reversión y de casos límite, no solo del camino feliz.</li>
+    <li>Contratos desplegados con Ignition y verificados (<code>--verify</code>); direcciones y enlaces en el README.</li>
+    <li>La dApp abre en su URL pública y apunta a esas mismas direcciones (no a un despliegue viejo).</li>
+    <li>La dApp muestra los estados de la transacción: esperando firma, pendiente, confirmada, rechazada por el usuario, revertida.</li>
+    <li><code>docs/arquitectura.md</code>, <code>docs/seguridad.md</code> y <code>docs/costos.md</code> completos.</li>
+    <li>Slither corrido sobre la versión final; cada hallazgo alto o medio atendido o justificado en <code>docs/seguridad.md</code>.</li>
+    <li>Ninguna clave, URL de RPC ni frase semilla en el repositorio, ni en el historial (<code>git log -p | grep -i "private"</code> como revisión mínima).</li>
+    <li>Ningún dato personal real en cadena ni en la demo.</li>
+    <li>Video de 3 minutos: enlace en el README que abre sin pedir acceso, y copia descargada en el portátil.</li>
+    <li>Diapositivas en <code>sustentacion.pdf</code>, con las cinco partes. Ensayada con cronómetro: menos de 15:00.</li>
+    <li>Las dos preguntas de la auditoría cruzada #2 escritas, con la función o el archivo al que apuntan.</li>
+    <li>Etiqueta creada y subida: <code>git tag v1.0-final</code> y <code>git push origin v1.0-final</code>.</li>
+  </ul>
+
+  <table>
+    <tr><th style="width:34%">ERROR FRECUENTE</th><th>CÓMO EVITARLO</th></tr>
+    <tr><td class="pk">La dApp usa la dirección de un despliegue viejo</td><td>Que el frontend lea la dirección de un solo archivo generado por el despliegue (por ejemplo, el <code>deployed_addresses.json</code> de Ignition), no de una constante copiada a mano.</td></tr>
+    <tr><td class="pk">«Funciona en mi máquina»</td><td>Clonar el repositorio en una carpeta nueva y seguir el README al pie de la letra. Lo que falte ahí, falta en la entrega.</td></tr>
+    <tr><td class="pk">La URL del RPC con su clave en el frontend público</td><td>Que la dApp use el proveedor de la billetera del usuario (<code>window.ethereum</code>) para leer y escribir. Una clave publicada en una página web queda expuesta para cualquiera.</td></tr>
+    <tr><td class="pk">El video es privado</td><td>Abrir el enlace en una ventana de incógnito antes de entregarlo.</td></tr>
+    <tr><td class="pk">La verificación falla por tiempo</td><td>Esperar un minuto y repetir el mismo comando de Ignition con <code>--verify</code>: Ignition sabe que ya desplegó y solo reintenta la verificación.</td></tr>
+    <tr><td class="pk">La presentación se pasa de 15:00</td><td>Ensayar con cronómetro. La demo es la parte que más se alarga: tengan un guion de qué botón, qué transacción y qué evento van a mostrar.</td></tr>
+  </table>
+
+  <div class="caja">
+    <div class="caja-et">DOCUMENTOS RELACIONADOS</div>
+    <p><code>README.md</code> de esta carpeta (índice del proyecto y calendario) · <code>planilla-sustentacion.pdf</code> (la planilla con la que el docente califica en vivo: es pública, para que sepan exactamente qué se mira) · <code>auditoria-cruzada.pdf</code> · <code>ensayo-individual.pdf</code> (se entrega el mismo día).</p>
+  </div>
+</section>
+
+</body>
+</html>

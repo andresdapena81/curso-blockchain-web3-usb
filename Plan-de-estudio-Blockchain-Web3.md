@@ -671,6 +671,23 @@ Se desarrolló el material completo de las 17 sesiones (presentaciones, laborato
 
 **Pendiente para quien dicte el curso:** actualizar la parte regulatoria de la S16 (la norma colombiana cambia), verificar las cifras energéticas y los casos citados antes de cada dictado, y fijar los campos institucionales.
 
+### Versión 4 — todas las sesiones al estándar de la Sesión 4 (17-sep-2026)
+
+Las sesiones 5 a 17 se llevaron al estándar de la Sesión 4: presentación explicada (idea, ejemplo trabajado y error típico por concepto, notas del orador en todas las láminas, pregunta de verificación por bloque) y **una guía de laboratorio en PDF por sesión**. Las sesiones 1 a 4 se auditaron y corrigieron.
+
+| Cambio | Detalle |
+|---|---|
+| Laboratorios nuevos | S12: dApp sin herramientas de compilación, con andamiaje (`material/laboratorio-12`). S13: autenticación por firma EIP-712. S14: mini-AMM `x·y=k` propio (los pools de prueba de Uniswap tienen liquidez y precios que no enseñan el mecanismo; Uniswap queda como extensión) y plantilla de pérdida impermanente. S16: despliegue comparado Sepolia / OP Sepolia. |
+| Gobernanza (S15) | El gobierno ahora usa `TimelockController`, como pide este plan; se añadió un multisig propio como alternativa sin red. |
+| NFT (S11) | OpenSea cerró su sitio de redes de prueba (jul-2025): la evidencia es el explorador (Etherscan / Blockscout). Se añadió el diploma como token intransferible (ERC-5192). |
+| Proyecto integrador | Documentos públicos en `material/proyecto/`: anteproyecto, avance 1, avance 2, entrega final, ensayo individual, auditoría cruzada y planillas de sustentación. |
+| Correcciones de contenido | SIWE (ERC-4361) firma texto ERC-191, no EIP-712. `increaseAllowance` ya no existe en OpenZeppelin 5. Se corrigieron dos fallas de la dApp de referencia (eventos nunca suscritos; reversión no detectada con ethers v6). |
+| Pruebas | 154 pruebas de contrato, todas en verde con las soluciones. |
+
+**Decisión pendiente — pesos del proyecto.** Las secciones 8 y 9 no coinciden: la 8 asigna 5 / 10 / 10 / 15 % a anteproyecto, avance 1, avance 2 y entrega final (40 % en total); la 9 asigna 6 % al anteproyecto y 28 % al resto del proyecto (34 %). Los documentos de `material/proyecto/` usan la sección 8 y señalan la discrepancia. Hay que fijar una sola versión.
+
+**Verificar antes de dictar (sensible al tiempo):** la actualización Glamsterdam tiene como fecha objetivo en Sepolia el 6-oct-2026 y cambia costos de gas que usa la S5; el estado regulatorio de la S16 quedó verificado al 17-sep-2026 con fuentes oficiales, con ítems marcados "⚠ VERIFICAR" en las notas del orador.
+
 ---
 
 *Documento de trabajo. Ajustar campos institucionales, porcentajes de corte y versiones de herramientas antes de su radicación oficial.*

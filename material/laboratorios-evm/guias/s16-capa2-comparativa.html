@@ -1,0 +1,339 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<title>Guía · Laboratorio 16 · Capa 2 comparativa</title>
+<!--ESTILOS-->
+</head>
+<body>
+
+<section class="barra">
+  <div class="kicker">LABORATORIO 16 · SESIÓN 16 · UNIDAD IV · EN EQUIPOS DE PROYECTO</div>
+  <h1>EL MISMO CONTRATO<br>EN <em>L1 Y EN L2</em>:<br>CUÁNTO CUESTA Y CUÁNTO TARDA</h1>
+  <div class="sub">Desplegar SelloTiempo sin cambiar una línea en Sepolia y en OP Sepolia, medir gas, costo total (incluido el costo L1 de datos del rollup) y tiempo hasta el recibo. Y el análisis regulatorio del proyecto propio.</div>
+</section>
+
+<dl class="datos">
+  <div><dt>MODALIDAD</dt><dd>Equipo de proyecto<br>(3 personas)</dd></div>
+  <div><dt>REQUISITOS</dt><dd>Node.js 22 LTS · repo<br>ETH de Sepolia</dd></div>
+  <div><dt>DURACIÓN</dt><dd>55 min en clase<br>+ 1 h en casa</dd></div>
+  <div><dt>META</dt><dd>2 despliegues, 1 tabla<br>+ plantilla legal</dd></div>
+</dl>
+
+<div class="caja clave">
+  <div class="caja-et">CÓMO LEER ESTA GUÍA</div>
+  <p>Cada paso dice qué escribir, qué deberían ver y cómo saber que funcionó. Los datos de redes, faucets y puente se <strong>verificaron el 17 de septiembre de 2026</strong>; si algo cambió (un faucet cerró, una URL se movió), la sección 12 dice cómo seguir. Las partes 1 y 2 son en la red local y no gastan nada; hagan esas primero, mientras consiguen ETH de prueba.</p>
+</div>
+
+<!-- ============================================================ 1 -->
+<section class="sec">
+  <div class="sec-cab"><span class="sec-num">01</span><h2>Objetivo, resultados de aprendizaje y entregables</h2><span class="lead">LEER PRIMERO</span></div>
+  <p><strong>Objetivo:</strong> comprobar con datos propios qué significa «compatible con la EVM» (el mismo bytecode corre en las dos redes) y cuánto cambia el costo y el tiempo de confirmación entre una capa 1 de prueba y una capa 2 de prueba; y aplicar el mapa regulatorio colombiano al proyecto del equipo.</p>
+  <table>
+    <tr><th style="width:14%">RA</th><th>CÓMO LO TRABAJA</th></tr>
+    <tr><td class="pk">RA2</td><td>Evaluar una solución de escalado con evidencia medida, no con folletos.</td></tr>
+    <tr><td class="pk">RA4</td><td>Desplegar el mismo contrato en dos redes públicas con un entorno profesional y leer sus recibos.</td></tr>
+    <tr><td class="pk">RA7</td><td>Identificar las obligaciones legales del proyecto propio en Colombia, con fuente y fecha.</td></tr>
+  </table>
+  <table>
+    <tr><th style="width:26%">PARTE</th><th>QUÉ SE HACE</th><th style="width:16%">DÓNDE</th></tr>
+    <tr><td class="pk">1 · Probar</td><td>Las 3 pruebas de SelloTiempo.</td><td>local</td></tr>
+    <tr><td class="pk">2 · Ensayar la medición</td><td>El script en local, normal y simulando un rollup OP.</td><td>local</td></tr>
+    <tr><td class="pk">3 · Preparar redes</td><td>Keystore, ETH en Sepolia y en OP Sepolia (faucet o puente).</td><td>Sepolia · OP Sepolia</td></tr>
+    <tr><td class="pk">4 · Medir</td><td>Desplegar y sellar en las dos redes; llenar la tabla.</td><td>Sepolia · OP Sepolia</td></tr>
+    <tr><td class="pk">5 · Taller legal</td><td>Plantilla regulatoria del proyecto propio.</td><td>papel</td></tr>
+  </table>
+  <p><strong>Se entrega</strong> en el repositorio del equipo, carpeta <code>entregas/lab16/</code>, antes de la Sesión 17: <code>medicion.md</code> (las dos salidas completas del script, la tabla de la sección 7 y las respuestas de la sección 8) y <code>taller-regulatorio.md</code> (la plantilla de la sección 9). Sin direcciones verificables en las dos redes, el laboratorio no se califica.</p>
+  <div class="caja peligro">
+    <div class="caja-et">REGLAS QUE NO ADMITEN EXCEPCIÓN</div>
+    <p>Solo redes de prueba: <strong>nunca dinero real</strong>. Billetera del curso, nunca la personal. La frase semilla no se comparte con nadie, tampoco con el docente. No firmen nada que no entiendan: antes de enviar al puente, lean la dirección de destino. Claves y URL de RPC <strong>solo</strong> en el keystore de Hardhat. No se modifica <code>hardhat.config.js</code>: la red <code>opSepolia</code> ya está definida.</p>
+  </div>
+</section>
+
+<!-- ============================================================ 2 -->
+<section class="sec salto">
+  <div class="sec-cab"><span class="sec-num">02</span><h2>Parte 1 · Preparar y probar en local</h2><span class="lead">10 MINUTOS</span></div>
+  <div class="pregunta">
+    <div class="cab"><div class="n">1</div><div class="enun"><span class="tema">ENTORNO</span>Si no está listo desde las sesiones anteriores</div></div>
+    <div class="just">
+      <pre>node --version                      # v22.x
+cd "ruta/al/curso/material/laboratorios-evm"
+npm install                         # una vez por semestre
+npx hardhat --version               # 3.16.0</pre>
+    </div>
+  </div>
+  <div class="pregunta">
+    <div class="cab"><div class="n">2</div><div class="enun"><span class="tema">EL CONTRATO</span>contracts/s16/SelloTiempo.sol</div></div>
+    <div class="just">
+      Léanlo: <code>sellar(bytes32 hash)</code> guarda el momento (<code>block.timestamp</code>) y quién selló un hash, emite <code>Sellado</code> y rechaza sellar dos veces el mismo hash (<code>YaSellado</code>). Solo se guarda el <strong>hash</strong>, nunca el documento ni datos personales (Ley 1581 de 2012). Es pequeño y sin dependencias para que la comparación entre redes sea justa.
+      <pre>npx hardhat test test/s16/SelloTiempo.test.js</pre>
+      <strong>Salida esperada:</strong>
+      <pre>  S16 · SelloTiempo
+    √ sella un hash con el momento y la cuenta que lo registró
+    √ el mismo hash no se sella dos veces: el primero conserva la prioridad
+    √ un hash nunca sellado devuelve 0
+
+  3 passing</pre>
+    </div>
+  </div>
+</section>
+
+<!-- ============================================================ 3 -->
+<section class="sec">
+  <div class="sec-cab"><span class="sec-num">03</span><h2>Parte 2 · Ensayar la medición sin gastar nada</h2><span class="lead">10 MINUTOS</span></div>
+  <p>El script <code>scripts/s16/desplegar-y-medir.js</code> despliega SelloTiempo, llama <code>sellar()</code> una vez y mide cada transacción: gas usado, precio efectivo del gas, costo de ejecución, costo L1 de datos (solo en un rollup OP), total y tiempo hasta tener el recibo.</p>
+  <div class="pregunta">
+    <div class="cab"><div class="n">1</div><div class="enun"><span class="tema">RED LOCAL NORMAL</span>Como si fuera una L1</div></div>
+    <div class="just">
+      <pre>npx hardhat run scripts/s16/desplegar-y-medir.js</pre>
+      <strong>Salida real</strong> (los precios cambian en cada corrida; el gas no):
+      <pre>  DESPLIEGUE de SelloTiempo
+    gas usado        169.615
+    ...
+    datos L1 (l1Fee) no aplica: esta red no es un rollup OP
+  OPERACIÓN sellar(hash)
+    gas usado        90.279
+    precio del gas   0.969776789 gwei
+    ejecución        0.000087550478734131 ETH
+    datos L1 (l1Fee) no aplica: esta red no es un rollup OP
+    TOTAL            0.000087550478734131 ETH
+    tiempo al recibo 0.0 s
+
+  Fila para la tabla (...):
+  default | 31337 | 169615 | 0.000187835361328125 | 90279 | 0.000087550478734131 | n/a | 0.0</pre>
+    </div>
+  </div>
+  <div class="pregunta">
+    <div class="cab"><div class="n">2</div><div class="enun"><span class="tema">RED LOCAL SIMULANDO UN ROLLUP OP</span>Para ver el campo l1Fee antes de tocar la testnet</div></div>
+    <div class="just">
+      <pre>$env:SIMULAR_OP="1"; npx hardhat run scripts/s16/desplegar-y-medir.js     (PowerShell)
+SIMULAR_OP=1 npx hardhat run scripts/s16/desplegar-y-medir.js             (macOS / Linux)</pre>
+      Ahora el recibo trae los campos de OP: <code>l1Fee</code>, <code>l1GasUsed</code> (1 600 para <code>sellar</code>, 7 295 para el despliegue) y los escalares. En la simulación local el <code>l1Fee</code> sale en 0 porque no hay una L1 real con precio; en OP Sepolia tendrá un valor. En PowerShell, al terminar, borren la variable: <code>$env:SIMULAR_OP=$null</code>.<br>
+      <strong>Cómo sé que funcionó:</strong> aparece la línea <code>datos L1 (l1Fee)</code> con un número y la línea <code>l1GasUsed</code>.
+    </div>
+  </div>
+  <div class="caja alerta">
+    <div class="caja-et">CÓMO SE LEE EL COSTO L1 DE DATOS EN UN ROLLUP</div>
+    <p>En OP Stack, cada transacción paga dos cosas: la <strong>ejecución en la L2</strong> (<code>gasUsed × effectiveGasPrice</code>, como en cualquier red EVM) y su parte de <strong>publicar los datos en Ethereum</strong>, que el nodo reporta en el recibo como <code>l1Fee</code> (en wei). ethers no expone ese campo, por eso el script lee el recibo crudo con <code>eth_getTransactionReceipt</code>. El total real es la suma. También se puede estimar antes de enviar con el contrato predeployado <code>GasPriceOracle</code> (<code>0x420000000000000000000000000000000000000F</code>, función <code>getL1Fee(bytes)</code>).</p>
+  </div>
+</section>
+
+<!-- ============================================================ 4 -->
+<section class="sec salto">
+  <div class="sec-cab"><span class="sec-num">04</span><h2>Las dos redes, verificadas</h2><span class="lead">17-09-2026</span></div>
+  <table>
+    <tr><th style="width:24%">DATO</th><th style="width:38%">SEPOLIA (L1 DE PRUEBA)</th><th>OP SEPOLIA (L2 DE PRUEBA)</th></tr>
+    <tr><td class="pk">chainId</td><td>11155111</td><td>11155420</td></tr>
+    <tr><td class="pk">Red en hardhat.config.js</td><td><code>sepolia</code> (chainType l1)</td><td><code>opSepolia</code> (chainType op)</td></tr>
+    <tr><td class="pk">Variable del keystore</td><td><code>SEPOLIA_RPC_URL</code></td><td><code>OP_SEPOLIA_RPC_URL</code></td></tr>
+    <tr><td class="pk">RPC público</td><td>el de su proveedor (Alchemy, Infura)</td><td><code>https://sepolia.optimism.io</code> (con límite de uso; sin websockets)</td></tr>
+    <tr><td class="pk">Explorador</td><td><code>sepolia.etherscan.io</code></td><td><code>sepolia-optimism.etherscan.io</code> · <code>testnet-explorer.optimism.io</code></td></tr>
+    <tr><td class="pk">Tiempo de bloque</td><td>12 s</td><td>2 s</td></tr>
+    <tr><td class="pk">Clave privada</td><td colspan="2">La MISMA <code>SEPOLIA_PRIVATE_KEY</code> sirve en las dos: la dirección es la misma, los saldos no.</td></tr>
+  </table>
+
+  <h3 style="font-size:11pt;margin:4mm 0 2mm">Cómo conseguir ETH en OP Sepolia</h3>
+  <table>
+    <tr><th style="width:36%">VÍA</th><th>CONDICIONES VERIFICADAS</th></tr>
+    <tr><td class="pk">Superchain Faucet · console.optimism.io/faucet</td><td>Faucet oficial de Optimism (listado en <code>docs.optimism.io/app-developers/tools/faucets</code>). La página exige JavaScript; los montos y requisitos no se pudieron leer al verificar: revisen en pantalla.</td></tr>
+    <tr><td class="pk">QuickNode · faucet.quicknode.com/optimism/sepolia</td><td>Un reclamo cada 12 horas, sin saldo mínimo en mainnet y sin cuenta.</td></tr>
+    <tr><td class="pk">Alchemy · alchemy.com/faucets/optimism-sepolia</td><td>0,1 ETH cada 24 h, pero exige 0,001 ETH en Ethereum mainnet: <strong>no</strong> es para billeteras del curso (no se usa dinero real).</td></tr>
+    <tr><td class="pk">Puente desde Sepolia</td><td>Si ya tienen ETH en Sepolia (faucet de la S8 o billetera institucional del docente), pásenlo a OP Sepolia con el puente oficial: sección 5. Llega en 1 a 3 minutos.</td></tr>
+  </table>
+</section>
+
+<!-- ============================================================ 5 -->
+<section class="sec">
+  <div class="sec-cab"><span class="sec-num">05</span><h2>Parte 3 · Keystore y fondos</h2><span class="lead">15 MINUTOS</span></div>
+  <div class="pregunta">
+    <div class="cab"><div class="n">1</div><div class="enun"><span class="tema">EL KEYSTORE</span>La única forma permitida de guardar secretos</div></div>
+    <div class="just">
+      <pre>npx hardhat keystore set SEPOLIA_RPC_URL        # si no existe desde la S8
+npx hardhat keystore set SEPOLIA_PRIVATE_KEY    # clave de la billetera DEL CURSO
+npx hardhat keystore set OP_SEPOLIA_RPC_URL     # https://sepolia.optimism.io, o la de Alchemy/Infura para OP Sepolia
+npx hardhat keystore list</pre>
+      La primera vez pide crear la contraseña del keystore. <strong>Cómo sé que funcionó:</strong> <code>keystore list</code> muestra los tres nombres (nunca los valores). Si el RPC público responde «rate limit» o 429, cambien <code>OP_SEPOLIA_RPC_URL</code> por la URL de su proveedor para «OP Sepolia».
+    </div>
+  </div>
+  <div class="pregunta">
+    <div class="cab"><div class="n">2</div><div class="enun"><span class="tema">AGREGAR OP SEPOLIA A METAMASK</span>Para ver el saldo</div></div>
+    <div class="just">
+      MetaMask → redes → agregar red manualmente: nombre <code>OP Sepolia</code>, RPC <code>https://sepolia.optimism.io</code>, chainId <code>11155420</code>, símbolo <code>ETH</code>, explorador <code>https://sepolia-optimism.etherscan.io</code>. Verifiquen el chainId: es lo que distingue una red de otra.
+    </div>
+  </div>
+  <div class="pregunta">
+    <div class="cab"><div class="n">3</div><div class="enun"><span class="tema">PUENTE SEPOLIA → OP SEPOLIA</span>Solo si el faucet no alcanzó</div></div>
+    <div class="just">
+      <strong>Dirección del puente</strong> (L1StandardBridgeProxy de OP Sepolia, en Sepolia): <code>0xFBb0621E0B23b5478B630BD55a5f21f67730B0F1</code>.<br>
+      <strong>Verifíquenla antes de enviar</strong> en el registro oficial de la Superchain: <code>github.com/ethereum-optimism/superchain-registry</code>, archivo <code>superchain/configs/sepolia/op.toml</code>, clave <code>L1StandardBridgeProxy</code>. Si no coincide carácter por carácter, <strong>no envíen</strong>.<br>
+      <strong>Qué hacer:</strong> en MetaMask, red <strong>Sepolia</strong>, enviar 0,01 ETH a esa dirección desde la billetera del curso (una cuenta normal, no un contrato). El puente acredita la misma cantidad a la <strong>misma dirección</strong> en OP Sepolia.<br>
+      <strong>Alternativas con interfaz:</strong> <code>app.optimism.io/bridge</code> o <code>superbridge.app/op-sepolia</code>.<br>
+      <strong>Cómo sé que funcionó:</strong> 1 a 3 minutos después, MetaMask en la red OP Sepolia muestra el saldo; o busquen su dirección en <code>sepolia-optimism.etherscan.io</code>.<br>
+      <strong>Ojo:</strong> es de ida. Volver de OP Sepolia a Sepolia por el puente nativo tarda <strong>7 días</strong> (la ventana de desafío del rollup optimista, igual que en mainnet).
+    </div>
+  </div>
+  <div class="caja">
+    <div class="caja-et">PUNTO DE CONTROL 3</div>
+    <p>El script en local funciona, el keystore tiene las tres variables, y la billetera del curso tiene al menos 0,005 ETH en Sepolia <strong>y</strong> algo de ETH en OP Sepolia (0,001 basta para esta medición).</p>
+  </div>
+</section>
+
+<!-- ============================================================ 6 -->
+<section class="sec salto">
+  <div class="sec-cab"><span class="sec-num">06</span><h2>Parte 4 · Desplegar y medir en las dos redes</h2><span class="lead">15 MINUTOS</span></div>
+  <div class="pregunta">
+    <div class="cab"><div class="n">1</div><div class="enun"><span class="tema">SEPOLIA</span>La L1 de prueba</div></div>
+    <div class="just">
+      <pre>npx hardhat run scripts/s16/desplegar-y-medir.js --network sepolia</pre>
+      Tarda unos 30 segundos (dos transacciones de ~12 s cada una). Copien la salida COMPLETA a <code>medicion.md</code>.
+    </div>
+  </div>
+  <div class="pregunta">
+    <div class="cab"><div class="n">2</div><div class="enun"><span class="tema">OP SEPOLIA</span>La L2 de prueba, mismo contrato</div></div>
+    <div class="just">
+      <pre>npx hardhat run scripts/s16/desplegar-y-medir.js --network opSepolia</pre>
+      Mismo script, mismo contrato, sin tocar una línea. Esta vez aparecen <code>datos L1 (l1Fee)</code>, <code>l1GasUsed</code>, los escalares y la «parte L1 del total».<br>
+      <strong>Cómo sé que terminó:</strong> cada corrida termina con una línea «Fila para la tabla». Abran las dos direcciones de contrato en sus exploradores: deben mostrar el contrato creado por su cuenta.
+    </div>
+  </div>
+  <div class="caja clave">
+    <div class="caja-et">QUÉ ESPERAR (ESTIMACIÓN CON PRECIOS OBSERVADOS EL 17-09-2026)</div>
+    <p>Con el gas medido en local (<code>sellar</code> = 90 279) y los precios que mostraban ese día los nodos públicos (Sepolia ≈ 1,075 gwei; OP Sepolia ≈ 0,0017 gwei de ejecución y un <code>l1Fee</code> de ≈ 1,67 × 10<sup>-8</sup> ETH para una transacción pequeña), sellar costaría ≈ 0,0000971 ETH en Sepolia y ≈ 0,00000017 ETH en OP Sepolia: unas <strong>570 veces</strong> menos. Sus números serán otros: los precios de las testnets cambian cada minuto y no reflejan los de mainnet. Lo que sí debe repetirse es la <strong>estructura</strong>: el gas usado casi igual, el precio muy distinto y un costo L1 de datos solo en la L2.</p>
+  </div>
+</section>
+
+<!-- ============================================================ 7 -->
+<section class="sec">
+  <div class="sec-cab"><span class="sec-num">07</span><h2>Tabla comparativa para llenar</h2><span class="lead">VA EN medicion.md</span></div>
+  <table>
+    <tr><th style="width:34%">MEDIDA</th><th style="width:22%">SEPOLIA</th><th style="width:22%">OP SEPOLIA</th><th>RAZÓN L1 / L2</th></tr>
+    <tr style="height:9mm"><td class="pk">Dirección del contrato</td><td>&nbsp;</td><td>&nbsp;</td><td>—</td></tr>
+    <tr style="height:9mm"><td class="pk">Gas del despliegue</td><td>&nbsp;</td><td>&nbsp;</td><td>&nbsp;</td></tr>
+    <tr style="height:9mm"><td class="pk">Total del despliegue (ETH)</td><td>&nbsp;</td><td>&nbsp;</td><td>&nbsp;</td></tr>
+    <tr style="height:9mm"><td class="pk">Gas de sellar()</td><td>&nbsp;</td><td>&nbsp;</td><td>&nbsp;</td></tr>
+    <tr style="height:9mm"><td class="pk">Precio del gas en sellar (gwei)</td><td>&nbsp;</td><td>&nbsp;</td><td>&nbsp;</td></tr>
+    <tr style="height:9mm"><td class="pk">Ejecución de sellar (ETH)</td><td>&nbsp;</td><td>&nbsp;</td><td>&nbsp;</td></tr>
+    <tr style="height:9mm"><td class="pk">l1Fee de sellar (ETH)</td><td>no aplica</td><td>&nbsp;</td><td>—</td></tr>
+    <tr style="height:9mm"><td class="pk">Parte L1 del total (%)</td><td>no aplica</td><td>&nbsp;</td><td>—</td></tr>
+    <tr style="height:9mm"><td class="pk">Total de sellar (ETH)</td><td>&nbsp;</td><td>&nbsp;</td><td>&nbsp;</td></tr>
+    <tr style="height:9mm"><td class="pk">Tiempo al recibo de sellar (s)</td><td>&nbsp;</td><td>&nbsp;</td><td>&nbsp;</td></tr>
+    <tr style="height:9mm"><td class="pk">Hash de sellar</td><td>&nbsp;</td><td>&nbsp;</td><td>—</td></tr>
+  </table>
+</section>
+
+<!-- ============================================================ 8 -->
+<section class="sec">
+  <div class="sec-cab"><span class="sec-num">08</span><h2>Preguntas de análisis</h2><span class="lead">CON SUS NÚMEROS</span></div>
+  <ol>
+    <li>¿El gas usado de <code>sellar</code> fue idéntico en las dos redes? Si difiere en unas pocas unidades, busquen por qué en su recibo (pista: el costo de los bytes cero y no cero del calldata depende del hash que sellaron). ¿Qué demuestra eso sobre «compatible con la EVM»?</li>
+    <li>Con SUS datos: ¿cuántas veces más barato fue sellar en OP Sepolia? ¿Qué porcentaje del total de la L2 fue <code>l1Fee</code>? ¿Y en el despliegue, que publica mucho más bytecode? Expliquen la diferencia con <code>l1GasUsed</code>.</li>
+    <li>El tiempo al recibo, ¿se parece al tiempo de bloque de cada red (12 s y 2 s)? ¿Por qué ese «recibo» en la L2 NO significa que la transacción sea final en Ethereum? (pista: A.3 del deck y los 7 días).</li>
+    <li>Si su proyecto hiciera 10 000 sellos al mes, ¿cuánto costaría en cada red con sus precios? ¿Por qué esa cifra no sirve para presupuestar en mainnet, y qué dato buscarían para hacerlo?</li>
+    <li>¿Qué confianza adicional asumen al usar OP Sepolia en vez de Sepolia (secuenciador, puente, pruebas de fraude)? Una respuesta de máximo 120 palabras que alguien de la S4 entendería.</li>
+  </ol>
+</section>
+
+<!-- ============================================================ 9 -->
+<section class="sec salto">
+  <div class="sec-cab"><span class="sec-num">09</span><h2>Parte 5 · Taller: análisis regulatorio del proyecto propio</h2><span class="lead">20 MINUTOS · VA EN taller-regulatorio.md</span></div>
+  <p>Aplicar el mapa del bloque B al proyecto del equipo. Cada respuesta cita la norma, la URL oficial y la fecha en que la abrieron. <strong>No es asesoría jurídica:</strong> es el ejercicio de hacer las preguntas correctas. Si la respuesta depende de algo que no saben, escriban la pregunta que le harían a un abogado.</p>
+  <table>
+    <tr><th style="width:4%">#</th><th style="width:42%">PREGUNTA</th><th style="width:26%">NORMA DE REFERENCIA</th><th>RESPUESTA DEL EQUIPO (CON FUENTE Y FECHA)</th></tr>
+    <tr><td class="pk">1</td><td>¿Qué hace nuestro sistema, en una frase, y quiénes son sus usuarios?</td><td>—</td><td>&nbsp;</td></tr>
+    <tr><td class="pk">2</td><td>¿Intercambiamos, custodiamos o transferimos activos virtuales por cuenta de otros? ¿Seríamos PSAV y tendríamos que reportar a la UIAF?</td><td>UIAF · Res. 314 de 2021 (y Res. 84 de 2022)</td><td>&nbsp;</td></tr>
+    <tr><td class="pk">3</td><td>¿Nuestros usuarios podrían tener ganancias con un token? ¿Cómo lo declararían? ¿Quedaríamos obligados a reportar como proveedor?</td><td>DIAN · Concepto 018075 de 2023 · Res. 000240 de 2025</td><td>&nbsp;</td></tr>
+    <tr><td class="pk">4</td><td>¿Nuestro token o servicio podría considerarse un producto financiero o un valor? ¿Necesitaríamos a un banco?</td><td>SFC · Cartas Circulares 29/2014, 78/2016, 52/2017 · Ley 964 de 2005</td><td>&nbsp;</td></tr>
+    <tr><td class="pk">5</td><td>¿Qué datos personales tocamos, dónde viven y cómo atenderíamos una solicitud de supresión?</td><td>Ley 1581 de 2012 (S15)</td><td>&nbsp;</td></tr>
+    <tr><td class="pk">6</td><td>¿El «contrato» de nuestro proyecto tiene efecto jurídico entre las partes, o solo automatiza? ¿Qué documento legal lo acompañaría?</td><td>pregunta abierta (B.8)</td><td>&nbsp;</td></tr>
+    <tr><td class="pk">7</td><td>Si operáramos también con usuarios de la Unión Europea, ¿qué cambiaría?</td><td>MiCA · Reg. (UE) 2023/1114 y 2023/1113</td><td>&nbsp;</td></tr>
+    <tr><td class="pk">8</td><td>La obligación que MÁS nos costaría cumplir, y si la cumpliríamos o rediseñaríamos para no tenerla.</td><td>—</td><td>&nbsp;</td></tr>
+  </table>
+  <div class="caja alerta">
+    <div class="caja-et">LA RESPUESTA HONESTA MÁS FRECUENTE</div>
+    <p>La mayoría de proyectos del curso (certificados, trazabilidad, votación, tiquetes) <strong>no</strong> son PSAV: no intercambian activos por cuenta de clientes. Su obligación más real suele ser la protección de datos personales. Descubrir eso con fuentes vale más que listar todas las normas.</p>
+  </div>
+</section>
+
+<!-- ============================================================ 10 -->
+<section class="sec">
+  <div class="sec-cab"><span class="sec-num">10</span><h2>Estado regulatorio verificado</h2><span class="lead">CONSULTADO EL 17-09-2026</span></div>
+  <p>Resumen de lo que se verificó en fuente oficial para el bloque B. <strong>Antes de citarlo, ábranlo otra vez:</strong> la norma cambia.</p>
+  <table>
+    <tr><th style="width:22%">TEMA</th><th style="width:44%">ESTADO</th><th>FUENTE OFICIAL</th></tr>
+    <tr><td class="pk">Naturaleza jurídica</td><td>No son moneda de curso legal, divisa ni valor; no están regulados ni supervisados; las entidades vigiladas no pueden custodiarlos ni intermediarlos.</td><td><code>superfinanciera.gov.co/publicaciones/10087902/</code> (CC 52/2017) · <code>/10115324/</code> (página actualizada el 11-jun-2026)</td></tr>
+    <tr><td class="pk">UIAF</td><td>PSAV reportan ROS, transacciones (desde USD 150 / USD 450) y clientes, mensualmente, desde el 1-jul-2022.</td><td><code>uiaf.gov.co/sector/activos-virtuales</code> · Res. 314 de 2021 · Res. 84 de 2022</td></tr>
+    <tr><td class="pk">DIAN · impuestos</td><td>Activos intangibles; renta o ganancia ocasional según el caso.</td><td><code>normograma.dian.gov.co/dian/compilacion/docs/oficio_dian_18075_2023.htm</code></td></tr>
+    <tr><td class="pk">DIAN · CARF</td><td>Res. 000240 del 24-dic-2025: los proveedores de servicios de criptoactivos reportan desde el año gravable 2026, en XML, hasta el último día hábil de mayo del año siguiente.</td><td><code>dian.gov.co/normatividad/Normatividad/</code> «Resolución 000240 de 24-12-2025.pdf»</td></tr>
+    <tr><td class="pk">Arenera SFC</td><td>Piloto 2021-2024 (fin 13-jun-2024) sin incidentes para consumidores; criptoactivos siguen sin regular.</td><td><code>superfinanciera.gov.co/publicaciones/10115218/</code></td></tr>
+    <tr><td class="pk">Congreso</td><td>PL 139/2021C y PL 510/2025C archivados; ninguna ley de PSAV sancionada.</td><td><code>camara.gov.co/criptoactivos-2227/</code> · <code>camara.gov.co/servicios-activos-virtuales-497/</code></td></tr>
+    <tr><td class="pk">MiCA</td><td>Vigor 29-jun-2023; stablecoins 30-jun-2024; general 30-dic-2024; transitorio CASP hasta 1-jul-2026.</td><td><code>eur-lex.europa.eu</code> · CELEX 32023R1114, art. 149</td></tr>
+    <tr><td class="pk">Travel Rule</td><td>GAFI R.15/R.16 (umbral USD/EUR 1 000; R.16 revisada 18-jun-2025). UE: sin umbral desde 30-dic-2024.</td><td><code>fatf-gafi.org</code> · CELEX 32023R1113</td></tr>
+  </table>
+  <p><strong>No confirmado en fuente oficial:</strong> conceptos recientes del Banco de la República (su sitio no abrió al verificar), proyectos de ley radicados desde el 20-jul-2026 y un informe final formal del piloto de la SFC.</p>
+</section>
+
+<!-- ============================================================ 11 -->
+<section class="sec">
+  <div class="sec-cab"><span class="sec-num">11</span><h2>Errores frecuentes</h2><span class="lead">CASI TODO SE RESUELVE AQUÍ</span></div>
+  <table>
+    <tr><th style="width:42%">SÍNTOMA</th><th>CAUSA Y SOLUCIÓN</th></tr>
+    <tr><td class="pk">«Sin saldo en esta red» con --network opSepolia</td><td>El ETH está en Sepolia. Faucet de OP Sepolia o puente (sección 5).</td></tr>
+    <tr><td class="pk">HHE… «configuration variable OP_SEPOLIA_RPC_URL»</td><td>Falta en el keystore: <code>npx hardhat keystore set OP_SEPOLIA_RPC_URL</code>.</td></tr>
+    <tr><td class="pk">Envié al puente y no llega</td><td>Esperen hasta 3 minutos; busquen la MISMA dirección en el explorador de OP Sepolia. Si enviaron desde un contrato o a otra dirección, el puente no acredita a su cuenta.</td></tr>
+    <tr><td class="pk">429 · «rate limit» · «too many requests»</td><td>El RPC público limita. Usen la URL de su proveedor para OP Sepolia en el keystore.</td></tr>
+    <tr><td class="pk"><code>l1Fee</code> dice «no aplica»</td><td>Corrieron sin <code>--network opSepolia</code> o con <code>--network sepolia</code>.</td></tr>
+    <tr><td class="pk">Con SIMULAR_OP el l1Fee da 0</td><td>Es lo esperado en local: no hay una L1 con precio. En OP Sepolia tendrá valor.</td></tr>
+    <tr><td class="pk">Después de SIMULAR_OP todo sale «simulando OP»</td><td>La variable quedó puesta en PowerShell: <code>$env:SIMULAR_OP=$null</code>.</td></tr>
+    <tr><td class="pk">«nonce too low» o transacción atascada</td><td>Usaron la misma cuenta en MetaMask a la vez. Esperen a que se confirme y vuelvan a correr.</td></tr>
+  </table>
+</section>
+
+<!-- ============================================================ 12 -->
+<section class="sec salto">
+  <div class="sec-cab"><span class="sec-num">12</span><h2>Si algo cambió desde la verificación</h2></div>
+  <ul>
+    <li><strong>Un faucet cerró:</strong> la lista vigente está en <code>docs.optimism.io/app-developers/tools/faucets</code>. Si ninguno sirve, pidan ETH de OP Sepolia al docente.</li>
+    <li><strong>La dirección del puente:</strong> la fuente de verdad es el <code>superchain-registry</code> (sección 5). Nunca una dirección que aparezca en un mensaje, video o foro.</li>
+    <li><strong>OP Sepolia no responde:</strong> el laboratorio puede hacerse con otra L2 de prueba compatible con la EVM, pero requeriría agregar la red a <code>hardhat.config.js</code>, que es archivo del docente: pídanlo, no lo editen.</li>
+  </ul>
+</section>
+
+<!-- ============================================================ 13 -->
+<section class="sec">
+  <div class="sec-cab"><span class="sec-num">13</span><h2>Lista de chequeo de entrega</h2></div>
+  <ul>
+    <li>☐ Captura de <code>SelloTiempo.test.js</code>: 3 passing.</li>
+    <li>☐ Salida completa del script en Sepolia y en OP Sepolia, en <code>medicion.md</code>.</li>
+    <li>☐ Direcciones de los dos contratos y hashes de los dos <code>sellar</code>, abribles en sus exploradores.</li>
+    <li>☐ Tabla de la sección 7 llena, con la columna de razón calculada.</li>
+    <li>☐ Las 5 respuestas de análisis, con sus números.</li>
+    <li>☐ <code>taller-regulatorio.md</code> con las 8 preguntas, cada norma con URL y fecha de consulta.</li>
+    <li>☐ <code>git status</code> revisado: ninguna clave ni URL con API key en el repositorio.</li>
+  </ul>
+</section>
+
+<!-- ============================================================ 14 -->
+<section class="sec">
+  <div class="sec-cab"><span class="sec-num">14</span><h2>Rúbrica</h2><span class="lead">PARTE DEL 4 % DE LABORATORIOS S14–S16</span></div>
+  <table>
+    <tr><th style="width:24%">CRITERIO</th><th style="width:8%">PESO</th><th style="width:23%">EXCELENTE (5,0)</th><th style="width:23%">ACEPTABLE (3,5)</th><th>INSUFICIENTE (&lt; 3,0)</th></tr>
+    <tr><td class="pk">Despliegue en dos redes</td><td>30 %</td><td>Mismo contrato en Sepolia y OP Sepolia, direcciones y hashes verificables.</td><td>Una red completa y la otra parcial.</td><td>Sin evidencia on-chain.</td></tr>
+    <tr><td class="pk">Tabla comparativa</td><td>25 %</td><td>Completa, con l1Fee y razones bien calculadas.</td><td>Completa pero sin l1Fee o con errores de cálculo.</td><td>Incompleta o inventada.</td></tr>
+    <tr><td class="pk">Análisis</td><td>20 %</td><td>Las 5 respuestas con sus números y razonamiento propio.</td><td>Correctas pero genéricas.</td><td>Sin datos propios.</td></tr>
+    <tr><td class="pk">Taller regulatorio</td><td>25 %</td><td>8 respuestas con norma, URL oficial y fecha; identifica la obligación real del proyecto.</td><td>Respuestas razonables sin fuentes o sin fecha.</td><td>Genérico o con normas inexistentes.</td></tr>
+  </table>
+</section>
+
+<!-- ============================================================ 15 -->
+<section class="sec">
+  <div class="sec-cab"><span class="sec-num">15</span><h2>Referencias técnicas</h2><span class="lead">CONSULTADAS EL 17-09-2026</span></div>
+  <ul>
+    <li>Optimism · redes: <code>docs.optimism.io/superchain/networks</code> · faucets: <code>docs.optimism.io/app-developers/tools/faucets</code> · tarifas: <code>docs.optimism.io/stack/transactions/fees</code> · puentes: <code>docs.optimism.io/app-developers/bridging/messaging</code></li>
+    <li>Registro de direcciones: <code>github.com/ethereum-optimism/superchain-registry</code> (<code>superchain/configs/sepolia/op.toml</code>)</li>
+    <li>Predeploys de OP Stack (GasPriceOracle): <code>specs.optimism.io/protocol/predeploys.html</code></li>
+    <li>EIP-4844 (blobs): <code>eips.ethereum.org/EIPS/eip-4844</code> · anuncio de Dencun: <code>blog.ethereum.org/2024/02/27/dencun-mainnet-announcement</code></li>
+  </ul>
+</section>
+
+</body>
+</html>

@@ -254,7 +254,7 @@ function tabla(s, cabecera, filas, o) {
   s.addTable(rows, {
     x: o.x || M, y: o.y, w: o.w || CW, colW: o.colW,
     border: { type: "solid", color: C.grisClaro, pt: 1 },
-    rowH: [hdrH, ...filas.map(() => bodyH)], margin: [7, 9, 7, 9], autoPage: false,
+    rowH: [hdrH, ...filas.map(() => bodyH)], margin: o.margin || [7, 9, 7, 9], autoPage: false,
   });
   s.addShape(pres.ShapeType.rect, {
     x: (o.x || M) - 0.02, y: o.y - 0.02, w: (o.w || CW) + 0.04, h: (o.h || 4) + 0.04,
@@ -353,6 +353,7 @@ async function construir() {
       s.addText(m[0], { x, y: 5.72, w: 1.85, h: 0.5, fontFace: F.mono, fontSize: 11.5, bold: true, color: C.blanco, margin: 0, valign: "top", lineSpacingMultiple: 1.05 });
       s.addText(m[1].toUpperCase(), { x, y: 6.24, w: 1.85, h: 0.28, fontFace: F.mono, fontSize: 8.5, color: "A39EAF", charSpacing: 1.2, margin: 0, valign: "top" });
     });
+    s.addNotes("Presentarse y presentar el curso: 17 sesiones, proyecto integrador en equipos de tres y la regla de oro: nunca dinero real. Hoy es teórica, sin computadores. Lanzar la pregunta del título y dejarla abierta: la sesión entera la responde. 3 minutos.");
     nSlide++;
   }
 
@@ -394,7 +395,7 @@ async function construir() {
       ["147–160", "B.3", "Adopción real: qué encontró uso sostenido después de quince años y qué no."],
       ["160–172", "B.4", "Taller de casos en grupos de tres. Aplicar el árbol de decisión y defenderlo."],
       ["172–180", "BLOQUE C", "Síntesis, pregunta de la semana y lectura obligatoria para la Sesión 2."],
-    ], { y: 1.92, h: 5.0, colW: [1.15, 1.5, 9.443], size: 11 });
+    ], { y: 1.92, h: 4.8, colW: [1.15, 1.5, 9.443], size: 11, margin: [3, 9, 3, 9] });
     s.addNotes("Las marcas de minuto son referencia de ritmo, no camisa de fuerza. Si el grupo llega sin base de redes, extender A.2 y recortar A.6, que es el más prescindible.");
   }
 
@@ -413,7 +414,7 @@ async function construir() {
   }
 
   /* ---------- 05 · DIVISOR BLOQUE A ---------- */
-  await divisor({ letra: "A", titulo: "El problema y su historia", sub: "Siete secciones encadenadas: del doble gasto a la decisión de no usar blockchain.", minutos: "MIN 10 — 105 · EXPOSICIÓN DIALOGADA", ic: "reloj" });
+  (await divisor({ letra: "A", titulo: "El problema y su historia", sub: "Siete secciones encadenadas: del doble gasto a la decisión de no usar blockchain.", minutos: "MIN 10 — 105 · EXPOSICIÓN DIALOGADA", ic: "reloj" })).addNotes("Bloque A, min 10–105: siete secciones encadenadas que terminan en la más importante, cuándo NO usar blockchain (A.7). Anunciar que cada sección cierra con una pregunta para el aula.");
 
   /* ---------- 06 · A.1 apertura ---------- */
   {
@@ -650,11 +651,11 @@ async function construir() {
     const s = await lamina({ kicker: "A.4 · min 60–72 · la síntesis", titulo: "31 de octubre de 2008", ic: "fusion" });
     parrafo(s, "Alguien que firmaba como Satoshi Nakamoto —seudónimo cuya identidad real sigue sin establecerse— publicó en una lista de correo de criptografía un documento de nueve páginas: «Bitcoin: A Peer-to-Peer Electronic Cash System». El 3 de enero de 2009 se generó el primer bloque de la red.", { y: 1.9, h: 0.95 });
 
-    cifra(s, "9", "Páginas del documento que abrió el campo.", { x: M, y: 3.02, w: 2.85, h: 1.62, size: 46 });
-    cifra(s, "2008", "Crisis financiera más grave desde 1929. Los rescates bancarios con dinero público en el centro del debate.", { x: M + 3.1, y: 3.02, w: 4.35, h: 1.62, size: 36, color: C.ocre });
-    cifra(s, "0", "Piezas nuevas inventadas. Todas existían ya.", { x: M + 7.7, y: 3.02, w: 4.39, h: 1.62, size: 46, color: C.violeta });
+    cifra(s, "9", "Páginas del documento que abrió el campo.", { x: M, y: 3.0, w: 2.85, h: 1.85, size: 46 });
+    cifra(s, "2008", "Crisis financiera más grave desde 1929. Los rescates bancarios con dinero público en el centro del debate.", { x: M + 3.1, y: 3.0, w: 4.35, h: 1.85, size: 36, color: C.ocre });
+    cifra(s, "0", "Piezas nuevas inventadas. Todas existían ya.", { x: M + 7.7, y: 3.0, w: 4.39, h: 1.85, size: 46, color: C.violeta });
 
-    const r = await ficha(s, { tipo: "profundidad", etiqueta: "El bloque génesis", x: M, y: 4.85, w: CW, h: 1.62 });
+    const r = await ficha(s, { tipo: "profundidad", etiqueta: "El bloque génesis", x: M, y: 5.02, w: CW, h: 1.66 });
     parrafo(s, "En el primer bloque quedó grabado, de forma permanente, el titular de portada de The Times del 3 de enero de 2009 sobre un segundo rescate bancario. Cumple dos funciones: es prueba criptográfica de que el bloque no pudo crearse antes de esa fecha, y es una declaración política inequívoca sobre el objeto del proyecto.", { x: r.x, y: r.y, w: r.w, h: 0.95, size: 13.5 });
     s.addNotes("El contexto no es anecdótico. Explica por qué el diseño prioriza resistencia a la censura y ausencia de emisor por encima del rendimiento.");
   }
@@ -797,7 +798,7 @@ async function construir() {
       ["Pública con permiso", "Cualquiera", "Conjunto autorizado", "En los validadores autorizados.", "Registros públicos estatales donde la transparencia es obligatoria pero la escritura debe ser oficial."],
       ["De consorcio", "Miembros", "Miembros", "En el consorcio como colectivo.", "Trazabilidad entre empresas competidoras que no confían entre sí pero necesitan un registro común."],
       ["Privada", "Una organización", "Una organización", "Total, en el operador.", "Casi siempre: ninguno. Ver la lámina siguiente."],
-    ], { y: 2.85, h: 3.5, colW: [2.15, 1.5, 1.75, 2.9, 3.793], rowH: 0.78, size: 11 });
+    ], { y: 3.0, h: 3.3, colW: [2.15, 1.5, 1.75, 2.9, 3.793], rowH: 0.78, size: 11 });
     s.addNotes("Pedir a los estudiantes que, cuando propongan proyecto en la Sesión 6, digan explícitamente en qué fila se ubican y por qué.");
   }
 
@@ -945,7 +946,7 @@ async function construir() {
   }
 
   /* ---------- 39 · DIVISOR BLOQUE B ---------- */
-  await divisor({ letra: "B", titulo: "Profundización", sub: "Quién sostiene la red, cómo está organizado el territorio y qué demostró la evidencia después de quince años.", minutos: "MIN 115 — 172 · EXPOSICIÓN + TALLER", ic: "profundidad" });
+  (await divisor({ letra: "B", titulo: "Profundización", sub: "Quién sostiene la red, cómo está organizado el territorio y qué demostró la evidencia después de quince años.", minutos: "MIN 115 — 172 · EXPOSICIÓN + TALLER", ic: "profundidad" })).addNotes("Después de la pausa (min 115). Cambio de registro: del porqué histórico a quién sostiene hoy la red, cómo está organizado el territorio y qué demostró la evidencia. Cierra con el taller de casos en grupos de tres.");
 
   /* ---------- 40 · B.1 apertura ---------- */
   {
@@ -1011,17 +1012,17 @@ async function construir() {
   /* ---------- 45 · Alerta + MEV ---------- */
   {
     const s = await lamina({ kicker: "B.1 · cierre", titulo: "La descentralización de la base no se hereda hacia arriba", ic: "alerta", tituloSize: 24 });
-    const r = await ficha(s, { tipo: "alerta", etiqueta: "Alerta · la situación habitual", x: M, y: 1.9, w: CW, h: 2.15 });
+    const r = await ficha(s, { tipo: "alerta", etiqueta: "Alerta · la situación habitual", x: M, y: 1.9, w: CW, h: 1.6 });
     parrafo(s, "Es perfectamente posible —y es lo normal— que la capa base sea muy descentralizada y la experiencia del usuario esté completamente centralizada: la billetera es de una empresa, lee la cadena a través de otra, el activo se compró en un intercambio custodio y la interfaz web se sirve desde un servidor con dueño.", { x: r.x, y: r.y, w: r.w, h: 1.1, size: 13.5 });
 
-    const r2 = await ficha(s, { tipo: "profundidad", etiqueta: "Profundidad · el poder de ordenar", x: M, y: 4.2, w: CW, h: 1.55 });
+    const r2 = await ficha(s, { tipo: "profundidad", etiqueta: "Profundidad · el poder de ordenar", x: M, y: 3.68, w: CW, h: 1.55 });
     s.addText([
       { text: "MEV ", options: { fontFace: F.mono, bold: true, color: C.tinta, fontSize: 13 } },
       { text: "[Maximal Extractable Value · valor máximo extraíble] ", options: { fontFace: F.mono, color: C.violetaOs, fontSize: 11.5 } },
       { text: "es el beneficio que un productor de bloques obtiene incluyendo, excluyendo o reordenando transacciones. Es una consecuencia estructural, no un fallo: alguien tiene que decidir el orden, y quien decide puede aprovecharlo. Sesiones 9 y 14.", options: { fontFace: F.body, color: C.tintaSuav, fontSize: 13 } },
     ], { x: r2.x, y: r2.y - 0.04, w: r2.w, h: 0.9, lineSpacingMultiple: 1.22, margin: 0, valign: "top" });
 
-    const r3 = await ficha(s, { tipo: "pregunta", etiqueta: "Pregunta para el aula", x: M, y: 5.88, w: CW, h: 1.0 });
+    const r3 = await ficha(s, { tipo: "pregunta", etiqueta: "Pregunta para el aula", x: M, y: 5.45, w: CW, h: 1.0 });
     s.addText("Si casi nadie corre un nodo completo, ¿en qué se diferencia el usuario promedio del cliente de un banco?", { x: r3.x, y: r3.y - 0.1, w: r3.w, h: 0.42, fontFace: F.display, fontSize: 14, color: C.tinta, margin: 0, valign: "middle" });
     s.addNotes("Cuando alguien afirme que un sistema «es descentralizado», la pregunta profesional es siempre: ¿en qué dimensión, y comparado con qué?");
   }
@@ -1092,9 +1093,9 @@ async function construir() {
       ["Blockchain empresarial privada", "PASOS 1 Y 2. Una sola organización, o varias que ya confían entre sí y tienen contratos. La ola de pilotos corporativos terminó, en su mayoría, en bases de datos con más pasos."],
       ["Identidad digital universal", "ADOPCIÓN Y RECUPERACIÓN. Técnicamente viable, pero exige que todo un ecosistema adopte el mismo esquema al tiempo, y choca con qué hacer cuando el usuario pierde sus claves."],
       ["Coleccionables digitales como mercado masivo", "EL ACTIVO NO TENÍA LA DEMANDA QUE EL PRECIO SUPONÍA. El mercado especulativo colapsó, pero el estándar técnico sobrevivió y hoy se usa para entradas, credenciales y membresías. La tecnología no fracasó; la tesis de inversión sí."],
-    ], { y: 1.95, h: 3.7, colW: [3.9, 8.193], size: 11.5 });
+    ], { y: 1.95, h: 3.45, colW: [3.9, 8.193], size: 11.5 });
 
-    const r = await ficha(s, { tipo: "pregunta", etiqueta: "El patrón, en una frase", x: M, y: 5.78, w: CW, h: 1.1 });
+    const r = await ficha(s, { tipo: "pregunta", etiqueta: "El patrón, en una frase", x: M, y: 5.55, w: CW, h: 1.2 });
     s.addText("Sobrevivieron los casos que necesitaban resistencia a la censura o liquidación sin intermediario. Fracasaron los que solo necesitaban un registro compartido.", { x: r.x, y: r.y - 0.08, w: r.w, h: 0.5, fontFace: F.display, fontSize: 14, color: C.tinta, lineSpacingMultiple: 1.05, margin: 0, valign: "middle" });
     s.addNotes("Cada fila remite a un paso concreto del árbol de A.7. Eso convierte el árbol en una herramienta con respaldo empírico, no en una opinión del docente.");
   }
@@ -1145,7 +1146,7 @@ async function construir() {
 
   
   /* ---------- 57 · DIVISOR BLOQUE C ---------- */
-  await divisor({ letra: "C", titulo: "Cierre", sub: "Qué llevarse, qué trabajar y qué viene en la Sesión 2.", minutos: "MIN 172 — 180 · PLENARIA", ic: "bandera" });
+  (await divisor({ letra: "C", titulo: "Cierre", sub: "Qué llevarse, qué trabajar y qué viene en la Sesión 2.", minutos: "MIN 172 — 180 · PLENARIA", ic: "bandera" })).addNotes("Últimos 8 minutos. Síntesis en voz alta, trabajo autónomo y lo que viene en la Sesión 2. No abrir temas nuevos.");
 
   /* ---------- 58 · Qué llevarse ---------- */
   {
@@ -1267,7 +1268,9 @@ async function construir() {
     ["Whitepaper", "", "Documento técnico en el que se expone el diseño de un protocolo. En este campo, «el whitepaper» sin más designa por defecto el documento de Bitcoin de 2008."],
   ];
 
-  const POR_PAG = 7, PAGS = Math.ceil(glosario.length / POR_PAG);
+  /* Alto de fila según el largo de la definición: las de tres renglones pisaban la fila siguiente. */
+  const altoFila = (g) => (g[2].length > 190 ? 0.9 : 0.68);
+  const POR_PAG = 6, PAGS = Math.ceil(glosario.length / POR_PAG);
   for (let p = 0; p < PAGS; p++) {
     const trozo = glosario.slice(p * POR_PAG, (p + 1) * POR_PAG);
     const s = await lamina({
@@ -1275,14 +1278,16 @@ async function construir() {
       titulo: p === 0 ? "Glosario completo de la sesión" : "Glosario · continuación",
       ic: "lista", tituloSize: 27,
     });
-    trozo.forEach((g, i) => {
-      const y = 1.98 + i * 0.66;
+    let yAcum = 1.98;
+    trozo.forEach((g) => {
+      const y = yAcum;
+      yAcum += altoFila(g);
       s.addText(g[0], { x: M, y, w: 2.0, h: 0.36, fontFace: F.mono, fontSize: 11, bold: true, color: C.tinta, margin: 0, valign: "top" });
       if (g[1]) s.addText(g[1], { x: M + 2.05, y: y + 0.03, w: 2.5, h: 0.3, fontFace: F.mono, fontSize: 9, color: C.violetaOs, margin: 0, valign: "top" });
-      parrafo(s, g[2], { x: M + 4.65, y: y - 0.03, w: CW - 4.65, h: 0.58, size: 11.5 });
+      parrafo(s, g[2], { x: M + 4.65, y: y - 0.03, w: CW - 4.65, h: altoFila(g) - 0.08, size: 11.5 });
       linea(s, M, y - 0.13, M + CW, y - 0.13, C.grisClaro, 1);
     });
-    linea(s, M, 1.85 + trozo.length * 0.66, M + CW, 1.85 + trozo.length * 0.66, C.grisClaro, 1);
+    linea(s, M, yAcum - 0.13, M + CW, yAcum - 0.13, C.grisClaro, 1);
     s.addNotes("Glosario acumulativo: cada sesión añade entradas y ninguna se elimina.");
   }
 
@@ -1337,6 +1342,7 @@ async function construir() {
       x: M, y: 5.9, w: 9.5, h: 0.8, fontFace: F.mono, fontSize: 10,
       color: "6E6A7C", margin: 0, valign: "top", lineSpacingMultiple: 1.35,
     });
+    s.addNotes("Cerrar con lo que exige la próxima sesión: Python 3 o Node.js instalado y funcionando desde la línea de comandos, y el whitepaper leído (secciones 1 a 5). Sin entorno no se puede hacer el bloque D de la Sesión 2. 1 minuto.");
     nSlide++;
   }
 

@@ -1,0 +1,323 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<title>Guía · Laboratorio 13</title>
+<!--ESTILOS-->
+</head>
+<body>
+
+<section class="barra">
+  <div class="kicker">LABORATORIO 13 · SESIÓN 13 · EN PAREJAS · CALIFICABLE (LABORATORIOS S13–S16)</div>
+  <h1>AUTENTICACIÓN<br>POR FIRMA <em>EIP-712</em><br>PASO A PASO</h1>
+  <div class="sub">Un contrato que acepta una firma hecha fuera de la cadena, la verifica y resiste cinco ataques:<br>firma ajena, mensaje alterado, firma vencida, repetición y dominio equivocado.</div>
+</section>
+
+<dl class="datos">
+  <div><dt>MODALIDAD</dt><dd>En parejas<br>dentro del equipo</dd></div>
+  <div><dt>REQUISITO</dt><dd>laboratorios-evm<br>y keystore (S8)</dd></div>
+  <div><dt>DURACIÓN</dt><dd>40 min en clase<br>+ Sepolia en casa</dd></div>
+  <div><dt>META</dt><dd>16 pruebas verdes<br>+ 1 tx en Sepolia</dd></div>
+</dl>
+
+<div class="caja clave">
+  <div class="caja-et">CÓMO LEER ESTA GUÍA</div>
+  <p>Está escrita para que la hagas <strong>sin ayuda</strong>. Cada paso dice qué escribir, qué deberías ver y cómo saber que funcionó. Si algo no sale como aquí se describe, ve a <strong>«Errores frecuentes»</strong> (sección 10). Las pruebas son el juez: no hay que adivinar si el contrato está bien.</p>
+</div>
+
+<!-- ============================================================ 1 -->
+<section class="sec">
+  <div class="sec-cab"><span class="sec-num">01</span><h2>Qué vas a construir, y por qué</h2><span class="lead">LEER PRIMERO</span></div>
+
+  <p><strong>Objetivo.</strong> Implementar y desplegar un contrato que autentica a una persona por su <strong>firma EIP-712</strong>: el estudiante firma en su billetera, gratis, el mensaje «asistí a la sesión 13»; <strong>otra</strong> cuenta (el computador del docente) envía esa firma y paga el gas; el contrato registra la asistencia solo si la firma es auténtica, vigente y no repetida.</p>
+  <p><strong>Resultados de aprendizaje.</strong> RA4 (desplegar y verificar un contrato con pruebas automatizadas) y RA6 (integrar firmas y eventos entre la interfaz y la cadena).</p>
+
+  <table>
+    <tr><th style="width:40%">ARCHIVO</th><th style="width:30%">QUÉ ES</th><th>QUÉ HACES TÚ</th></tr>
+    <tr><td class="pk">andamiaje/s13/AsistenciaFirmada.sol</td><td>El contrato con los TODO 1 a 5.</td><td>Lo copias sobre <code>contracts/s13/</code> y lo completas.</td></tr>
+    <tr><td class="pk">test/s13/AsistenciaFirmada.test.js</td><td>16 pruebas: 8 de funcionamiento y 8 ataques (★).</td><td>No se modifica.</td></tr>
+    <tr><td class="pk">scripts/s13/firmar-asistencia.js</td><td>Firma, verifica fuera de la cadena, envía y lee eventos.</td><td>Lo corres en local y en Sepolia.</td></tr>
+    <tr><td class="pk">andamiaje/s13/firmar-asistencia.js</td><td>El mismo script con los TODO A–F.</td><td>Opcional: escribirlo tú.</td></tr>
+    <tr><td class="pk">ignition/modules/s13-AsistenciaFirmada.js</td><td>Despliegue reproducible.</td><td>Despliegas y verificas en Sepolia.</td></tr>
+  </table>
+
+  <div class="caja alerta">
+    <div class="caja-et">LA IDEA EN TRES LÍNEAS</div>
+    <p><strong>1.</strong> Quien firma (el estudiante) no gasta nada: firmar no es una transacción. <strong>2.</strong> Quien envía (el docente) paga el gas pero no puede falsificar nada: solo transporta la firma. <strong>3.</strong> El contrato no confía en quien envía: recupera de la firma quién la hizo y lo compara con el campo <code>estudiante</code>.</p>
+  </div>
+</section>
+
+<!-- ============================================================ 2 -->
+<section class="sec">
+  <div class="sec-cab"><span class="sec-num">02</span><h2>Qué se entrega</h2><span class="lead">EVIDENCIA VERIFICABLE</span></div>
+  <ol>
+    <li>Captura de <code>npx hardhat test test/s13/AsistenciaFirmada.test.js</code> con <strong>16 passing</strong>.</li>
+    <li>Dirección del contrato <strong>verificado</strong> en Sepolia (enlace a Etherscan, pestaña <em>Contract</em> con la marca verde).</li>
+    <li>Hash de la transacción <code>registrar</code> en Sepolia y captura de su pestaña <em>Logs</em> (o <em>Events</em>) con <code>AsistenciaRegistrada</code>.</li>
+    <li>La salida completa del script en Sepolia (texto, no foto borrosa).</li>
+    <li>Respuestas a las preguntas de reflexión (sección 11), con los valores <strong>de tu</strong> despliegue.</li>
+  </ol>
+  <p>Todo en un solo documento por pareja, por el canal del curso. Política del curso: sin evidencia en cadena, el laboratorio no se califica.</p>
+</section>
+
+<!-- ============================================================ 3 -->
+<section class="sec salto">
+  <div class="sec-cab"><span class="sec-num">03</span><h2>Preparación desde cero</h2><span class="lead">10 MINUTOS</span></div>
+
+  <p>Si ya hiciste los laboratorios de las sesiones 8 a 12 en este mismo computador, solo actualiza el repositorio (paso 3.3). Si no, haz todo.</p>
+
+  <h3 style="font-size:10.5pt;margin:3mm 0 2mm">3.1 · Comprobar versiones</h3>
+  <pre>node --version            # debe decir v22.x (Node 22 LTS)
+git --version             # cualquier versión reciente
+npx hardhat --version     # dentro de laboratorios-evm: 3.16.0</pre>
+  <p><strong>Cómo sé que funcionó:</strong> los tres comandos responden un número de versión. Si <code>node</code> no se reconoce, instala Node.js 22 LTS desde <code>nodejs.org</code> y abre una terminal nueva.</p>
+
+  <h3 style="font-size:10.5pt;margin:3mm 0 2mm">3.2 · Obtener el repositorio (solo la primera vez)</h3>
+  <pre>git clone &lt;URL del repositorio del curso&gt;
+cd laboratorios-evm
+npm install               # una sola vez; tarda unos minutos</pre>
+
+  <h3 style="font-size:10.5pt;margin:3mm 0 2mm">3.3 · Actualizar (si ya lo tenías)</h3>
+  <pre>cd laboratorios-evm
+git pull
+npx hardhat test test/s13/AsistenciaFirmada.test.js     # debe COMPILAR; cuántas pasan se ve en el paso 4</pre>
+  <p><strong>Cómo sé que funcionó:</strong> existen las carpetas <code>contracts/s13</code>, <code>test/s13</code>, <code>scripts/s13</code> y <code>andamiaje/s13</code>. La primera corrida de pruebas compila sin errores. El repositorio del curso ya trae el contrato con huecos; si alguna vez ves <code>16 passing</code> antes de escribir nada, tienes una versión completa y el paso 4 la reemplaza por el andamiaje.</p>
+
+  <h3 style="font-size:10.5pt;margin:3mm 0 2mm">3.4 · El keystore (para Sepolia, sección 8)</h3>
+  <pre>npx hardhat keystore list          # deben aparecer los tres nombres de abajo
+npx hardhat keystore set SEPOLIA_RPC_URL        # si falta alguno
+npx hardhat keystore set SEPOLIA_PRIVATE_KEY
+npx hardhat keystore set ETHERSCAN_API_KEY</pre>
+
+  <div class="caja peligro">
+    <div class="caja-et">REGLAS QUE NO ADMITEN EXCEPCIÓN</div>
+    <p>La clave privada es la de la <strong>billetera del curso</strong>, sin fondos reales. Claves y URLs de RPC van <strong>solo</strong> en el keystore: nunca en un archivo, nunca en un chat, nunca en una captura. La frase semilla no se comparte con nadie, tampoco con el docente. Y no firmes nada que no entiendas: en este laboratorio sabes exactamente qué firmas, campo por campo.</p>
+  </div>
+</section>
+
+<!-- ============================================================ 4 -->
+<section class="sec salto">
+  <div class="sec-cab"><span class="sec-num">04</span><h2>Paso 1 · Copiar el andamiaje y ver el rojo</h2><span class="lead">5 MINUTOS</span></div>
+
+  <pre>copy andamiaje\s13\AsistenciaFirmada.sol contracts\s13\        (Windows)
+cp andamiaje/s13/AsistenciaFirmada.sol contracts/s13/          (macOS / Linux)
+npx hardhat test test/s13/AsistenciaFirmada.test.js</pre>
+
+  <p><strong>Salida esperada</strong> (resumida):</p>
+  <pre>Warning: Function state mutability can be restricted to pure     ← normal en el andamiaje
+  S13 · AsistenciaFirmada · el dominio
+    √ expone su dominio EIP-712 (nombre, versión, red y dirección)
+    1) calcula el mismo resumen que ethers (TypedDataEncoder)
+  ...
+  3 passing
+  13 failing</pre>
+
+  <p><strong>Cómo sé que funcionó:</strong> compila, y salen exactamente <strong>3 verdes y 13 rojas</strong>. Las tres verdes no dependen de tu código (el dominio lo arma OpenZeppelin; firmar no cuesta gas; quien envía es quien paga). Las 13 rojas son el mapa de lo que falta.</p>
+
+  <div class="caja">
+    <div class="caja-et">SI QUIERES VOLVER A EMPEZAR</div>
+    <p>Vuelve a copiar el andamiaje encima: <code>andamiaje/s13/</code> nunca se modifica. Para deshacer cualquier cambio y volver a lo que trae el repositorio: <code>git checkout contracts/s13/AsistenciaFirmada.sol</code>.</p>
+  </div>
+</section>
+
+<!-- ============================================================ 5 -->
+<section class="sec">
+  <div class="sec-cab"><span class="sec-num">05</span><h2>Paso 2 · TODO 1: el resumen que se firma</h2><span class="lead">PUNTO DE CONTROL A LOS 20 MIN</span></div>
+
+  <p>Una billetera no firma «el mensaje»: firma un <strong>resumen</strong> de 32 bytes calculado así (EIP-712):</p>
+  <pre>hashStruct = keccak256( abi.encode( TYPEHASH, estudiante, sesion, nonce, vence ) )
+resumen    = keccak256( 0x19 0x01 ‖ separadorDeDominio ‖ hashStruct )</pre>
+  <p>La segunda línea la hace OpenZeppelin con <code>_hashTypedDataV4</code>, porque tu contrato hereda <code>EIP712("AsistenciaUSB", "1")</code>. El separador de dominio mezcla nombre, versión, <code>chainId</code> y la dirección del contrato. Tú escribes la primera.</p>
+
+  <div class="pregunta">
+    <div class="cab"><div class="n">1</div><div class="enun"><span class="tema">FUNCIÓN · hashAsistencia(estudiante, sesion, nonce, vence)</span>Devolver el resumen EIP-712</div></div>
+    <div class="just">
+      <strong>Qué escribir:</strong> borra las dos líneas de relleno y escribe:<br>
+      <code>bytes32 hashStruct = keccak256(abi.encode(ASISTENCIA_TYPEHASH, estudiante, sesion, nonce, vence));</code><br>
+      <code>return _hashTypedDataV4(hashStruct);</code><br>
+      <strong>Tres detalles que rompen todo si se hacen mal:</strong><br>
+      · <code>abi.encode</code>, no <code>abi.encodePacked</code>: EIP-712 exige que cada campo ocupe 32 bytes.<br>
+      · Los campos en el MISMO orden que en el tipo: estudiante, sesion, nonce, vence.<br>
+      · <code>ASISTENCIA_TYPEHASH</code> ya está escrito: no le cambies ni un espacio.<br>
+      <strong>Cómo lo compruebas:</strong> <code>npx hardhat test test/s13/AsistenciaFirmada.test.js</code> → ahora pasan también «calcula el mismo resumen que ethers» y «fuera de la cadena, verifyTypedData recupera a quien firmó». Esa primera prueba compara tu hash con el que calcula <code>ethers.TypedDataEncoder.hash</code>: si coinciden, tu Solidity y la billetera hablan el mismo idioma.
+    </div>
+  </div>
+</section>
+
+<!-- ============================================================ 6 -->
+<section class="sec">
+  <div class="sec-cab"><span class="sec-num">06</span><h2>Paso 3 · TODO 2 a 5: registrar</h2><span class="lead">EL NÚCLEO</span></div>
+
+  <p>La función <code>registrar(estudiante, sesion, nonce, vence, firma)</code> la puede llamar cualquiera. Su trabajo es decidir si la firma autoriza lo que dice. Escríbela en este orden:</p>
+
+  <div class="pregunta">
+    <div class="cab"><div class="n">2</div><div class="enun"><span class="tema">TODO 2 · VENCIMIENTO</span>¿Sigue vigente?</div></div>
+    <div class="just"><code>if (block.timestamp &gt; vence) revert FirmaVencida(vence, block.timestamp);</code><br><strong>Por qué:</strong> sin fecha límite, una firma robada hoy serviría dentro de un año. Se compara con la hora del <strong>bloque</strong>, no la del computador.</div>
+  </div>
+
+  <div class="pregunta">
+    <div class="cab"><div class="n">3</div><div class="enun"><span class="tema">TODO 3 · AUTENTICIDAD</span>¿La firmó el estudiante, para este contrato y esta red?</div></div>
+    <div class="just"><code>address recuperado = ECDSA.recover(hashAsistencia(estudiante, sesion, nonce, vence), firma);</code><br><code>if (recuperado != estudiante) revert FirmaInvalida(recuperado, estudiante);</code><br><strong>Por qué funciona:</strong> es la recuperación de clave pública de la Sesión 3. Si cualquier bit del mensaje o del dominio difiere de lo que se firmó, el resumen cambia y <code>recover</code> devuelve OTRA dirección (no falla: devuelve una dirección que no es la del estudiante). Por eso comparamos.</div>
+  </div>
+
+  <div class="pregunta">
+    <div class="cab"><div class="n">4</div><div class="enun"><span class="tema">TODO 4 · ANTI-REPETICIÓN</span>¿Es el nonce que toca? Consumirlo</div></div>
+    <div class="just"><code>_useCheckedNonce(estudiante, nonce);</code><br><strong>Qué hace:</strong> viene de <code>Nonces</code> de OpenZeppelin 5. Si <code>nonce</code> no es el siguiente del estudiante, revierte con <code>InvalidAccountNonce(estudiante, nonceActual)</code>; si lo es, lo incrementa. La segunda vez que alguien envíe la misma firma, el nonce ya no coincide.</div>
+  </div>
+
+  <div class="pregunta">
+    <div class="cab"><div class="n">5</div><div class="enun"><span class="tema">TODO 5 · EFECTO Y EVENTO</span>Registrar y dejar rastro</div></div>
+    <div class="just"><code>asistio[sesion][estudiante] = true;</code><br><code>emit AsistenciaRegistrada(estudiante, sesion, msg.sender, nonce);</code><br><strong>Por qué el evento:</strong> es lo que después se lee con <code>queryFilter</code> o se indexa (bloque A de la clase). <code>msg.sender</code> es quien envió, no quien firmó: el evento guarda los dos.</div>
+  </div>
+
+  <p><strong>Cómo sé que terminé:</strong> <code>npx hardhat test test/s13/AsistenciaFirmada.test.js</code> muestra <strong>16 passing</strong>. Revisa en particular las ocho con ★: son los ataques de la tabla A.9 de la clase.</p>
+  <pre>  S13 · AsistenciaFirmada · ataques que debe resistir
+    √ ★ firma de otro: Beto no puede marcar la asistencia de Ana
+    √ ★ mensaje alterado: cambiar la sesión después de firmar invalida la firma
+    √ ★ firma vencida: pasada la fecha `vence`, se rechaza
+    √ ★ repetición: la misma firma no se puede usar dos veces (nonce consumido)
+    √ ★ nonce adelantado: una firma con nonce 5 no sirve si el siguiente es 0
+    √ ★ dominio de otra cadena: una firma hecha para Sepolia no sirve en esta red
+    √ ★ dominio de otro contrato: una firma para otra copia del contrato no sirve aquí
+    √ ★ una firma mal formada se rechaza con el error de ECDSA
+  16 passing</pre>
+  <p>Opcional, y recomendado: <code>npx hardhat test test/s13/AsistenciaFirmada.test.js --coverage</code>. La solución de referencia da 100 % de líneas en <code>AsistenciaFirmada.sol</code>.</p>
+</section>
+
+<!-- ============================================================ 7 -->
+<section class="sec">
+  <div class="sec-cab"><span class="sec-num">07</span><h2>Paso 4 · El script en la red local</h2><span class="lead">FIRMAR ≠ TRANSACCIONAR</span></div>
+
+  <pre>npx hardhat run scripts/s13/firmar-asistencia.js</pre>
+  <p>El script despliega un contrato nuevo en la red local, usa la cuenta 1 como estudiante (solo firma) y la cuenta 0 como docente (envía y paga). <strong>Salida real</strong> de una corrida (la firma y los hashes cambian con la hora, porque <code>vence</code> depende del bloque):</p>
+  <pre>  1 · DOMINIO
+     nombre / versión : AsistenciaUSB / 1
+     chainId          : 31337
+     contrato         : 0x5FbDB2315678afecb367f032d93F642f64180aa3
+  2 · MENSAJE QUE SE FIRMA
+     estudiante       : 0x70997970C51812dc3A010C7d01b50e0d17dc79C8
+     sesión / nonce   : 13 / 0
+  3 · FIRMA (65 bytes = r ‖ s ‖ v)
+     0x07a7d7f09c20a508…c43673eb1b
+     transacciones del estudiante antes/después de firmar: 0 / 0 ← firmar no es transaccionar
+  4 · VERIFICACIÓN FUERA DE LA CADENA
+     digest EIP-712   : 0x32c9f403bd790a136c211e4462f7bdd20db24d597a7beed337f7ef5546d455f1
+     digest (contrato): 0x32c9f403bd790a136c211e4462f7bdd20db24d597a7beed337f7ef5546d455f1
+     recuperado       : 0x70997970C51812dc3A010C7d01b50e0d17dc79C8 ✔ coincide
+  5 · ENVÍO EN CADENA
+     enviada por      : 0xf39Fd6e51aad88F6F4ce6aB8827279cffFb92266 (el docente paga el gas)
+     bloque / gas     : 2 / 75330
+     ¿asistió?        : true
+  6 · EVENTOS LEÍDOS CON queryFilter (bloques 0 a latest)
+     bloque 2 · sesión 13 · nonce 0 · enviada por 0xf39Fd6e51aad88F6F4ce6aB8827279cffFb92266</pre>
+
+  <p><strong>Cómo sé que funcionó:</strong> los dos <em>digest</em> son idénticos, aparece «✔ coincide», el contador de transacciones del estudiante es igual antes y después de firmar, y el evento aparece en el paso 6.</p>
+
+  <div class="caja">
+    <div class="caja-et">OPCIONAL · ESCRIBIR EL SCRIPT TÚ MISMO</div>
+    <p>Copia <code>andamiaje/s13/firmar-asistencia.js</code> sobre <code>scripts/s13/firmar-asistencia.js</code> y completa los TODO A–F: el dominio (léelo con <code>eip712Domain()</code>), los tipos, <code>signTypedData</code>, <code>verifyTypedData</code>, el envío y <code>queryFilter</code>. Termina cuando imprime «✔ coincide» y un hash de transacción. Restaura el original con <code>git checkout scripts/s13/firmar-asistencia.js</code>.</p>
+  </div>
+</section>
+
+<!-- ============================================================ 8 -->
+<section class="sec">
+  <div class="sec-cab"><span class="sec-num">08</span><h2>Paso 5 · Sepolia: la evidencia en cadena</h2><span class="lead">EN CLASE O EN CASA</span></div>
+
+  <p><strong>5.1 · Desplegar y verificar.</strong></p>
+  <pre>npx hardhat ignition deploy ignition/modules/s13-AsistenciaFirmada.js --network sepolia --verify</pre>
+  <p>Salida esperada: <code>AsistenciaFirmadaModulo#AsistenciaFirmada - 0x…</code> y un mensaje de verificación exitosa con el enlace a <code>sepolia.etherscan.io</code>. Si el keystore tiene contraseña, Hardhat la pide. Copia la dirección.</p>
+
+  <p><strong>5.2 · Firmar y enviar sobre TU contrato.</strong> En Sepolia solo hay una cuenta configurada: la misma firma y envía (el script lo dice).</p>
+  <pre>$env:CONTRATO="0x...la dirección de 5.1..."                  (PowerShell)
+export CONTRATO=0x...la dirección de 5.1...                  (macOS / Linux)
+npx hardhat run scripts/s13/firmar-asistencia.js --network sepolia</pre>
+  <p>Tarda unos 15 a 30 segundos: espera a que se mine el bloque. La dirección de un contrato <strong>no</strong> es un secreto; por eso puede ir en una variable de entorno. La clave, jamás.</p>
+
+  <p><strong>5.3 · Comprobar en Etherscan.</strong> Abre <code>https://sepolia.etherscan.io/tx/&lt;hash&gt;</code>: estado <em>Success</em>, <em>From</em> = tu cuenta, <em>To</em> = tu contrato. En la pestaña <em>Logs</em> verás <code>AsistenciaRegistrada</code> con cuatro <em>topics</em>. En la página del contrato, pestaña <em>Contract</em>, la marca verde de verificado; en <em>Read Contract</em> puedes consultar <code>asistio(13, tuDireccion)</code> → <code>true</code>.</p>
+
+  <p><strong>Cómo sé que terminé:</strong> tengo dirección verificada, hash de <code>registrar</code> con estado <em>Success</em> y la captura del log.</p>
+</section>
+
+<!-- ============================================================ 9 -->
+<section class="sec">
+  <div class="sec-cab"><span class="sec-num">09</span><h2>Puntos de control</h2></div>
+  <table>
+    <tr><th style="width:18%">MINUTO</th><th style="width:40%">DEBERÍAS TENER</th><th>SI NO LO TIENES</th></tr>
+    <tr><td class="pk">5</td><td>3 passing / 13 failing con el andamiaje.</td><td>Revisa la sección 3 y la carpeta en la que estás.</td></tr>
+    <tr><td class="pk">20</td><td>TODO 1 listo: pasa «calcula el mismo resumen que ethers».</td><td>El docente proyecta la solución del TODO 1 (lámina B.3).</td></tr>
+    <tr><td class="pk">35</td><td>16 passing.</td><td>Compara tu <code>registrar</code> con la lámina B.3.</td></tr>
+    <tr><td class="pk">40</td><td>Script local con «✔ coincide».</td><td>Sepolia queda para casa; lo local es obligatorio en clase.</td></tr>
+  </table>
+</section>
+
+<!-- ============================================================ 10 -->
+<section class="sec salto">
+  <div class="sec-cab"><span class="sec-num">10</span><h2>Errores frecuentes</h2><span class="lead">CASI TODO SE RESUELVE AQUÍ</span></div>
+  <table>
+    <tr><th style="width:40%">SÍNTOMA</th><th>CAUSA Y SOLUCIÓN</th></tr>
+    <tr><td class="pk">«calcula el mismo resumen» falla con hashes distintos</td><td>Usaste <code>abi.encodePacked</code>, cambiaste el orden de los campos o tocaste <code>ASISTENCIA_TYPEHASH</code>. Deben ser idénticos al tipo que firma ethers.</td></tr>
+    <tr><td class="pk">Todas las ★ de dominio pasan pero «firma válida» falla con FirmaInvalida</td><td>Pasaste los argumentos a <code>hashAsistencia</code> en otro orden dentro de <code>registrar</code>.</td></tr>
+    <tr><td class="pk">«repetición» no revierte</td><td>Falta el TODO 4, o usaste <code>nonces(estudiante)</code> sin consumirlo. <code>_useCheckedNonce</code> compara Y incrementa.</td></tr>
+    <tr><td class="pk">La repetición revierte con FirmaInvalida en vez de InvalidAccountNonce</td><td>Recalculas el resumen con <code>nonces(estudiante)</code> (que ya subió) en vez del <code>nonce</code> recibido. Usa el parámetro.</td></tr>
+    <tr><td class="pk">«firma mal formada» espera ECDSAInvalidSignatureLength y obtiene otro error</td><td>No usaste <code>ECDSA.recover</code> de OpenZeppelin (o usaste <code>ecrecover</code> directo, que no valida longitud).</td></tr>
+    <tr><td class="pk"><code>HHE…</code> / «Cannot find module» al correr el script</td><td>No estás dentro de <code>laboratorios-evm</code>, o falta <code>npm install</code>.</td></tr>
+    <tr><td class="pk">En Sepolia: «insufficient funds»</td><td>La billetera del curso no tiene ETH de Sepolia. Pídelo al docente (billetera institucional).</td></tr>
+    <tr><td class="pk">En Sepolia: FirmaVencida</td><td>La transacción tardó más de 10 minutos en minarse (red congestionada). Vuelve a correr el script: firma con un <code>vence</code> nuevo.</td></tr>
+    <tr><td class="pk">En Sepolia: la verificación de Etherscan falla</td><td>Falta <code>ETHERSCAN_API_KEY</code> en el keystore, o Etherscan todavía no indexó el contrato. Espera un minuto y verifica sin redesplegar: <code>npx hardhat ignition verify chain-11155111</code>.</td></tr>
+    <tr><td class="pk">queryFilter no devuelve nada en Sepolia</td><td>Rango de bloques demasiado grande para el RPC. El script busca desde el bloque del recibo menos 10; si lo modificaste, vuelve a acotar el rango.</td></tr>
+  </table>
+</section>
+
+<!-- ============================================================ 11 -->
+<section class="sec">
+  <div class="sec-cab"><span class="sec-num">11</span><h2>Preguntas de reflexión</h2><span class="lead">CON TUS PROPIOS VALORES</span></div>
+  <p>Se responden mirando <strong>tu</strong> despliegue y <strong>tu</strong> salida. Una respuesta sin el valor concreto pedido no cuenta.</p>
+  <ol>
+    <li><strong>Gas.</strong> Copia el <code>gasUsed</code> de tu transacción <code>registrar</code> en Sepolia (Etherscan, <em>Gas Usage by Txn</em>) y compáralo con los 75 330 de la red local. ¿Coinciden exactamente? Si no, ¿qué parte de la transacción cambia entre una firma y otra y cuesta gas distinto? (Pista: Sesión 5, costo del calldata por byte cero y no cero.)</li>
+    <li><strong>Topics.</strong> En la pestaña <em>Logs</em> de tu transacción, copia los cuatro <em>topics</em>. ¿Cuál es el <code>topic0</code>? Compruébalo con <code>ethers.id("AsistenciaRegistrada(address,uint256,address,uint256)")</code> y di qué contienen los topics 1, 2 y 3. ¿Por qué el <code>nonce</code> no aparece como topic?</li>
+    <li><strong>Mensaje alterado.</strong> En una consola (<code>npx hardhat console --network sepolia</code> o un script), toma tu firma de Sepolia y llama <code>ethers.verifyTypedData</code> con el mismo dominio pero <code>sesion: 14</code>. Copia la dirección que devuelve. ¿Es la tuya? ¿Por qué <code>recover</code> no «falla» sino que devuelve otra dirección?</li>
+    <li><strong>El dominio en cadena.</strong> En <em>Read Contract</em> de Etherscan, consulta <code>eip712Domain</code>. Copia <code>chainId</code> y <code>verifyingContract</code>. ¿Qué ataque de la tabla A.9 cierra cada uno?</li>
+    <li><strong>Orden de las comprobaciones.</strong> Si en <code>registrar</code> intercambias los TODO 3 y 4 (primero consumir el nonce, después verificar la firma), ¿se rompe la seguridad? Justifica con lo que deshace un <code>revert</code>, y di qué recomienda el patrón checks-effects-interactions.</li>
+    <li><strong>Diseño.</strong> En este contrato cualquiera puede enviar la firma de Ana. Describe un escenario de su proyecto donde eso sea una ventaja (gas patrocinado) y otro donde sería un problema, y qué campo añadirían al tipo para evitarlo.</li>
+  </ol>
+</section>
+
+<!-- ============================================================ 12 -->
+<section class="sec">
+  <div class="sec-cab"><span class="sec-num">12</span><h2>Lista de chequeo de entrega</h2></div>
+  <table>
+    <tr><th style="width:8%">✓</th><th>ÍTEM</th></tr>
+    <tr><td>☐</td><td>Captura con <code>16 passing</code> de <code>test/s13/AsistenciaFirmada.test.js</code>, con tu versión del contrato (no la de referencia).</td></tr>
+    <tr><td>☐</td><td>Dirección del contrato en Sepolia con enlace y marca de verificado.</td></tr>
+    <tr><td>☐</td><td>Hash de la transacción <code>registrar</code> con estado <em>Success</em> y captura de sus <em>Logs</em>.</td></tr>
+    <tr><td>☐</td><td>Salida completa del script en Sepolia, como texto.</td></tr>
+    <tr><td>☐</td><td>Las seis respuestas de reflexión con los valores de tu despliegue.</td></tr>
+    <tr><td>☐</td><td>Nada de lo entregado contiene una clave privada, una frase semilla ni una URL de RPC con API key.</td></tr>
+  </table>
+</section>
+
+<!-- ============================================================ 13 -->
+<section class="sec">
+  <div class="sec-cab"><span class="sec-num">13</span><h2>Rúbrica</h2><span class="lead">ESCALA DE 0 A 5,0</span></div>
+  <table>
+    <tr><th style="width:22%">CRITERIO</th><th style="width:8%">PESO</th><th style="width:25%">EXCELENTE (5,0)</th><th style="width:23%">ACEPTABLE (3,5)</th><th>INSUFICIENTE (&lt; 3,0)</th></tr>
+    <tr><td class="pk">Contrato y pruebas</td><td>40 %</td><td>16 passing con el código propio; sin cambios a las pruebas.</td><td>13 a 15 pruebas verdes.</td><td>Menos de 13, o se modificaron las pruebas.</td></tr>
+    <tr><td class="pk">Evidencia en Sepolia</td><td>30 %</td><td>Contrato verificado, <code>registrar</code> exitoso, log capturado.</td><td>Desplegado y usado, pero sin verificar.</td><td>Sin evidencia en cadena (no se califica el laboratorio).</td></tr>
+    <tr><td class="pk">Reflexión</td><td>30 %</td><td>Las seis respuestas, con valores propios y razonamiento correcto.</td><td>Respuestas correctas pero sin los valores del despliegue propio.</td><td>Respuestas genéricas, sin mirar el artefacto.</td></tr>
+  </table>
+</section>
+
+<!-- ============================================================ 14 -->
+<section class="sec">
+  <div class="sec-cab"><span class="sec-num">14</span><h2>Referencias</h2></div>
+  <ul>
+    <li>EIP-712: <em>Typed structured data hashing and signing</em>. <code>https://eips.ethereum.org/EIPS/eip-712</code></li>
+    <li>ERC-4361: <em>Sign-In with Ethereum</em> (firma texto con ERC-191). <code>https://eips.ethereum.org/EIPS/eip-4361</code></li>
+    <li>ERC-2612: <em>Permit</em>, la misma técnica aplicada a tokens. <code>https://eips.ethereum.org/EIPS/eip-2612</code></li>
+    <li>OpenZeppelin Contracts 5.x · EIP712, ECDSA y Nonces. <code>https://docs.openzeppelin.com/contracts/5.x/api/utils/cryptography</code></li>
+    <li>ethers v6 · <code>Signer.signTypedData</code> y <code>verifyTypedData</code>. <code>https://docs.ethers.org/v6/api/providers/#Signer-signTypedData</code></li>
+  </ul>
+</section>
+
+</body>
+</html>

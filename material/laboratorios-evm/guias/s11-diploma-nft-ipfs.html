@@ -1,0 +1,455 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<title>Guía · Laboratorio 11 · Diploma NFT con IPFS</title>
+<!--ESTILOS-->
+</head>
+<body>
+
+<section class="barra">
+  <div class="kicker">LABORATORIO 11 · SESIÓN 11 · EN PAREJAS · CALIFICABLE (SEGUNDO CORTE)</div>
+  <h1>UN DIPLOMA <em>NFT</em><br>CON SU METADATA<br>EN IPFS</h1>
+  <div class="sub">Un ERC-721 con OpenZeppelin, una imagen y un JSON en IPFS, un despliegue verificado en Sepolia<br>y los tres saltos —cadena, JSON, imagen— comprobados uno por uno.</div>
+</section>
+
+<dl class="datos">
+  <div><dt>MODALIDAD</dt><dd>En parejas</dd></div>
+  <div><dt>DURACIÓN</dt><dd>75 min en clase<br>+ lo que falte en casa</dd></div>
+  <div><dt>REQUISITOS</dt><dd>Node 22, repo del curso,<br>MetaMask con Sepolia</dd></div>
+  <div><dt>META</dt><dd>11 pruebas verdes<br>+ 3 saltos resueltos</dd></div>
+</dl>
+
+<div class="caja clave">
+  <div class="caja-et">CÓMO LEER ESTA GUÍA</div>
+  <p>Está escrita para que la puedan seguir <strong>sin ayuda</strong>. Cada paso dice qué escribir, qué deberían ver y cómo saber que funcionó. Los comandos están en PowerShell (Windows, la sala); cuando cambian en macOS/Linux, se indica. Si algo no sale como aquí se describe, vayan a <strong>«Errores frecuentes»</strong> (sección 12) antes de pedir ayuda. Todo lo que se cita aquí se verificó al preparar el laboratorio, en septiembre de 2026.</p>
+</div>
+
+<div class="caja peligro">
+  <div class="caja-et">REGLAS QUE NO ADMITEN EXCEPCIÓN</div>
+  <ul>
+    <li>Solo red local o Sepolia. <strong>Nunca</strong> dinero real.</li>
+    <li>La frase semilla no se comparte con nadie, tampoco con el docente. No se firma lo que no se entiende.</li>
+    <li>La clave privada y la URL del RPC van <strong>solo</strong> en el keystore de Hardhat (<code>npx hardhat keystore set …</code>). Nunca en un archivo del repositorio.</li>
+    <li><strong>Ningún dato personal</strong> en la cadena ni en IPFS (Ley 1581 de 2012): nada de nombres, cédulas, correos ni fotos de personas. Lo que se sube a IPFS es público y no se puede borrar.</li>
+    <li>Los contratos son material de clase, sin auditar.</li>
+  </ul>
+</div>
+
+<!-- ============================================================ 1 -->
+<section class="sec">
+  <div class="sec-cab"><span class="sec-num">01</span><h2>Objetivo, resultados de aprendizaje y entrega</h2><span class="lead">LEER PRIMERO</span></div>
+
+  <p><strong>Objetivo:</strong> implementar un token no fungible (ERC-721) con metadata descentralizada, y comprobar con evidencia propia que «el NFT» (una fila en un contrato) y «el archivo» (lo que vive en IPFS) son cosas distintas.</p>
+  <table>
+    <tr><th style="width:18%">RA</th><th>QUÉ DEMUESTRA ESTE LABORATORIO</th></tr>
+    <tr><td class="pk">RA3</td><td>Implementar un estándar (ERC-721 con OpenZeppelin v5), con pruebas automatizadas y control de acceso y de suministro.</td></tr>
+    <tr><td class="pk">RA6</td><td>Integrar almacenamiento descentralizado: subir a IPFS, obtener CIDs, enlazarlos desde el contrato y resolverlos.</td></tr>
+  </table>
+
+  <p><strong>Qué se entrega</strong> (detalle en la lista de chequeo, sección 14):</p>
+  <table>
+    <tr><th style="width:30%">EVIDENCIA</th><th>DETALLE</th><th style="width:10%">PESO</th></tr>
+    <tr><td class="pk">Pruebas</td><td>Captura de <code>11 passing</code> de <code>test/s11/DiplomaUSB.test.js</code> con SU contrato.</td><td>20 %</td></tr>
+    <tr><td class="pk">CIDs en IPFS</td><td>CID de la imagen y del JSON; ambos abren en una puerta pública.</td><td>20 %</td></tr>
+    <tr><td class="pk">Contrato en Sepolia</td><td>Dirección del contrato verificado y hash de la transacción de <code>emitir</code>.</td><td>25 %</td></tr>
+    <tr><td class="pk">Los tres saltos</td><td>Salida completa de <code>leer-diploma.js</code> y captura del token en un explorador.</td><td>20 %</td></tr>
+    <tr><td class="pk">Reflexión</td><td>Respuestas a las preguntas de la sección 13.</td><td>15 %</td></tr>
+  </table>
+  <p>Política del curso: <strong>sin evidencia en cadena (dirección o hash), el laboratorio no se califica.</strong></p>
+</section>
+
+<!-- ============================================================ 2 -->
+<section class="sec salto">
+  <div class="sec-cab"><span class="sec-num">02</span><h2>El mapa: qué van a hacer y por qué en este orden</h2></div>
+
+  <pre>  PASO 3-4   contrato + pruebas       (sin internet)      15 min
+  PASO 5     imagen a IPFS            (Pinata)            10 min
+  PASO 6     JSON a IPFS              (Pinata)            10 min
+  PASO 7     ensayo en red local      (sin gastar nada)   10 min
+  PASO 8     despliegue en Sepolia    (ETH de prueba)     15 min
+  PASO 9-10  ver el token y los 3 saltos                  15 min
+  PASO 11    reto opcional: el diploma como SBT           en casa</pre>
+
+  <p>Lo que construyen, en una imagen:</p>
+  <pre>  EN LA CADENA (Sepolia)            EN IPFS                         EN IPFS
+  ownerOf(1) = su dirección   --&gt;   diploma.json              --&gt;   diploma.png
+  tokenURI(1) = ipfs://CID_JSON     "image": "ipfs://CID_IMG"</pre>
+  <p>El contrato guarda al dueño y <strong>un texto</strong>. Ese texto lleva al JSON; el JSON lleva a la imagen. Un explorador que «muestra el NFT» hace esos tres saltos por ustedes. En el paso 10 los harán ustedes a la vista.</p>
+
+  <div class="caja alerta">
+    <div class="caja-et">SOBRE «VERLO EN UN MARKETPLACE DE PRUEBA»</div>
+    <p>El plan del curso pedía ver la colección en un marketplace de testnet. Lo verificamos: <strong>OpenSea cerró su sitio para redes de prueba en julio de 2025</strong> (<code>testnets.opensea.io</code> hoy redirige a un aviso de despedida). Por eso la evidencia es la vista del token en un <strong>explorador</strong> (Etherscan o Blockscout) más la metadata resuelta desde una <strong>puerta IPFS</strong> con el script del paso 10. Rarible mantiene un sitio de testnet (<code>testnet.rarible.com</code>) que lista colecciones de Sepolia; mirarlo es opcional y no depende de ustedes que indexe su contrato.</p>
+  </div>
+</section>
+
+<!-- ============================================================ 3 -->
+<section class="sec">
+  <div class="sec-cab"><span class="sec-num">03</span><h2>Preparación desde cero</h2><span class="lead">ANTES DE LA CLASE</span></div>
+
+  <p>Abran una terminal (Windows: tecla Windows, escriban <code>PowerShell</code>, Enter) y comprueben:</p>
+  <pre>node -v                      # debe decir v22.algo
+git --version                # cualquier versión reciente</pre>
+  <p>Entren a la carpeta del repositorio del curso y comprueben Hardhat. Si nunca instalaron las dependencias, <code>npm install</code> primero (una sola vez en el semestre):</p>
+  <pre>cd "ruta\a\laboratorios-evm"
+npm install                  # solo si no existe la carpeta node_modules
+npx hardhat --version        # debe decir 3.16.0</pre>
+
+  <p><strong>Para Sepolia</strong> (pasos 8 a 10) necesitan lo mismo que en el laboratorio 8. Comprueben que las tres claves están en el keystore; si falta alguna, cárguenla (el comando la pide de forma oculta, no la escriban en el comando):</p>
+  <pre>npx hardhat keystore list                 # deben aparecer las tres
+npx hardhat keystore set SEPOLIA_RPC_URL
+npx hardhat keystore set SEPOLIA_PRIVATE_KEY
+npx hardhat keystore set ETHERSCAN_API_KEY</pre>
+  <p>Y ETH de Sepolia en la cuenta de la billetera del curso: con <strong>0,02 ETH</strong> sobra para este laboratorio (el despliegue midió 1 349 852 de gas y cada emisión unos 174 000). Si no tienen, pídanlo a la reserva del docente.</p>
+
+  <div class="caja">
+    <div class="caja-et">CÓMO SÉ QUE ESTOY LISTO</div>
+    <p><code>npx hardhat --version</code> dice <code>3.16.0</code>, <code>keystore list</code> muestra las tres claves y MetaMask, en Sepolia, tiene saldo. Si están en la sala y algo de esto falla, pueden hacer igual los pasos 3 a 7 (no necesitan Sepolia) y el resto en casa.</p>
+  </div>
+</section>
+
+<!-- ============================================================ 4 -->
+<section class="sec salto">
+  <div class="sec-cab"><span class="sec-num">04</span><h2>Paso 1 y 2 · El contrato con huecos y sus pruebas</h2><span class="lead">15 MIN · SIN INTERNET</span></div>
+
+  <p>Los archivos del laboratorio:</p>
+  <pre>laboratorios-evm/
+├── contracts/s11/DiplomaUSB.sol    &lt;- AQUÍ TRABAJAN
+├── andamiaje/s11/DiplomaUSB.sol    &lt;- copia intacta con los TODO
+├── andamiaje/s11/DiplomaSBT.sol    &lt;- reto opcional (sección 11)
+├── test/s11/DiplomaUSB.test.js     &lt;- 11 pruebas. NO se modifica
+├── ignition/modules/s11-DiplomaUSB.js   &lt;- despliega y emite
+├── scripts/s11/leer-diploma.js     &lt;- los tres saltos
+└── scripts/s11/cid-raw.js          &lt;- calcular un CID a mano</pre>
+
+  <p><strong>Paso 1.</strong> Abran <code>contracts/s11/DiplomaUSB.sol</code>. Si ya trae comentarios <code>// TODO</code>, trabajen ahí. Si no (o si lo dañaron y quieren empezar de nuevo), copien el andamiaje encima:</p>
+  <pre>copy andamiaje\s11\DiplomaUSB.sol contracts\s11\DiplomaUSB.sol      # Windows
+cp andamiaje/s11/DiplomaUSB.sol contracts/s11/DiplomaUSB.sol         # macOS / Linux</pre>
+
+  <p><strong>Paso 2.</strong> Corran las pruebas <em>antes</em> de escribir nada, para ver el punto de partida:</p>
+  <pre>npx hardhat test test/s11/DiplomaUSB.test.js</pre>
+  <p>Salida esperada (resumida): compila, y <strong>4 pasan y 7 fallan</strong>. Las que fallan son las marcadas con ★: dependen de lo que ustedes escriben.</p>
+  <pre>    1) ★ cada token tiene un id único y consecutivo
+    ...
+    √ el tope queda fijado al desplegar
+    5) ★ no se puede emitir por encima del tope
+  4 passing
+  7 failing</pre>
+</section>
+
+<!-- ============================================================ 5 -->
+<section class="sec">
+  <div class="sec-cab"><span class="sec-num">05</span><h2>Paso 3 · Completar los TODO</h2><span class="lead">4 TODO</span></div>
+
+  <div class="pregunta">
+    <div class="cab"><div class="n">1</div><div class="enun"><span class="tema">TODO 1 · emitir() · CHECKS</span>Rechazar lo que no se puede emitir</div></div>
+    <div class="just">
+      <strong>Qué hace:</strong> antes de tocar el estado, revisa dos condiciones, en este orden: que el <code>uri</code> no esté vacío y que no se haya llegado al tope.<br>
+      <strong>Qué escribir:</strong> <code>if (bytes(uri).length == 0) revert URIVacio();</code> y <code>if (_siguienteId &gt; tope) revert TopeAlcanzado(tope);</code><br>
+      <strong>Por qué <code>&gt;</code> y no <code>&gt;=</code>:</strong> los ids empiezan en 1. Con tope 3, se pueden emitir los ids 1, 2 y 3; el cuarto intento tiene <code>_siguienteId = 4</code>, que es mayor que 3.<br>
+      <strong>Cómo lo compruebo:</strong> pasan «no se puede emitir por encima del tope» y «rechaza un tokenURI vacío».
+    </div>
+  </div>
+
+  <div class="pregunta">
+    <div class="cab"><div class="n">2</div><div class="enun"><span class="tema">TODO 2 · emitir() · EFFECTS</span>Asignar el id y guardar el enlace</div></div>
+    <div class="just">
+      <strong>Qué escribir:</strong> <code>tokenId = _siguienteId++;</code> (usa el valor actual y luego lo incrementa) y <code>_setTokenURI(tokenId, uri);</code><br>
+      <strong>El detalle:</strong> <code>tokenId</code> es la variable de retorno con nombre: al asignarla, la función ya devuelve ese valor.
+    </div>
+  </div>
+
+  <div class="pregunta">
+    <div class="cab"><div class="n">3</div><div class="enun"><span class="tema">TODO 3 · emitir() · INTERACTION</span>Crear el token y avisar</div></div>
+    <div class="just">
+      <strong>Qué escribir:</strong> <code>_safeMint(a, tokenId);</code> y luego <code>emit DiplomaEmitido(tokenId, a, uri);</code><br>
+      <strong>Por qué al final:</strong> si <code>a</code> es un contrato, <code>_safeMint</code> le llama <code>onERC721Received</code>. Para entonces todo el estado ya debe estar escrito: es el patrón checks-effects-interactions de la Sesión 9.<br>
+      <strong>Cómo lo compruebo:</strong> pasan las pruebas de ids, de tokenURI, de los dos eventos (<code>DiplomaEmitido</code> y el <code>Transfer</code> estándar desde la dirección cero) y la de transferencia.
+    </div>
+  </div>
+
+  <div class="pregunta">
+    <div class="cab"><div class="n">4</div><div class="enun"><span class="tema">TODO 4 · totalEmitidos()</span>Cuántos van</div></div>
+    <div class="just">
+      <strong>Qué escribir:</strong> <code>return _siguienteId - 1;</code> — si el siguiente id es 3, ya se emitieron el 1 y el 2.
+    </div>
+  </div>
+
+  <p>Vuelvan a correr las pruebas. <strong>Punto de control 1:</strong></p>
+  <pre>npx hardhat test test/s11/DiplomaUSB.test.js
+  ...
+  11 passing</pre>
+  <p>Tomen la captura de esta salida: es la primera evidencia.</p>
+</section>
+
+<!-- ============================================================ 6 -->
+<section class="sec salto">
+  <div class="sec-cab"><span class="sec-num">06</span><h2>Paso 4 · Subir la imagen a IPFS</h2><span class="lead">10 MIN · INTERNET</span></div>
+
+  <p><strong>Qué servicio usar.</strong> Revisado en septiembre de 2026 en sus páginas de precios:</p>
+  <table>
+    <tr><th style="width:18%">SERVICIO</th><th>PLAN GRATUITO ANUNCIADO</th><th style="width:34%">USO EN ESTE LABORATORIO</th></tr>
+    <tr><td class="pk">Pinata</td><td>1 GB, 500 archivos, una puerta propia (<code>…mypinata.cloud</code>).</td><td>Opción principal: <code>pinata.cloud</code>.</td></tr>
+    <tr><td class="pk">Filebase</td><td>5 GB compartidos, 500 archivos fijados en IPFS.</td><td>Alternativa: <code>filebase.com</code>.</td></tr>
+    <tr><td class="pk">IPFS Desktop</td><td>Su propio nodo, gratis, sin cuenta.</td><td>Plan B: el archivo solo está disponible mientras su PC esté encendido y conectado.</td></tr>
+  </table>
+  <div class="caja alerta">
+    <div class="caja-et">SI UN SERVICIO PIDE TARJETA DE CRÉDITO</div>
+    <p>No la pongan. El plan gratuito debe bastar; si el registro exige tarjeta, usen la alternativa o el plan B y avisen al docente. Registrarse pide un correo: usen uno que no les importe exponer a un tercero.</p>
+  </div>
+
+  <p><strong>4.1 · Preparen la imagen.</strong> Cualquier PNG pequeño (menos de 1 MB) que NO tenga fotos ni datos de personas. Lo más simple: en Paint, un rectángulo con el texto <code>DIPLOMA DE PRUEBA · LAB 11 · USB</code>, guardado como <code>diploma.png</code>.</p>
+  <p><strong>4.2 · Súbanla.</strong> En Pinata: <em>Files → Upload → File</em>, elijan el archivo. Cuando pregunte la red, elijan <strong>Public</strong> (público).</p>
+
+  <div class="caja peligro">
+    <div class="caja-et">LA TRAMPA NÚMERO UNO: «PRIVATE»</div>
+    <p>Pinata permite subir a «Private IPFS». Según su propia documentación, esos archivos <strong>no se anuncian a la red IPFS</strong> y solo se abren con un enlace temporal: ninguna puerta pública ni ningún explorador los va a encontrar. Si su CID «no existe» en ninguna puerta, casi seguro lo subieron como privado. Súbanlo otra vez como público.</p>
+  </div>
+
+  <p><strong>4.3 · Copien el CID.</strong> Pinata lo muestra junto al archivo. Los CID de versión 1 empiezan por <code>baf…</code> (por ejemplo <code>bafybei…</code> o <code>bafkrei…</code>); los antiguos, de versión 0, por <code>Qm…</code>. Péguenlo en un archivo de notas: lo necesitan en el paso siguiente.</p>
+  <p><strong>4.4 · Ábranlo en una puerta.</strong> En el navegador:</p>
+  <pre>https://gateway.pinata.cloud/ipfs/SU_CID_DE_LA_IMAGEN</pre>
+  <p><strong>Cómo sé que funcionó:</strong> el navegador muestra su imagen. Prueben también <code>https://ipfs.io/ipfs/SU_CID</code>: puede tardar la primera vez o responder <code>429 Too Many Requests</code> (límite de consultas de las puertas públicas; nos pasó al preparar el laboratorio). Un 429 no significa que el archivo no exista.</p>
+</section>
+
+<!-- ============================================================ 7 -->
+<section class="sec salto">
+  <div class="sec-cab"><span class="sec-num">07</span><h2>Paso 5 · Escribir y subir el JSON de metadata</h2><span class="lead">10 MIN</span></div>
+
+  <p><strong>5.1 · Creen el archivo</strong> <code>diploma.json</code> (en VS Code: <em>Archivo → Nuevo</em>, guardar con ese nombre). Pongan el CID de la imagen donde dice <code>SU_CID_DE_LA_IMAGEN</code>:</p>
+  <pre>{
+  "name": "Diploma de prueba · Laboratorio 11",
+  "description": "Credencial de PRUEBA emitida en clase. No contiene datos personales.",
+  "image": "ipfs://SU_CID_DE_LA_IMAGEN",
+  "attributes": [
+    { "trait_type": "Programa", "value": "Ingeniería de Sistemas" },
+    { "trait_type": "Cohorte", "value": "2026-2" },
+    { "trait_type": "Tipo", "value": "Prueba de laboratorio" }
+  ]
+}</pre>
+  <table>
+    <tr><th style="width:22%">CAMPO</th><th>DE DÓNDE SALE Y QUIÉN LO LEE</th></tr>
+    <tr><td class="pk">name, description, image</td><td>Esquema de metadata que propone el propio EIP-721. Lo leen exploradores y billeteras.</td></tr>
+    <tr><td class="pk">attributes</td><td>No es del estándar: es una convención que popularizó OpenSea y que hoy leen casi todos (los «rasgos»).</td></tr>
+    <tr><td class="pk">"ipfs://…"</td><td>Se escribe con el esquema <code>ipfs://</code>, no con la URL de una puerta: así no depende de ningún servidor.</td></tr>
+  </table>
+
+  <p><strong>5.2 · Comprueben que el JSON es válido</strong> antes de subirlo (un JSON roto es el error más tonto y más común):</p>
+  <pre>node -e "console.log(JSON.parse(require('fs').readFileSync('diploma.json','utf8')).image)"</pre>
+  <p>Debe imprimir <code>ipfs://SU_CID_DE_LA_IMAGEN</code>. Si dice <code>SyntaxError</code>, falta o sobra una coma o unas comillas.</p>
+
+  <p><strong>5.3 · Súbanlo</strong> igual que la imagen (público). Copien su CID: <strong>el tokenURI del diploma es <code>ipfs://SU_CID_DEL_JSON</code></strong>.</p>
+  <p><strong>5.4 · Punto de control 2:</strong> <code>https://gateway.pinata.cloud/ipfs/SU_CID_DEL_JSON</code> muestra el JSON, y copiando el CID que aparece en <code>"image"</code> en otra puerta, se ve la imagen.</p>
+
+  <div class="caja">
+    <div class="caja-et">EL ORDEN NO ES CAPRICHO</div>
+    <p>El CID de la imagen va <em>dentro</em> del JSON, así que el JSON se escribe después. Si mañana cambian la imagen, cambia su CID; entonces hay que cambiar el JSON, que tendrá otro CID, y el token seguiría apuntando al JSON viejo. Eso es el direccionamiento por contenido: nada cambia a escondidas.</p>
+  </div>
+
+  <p><strong>5.5 · (Para la reflexión) Calculen un CID a mano.</strong> El script calcula el CID «raw» de un archivo sin subirlo a ningún lado:</p>
+  <pre>node scripts/s11/cid-raw.js --texto "hello world"
+  CID raw : bafkreifzjut3te2nhyekklss27nh3k72ysco7y32koao5eei66wof36n5e
+node scripts/s11/cid-raw.js ruta\a\diploma.json</pre>
+  <p>El primero lo pueden abrir en <code>https://ipfs.io/ipfs/bafkreifz…n5e</code>: devuelve «hello world» (alguien en el mundo fijó esos mismos bytes). Comparen el CID que da el script para su <code>diploma.json</code> con el que les dio Pinata. La pregunta 3 de la sección 13 es sobre eso.</p>
+</section>
+
+<!-- ============================================================ 8 -->
+<section class="sec salto">
+  <div class="sec-cab"><span class="sec-num">08</span><h2>Paso 6 · Ensayo en la red local</h2><span class="lead">10 MIN · NO GASTA NADA</span></div>
+
+  <p>Antes de gastar ETH de prueba, ensayen el despliegue completo en la red simulada de Hardhat. El módulo de Ignition despliega <code>DiplomaUSB</code> con un tope y además llama <code>emitir</code> una vez:</p>
+  <pre>npx hardhat ignition deploy ignition/modules/s11-DiplomaUSB.js</pre>
+  <p>Salida esperada (la dirección es siempre esta en una red local nueva):</p>
+  <pre>Batch #1
+  Executed DiplomaModulo#DiplomaUSB
+Batch #2
+  Executed DiplomaModulo#emitirPrimerDiploma
+
+[ DiplomaModulo ] successfully deployed 🚀
+
+Deployed Addresses
+DiplomaModulo#DiplomaUSB - 0x5FbDB2315678afecb367f032d93F642f64180aa3</pre>
+  <p><strong>Cómo sé que funcionó:</strong> aparecen las dos ejecuciones (<em>DiplomaUSB</em> y <em>emitirPrimerDiploma</em>) y la dirección. Si falla aquí, fallará igual en Sepolia: arréglenlo antes de seguir.</p>
+
+  <div class="caja">
+    <div class="caja-et">QUÉ HIZO IGNITION</div>
+    <p>Leyó tres parámetros con sus valores por defecto: <code>tope = 100</code>, <code>destinatario</code> = la primera cuenta de Hardhat, y un <code>tokenURI</code> de ejemplo. En Sepolia los van a reemplazar por los suyos con un archivo de parámetros.</p>
+  </div>
+</section>
+
+<!-- ============================================================ 9 -->
+<section class="sec">
+  <div class="sec-cab"><span class="sec-num">09</span><h2>Paso 7 · Desplegar y verificar en Sepolia</h2><span class="lead">15 MIN</span></div>
+
+  <p><strong>7.1 · Creen su archivo de parámetros</strong> en <code>ignition/parametros/diploma-sepolia.json</code>. Solo lleva datos públicos: el tope, SU dirección (la de MetaMask, que recibirá el diploma) y SU tokenURI.</p>
+  <pre>{
+  "DiplomaModulo": {
+    "tope": 100,
+    "destinatario": "0xSU_DIRECCION_DE_METAMASK",
+    "tokenURI": "ipfs://SU_CID_DEL_JSON"
+  }
+}</pre>
+  <p>La clave privada <strong>NO</strong> va aquí: Hardhat la toma del keystore.</p>
+
+  <p><strong>7.2 · Desplieguen, emitan y verifiquen</strong> con un solo comando (en PowerShell, todo en una línea; en bash pueden partirlo con <code>\</code>):</p>
+  <pre>npx hardhat ignition deploy ignition/modules/s11-DiplomaUSB.js --network sepolia --parameters ignition/parametros/diploma-sepolia.json --verify</pre>
+  <p>Hardhat les pedirá la contraseña del keystore y confirmar que quieren desplegar en <code>sepolia</code>. Cada lote espera a que Sepolia mine (unos 12 s por bloque): <strong>tarda uno o dos minutos</strong>. Salida esperada:</p>
+  <pre>[ DiplomaModulo ] successfully deployed 🚀
+Deployed Addresses
+DiplomaModulo#DiplomaUSB - 0x…SU_CONTRATO…
+Verifying contract "contracts/s11/DiplomaUSB.sol:DiplomaUSB" for network sepolia...
+Contract verified successfully …</pre>
+  <p><strong>Anoten la dirección.</strong> Ignition guarda el registro en <code>ignition/deployments/chain-11155111/</code>: si la conexión se corta, repitan el mismo comando y retoma donde quedó, sin desplegar dos veces.</p>
+
+  <div class="caja">
+    <div class="caja-et">PUNTO DE CONTROL 3 · EN EL EXPLORADOR</div>
+    <p>Abran <code>https://sepolia.etherscan.io/address/0xSU_CONTRATO</code>. Deben ver dos transacciones (creación y <code>emitir</code>) y la pestaña <em>Contract</em> con marca de verificado. En <em>Read Contract</em>, llamen <code>tokenURI</code> con <code>1</code>: debe devolver su <code>ipfs://…</code>. Copien el hash de la transacción de <code>emitir</code>: es evidencia.</p>
+  </div>
+</section>
+
+<!-- ============================================================ 10 -->
+<section class="sec salto">
+  <div class="sec-cab"><span class="sec-num">10</span><h2>Paso 8 · Ver el NFT y recorrer los tres saltos</h2><span class="lead">15 MIN · LA EVIDENCIA</span></div>
+
+  <p><strong>8.1 · En los exploradores.</strong> Cambien la dirección por la de su contrato:</p>
+  <table>
+    <tr><th style="width:52%">URL</th><th>QUÉ DEBEN VER</th></tr>
+    <tr><td class="pk">sepolia.etherscan.io/nft/0xSU_CONTRATO/1</td><td>El token #1 como ERC-721, su dueño (ustedes) y la metadata si Etherscan ya la resolvió.</td></tr>
+    <tr><td class="pk">eth-sepolia.blockscout.com/token/0xSU_CONTRATO/instance/1</td><td>Explorador abierto: resuelve el JSON y muestra la imagen y los atributos.</td></tr>
+  </table>
+  <p>Los exploradores resuelven la metadata en segundo plano: si la imagen no aparece enseguida, esperen unos minutos. Si al rato sigue sin aparecer, el paso 8.2 les dice cuál salto falla.</p>
+
+  <p><strong>8.2 · Con el script, a la vista.</strong> En PowerShell:</p>
+  <pre>$env:DIPLOMA="0xSU_CONTRATO"; $env:TOKEN_ID="1"
+npx hardhat run scripts/s11/leer-diploma.js --network sepolia</pre>
+  <p>(macOS/Linux: <code>DIPLOMA=0x… TOKEN_ID=1 npx hardhat run scripts/s11/leer-diploma.js --network sepolia</code>.) Salida esperada, con sus valores:</p>
+  <pre>1 · EN LA CADENA  (sepolia)
+  contrato  : 0x…  «Diploma USB»
+  token     : #1
+  dueño     : 0x…SU_DIRECCION
+  tokenURI  : ipfs://SU_CID_DEL_JSON
+
+2 · LA METADATA (el JSON)
+  resuelto en: https://gateway.pinata.cloud/ipfs/SU_CID_DEL_JSON
+  name       : Diploma de prueba · Laboratorio 11
+  description: Credencial de PRUEBA emitida en clase. No contiene datos personales.
+  image      : ipfs://SU_CID_DE_LA_IMAGEN
+  rasgo      : Programa = Ingeniería de Sistemas
+  ...
+3 · EL ARCHIVO (la imagen)
+  resuelto en: https://gateway.pinata.cloud/ipfs/SU_CID_DE_LA_IMAGEN
+  tamaño     : (los bytes de su PNG)
+  sha256     : 0x…
+
+Los tres saltos resolvieron. Guarden esta salida como evidencia.</pre>
+  <p>Si una puerta responde 429 o falla, el script lo dice (<code>· https://ipfs.io/ipfs respondió 429; pruebo la siguiente</code>) y sigue con otra. Si tienen puerta propia de Pinata, pueden ponerla primero con <code>$env:GATEWAY="https://SU-SUBDOMINIO.mypinata.cloud/ipfs"</code>.</p>
+
+  <div class="caja clave">
+    <div class="caja-et">CÓMO SÉ QUE TERMINÉ EL LABORATORIO</div>
+    <p>Tengo: (1) captura de <code>11 passing</code>; (2) los dos CID abriendo en una puerta; (3) contrato verificado en Sepolia y hash de <code>emitir</code>; (4) la salida completa de <code>leer-diploma.js</code> terminando en «Los tres saltos resolvieron» y una captura del token en Etherscan o Blockscout; (5) las respuestas de la sección 13.</p>
+  </div>
+</section>
+
+<!-- ============================================================ 11 -->
+<section class="sec">
+  <div class="sec-cab"><span class="sec-num">11</span><h2>Reto opcional · El diploma como SBT (ERC-5192)</h2><span class="lead">EN CASA</span></div>
+
+  <p>Un ERC-721 normal se puede vender o regalar. Un diploma, no debería. ERC-5192 (estado <em>Final</em>) define tokens «atados al alma»: añade <code>locked(tokenId)</code> y los eventos <code>Locked</code>/<code>Unlocked</code>, y exige que, si <code>locked</code> devuelve <code>true</code>, toda función de ERC-721 que mueva el token entre cuentas revierta. Su identificador ERC-165 es <code>0xb45a3c0e</code>.</p>
+  <p>Requisito: <code>DiplomaUSB</code> completo (el SBT hereda de él). Luego:</p>
+  <pre>copy andamiaje\s11\DiplomaSBT.sol contracts\s11\DiplomaSBT.sol
+npx hardhat test test/s11/DiplomaSBT.test.js        # al empezar: 2 pasan, 7 fallan</pre>
+  <table>
+    <tr><th style="width:18%">TODO</th><th>QUÉ HACER</th></tr>
+    <tr><td class="pk">1 · locked</td><td><code>_requireOwned(tokenId);</code> (revierte si no existe) y <code>return true;</code></td></tr>
+    <tr><td class="pk">2 · revocar</td><td><code>_burn(tokenId);</code> y <code>emit DiplomaRevocado(tokenId, motivo);</code></td></tr>
+    <tr><td class="pk">3 · _update (antes)</td><td><code>address from = _ownerOf(tokenId);</code> — si <code>from</code> y <code>to</code> son distintos de cero, es una transferencia: <code>revert DiplomaIntransferible(tokenId);</code></td></tr>
+    <tr><td class="pk">4 · _update (después)</td><td>Guardar <code>super._update(...)</code> en una variable; si <code>from == address(0)</code> (fue una emisión), <code>emit Locked(tokenId);</code> y devolver la variable.</td></tr>
+  </table>
+  <p>Terminado: <code>9 passing</code>. Miren con atención la prueba «billetera perdida»: la universidad revoca el token 1 y emite el 2 a una cuenta nueva. Es la pregunta 5 de la reflexión.</p>
+</section>
+
+<!-- ============================================================ 12 -->
+<section class="sec salto">
+  <div class="sec-cab"><span class="sec-num">12</span><h2>Errores frecuentes</h2><span class="lead">CASI TODO SE RESUELVE AQUÍ</span></div>
+
+  <table>
+    <tr><th style="width:40%">SÍNTOMA</th><th>CAUSA Y SOLUCIÓN</th></tr>
+    <tr><td class="pk">Ninguna puerta encuentra el CID</td><td>Lo subieron como <strong>privado</strong> en Pinata. Súbanlo como público. Si es público: revisen que copiaron el CID completo, sin espacios.</td></tr>
+    <tr><td class="pk">La puerta responde 429</td><td>Límite de consultas de la puerta pública. Prueben otra (<code>gateway.pinata.cloud</code>, <code>dweb.link</code>) o la puerta propia de su cuenta.</td></tr>
+    <tr><td class="pk">El JSON abre pero la imagen no</td><td><code>"image"</code> está mal: debe ser <code>ipfs://CID</code> (sin <code>/ipfs/</code> de más ni URL de puerta) y con el CID de la imagen, no el del JSON.</td></tr>
+    <tr><td class="pk"><code>SyntaxError</code> al validar el JSON</td><td>Coma de más al final de una lista, o comillas tipográficas (“ ”) en vez de rectas (" "). Escríbanlo en VS Code, no en Word.</td></tr>
+    <tr><td class="pk">Pruebas: <code>ERC721NonexistentToken(1)</code></td><td>Falta <code>_safeMint</code> (TODO 3): el token nunca se crea.</td></tr>
+    <tr><td class="pk">Pruebas: «Expected event DiplomaEmitido»</td><td>Falta el <code>emit</code> o los argumentos van en otro orden: <code>(tokenId, a, uri)</code>.</td></tr>
+    <tr><td class="pk"><code>TopeAlcanzado</code> al desplegar o emitir</td><td>El <code>tope</code> del JSON de parámetros es 0 o menor que los diplomas emitidos.</td></tr>
+    <tr><td class="pk"><code>OwnableUnauthorizedAccount</code></td><td>Están emitiendo desde una cuenta distinta de la que desplegó el contrato.</td></tr>
+    <tr><td class="pk">HHE… «configuration variable … not found»</td><td>Falta cargar una clave en el keystore: <code>npx hardhat keystore set NOMBRE</code>.</td></tr>
+    <tr><td class="pk"><code>insufficient funds for gas</code></td><td>La cuenta de <code>SEPOLIA_PRIVATE_KEY</code> no tiene ETH de Sepolia. Pidan a la reserva del docente.</td></tr>
+    <tr><td class="pk">La verificación falla pero el despliegue no</td><td>Clave de Etherscan ausente o inválida. Repitan el mismo comando de Ignition con <code>--verify</code>: no redespliega.</td></tr>
+    <tr><td class="pk">El explorador muestra el token sin imagen</td><td>Aún no resolvió la metadata (esperen), o un salto falla: <code>leer-diploma.js</code> dice cuál.</td></tr>
+    <tr><td class="pk"><code>Falta la variable DIPLOMA</code></td><td>En PowerShell es <code>$env:DIPLOMA="0x…"</code> en la misma terminal donde corren el script.</td></tr>
+  </table>
+</section>
+
+<!-- ============================================================ 13 -->
+<section class="sec">
+  <div class="sec-cab"><span class="sec-num">13</span><h2>Preguntas de reflexión</h2><span class="lead">SE RESPONDEN MIRANDO SU PROPIO ARTEFACTO</span></div>
+  <p>Cada respuesta debe citar un dato de <strong>su</strong> despliegue (una dirección, un CID, un hash, una línea de su salida). Una respuesta genérica, sin ese dato, no puntúa.</p>
+  <ol>
+    <li><strong>Los tres saltos.</strong> Copien el tokenURI que devuelve su contrato y el <code>"image"</code> de su JSON. ¿Cuántos CID distintos hay en su diploma, y cuál de ellos quedó escrito en la cadena?</li>
+    <li><strong>Permanencia.</strong> Si mañana borran el archivo de su cuenta de Pinata (dejan de fijarlo), ¿qué cambia en <code>ownerOf(1)</code> y en <code>tokenURI(1)</code> de su contrato? ¿Qué dejaría de funcionar en la salida de <code>leer-diploma.js</code>, y en qué salto?</li>
+    <li><strong>El CID no es único por archivo.</strong> Corran <code>cid-raw.js</code> sobre su <code>diploma.json</code>. ¿Coincide con el CID que les dio Pinata? Si no, expliquen por qué ambos pueden ser «el hash del contenido» a la vez.</li>
+    <li><strong>Transferir.</strong> Busquen en su contrato (en el explorador o en el código) la función con la que un dueño podría pasar su diploma a otra persona. ¿Qué cambiaría en la cadena y qué no cambiaría en IPFS?</li>
+    <li><strong>SBT.</strong> Con la prueba «billetera perdida» del reto (o leyéndola en <code>test/s11/DiplomaSBT.test.js</code>): después de revocar y reemitir, ¿qué id tiene el diploma nuevo y qué pasa con el 1? ¿Quién tiene el poder real sobre un diploma SBT?</li>
+    <li><strong>Habeas data.</strong> Miren su JSON y su transacción de <code>emitir</code> en el explorador. Señalen cada dato que es público. ¿Alguno permitiría identificar a una persona? ¿Qué NO pondrían nunca ahí, y dónde lo guardarían?</li>
+  </ol>
+</section>
+
+<!-- ============================================================ 14 -->
+<section class="sec salto">
+  <div class="sec-cab"><span class="sec-num">14</span><h2>Lista de chequeo de entrega</h2></div>
+  <table>
+    <tr><th style="width:6%">✓</th><th>ÍTEM</th></tr>
+    <tr><td>☐</td><td>Captura de <code>npx hardhat test test/s11/DiplomaUSB.test.js</code> con <code>11 passing</code>.</td></tr>
+    <tr><td>☐</td><td>CID de la imagen y URL de puerta que la abre.</td></tr>
+    <tr><td>☐</td><td>CID del JSON y URL de puerta que lo abre. El JSON no tiene ningún dato personal.</td></tr>
+    <tr><td>☐</td><td>Dirección del contrato <code>DiplomaUSB</code> en Sepolia, verificado (enlace al explorador).</td></tr>
+    <tr><td>☐</td><td>Hash de la transacción de <code>emitir</code> (enlace al explorador).</td></tr>
+    <tr><td>☐</td><td>Salida completa de <code>leer-diploma.js</code> que termina en «Los tres saltos resolvieron».</td></tr>
+    <tr><td>☐</td><td>Captura del token en Etherscan o Blockscout.</td></tr>
+    <tr><td>☐</td><td>Respuestas a las seis preguntas de la sección 13, cada una con un dato propio.</td></tr>
+    <tr><td>☐</td><td>En el repositorio: su <code>DiplomaUSB.sol</code> y su <code>diploma.json</code>. <strong>No</strong> suban <code>.env</code>, claves ni frases (revisen <code>git status</code> antes del push).</td></tr>
+    <tr><td>☐</td><td>(Opcional) <code>9 passing</code> del reto SBT.</td></tr>
+  </table>
+</section>
+
+<!-- ============================================================ 15 -->
+<section class="sec">
+  <div class="sec-cab"><span class="sec-num">15</span><h2>Rúbrica</h2></div>
+  <table>
+    <tr><th style="width:20%">CRITERIO</th><th style="width:8%">PESO</th><th>EXCELENTE (5,0)</th><th>ACEPTABLE (3,5)</th><th>INSUFICIENTE (&lt; 3,0)</th></tr>
+    <tr><td class="pk">Pruebas</td><td>20 %</td><td>11 verdes con su propio código; el orden CEI respetado.</td><td>11 verdes, pero con <code>_safeMint</code> antes de los efectos.</td><td>Pruebas en rojo o modificadas.</td></tr>
+    <tr><td class="pk">IPFS</td><td>20 %</td><td>Dos CID públicos; JSON válido y sin datos personales; <code>image</code> con <code>ipfs://</code>.</td><td>Funciona, pero <code>image</code> usa la URL de una puerta.</td><td>CID privado, roto, o JSON con datos personales.</td></tr>
+    <tr><td class="pk">Despliegue</td><td>25 %</td><td>Verificado en Sepolia; diploma emitido con su tokenURI real.</td><td>Desplegado sin verificar, o tokenURI de ejemplo.</td><td>Sin evidencia en cadena.</td></tr>
+    <tr><td class="pk">Tres saltos</td><td>20 %</td><td>Script completo y token visible en un explorador.</td><td>Solo uno de los dos.</td><td>Ninguno.</td></tr>
+    <tr><td class="pk">Reflexión</td><td>15 %</td><td>Seis respuestas con datos propios y razonamiento correcto.</td><td>Respuestas correctas pero genéricas.</td><td>Faltan o son incorrectas.</td></tr>
+  </table>
+</section>
+
+<!-- ============================================================ 16 -->
+<section class="sec">
+  <div class="sec-cab"><span class="sec-num">16</span><h2>Referencias</h2></div>
+  <ul>
+    <li>EIP-721, <em>Non-Fungible Token Standard</em>. <code>eips.ethereum.org/EIPS/eip-721</code></li>
+    <li>EIP-1155, <em>Multi Token Standard</em>. <code>eips.ethereum.org/EIPS/eip-1155</code></li>
+    <li>ERC-5192, <em>Minimal Soulbound NFTs</em> (Final). <code>eips.ethereum.org/EIPS/eip-5192</code></li>
+    <li>ERC-2981, <em>NFT Royalty Standard</em> (Final). <code>eips.ethereum.org/EIPS/eip-2981</code></li>
+    <li>IPFS, <em>Best practices for storing NFT data</em>. <code>docs.ipfs.tech/how-to/best-practices-for-nft-data/</code></li>
+    <li>Pinata, <em>Private IPFS</em> y <em>Uploading files</em>. <code>docs.pinata.cloud</code></li>
+    <li>OpenSea, <em>Farewell testnets</em> (23-07-2025). <code>support.opensea.io/en/articles/11833955-farewell-testnets</code></li>
+    <li>OpenZeppelin Contracts 5.x, ERC-721. <code>docs.openzeppelin.com/contracts/5.x/erc721</code></li>
+    <li>Ley Estatutaria 1581 de 2012, régimen general de protección de datos personales (Colombia).</li>
+  </ul>
+</section>
+
+</body>
+</html>

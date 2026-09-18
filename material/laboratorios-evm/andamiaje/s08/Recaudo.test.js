@@ -59,19 +59,19 @@ describe(`S08 · ${CONTRATO} · aportar`, () => {
 
   // TODO · un aporte válido suma al aportante y al total, y emite Aporte con los argumentos correctos
   // TODO · ¿se puede aportar después del plazo?
-  // TODO · ¿y en el SEGUNDO EXACTO del cierre?   pista: time.setNextBlockTimestamp(fin)
+  // TODO · ¿y justo en el límite del plazo?   (herramienta útil: time.setNextBlockTimestamp)
 });
 
 describe(`S08 · ${CONTRATO} · recaudo exitoso`, () => {
   // TODO · con la meta superada, tras el plazo, el dueño reclama y recibe el saldo
   //        pista: expect(tx).to.changeEtherBalance(ethers, cuenta, monto)
-  // TODO · ¿y con la meta EXACTA?
+  // TODO · ¿y en el límite de la meta?
   // TODO · ¿se puede reclamar antes del plazo? ¿dos veces? ¿alguien que no es el dueño?
 });
 
 describe(`S08 · ${CONTRATO} · recaudo fallido`, () => {
   // TODO · cada aportante recupera exactamente lo suyo
-  // TODO · ¿puede alguien reembolsar DOS veces?  pista: que haya saldo de otros en el contrato
+  // TODO · ¿puede alguien reembolsar más de una vez?
   // TODO · ¿quien no aportó recibe algo?
   // TODO · ¿el dueño puede llevarse los fondos si no se alcanzó la meta?
 });

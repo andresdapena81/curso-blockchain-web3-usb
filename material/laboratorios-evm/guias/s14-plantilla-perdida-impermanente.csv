@@ -1,0 +1,4 @@
+escenario,precio_final,r,eth_en_pool,usdc_en_pool,valor_pool,valor_conservar,perdida_impermanente
+A · ETH cae a 1 000,1000,0.5000,1.414214,1414.2136,2828.4271,3000.0000,0.057191
+B · ETH sube a 4 000,4000,2.0000,0.707107,2828.4271,5656.8542,6000.0000,0.057191
+C · ETH sube a 8 000,8000,4.0000,0.500000,4000.0000,8000.0000,10000.0000,0.200000

@@ -1,0 +1,128 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<title>Proyecto · Avance 2</title>
+<!--ESTILOS-->
+</head>
+<body>
+
+<section class="barra">
+  <div class="kicker">PROYECTO INTEGRADOR · ENTREGA 3 DE 4 · SESIÓN 16 · POR EQUIPO</div>
+  <h1>AVANCE 2 ·<br>LA <em>dApp INTEGRADA</em>,<br>DE PUNTA A PUNTA</h1>
+  <div class="sub">El proyecto deja de ser contratos sueltos: una interfaz conectada a la billetera que ejecuta el flujo principal contra sus contratos verificados en Sepolia, maneja los estados de la transacción y, si hay NFT, sirve su metadata desde IPFS.</div>
+</section>
+
+<dl class="datos">
+  <div><dt>MODALIDAD</dt><dd>Equipo de proyecto<br>(3 personas)</dd></div>
+  <div><dt>SE ENTREGA</dt><dd>Sesión 16<br>antes de iniciar</dd></div>
+  <div><dt>PESO</dt><dd>10 % (plan §8)<br>ver nota en §07</dd></div>
+  <div><dt>SE DEMUESTRA</dt><dd>3 min en vivo<br>+ video de respaldo</dd></div>
+</dl>
+
+<div class="caja clave">
+  <div class="caja-et">EN UNA FRASE</div>
+  <p>Un usuario que no programa abre la dApp, conecta su billetera del curso, ejecuta el caso de uso principal del proyecto y ve el resultado en la interfaz; y cualquiera puede comprobar en el explorador de Sepolia que lo que muestra la interfaz ocurrió en la cadena. <strong>Mejor un flujo completo y sólido que cinco a medias:</strong> el corte vertical del proyecto del docente.</p>
+</div>
+
+<!-- ============================================================ 1 -->
+<section class="sec">
+  <div class="sec-cab"><span class="sec-num">01</span><h2>De dónde viene y hacia dónde va</h2></div>
+  <table>
+    <tr><th style="width:22%">ENTREGA</th><th style="width:12%">SESIÓN</th><th>QUÉ EXIGÍA / EXIGE</th></tr>
+    <tr><td class="pk">Anteproyecto</td><td>S6</td><td>Problema, usuarios, por qué blockchain, alcance y arquitectura preliminar.</td></tr>
+    <tr><td class="pk">Avance 1</td><td>S13</td><td>Contratos desplegados y verificados en Sepolia, pruebas con cobertura ≥ 80 %, repositorio documentado.</td></tr>
+    <tr><td class="pk"><strong>Avance 2</strong></td><td><strong>S16</strong></td><td><strong>dApp integrada: frontend conectado, flujo completo funcional, metadata en IPFS si aplica.</strong></td></tr>
+    <tr><td class="pk">Entrega final</td><td>S17</td><td>Producto completo, documentación técnica, video de 3 minutos, sustentación y defensa (Demo Day).</td></tr>
+  </table>
+  <p>Lo que se construye aquí es lo que se demuestra en vivo en el Demo Day. Lo que falte hoy se cierra antes de la S17, con fecha y responsable escritos en el README.</p>
+</section>
+
+<!-- ============================================================ 2 -->
+<section class="sec">
+  <div class="sec-cab"><span class="sec-num">02</span><h2>Qué se entrega</h2><span class="lead">REQUISITOS MÍNIMOS</span></div>
+  <table>
+    <tr><th style="width:24%">COMPONENTE</th><th>REQUISITO</th><th style="width:25%">SE COMPRUEBA CON</th></tr>
+    <tr><td class="pk">1 · Frontend conectado</td><td>La interfaz conecta la billetera, detecta la red (Sepolia, chainId 11155111) y pide cambiarla si es otra. Lee y escribe en los contratos del Avance 1, <strong>verificados</strong> en el explorador.</td><td>Demo en vivo; direcciones en el README.</td></tr>
+    <tr><td class="pk">2 · Flujo completo</td><td>El caso de uso principal funciona de punta a punta: acción del usuario → firma → transacción → resultado visible en la interfaz, leído de la cadena (no de una variable local).</td><td>Demo en vivo + hash en el explorador.</td></tr>
+    <tr><td class="pk">3 · Estados de la transacción</td><td>Se muestran: esperando firma, pendiente (con el hash), confirmada (con el bloque). Y los cuatro errores de la Sesión 12: <strong>red equivocada, billetera no instalada, rechazo del usuario, transacción revertida</strong> (con su motivo legible).</td><td>Demo: provocar un rechazo o cambiar de red.</td></tr>
+    <tr><td class="pk">4 · Eventos</td><td>La interfaz se actualiza con los eventos del contrato o releyendo el estado tras la confirmación; nunca asume el éxito antes del recibo.</td><td>Revisión del código.</td></tr>
+    <tr><td class="pk">5 · Metadata en IPFS (si aplica)</td><td>Si el proyecto emite NFT: <code>tokenURI</code> apunta a <code>ipfs://…</code>, el JSON cumple el esquema de metadata y la imagen se ve en la interfaz a través de una pasarela. Si no hay NFT, se escribe «no aplica» y por qué.</td><td>Abrir el <code>tokenURI</code> de un token emitido.</td></tr>
+    <tr><td class="pk">6 · Repositorio</td><td>README actualizado (cómo correr el frontend, direcciones, red, versiones), etiqueta <code>v0.2-avance-2</code> creada y subida antes de iniciar la S16.</td><td><code>git tag</code> en el repositorio.</td></tr>
+    <tr><td class="pk">7 · Video de respaldo</td><td>Hasta 3 minutos del flujo principal en Sepolia, con narración. Es el borrador del video del Demo Day.</td><td>Enlace en el README.</td></tr>
+  </table>
+</section>
+
+<!-- ============================================================ 3 -->
+<section class="sec">
+  <div class="sec-cab"><span class="sec-num">03</span><h2>Cómo se demuestra en clase</h2><span class="lead">3 MINUTOS POR EQUIPO</span></div>
+  <table>
+    <tr><th style="width:6%">#</th><th style="width:26%">PASO</th><th>QUÉ SE VE</th></tr>
+    <tr><td class="pk">1</td><td>Abrir</td><td>La dApp en el navegador (local o desplegada), billetera del curso, red Sepolia.</td></tr>
+    <tr><td class="pk">2</td><td>Ejecutar el flujo</td><td>El caso de uso principal, en vivo: firmar en la billetera, ver «pendiente», ver «confirmada» y el resultado en la interfaz.</td></tr>
+    <tr><td class="pk">3</td><td>Verificar en la cadena</td><td>Abrir el hash de esa transacción en <code>sepolia.etherscan.io</code>: el evento y el estado coinciden con la interfaz.</td></tr>
+    <tr><td class="pk">4</td><td>Provocar un error</td><td>Rechazar una firma o cambiar a otra red: la interfaz lo explica en lenguaje de usuario y no se rompe.</td></tr>
+  </table>
+  <div class="caja alerta">
+    <div class="caja-et">SI LA DEMO EN VIVO FALLA</div>
+    <p>Se proyecta el video de respaldo. Si el fallo es de infraestructura externa (RPC caído, red de la sala) y la evidencia en cadena existe, no resta. Si el fallo es del producto, se agenda una revisión en horario de atención antes de la S17 y se califica con lo que se vea entonces, con un tope de 4,0 en «Flujo completo».</p>
+  </div>
+</section>
+
+<!-- ============================================================ 4 -->
+<section class="sec">
+  <div class="sec-cab"><span class="sec-num">04</span><h2>Lista de chequeo del equipo</h2><span class="lead">LA VÍSPERA</span></div>
+  <ul>
+    <li>☐ Los contratos que usa el frontend son los del Avance 1 (o su nueva versión), <strong>verificados</strong> en Sepolia; las direcciones están en el README y en un único archivo de configuración del frontend.</li>
+    <li>☐ Con una billetera del curso <strong>nueva</strong> (sin permisos previos), el flujo completo funciona de principio a fin.</li>
+    <li>☐ Probamos los cuatro errores: red equivocada, sin billetera (otro navegador), rechazo y transacción que revierte.</li>
+    <li>☐ Ninguna pantalla dice «éxito» antes del recibo.</li>
+    <li>☐ Si hay NFT: el <code>tokenURI</code> de un token real abre en una pasarela IPFS y la imagen carga.</li>
+    <li>☐ Ninguna clave privada, frase semilla, URL de RPC con API key ni JWT de Pinata está en el código del frontend ni en el repositorio (<code>git log -p</code> revisado).</li>
+    <li>☐ Ningún dato personal va a la cadena ni a IPFS (Ley 1581 de 2012): de un documento, solo su hash.</li>
+    <li>☐ README: qué hace, cómo correr el frontend, red, direcciones, versiones, estado de cada funcionalidad (hecha / pendiente con fecha).</li>
+    <li>☐ Etiqueta: <code>git tag v0.2-avance-2</code> y <code>git push origin v0.2-avance-2</code>.</li>
+    <li>☐ Video de 3 minutos con enlace que abre en una ventana de incógnito.</li>
+  </ul>
+</section>
+
+<!-- ============================================================ 5 -->
+<section class="sec">
+  <div class="sec-cab"><span class="sec-num">05</span><h2>Rúbrica</h2><span class="lead">ESCALA 0,0 A 5,0</span></div>
+  <table>
+    <tr><th style="width:18%">CRITERIO</th><th style="width:7%">PESO</th><th style="width:25%">EXCELENTE (4,5 – 5,0)</th><th style="width:25%">ACEPTABLE (3,0 – 4,4)</th><th>INSUFICIENTE (&lt; 3,0)</th></tr>
+    <tr><td class="pk">Flujo completo funcional</td><td>35 %</td><td>El caso de uso principal funciona en vivo, de punta a punta, en Sepolia; lo mostrado coincide con el explorador.</td><td>Funciona con intervención manual (recargar, pegar direcciones) o solo en red local.</td><td>No completa el flujo o no toca la cadena.</td></tr>
+    <tr><td class="pk">Estados y manejo de errores</td><td>20 %</td><td>Los tres estados y los cuatro errores se muestran en lenguaje de usuario; nunca «éxito» antes del recibo.</td><td>Maneja algunos; mensajes técnicos crudos.</td><td>Se rompe o se queda colgado ante un error.</td></tr>
+    <tr><td class="pk">Integración con los contratos</td><td>15 %</td><td>Lee y escribe en contratos verificados; eventos o relectura tras confirmar; una sola fuente de direcciones.</td><td>Integra, pero con direcciones repetidas o estado local desincronizado.</td><td>Contratos no verificados o distintos de los declarados.</td></tr>
+    <tr><td class="pk">Metadata IPFS (o justificación)</td><td>10 %</td><td>tokenURI en IPFS, metadata válida e imagen visible; o justificación clara de por qué no aplica.</td><td>IPFS a medias (imagen en un servidor central, metadata incompleta).</td><td>URLs rotas o datos personales publicados.</td></tr>
+    <tr><td class="pk">Seguridad operativa</td><td>10 %</td><td>Ningún secreto en el repositorio; ningún dato personal en cadena; solo red de prueba.</td><td>Un descuido menor corregido antes de la revisión.</td><td>Un secreto expuesto o un dato personal en cadena.</td></tr>
+    <tr><td class="pk">Repositorio y video</td><td>10 %</td><td>README reproducible, etiqueta a tiempo, video claro de ≤ 3 min.</td><td>Falta uno de los tres o está incompleto.</td><td>Sin README útil, sin etiqueta y sin video.</td></tr>
+  </table>
+  <p><strong>Cómo se calcula:</strong> nota = Σ (peso × nota del criterio). Ejemplo: 4,5 · 4,0 · 4,0 · 5,0 · 5,0 · 3,5 → 1,575 + 0,800 + 0,600 + 0,500 + 0,500 + 0,350 = <strong>4,325 ≈ 4,3</strong>.</p>
+</section>
+
+<!-- ============================================================ 6 -->
+<section class="sec">
+  <div class="sec-cab"><span class="sec-num">06</span><h2>Errores que más bajan la nota</h2></div>
+  <table>
+    <tr><th style="width:40%">ERROR</th><th>POR QUÉ IMPORTA Y CÓMO EVITARLO</th></tr>
+    <tr><td class="pk">La interfaz muestra «listo» al enviar</td><td>Una transacción enviada puede revertir. Esperar el recibo y revisar <code>status</code> (Sesión 12, <code>dapp-ficha</code>).</td></tr>
+    <tr><td class="pk">Clave de Pinata o de Alchemy en el JavaScript del navegador</td><td>Todo lo que está en el frontend es público. Subir a IPFS desde un script local, no desde el navegador; en el frontend solo lecturas públicas.</td></tr>
+    <tr><td class="pk">Contrato del frontend ≠ contrato verificado</td><td>Redesplegaron y olvidaron actualizar la dirección o verificar. Una sola fuente de direcciones.</td></tr>
+    <tr><td class="pk">Cinco pantallas a medias</td><td>Se califica el flujo completo, no la cantidad. Cortar alcance y documentarlo en el README es una decisión profesional.</td></tr>
+    <tr><td class="pk">Imagen del NFT en Google Drive</td><td>No es IPFS y se rompe. Subirla a IPFS y usar <code>ipfs://CID</code> en la metadata.</td></tr>
+  </table>
+</section>
+
+<!-- ============================================================ 7 -->
+<section class="sec">
+  <div class="sec-cab"><span class="sec-num">07</span><h2>Dónde pesa esta entrega</h2></div>
+  <div class="caja">
+    <div class="caja-et">PESO EN LA NOTA DEL CURSO</div>
+    <p>En la tabla de entregas del plan (sección 8), el <strong>Avance 2</strong> pesa <strong>10 %</strong> de la nota final. En el esquema por cortes (sección 9), forma parte del componente «Proyecto final (avances + entrega + sustentación)», 70 % del tercer corte (28 % de la nota final). El índice del proyecto (<code>README.md</code> de esta carpeta) explica cómo se relacionan las dos tablas y la decisión que debe anunciar el docente.</p>
+  </div>
+  <p>Material de apoyo: <code>material/dapp-ficha</code> (dApp de referencia de un archivo, ethers v6, con los cuatro estados de error), las guías de las sesiones 11 a 13 y el deck de la Sesión 16 (bloque D).</p>
+</section>
+
+</body>
+</html>

@@ -1,0 +1,416 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<title>Guía · Laboratorio 12 · dApp de la FichaUSB</title>
+<!--ESTILOS-->
+</head>
+<body>
+
+<section class="barra">
+  <div class="kicker">LABORATORIO 12 · SESIÓN 12 · EN PAREJAS · CALIFICABLE (SEGUNDO CORTE)</div>
+  <h1>UNA INTERFAZ QUE<br>HABLA CON LA CADENA<br>Y <em>NO MIENTE</em></h1>
+  <div class="sub">Conectar MetaMask, leer el saldo de la FichaUSB, transferir, escuchar eventos<br>y provocar a propósito los cuatro errores que todo principiante ignora.</div>
+</section>
+
+<dl class="datos">
+  <div><dt>MODALIDAD</dt><dd>En parejas</dd></div>
+  <div><dt>DURACIÓN</dt><dd>85 min en clase<br>+ lo que falte en casa</dd></div>
+  <div><dt>REQUISITOS</dt><dd>Node 22, repo del curso,<br>MetaMask, navegador</dd></div>
+  <div><dt>META</dt><dd>8 TODO completos<br>+ 6 capturas</dd></div>
+</dl>
+
+<div class="caja clave">
+  <div class="caja-et">CÓMO LEER ESTA GUÍA</div>
+  <p>Está escrita para que la puedan seguir <strong>sin ayuda</strong>. Cada paso dice qué escribir, qué deberían ver y cómo saber que funcionó. Los comandos están en PowerShell (Windows, la sala); cuando cambian en macOS/Linux, se indica. No hay que compilar nada: la interfaz es <strong>un solo archivo HTML</strong> que se edita, se guarda y se recarga en el navegador. Si algo no sale como aquí se describe, vayan a <strong>«Errores frecuentes»</strong> (sección 11). Todo lo que aparece como «salida esperada» se obtuvo de verdad al preparar el laboratorio.</p>
+</div>
+
+<div class="caja peligro">
+  <div class="caja-et">REGLAS QUE NO ADMITEN EXCEPCIÓN</div>
+  <ul>
+    <li>Solo red local de Hardhat o Sepolia. <strong>Nunca</strong> dinero real; la billetera es la del curso.</li>
+    <li>La frase semilla no se comparte con nadie, tampoco con el docente. <strong>No se firma lo que no se entiende</strong>: lean lo que muestra MetaMask antes de confirmar.</li>
+    <li>En este laboratorio <strong>no se importa ninguna clave privada</strong> en MetaMask: los fondos locales llegan a su cuenta con un script.</li>
+    <li>Claves y URLs de RPC con clave: solo en el keystore de Hardhat, jamás en el HTML ni en Git.</li>
+  </ul>
+</div>
+
+<!-- ============================================================ 1 -->
+<section class="sec">
+  <div class="sec-cab"><span class="sec-num">01</span><h2>Objetivo, resultado de aprendizaje y entrega</h2><span class="lead">LEER PRIMERO</span></div>
+  <p><strong>Objetivo:</strong> construir una interfaz que lea y escriba en un contrato, gestionando la billetera y los estados de una transacción: pendiente, minada, y los cuatro errores (billetera no instalada, red equivocada, rechazo del usuario, transacción revertida).</p>
+  <p><strong>RA6</strong> · Integrar una interfaz Web 3.0 con contratos, gestionando wallets, eventos y estados de transacción.</p>
+  <table>
+    <tr><th style="width:30%">EVIDENCIA</th><th>DETALLE</th><th style="width:10%">PESO</th></tr>
+    <tr><td class="pk">Repositorio</td><td>Su <code>index.html</code> con los 8 TODO completos, en el repositorio del equipo.</td><td>25 %</td></tr>
+    <tr><td class="pk">Transferencia real</td><td>Captura del estado verde «confirmada» con su hash. En Sepolia, además, el enlace al explorador.</td><td>20 %</td></tr>
+    <tr><td class="pk">Cuatro errores + 2 estados</td><td>Seis capturas: sin billetera, red equivocada, rechazo, revertida, pendiente, confirmada.</td><td>35 %</td></tr>
+    <tr><td class="pk">Eventos</td><td>Evidencia de que el saldo cambió sin recargar la página.</td><td>10 %</td></tr>
+    <tr><td class="pk">Reflexión</td><td>Respuestas a las preguntas de la sección 12.</td><td>10 %</td></tr>
+  </table>
+  <p>Política del curso: sin hash de transacción, el laboratorio no se califica. Si solo trabajan en red local, repitan una transferencia en Sepolia desde casa para que la evidencia sea verificable por terceros.</p>
+</section>
+
+<!-- ============================================================ 2 -->
+<section class="sec salto">
+  <div class="sec-cab"><span class="sec-num">02</span><h2>El mapa y los archivos</h2></div>
+  <pre>material/laboratorio-12/
+├── andamiaje/index.html          &lt;- AQUÍ TRABAJAN: la dApp con 8 TODO
+├── guia/guia-laboratorio-12.pdf  &lt;- esta guía
+└── README.md
+
+material/laboratorios-evm/        &lt;- el repo Hardhat del curso
+├── contracts/s10/FichaUSB.sol    &lt;- el token de la Sesión 10
+├── scripts/s12/preparar-local.js &lt;- despliega FichaUSB local y les da fondos
+└── scripts/s12/comprobar-ficha.js &lt;- punto de control desde la terminal</pre>
+
+  <pre>  PASO 1   comprobar herramientas                         5 min
+  PASO 2   servir la página por http://localhost          5 min
+  PASO 3   un token para probar (red local o Sepolia)    15 min
+  PASO 4   configurar la dApp y punto de control          5 min
+  PASO 5   TODO 1 a 5: detectar, conectar, leer          20 min
+  PASO 6   TODO 6 a 8: transferir, errores, eventos      20 min
+  PASO 7   provocar los cuatro errores y capturarlos     15 min</pre>
+
+  <div class="caja">
+    <div class="caja-et">POR QUÉ SIN REACT NI COMPILACIÓN</div>
+    <p>El plan del curso menciona una aplicación React. En la sala puede no estar permitido instalar el conjunto de herramientas de React, así que el laboratorio usa el mismo enfoque de la dApp de referencia: <strong>un HTML con ethers v6 cargado desde jsDelivr</strong>. Se ve cada pieza (Provider, Signer, Contract) sin magia. Para el proyecto pueden usar React + wagmi + RainbowKit (lámina A.18): los conceptos y los estados de error son exactamente los mismos.</p>
+  </div>
+</section>
+
+<!-- ============================================================ 3 -->
+<section class="sec">
+  <div class="sec-cab"><span class="sec-num">03</span><h2>Paso 1 · Comprobar las herramientas</h2><span class="lead">5 MIN</span></div>
+  <pre>node -v                      # v22.algo
+python --version             # 3.algo (solo si van a usar el plan B del paso 2)
+cd "ruta\a\laboratorios-evm"
+npx hardhat --version        # 3.16.0   (si falla: npm install, una sola vez)</pre>
+  <p><strong>MetaMask:</strong> la extensión de la billetera del curso, instalada en Chrome o Firefox y desbloqueada. Copien su dirección (clic en el nombre de la cuenta): la van a necesitar en el paso 3. <strong>La dirección no es secreta</strong>; la frase semilla sí.</p>
+  <div class="caja">
+    <div class="caja-et">CÓMO SÉ QUE ESTOY LISTO</div>
+    <p>Las tres versiones responden y tienen su dirección <code>0x…</code> copiada en un archivo de notas.</p>
+  </div>
+</section>
+
+<!-- ============================================================ 4 -->
+<section class="sec salto">
+  <div class="sec-cab"><span class="sec-num">04</span><h2>Paso 2 · Servir la página (y por qué el doble clic no sirve)</h2><span class="lead">5 MIN</span></div>
+
+  <p>Si abren <code>index.html</code> con doble clic, el navegador lo carga como <code>file:///C:/…/index.html</code>. Con MetaMask eso falla, por dos razones:</p>
+  <ul>
+    <li><strong>Chrome no deja actuar a las extensiones en páginas <code>file://</code></strong> salvo que el usuario active, extensión por extensión, «Permitir acceso a URL de archivo». Viene apagado. Sin eso, MetaMask no inyecta <code>window.ethereum</code> y la dApp dice «No se detecta una billetera».</li>
+    <li><strong>MetaMask da permisos por sitio</strong> (por origen: esquema + dominio + puerto). Una página <code>file://</code> no tiene un origen normal, así que la conexión es poco fiable aunque se active el permiso.</li>
+  </ul>
+  <div class="caja peligro">
+    <div class="caja-et">NO ACTIVEN «PERMITIR ACCESO A URL DE ARCHIVO»</div>
+    <p>Le daría a la extensión acceso a archivos de su disco. La práctica correcta es la misma que en producción: servir la página por HTTP. En local, por <code>http://localhost</code>.</p>
+  </div>
+
+  <p><strong>Opción A · con Node</strong> (la primera vez <code>npx</code> pregunta si descarga el paquete <code>serve</code>: respondan <code>y</code>):</p>
+  <pre>cd "ruta\a\material\laboratorio-12\andamiaje"
+npx serve .
+   ┌──────────────────────────────────────────┐
+   │   Serving!                               │
+   │   - Local:    http://localhost:3000      │
+   └──────────────────────────────────────────┘</pre>
+  <p><strong>Opción B · con Python</strong> (si la sala no deja descargar <code>serve</code>):</p>
+  <pre>cd "ruta\a\material\laboratorio-12\andamiaje"
+python -m http.server 8000
+Serving HTTP on :: port 8000 (http://[::]:8000/) ...</pre>
+  <p>Abran <code>http://localhost:3000</code> (opción A) o <code>http://localhost:8000</code> (opción B). Dejen esa terminal abierta: si la cierran, la página deja de cargar.</p>
+  <div class="caja">
+    <div class="caja-et">PUNTO DE CONTROL 1</div>
+    <p>La página muestra «FichaUSB · Laboratorio 12 (versión de trabajo)». Al pulsar «Conectar billetera», la caja «Estado» dice en rojo <em>«Falta completar el TODO 2 (conectar) en el código de index.html.»</em> Eso es correcto: la página funciona y les avisa qué falta. Si en cambio no pasa nada, abran la consola del navegador (F12 → Console) y busquen el error.</p>
+  </div>
+</section>
+
+<!-- ============================================================ 5 -->
+<section class="sec salto">
+  <div class="sec-cab"><span class="sec-num">05</span><h2>Paso 3 · Un token para probar</h2><span class="lead">15 MIN · ELIJAN UNA OPCIÓN</span></div>
+
+  <table>
+    <tr><th style="width:20%">OPCIÓN</th><th>CUÁNDO</th><th style="width:34%">VENTAJA / DESVENTAJA</th></tr>
+    <tr><td class="pk">A · red local</td><td>En la sala. No depende de faucets ni de la red de la universidad.</td><td>Todo se mina al instante: los estados «pendiente» apenas se ven.</td></tr>
+    <tr><td class="pk">B · Sepolia</td><td>En casa, con la FichaUSB que desplegaron en la Sesión 10.</td><td>Evidencia verificable por cualquiera; hay que tener ETH y FUSB de Sepolia.</td></tr>
+  </table>
+
+  <h3>Opción A · red local de Hardhat</h3>
+  <p><strong>3A.1 · Terminal 1:</strong> levanten el nodo local y déjenlo corriendo todo el laboratorio.</p>
+  <pre>cd "ruta\a\laboratorios-evm"
+npx hardhat node
+Started HTTP and WebSocket JSON-RPC server at http://127.0.0.1:8545/
+Accounts
+========
+WARNING: Funds sent on live network to accounts with publicly known private keys WILL BE LOST.
+Account #0:  0xf39fd6e51aad88f6f4ce6ab8827279cfffb92266 (10000 ETH)
+...</pre>
+  <p>Esas cuentas y claves son públicas (las conoce todo el mundo): <strong>no las importen</strong> en MetaMask. No hace falta.</p>
+
+  <p><strong>3A.2 · MetaMask: agregar la red local.</strong> En MetaMask: selector de redes → <em>Agregar una red personalizada</em> (el texto exacto cambia entre versiones). Llenen:</p>
+  <table>
+    <tr><th style="width:32%">CAMPO</th><th>VALOR</th></tr>
+    <tr><td class="pk">Nombre de la red</td><td>Hardhat local</td></tr>
+    <tr><td class="pk">URL de RPC</td><td><code>http://127.0.0.1:8545</code></td></tr>
+    <tr><td class="pk">Identificador de cadena</td><td><code>31337</code></td></tr>
+    <tr><td class="pk">Símbolo de moneda</td><td><code>ETH</code></td></tr>
+  </table>
+  <p>Cámbiense a esa red. Su saldo será 0 ETH: es normal.</p>
+
+  <p><strong>3A.3 · Terminal 2:</strong> desplieguen la FichaUSB y mándense fondos. <code>DESTINO</code> es SU dirección de MetaMask:</p>
+  <pre>cd "ruta\a\laboratorios-evm"
+$env:DESTINO="0xSU_DIRECCION_DE_METAMASK"
+npx hardhat run scripts/s12/preparar-local.js --network localhost</pre>
+  <p>(macOS/Linux: <code>DESTINO=0x… npx hardhat run scripts/s12/preparar-local.js --network localhost</code>.) Salida esperada:</p>
+  <pre>  FichaUSB desplegada en la red local
+  ------------------------------------------------------------
+  DIRECCION_FICHA : 0x5FbDB2315678afecb367f032d93F642f64180aa3
+  chainId         : 31337
+  a 0xSU_DIRECCION
+      FUSB        : 1000.0
+      ETH (local) : 10.0</pre>
+  <p>La dirección del contrato puede ser otra si ya desplegaron algo en ese nodo: copien <strong>la que imprima</strong>. En MetaMask ya deberían ver 10 ETH. Opcional: <em>Importar tokens</em> con la dirección del contrato para ver los 1000 FUSB en la billetera.</p>
+  <div class="caja alerta">
+    <div class="caja-et">SI REINICIAN EL NODO</div>
+    <p>Todo se borra: contrato, saldos, historial. Hay que volver a correr <code>preparar-local.js</code>, pegar la nueva dirección en la dApp y, en MetaMask, borrar los datos de actividad de la cuenta (en configuración avanzada: <em>Borrar datos de la pestaña de actividad</em> o similar), o aparecerá el error «nonce too high».</p>
+  </div>
+
+  <h3>Opción B · Sepolia</h3>
+  <p>Usen la dirección de su FichaUSB de la Sesión 10. Necesitan en MetaMask (red Sepolia) algo de ETH de prueba para el gas y algunos FUSB: si no tienen FUSB, quien desplegó el contrato los acuña con <code>acunar</code> desde el explorador (<em>Write Contract</em>). La red esperada será <code>11155111n</code>.</p>
+</section>
+
+<!-- ============================================================ 6 -->
+<section class="sec salto">
+  <div class="sec-cab"><span class="sec-num">06</span><h2>Paso 4 · Configurar la dApp y punto de control</h2><span class="lead">5 MIN</span></div>
+  <p><strong>4.1 · Pegar la dirección y la red.</strong> Abran <code>andamiaje/index.html</code> en VS Code. Casi al final, en la sección CONFIGURACIÓN:</p>
+  <pre>const DIRECCION_FICHA = "0x5FbDB2315678afecb367f032d93F642f64180aa3"; // ← la que imprimió el script
+const CHAIN_ID_SEPOLIA = 31337n;   // ← 31337n en red local · 11155111n en Sepolia</pre>
+  <p>La <code>n</code> al final no es un error: es un <strong>BigInt</strong> de JavaScript. ethers v6 devuelve el chainId como BigInt, y un BigInt no es igual a un número normal (<code>31337n === 31337</code> es <code>false</code>). El nombre <code>CHAIN_ID_SEPOLIA</code> se conserva igual que en la solución de referencia aunque en local valga 31337.</p>
+
+  <p><strong>4.2 · El ABI.</strong> Miren la constante <code>ABI</code>: cinco líneas con las firmas de <code>symbol</code>, <code>decimals</code>, <code>balanceOf</code>, <code>transfer</code> y el evento <code>Transfer</code>. Es todo lo que la interfaz necesita saber del contrato. No hace falta tocarlo.</p>
+
+  <p><strong>4.3 · Punto de control 2, desde la terminal.</strong> Antes de pelear con el navegador, comprueben que la dirección y la red están bien. El script hace <strong>las mismas lecturas que la dApp, con el mismo ABI</strong>:</p>
+  <pre>$env:FICHA="0x5FbDB2315678afecb367f032d93F642f64180aa3"; $env:CUENTA="0xSU_DIRECCION"
+npx hardhat run scripts/s12/comprobar-ficha.js --network localhost      # o --network sepolia</pre>
+  <p>Salida esperada (real, de la preparación):</p>
+  <pre>  red           : localhost (31337)
+  contrato      : 0x5FbDB…  (2819 bytes de código)
+  símbolo       : FUSB
+  decimales     : 18
+  saldo bruto   : 1000000000000000000000      &lt;- lo que devuelve la cadena (entero)
+  saldo legible : 1000.0 FUSB   &lt;- formatUnits
+  ETH p/ gas    : 10.0</pre>
+  <p>Si dice <code>En 0x… NO hay contrato en la red 31337</code>, la dirección está mal copiada, están en otra red, o reiniciaron el nodo. Arréglenlo aquí: con esa dirección, la dApp tampoco funcionaría.</p>
+</section>
+
+<!-- ============================================================ 7 -->
+<section class="sec salto">
+  <div class="sec-cab"><span class="sec-num">07</span><h2>Paso 5 · TODO 1 a 5: detectar, conectar y leer</h2><span class="lead">20 MIN</span></div>
+  <p>El ciclo de trabajo es siempre el mismo: <strong>editar → guardar (Ctrl+S) → recargar el navegador (F5) → probar</strong>. No se compila nada. Los comentarios de cada TODO traen el código casi literal: lo importante es entender cada línea.</p>
+
+  <div class="pregunta">
+    <div class="cab"><div class="n">1</div><div class="enun"><span class="tema">TODO 1 · ESTADO DE ERROR 2</span>Billetera no instalada</div></div>
+    <div class="just">
+      <strong>Qué hace:</strong> al cargar la página, si <code>window.ethereum</code> no existe, muestra el aviso y desactiva el botón Conectar.<br>
+      <strong>Qué escribir:</strong> <code>if (typeof window.ethereum === "undefined") { $("sinWallet").hidden = false; $("btnConectar").disabled = true; }</code><br>
+      <strong>Por qué <code>typeof</code>:</strong> preguntar por una variable que no existe con <code>typeof</code> no lanza error; usarla directamente, sí.<br>
+      <strong>Cómo lo compruebo:</strong> abran la misma URL en un navegador o una ventana sin MetaMask (por ejemplo Edge, o una ventana de invitado): texto rojo «No se detecta una billetera…» y botón gris. Esa es la <strong>captura 1</strong>.
+    </div>
+  </div>
+
+  <div class="pregunta">
+    <div class="cab"><div class="n">2</div><div class="enun"><span class="tema">TODO 2 · CONECTAR</span>Provider, permiso, Signer y cuenta</div></div>
+    <div class="just">
+      <strong>Qué escribir</strong> (dentro del <code>try</code>, en lugar de la línea <code>return falta(…)</code>, que se borra):
+      <br><code>provider = new ethers.BrowserProvider(window.ethereum);</code> — el Provider habla con el nodo a través de MetaMask.
+      <br><code>await provider.send("eth_requestAccounts", []);</code> — aquí MetaMask pregunta si autorizan a este sitio a ver su cuenta.
+      <br><code>signer = await provider.getSigner();</code> y <code>cuenta = await signer.getAddress();</code>
+      <br>y mostrar: <code>const red = await provider.getNetwork();</code>, la cuenta abreviada, <code>red.name + " (" + red.chainId + ")"</code>, y <code>$("infoConexion").hidden = false;</code><br>
+      <strong>Cómo lo compruebo:</strong> al pulsar Conectar, MetaMask pide permiso la primera vez; luego aparecen «Cuenta 0x1234…abcd» y «Red unknown (31337)» (en red local ethers no conoce un nombre para 31337) o «sepolia (11155111)».
+    </div>
+  </div>
+
+  <div class="pregunta">
+    <div class="cab"><div class="n">3</div><div class="enun"><span class="tema">TODO 3 · ESTADO DE ERROR 1</span>Red equivocada</div></div>
+    <div class="just">
+      <strong>Qué escribir:</strong> si <code>red.chainId !== CHAIN_ID_SEPOLIA</code>: mostrar <code>$("avisoRed")</code> con un texto que diga a qué red cambiar, <code>$("btnEnviar").disabled = true</code>, <code>estado("Red equivocada: …", "error")</code> y <code>return</code>. Si coincide, ocultar el aviso.<br>
+      <strong>Cómo lo compruebo:</strong> lo harán en el paso 7. Si al conectar dice «red equivocada» estando en la red correcta, revisen la <code>n</code> de <code>31337n</code>.
+    </div>
+  </div>
+
+  <div class="pregunta">
+    <div class="cab"><div class="n">4</div><div class="enun"><span class="tema">TODO 4 · CONTRACT Y PRIMERAS LECTURAS</span>El puente hacia la FichaUSB</div></div>
+    <div class="just">
+      <strong>Qué escribir:</strong> <code>contrato = new ethers.Contract(DIRECCION_FICHA, ABI, signer);</code>, <code>simbolo = await contrato.symbol();</code>, <code>decimales = Number(await contrato.decimals());</code> y luego <code>await refrescarSaldo(); suscribirEventos(); $("btnEnviar").disabled = false; estado("Conectado. Listo para transferir.", "ok");</code><br>
+      <strong>Por qué <code>Number()</code> aquí sí:</strong> <code>decimals</code> es 18, un número pequeño. Con MONTOS nunca se usa <code>Number</code>: pierden precisión.<br>
+      <strong>No olviden <code>suscribirEventos()</code>:</strong> en la dApp de referencia faltaba esa llamada y el saldo no se actualizaba solo. Fue un error real, encontrado al probarla.
+    </div>
+  </div>
+
+  <div class="pregunta">
+    <div class="cab"><div class="n">5</div><div class="enun"><span class="tema">TODO 5 · LECTURA · refrescarSaldo()</span>balanceOf, gratis</div></div>
+    <div class="just">
+      <strong>Qué escribir:</strong> <code>const bruto = await contrato.balanceOf(cuenta);</code> y <code>$("saldo").textContent = ethers.formatUnits(bruto, decimales) + " " + simbolo;</code> (y borrar la línea <code>falta(…)</code>).<br>
+      <strong>Qué pasa por debajo:</strong> un <code>eth_call</code>: el nodo ejecuta la función en su copia y responde. No hay transacción, no hay firma, no hay gas para ustedes.<br>
+      <strong>Punto de control 3:</strong> al conectar, «Saldo FUSB <strong>1000.0 FUSB</strong>» y la caja Estado en verde «Conectado. Listo para transferir.».
+    </div>
+  </div>
+</section>
+
+<!-- ============================================================ 8 -->
+<section class="sec salto">
+  <div class="sec-cab"><span class="sec-num">08</span><h2>Paso 6 · TODO 6 a 8: transferir, clasificar errores, escuchar</h2><span class="lead">20 MIN</span></div>
+
+  <div class="pregunta">
+    <div class="cab"><div class="n">6</div><div class="enun"><span class="tema">TODO 6 · ESCRITURA · transfer</span>Enviar y ESPERAR, con un mensaje en cada momento</div></div>
+    <div class="just">
+      <strong>Qué escribir</strong> (dentro del <code>try</code> del botón Enviar, en lugar de <code>falta(…)</code>):
+      <br><code>const cantidad = ethers.parseUnits(monto, decimales);</code> — «2.5» se vuelve <code>2500000000000000000n</code>.
+      <br><code>const tx = await contrato.transfer(dest, cantidad);</code> — aquí MetaMask muestra la transacción y pide confirmar.
+      <br><code>estado("Transacción enviada. Esperando confirmación… " + tx.hash.slice(0, 10) + "…", "pendiente");</code>
+      <br><code>const recibo = await tx.wait();</code> — aquí espera a que se MINE.
+      <br><code>if (recibo.status === 0) { … "se revirtió" …; return; }</code>, <code>await refrescarSaldo();</code> y el estado verde con <code>recibo.blockNumber</code>.<br>
+      <strong>El error que se combate:</strong> decir «listo» después de <code>transfer()</code> y antes de <code>wait()</code>. El primer <code>await</code> solo significa «enviada».<br>
+      <strong>Punto de control 4:</strong> transfieran 2,5 FUSB a la dirección de un compañero (o a una segunda cuenta suya). Se ve amarillo «Confirma la transacción en la billetera…», luego amarillo «Transacción enviada. Esperando confirmación… 0x…», y al final verde <em>«¡Listo! Transferencia confirmada en el bloque N.»</em>; el saldo baja a 997.5. En red local todo pasa en menos de un segundo; en Sepolia, unos 12 segundos.
+    </div>
+  </div>
+
+  <div class="pregunta">
+    <div class="cab"><div class="n">7</div><div class="enun"><span class="tema">TODO 7 · manejarError(e)</span>Un mensaje claro para cada caso</div></div>
+    <div class="just">
+      <strong>Qué escribir</strong>, en este orden, cada caso con <code>estado(…, "error")</code> y <code>return</code>:
+      <br>a) <strong>Rechazo (estado 3):</strong> <code>e.code === "ACTION_REJECTED" || e.code === 4001</code>. El 4001 es el código de EIP-1193 («el usuario rechazó»); ethers v6 lo traduce a <code>ACTION_REJECTED</code>.
+      <br>b) <strong>Revertida (estado 4):</strong> <code>e.code === "CALL_EXCEPTION" || /revert/i.test(e.message || "")</code>. Si existe <code>e.receipt</code>, la transacción se minó y el gas SÍ se pagó; si no existe, falló al simularla (<code>estimateGas</code>) y no se gastó nada. Díganlo en el mensaje.
+      <br>c) <strong>Sin ETH para el gas:</strong> <code>e.code === "INSUFFICIENT_FUNDS"</code>.
+      <br>d) <strong>Cualquier otro:</strong> <code>"Error: " + (e.reason || e.shortMessage || e.message)</code>.<br>
+      <strong>Dato verificado:</strong> en ethers v6, cuando una transacción minada queda con <code>status 0</code>, <code>tx.wait()</code> no devuelve el recibo: <strong>lanza</strong> <code>CALL_EXCEPTION</code> con el recibo adjunto. Por eso la reversión se atrapa aquí y no en el <code>if (recibo.status === 0)</code>, que queda como red de seguridad.
+    </div>
+  </div>
+
+  <div class="pregunta">
+    <div class="cab"><div class="n">8</div><div class="enun"><span class="tema">TODO 8 · EVENTOS · suscribirEventos()</span>Que el saldo cambie solo</div></div>
+    <div class="just">
+      <strong>Qué escribir:</strong> <code>contrato.on("Transfer", (from, to) =&gt; { if (from === cuenta || to === cuenta) refrescarSaldo(); });</code><br>
+      <strong>Cómo lo compruebo en red local:</strong> con la dApp conectada, en la terminal 2 corran otra vez el script, ahora con la variable <code>FICHA</code>: no despliega nada, solo les acuña 100 FUSB más.
+      <br><code>$env:FICHA="0x5FbDB…"; npx hardhat run scripts/s12/preparar-local.js --network localhost</code>
+      <br>Salida: <code>Acuñados 100 FUSB más a 0x… · Saldo ahora: 1097.5 FUSB</code>. Miren la dApp <strong>sin recargar</strong>: en unos segundos el saldo cambia solo. En la preparación, el saldo mostrado pasó de 1083,99… a 1183,99… en menos de 5 segundos.<br>
+      <strong>En Sepolia:</strong> pídanle a un compañero que les transfiera desde su dApp.
+    </div>
+  </div>
+</section>
+
+<!-- ============================================================ 9 -->
+<section class="sec salto">
+  <div class="sec-cab"><span class="sec-num">09</span><h2>Paso 7 · Provocar los cuatro errores a propósito</h2><span class="lead">15 MIN · 6 CAPTURAS</span></div>
+  <p>Una dApp que solo maneja el camino feliz miente la mitad del tiempo. Aquí se demuestra que la suya no. Tomen una captura de pantalla de cada fila, con la caja «Estado» visible.</p>
+  <table>
+    <tr><th style="width:17%">ESTADO</th><th style="width:43%">CÓMO PROVOCARLO</th><th>QUÉ DEBE MOSTRAR (MENSAJE REAL DE LA SOLUCIÓN)</th></tr>
+    <tr><td class="pk">2 · Sin billetera</td><td>Abrir <code>http://localhost:3000</code> en un navegador o ventana sin MetaMask.</td><td>«No se detecta una billetera. Instala MetaMask y recarga esta página.» y el botón Conectar gris.</td></tr>
+    <tr><td class="pk">1 · Red equivocada</td><td>En MetaMask, cambiar a otra red (p. ej. Sepolia si esperan 31337). La página se recarga sola (evento <code>chainChanged</code>); pulsen Conectar otra vez.</td><td>«Estás en la red equivocada. Cambia a … en la billetera y reconecta.» y el botón Enviar desactivado.</td></tr>
+    <tr><td class="pk">3 · Rechazo</td><td>Llenar destino y monto, Enviar, y en la ventana de MetaMask pulsar <strong>Rechazar</strong>.</td><td>«Rechazaste la transacción en la billetera.» y el botón Enviar vuelve a estar activo.</td></tr>
+    <tr><td class="pk">4 · Revertida</td><td>Transferir más FUSB de los que tienen, p. ej. <code>5000000</code>.</td><td>«La transacción se revirtió al simularla, antes de firmar (no se gastó gas). Motivo: execution reverted (unknown custom error)». MetaMask ni siquiera se abre.</td></tr>
+    <tr><td class="pk">Pendiente</td><td>En Sepolia, capturar justo después de confirmar en MetaMask. En local es instantáneo: capturen el amarillo «Confirma la transacción en la billetera…» antes de confirmar.</td><td>Caja amarilla, con el hash cuando ya fue enviada.</td></tr>
+    <tr><td class="pk">Confirmada</td><td>Una transferencia normal.</td><td>«¡Listo! Transferencia confirmada en el bloque N.» en verde.</td></tr>
+  </table>
+  <div class="caja">
+    <div class="caja-et">POR QUÉ «UNKNOWN CUSTOM ERROR»</div>
+    <p>La FichaUSB revierte con un error personalizado de OpenZeppelin, <code>ERC20InsufficientBalance(sender, balance, needed)</code>. Como el ABI de la dApp no lo declara, ethers no sabe decodificarlo. <strong>Reto opcional:</strong> agreguen al ABI la línea <code>"error ERC20InsufficientBalance(address sender, uint256 balance, uint256 needed)"</code> y miren cómo cambia el motivo. Con MetaMask real el texto puede variar un poco según la versión; lo que se evalúa es que se clasifique como revertida.</p>
+  </div>
+  <div class="caja alerta">
+    <div class="caja-et">¿Y UNA REVERTIDA YA MINADA?</div>
+    <p>Pasa cuando la simulación sale bien pero la ejecución real falla (el estado cambió entre medio), o cuando alguien fuerza el envío. En la red local, Hardhat rechaza incluso las transacciones forzadas que revertirían, así que ese caso se ve mejor en Sepolia. Su TODO 7 ya lo cubre: <code>CALL_EXCEPTION</code> con <code>e.receipt</code>.</p>
+  </div>
+</section>
+
+<!-- ============================================================ 10 -->
+<section class="sec">
+  <div class="sec-cab"><span class="sec-num">10</span><h2>Cómo saber que terminaron</h2></div>
+  <ul>
+    <li>Ninguna acción muestra ya «Falta completar el TODO…».</li>
+    <li>Conectan, ven su saldo, transfieren y el saldo baja; el mensaje final incluye el número de bloque.</li>
+    <li>Tienen las seis capturas de la sección 9.</li>
+    <li>El saldo cambió sin recargar cuando alguien más les transfirió o les acuñó.</li>
+    <li>Si la guardaron en el repositorio, <code>git status</code> no muestra ningún archivo con claves.</li>
+  </ul>
+  <p>Si quieren comparar con una solución, pídanla al docente después de entregar: la dApp de referencia completa existe y es la que se usó para verificar cada salida de esta guía.</p>
+</section>
+
+<!-- ============================================================ 11 -->
+<section class="sec salto">
+  <div class="sec-cab"><span class="sec-num">11</span><h2>Errores frecuentes</h2><span class="lead">CASI TODO SE RESUELVE AQUÍ</span></div>
+  <table>
+    <tr><th style="width:38%">SÍNTOMA</th><th>CAUSA Y SOLUCIÓN</th></tr>
+    <tr><td class="pk">«No se detecta una billetera» teniendo MetaMask</td><td>Abrieron el archivo con doble clic (<code>file://</code>). Sírvanlo con <code>npx serve .</code> o <code>python -m http.server</code> (paso 2).</td></tr>
+    <tr><td class="pk"><code>ethers is not defined</code> en la consola</td><td>No cargó ethers desde jsDelivr: sin internet o bloqueado. Recarguen con conexión; la primera carga necesita internet, luego queda en caché.</td></tr>
+    <tr><td class="pk"><code>could not decode result data (value="0x")</code></td><td>En <code>DIRECCION_FICHA</code> no hay contrato en ESA red: dirección mal copiada, red equivocada, o reiniciaron el nodo. Corran <code>comprobar-ficha.js</code>.</td></tr>
+    <tr><td class="pk">Siempre dice «red equivocada»</td><td><code>CHAIN_ID_SEPOLIA</code> no coincide con la red de MetaMask, o le falta la <code>n</code> (BigInt). 31337n en local, 11155111n en Sepolia.</td></tr>
+    <tr><td class="pk">MetaMask: «nonce too high» o transacciones atascadas en local</td><td>Reiniciaron el nodo y MetaMask recuerda la cadena vieja. Borren los datos de actividad de la cuenta en la configuración avanzada de MetaMask.</td></tr>
+    <tr><td class="pk">MetaMask no se abre al pulsar Enviar</td><td>Si la caja dice «revertida al simularla», es lo esperado (monto mayor al saldo). Si no dice nada, miren la consola: probablemente un error de sintaxis en su TODO 6.</td></tr>
+    <tr><td class="pk">Todo error sale como «sin clasificar todavía, TODO 7»</td><td>Aún no completaron <code>manejarError</code>, o el orden de los <code>if</code> está mal: el rechazo va antes que la reversión.</td></tr>
+    <tr><td class="pk">El saldo no se actualiza solo</td><td>Falta <code>suscribirEventos()</code> después de conectar (TODO 4) o el cuerpo del TODO 8.</td></tr>
+    <tr><td class="pk">Saldo con muchos decimales raros o <code>1e+21</code></td><td>Usaron <code>Number</code> o <code>toString</code> en vez de <code>ethers.formatUnits(bruto, decimales)</code>.</td></tr>
+    <tr><td class="pk"><code>invalid BigNumberish string: Cannot convert 2.5 to a BigInt</code></td><td>Pasaron el texto del monto directo a <code>transfer</code>. Conviértanlo: <code>ethers.parseUnits(monto, decimales)</code>.</td></tr>
+    <tr><td class="pk"><code>invalid FixedNumber string value</code></td><td>El monto llegó con coma decimal («2,5»). Escríbanlo con punto: <code>2.5</code>.</td></tr>
+    <tr><td class="pk"><code>npx serve</code> no se deja instalar</td><td>Usen <code>python -m http.server 8000</code>.</td></tr>
+    <tr><td class="pk"><code>insufficient funds</code> en red local</td><td>El script mandó el ETH a otra dirección: revisen <code>DESTINO</code> y que MetaMask esté en la cuenta correcta.</td></tr>
+  </table>
+</section>
+
+<!-- ============================================================ 12 -->
+<section class="sec">
+  <div class="sec-cab"><span class="sec-num">12</span><h2>Preguntas de reflexión</h2><span class="lead">SE RESPONDEN MIRANDO SU PROPIA DAPP</span></div>
+  <p>Cada respuesta debe citar algo que ustedes vieron: un hash, un número de bloque, una línea de su código, un mensaje de su pantalla.</p>
+  <ol>
+    <li><strong>Dos esperas.</strong> Anoten, de una transferencia suya, el hash que se mostró en amarillo y el bloque que se mostró en verde. ¿Qué línea de su código produjo cada mensaje, y qué había pasado en la cadena en cada momento?</li>
+    <li><strong>Unidades.</strong> En la salida de <code>comprobar-ficha.js</code>, ¿qué número exacto es el «saldo bruto»? ¿Qué número exacto viajó a la cadena cuando transfirieron 2,5 FUSB, y qué función lo produjo?</li>
+    <li><strong>Revertida sin gas.</strong> Al provocar el estado 4, ¿se abrió MetaMask? ¿Se gastó ETH? Expliquen quién detectó la reversión y en qué momento (pista: <code>estimateGas</code>).</li>
+    <li><strong>Qué NO está descentralizado.</strong> Dibujen la cadena de piezas de SU dApp (servidor local, MetaMask, RPC, nodo, contrato). ¿Cuál de ellas, si cae, impide usarla, y cuál no afecta a los saldos? ¿Qué cambiarían para publicarla de verdad?</li>
+    <li><strong>Eventos.</strong> ¿Cuánto tardó su dApp en reflejar la transferencia o el acuñado externo? ¿Qué pasaría con el saldo mostrado si quitan <code>suscribirEventos()</code>?</li>
+  </ol>
+</section>
+
+<!-- ============================================================ 13 -->
+<section class="sec salto">
+  <div class="sec-cab"><span class="sec-num">13</span><h2>Lista de chequeo de entrega</h2></div>
+  <table>
+    <tr><th style="width:6%">✓</th><th>ÍTEM</th></tr>
+    <tr><td>☐</td><td><code>index.html</code> con los 8 TODO completos, en el repositorio del equipo.</td></tr>
+    <tr><td>☐</td><td>Captura 1 · sin billetera.</td></tr>
+    <tr><td>☐</td><td>Captura 2 · red equivocada.</td></tr>
+    <tr><td>☐</td><td>Captura 3 · rechazo del usuario.</td></tr>
+    <tr><td>☐</td><td>Captura 4 · transacción revertida.</td></tr>
+    <tr><td>☐</td><td>Captura 5 · pendiente (amarillo).</td></tr>
+    <tr><td>☐</td><td>Captura 6 · confirmada (verde, con bloque) y el hash de esa transacción (en Sepolia, enlace al explorador).</td></tr>
+    <tr><td>☐</td><td>Evidencia de actualización por evento (dos capturas: antes y después, sin recargar).</td></tr>
+    <tr><td>☐</td><td>Respuestas a las cinco preguntas de la sección 12.</td></tr>
+    <tr><td>☐</td><td>Ninguna clave privada, frase semilla ni URL de RPC con clave en el repositorio (<code>git status</code> antes del push).</td></tr>
+  </table>
+</section>
+
+<!-- ============================================================ 14 -->
+<section class="sec">
+  <div class="sec-cab"><span class="sec-num">14</span><h2>Rúbrica</h2></div>
+  <table>
+    <tr><th style="width:20%">CRITERIO</th><th style="width:8%">PESO</th><th>EXCELENTE (5,0)</th><th>ACEPTABLE (3,5)</th><th>INSUFICIENTE (&lt; 3,0)</th></tr>
+    <tr><td class="pk">Código</td><td>25 %</td><td>Los 8 TODO completos; montos siempre como BigInt; botón desactivado mientras se envía.</td><td>Funciona, con algún atajo (p. ej. <code>Number</code> en un monto).</td><td>Faltan TODO o la dApp no conecta.</td></tr>
+    <tr><td class="pk">Transferencia</td><td>20 %</td><td>Confirmada, con hash verificable en Sepolia.</td><td>Confirmada solo en red local.</td><td>Sin transferencia.</td></tr>
+    <tr><td class="pk">Estados</td><td>35 %</td><td>Seis capturas; cada error con su mensaje propio y el estado 4 distingue simulación de minada.</td><td>Cuatro o cinco estados bien manejados.</td><td>Menos de cuatro, o mensajes genéricos.</td></tr>
+    <tr><td class="pk">Eventos</td><td>10 %</td><td>El saldo cambia solo, con evidencia.</td><td>Funciona pero sin evidencia clara.</td><td>No funciona.</td></tr>
+    <tr><td class="pk">Reflexión</td><td>10 %</td><td>Cinco respuestas con datos propios.</td><td>Correctas pero genéricas.</td><td>Faltan o son incorrectas.</td></tr>
+  </table>
+</section>
+
+<!-- ============================================================ 15 -->
+<section class="sec" style="break-inside:avoid">
+  <div class="sec-cab"><span class="sec-num">15</span><h2>Referencias</h2></div>
+  <ul>
+    <li>ethers v6, documentación: <code>docs.ethers.org/v6/</code></li>
+    <li>EIP-1193, <em>Ethereum Provider JavaScript API</em> (códigos de error como 4001). <code>eips.ethereum.org/EIPS/eip-1193</code></li>
+    <li>EIP-6963, <em>Multi Injected Provider Discovery</em> (Final). <code>eips.ethereum.org/EIPS/eip-6963</code></li>
+    <li>MetaMask, documentación para desarrolladores. <code>docs.metamask.io</code></li>
+    <li>Hardhat 3, <em>hardhat node</em> y redes. <code>hardhat.org/docs</code></li>
+    <li>wagmi y RainbowKit (para el proyecto). <code>wagmi.sh</code> · <code>rainbowkit.com</code></li>
+  </ul>
+</section>
+
+</body>
+</html>

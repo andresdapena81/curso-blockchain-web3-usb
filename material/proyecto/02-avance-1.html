@@ -1,0 +1,191 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<title>Proyecto · Avance 1</title>
+<!--ESTILOS-->
+</head>
+<body>
+
+<section class="barra">
+  <div class="kicker">PROYECTO INTEGRADOR · ENTREGA 2 DE 4 · SESIÓN 13 · 10 % DE LA NOTA FINAL</div>
+  <h1>AVANCE 1:<br>CONTRATOS, PRUEBAS<br>Y UN REPO <em>QUE CORRE</em></h1>
+  <div class="sub">Qué se entrega, cómo se califica, la plantilla del README y la lista pública de preguntas<br>de la revisión técnica. Léanlo completo antes de la Sesión 13 y prepárense con él.</div>
+</section>
+
+<dl class="datos">
+  <div><dt>MODALIDAD</dt><dd>Equipo de 3<br>(nota grupal + en vivo)</dd></div>
+  <div><dt>CUÁNDO</dt><dd>Sesión 13<br>revisión en clase</dd></div>
+  <div><dt>PESO</dt><dd>10 % de la<br>nota final</dd></div>
+  <div><dt>META</dt><dd>Sepolia + ≥ 80 %<br>+ README</dd></div>
+</dl>
+
+<div class="caja clave">
+  <div class="caja-et">EN UNA FRASE</div>
+  <p>El Avance 1 demuestra que la <strong>capa de contratos</strong> de su proyecto existe, está probada y cualquiera puede reproducirla: contratos <strong>desplegados y verificados en Sepolia</strong>, una suite de pruebas con <strong>cobertura de líneas ≥ 80 %</strong> y un <strong>repositorio documentado</strong> que otra persona puede clonar y correr sin preguntarles nada. El frontend completo NO es parte de esta entrega: es el Avance 2 (Sesión 16).</p>
+</div>
+
+<!-- ============================================================ 1 -->
+<section class="sec">
+  <div class="sec-cab"><span class="sec-num">01</span><h2>Qué se entrega</h2><span class="lead">TRES COMPONENTES</span></div>
+
+  <table>
+    <tr><th style="width:22%">COMPONENTE</th><th style="width:44%">REQUISITO VERIFICABLE</th><th>CÓMO LO COMPRUEBA EL DOCENTE</th></tr>
+    <tr><td class="pk">1 · Contratos en Sepolia</td><td>Todos los contratos del proyecto desplegados en Sepolia con Hardhat Ignition y <strong>verificados</strong>: el código fuente se lee en Etherscan.</td><td>Abre los enlaces del README. En la pestaña <em>Contract</em> debe aparecer la marca de verificado.</td></tr>
+    <tr><td class="pk">2 · Suite de pruebas</td><td>Pruebas automatizadas con <code>npx hardhat test --coverage</code> que cubren <strong>≥ 80 % de las líneas</strong> de SUS contratos, incluidos casos de reversión, límites y eventos.</td><td>Les pide correr la cobertura en vivo y señalar una línea no cubierta.</td></tr>
+    <tr><td class="pk">3 · Repositorio documentado</td><td>README según la plantilla de la sección 4, sin secretos, con <code>package-lock.json</code>, instrucciones que funcionan desde cero y el análisis de Slither documentado.</td><td>Clona el repositorio en una carpeta nueva y sigue el README al pie de la letra.</td></tr>
+  </table>
+
+  <div style="break-inside:avoid">
+  <h3 style="font-size:10.5pt;margin:4mm 0 2mm">Cómo se entrega</h3>
+  <ol>
+    <li>Etiqueten el commit que se revisa y súbanlo: <code>git tag avance-1</code> y <code>git push origin avance-1</code>.</li>
+    <li>Registren en el formulario del curso: enlace al repositorio, nombre de la etiqueta, direcciones de los contratos en Sepolia y los tres integrantes.</li>
+    <li>Plazo: el día de la Sesión 13, antes de las 23:59. Lo que se revisa es el commit etiquetado; cambios posteriores no cuentan.</li>
+  </ol>
+  </div>
+
+  <div class="caja alerta">
+    <div class="caja-et">QUÉ NO ES ESTA ENTREGA</div>
+    <p>No es el frontend terminado (Avance 2, Sesión 16). No cuenta la cobertura de librerías externas como OpenZeppelin: solo la de <strong>sus</strong> contratos. Y no se aceptan contratos desplegados «a mano» desde Remix sin un módulo de Ignition en el repositorio: el despliegue tiene que ser reproducible.</p>
+  </div>
+</section>
+
+<!-- ============================================================ 2 -->
+<section class="sec">
+  <div class="sec-cab"><span class="sec-num">02</span><h2>Rúbrica</h2><span class="lead">ESCALA DE 0 A 5,0</span></div>
+
+  <p>Deriva de la rúbrica final del proyecto (plan de estudio, sección 8): los criterios «Pruebas y despliegue» y «Sustentación y documentación», aplicados a lo que existe en este punto del semestre.</p>
+
+  <table>
+    <tr><th style="width:18%">CRITERIO</th><th style="width:7%">PESO</th><th style="width:25%">EXCELENTE (5,0)</th><th style="width:25%">ACEPTABLE (3,5)</th><th>INSUFICIENTE (&lt; 3,0)</th></tr>
+    <tr><td class="pk">Contratos desplegados y verificados</td><td>30 %</td><td>Todos desplegados con Ignition y verificados; direcciones y enlaces en el README; el código desplegado coincide con el del commit etiquetado.</td><td>Desplegados y verificados, pero sin Ignition o con direcciones que hay que buscar.</td><td>Algún contrato sin desplegar o sin verificar.</td></tr>
+    <tr><td class="pk">Pruebas y cobertura</td><td>35 %</td><td>≥ 80 % de líneas; cada error personalizado y cada modificador de acceso tiene una prueba de reversión; se prueban eventos y límites (cero, máximo, tiempo).</td><td>≥ 80 % de líneas, pero casi todo son casos felices.</td><td>Menos de 60 %, pruebas que fallan o que no prueban nada (sin <code>expect</code>).</td></tr>
+    <tr><td class="pk">Repositorio y README</td><td>25 %</td><td>Se instala, prueba y despliega siguiendo el README sin ayuda; sin secretos; Slither documentado en <code>docs/SEGURIDAD.md</code>; lo centralizado declarado.</td><td>Funciona con uno o dos tropiezos menores; documentación incompleta.</td><td>No arranca siguiendo el README, o hay una clave o URL con API key en el historial.</td></tr>
+    <tr><td class="pk">Revisión técnica en vivo</td><td>10 %</td><td>Los tres integrantes responden con solvencia sobre cualquier parte.</td><td>Responde bien una sola persona del equipo.</td><td>Nadie explica su propio código.</td></tr>
+  </table>
+
+  <div class="caja peligro">
+    <div class="caja-et">DOS REGLAS QUE NO ADMITEN EXCEPCIÓN</div>
+    <p><strong>1.</strong> Una clave privada, una frase semilla o una URL de RPC con API key en cualquier commit del repositorio deja el criterio «Repositorio y README» en 0,0, aunque después se haya borrado: sigue en la historia de Git. Los secretos van solo en el keystore de Hardhat (<code>npx hardhat keystore set …</code>).<br><strong>2.</strong> Ningún dato personal en cadena (Ley 1581 de 2012). Si su proyecto maneja documentos o personas, en la cadena va solo un hash.</p>
+  </div>
+</section>
+
+<!-- ============================================================ 3 -->
+<section class="sec">
+  <div class="sec-cab"><span class="sec-num">03</span><h2>Lista de chequeo antes de entregar</h2><span class="lead">MÁRQUENLA EN EQUIPO</span></div>
+
+  <table>
+    <tr><th style="width:8%">✓</th><th>ÍTEM</th></tr>
+    <tr><td>☐</td><td><code>git clone</code> en una carpeta nueva → <code>npm install</code> → <code>npx hardhat test</code> pasa completo. Lo hace un integrante distinto al que más programó.</td></tr>
+    <tr><td>☐</td><td><code>npx hardhat test --coverage</code> muestra ≥ 80 % de líneas en cada contrato propio. Capturaron la tabla para el README.</td></tr>
+    <tr><td>☐</td><td>Cada <code>error</code> personalizado y cada modificador (<code>onlyOwner</code>, <code>whenNotPaused</code>…) tiene al menos una prueba con <code>revertedWithCustomError</code>.</td></tr>
+    <tr><td>☐</td><td>Hay al menos una prueba de evento (<code>.to.emit(...).withArgs(...)</code>) por cada evento que la interfaz vaya a leer.</td></tr>
+    <tr><td>☐</td><td>Slither corrido; cada hallazgo alto o medio está corregido o justificado en <code>docs/SEGURIDAD.md</code>.</td></tr>
+    <tr><td>☐</td><td>Módulo(s) de Ignition en <code>ignition/modules/</code>; parámetros de Sepolia en un JSON sin secretos.</td></tr>
+    <tr><td>☐</td><td>Contratos verificados en Sepolia; direcciones y enlaces en el README; bloque de despliegue anotado (sirve para <code>queryFilter</code>).</td></tr>
+    <tr><td>☐</td><td><code>package-lock.json</code> en el repositorio; <code>.gitignore</code> con <code>node_modules</code>, <code>artifacts</code>, <code>cache</code>, <code>coverage</code>, <code>.env</code>.</td></tr>
+    <tr><td>☐</td><td><code>git log -p | findstr /i "mnemonic alchemy.com/v2 infura.io/v3"</code> (Windows) o <code>git log -p | grep -iE "mnemonic|alchemy.com/v2|infura.io/v3"</code> no muestra nada, y ninguna cadena <code>0x</code> de 64 caracteres del historial es una clave (los hashes de transacción también miden 64: revísenlas).</td></tr>
+    <tr><td>☐</td><td>El README declara qué partes quedan centralizadas (RPC, hosting, indexador, administrador del contrato).</td></tr>
+    <tr><td>☐</td><td>Etiqueta <code>avance-1</code> creada y empujada; formulario enviado con las direcciones.</td></tr>
+  </table>
+</section>
+
+<!-- ============================================================ 4 -->
+<section class="sec salto">
+  <div class="sec-cab"><span class="sec-num">04</span><h2>Plantilla de README para un proyecto Web3</h2><span class="lead">CÓPIENLA A README.md</span></div>
+
+  <p>Reemplacen lo que está entre <code>&lt;…&gt;</code>. No borren secciones: si una no aplica, escriban «No aplica, porque…». El README es lo primero que el docente, el equipo auditor y un futuro empleador leen.</p>
+
+  <pre># &lt;Nombre del proyecto&gt;
+
+&lt;Una frase: qué problema resuelve y para quién.&gt;
+
+## 1. Por qué blockchain (y por qué no una base de datos)
+&lt;3-5 líneas del anteproyecto: contra quién se protege el sistema, qué
+ propiedad aporta la cadena, qué alternativa centralizada se descartó y por qué.&gt;
+
+## 2. Arquitectura
+&lt;Diagrama o lista: contratos, quién llama a qué, qué emite cada evento.&gt;
+| Contrato | Responsabilidad | Patrones aplicados |
+|---|---|---|
+
+## 3. Despliegue en Sepolia
+| Contrato | Dirección | Etherscan (verificado) | Bloque de despliegue |
+|---|---|---|---|
+| &lt;Nombre&gt; | 0x… | https://sepolia.etherscan.io/address/0x…#code | &lt;n&gt; |
+
+## 4. Requisitos
+- Node.js 22 LTS, Git. Versiones fijadas en package.json / package-lock.json.
+
+## 5. Instalar y probar
+    npm install
+    npx hardhat test
+    npx hardhat test --coverage
+
+&lt;Pegar aquí la tabla de cobertura: archivo · % de líneas.&gt;
+
+## 6. Desplegar
+    npx hardhat keystore set SEPOLIA_RPC_URL
+    npx hardhat keystore set SEPOLIA_PRIVATE_KEY
+    npx hardhat keystore set ETHERSCAN_API_KEY
+    npx hardhat ignition deploy ignition/modules/&lt;Modulo&gt;.js --network sepolia --verify
+
+## 7. Seguridad
+- Resultado de Slither y qué se hizo con cada hallazgo: ver docs/SEGURIDAD.md
+- Roles con privilegios (owner, pausador…) y qué pueden hacer.
+- Riesgos conocidos y mitigaciones.
+
+## 8. Qué queda centralizado
+&lt;RPC, hosting del frontend, gateway IPFS, indexador, cuenta administradora…
+ y cómo se descentralizaría en una versión real.&gt;
+
+## 9. Equipo y uso de IA
+&lt;Integrantes y rol. Declaración de las herramientas de IA usadas y para qué.&gt;
+
+&gt; Material de curso, sin auditar. Solo redes de prueba; nunca fondos reales.</pre>
+</section>
+
+<!-- ============================================================ 5 -->
+<section class="sec salto">
+  <div class="sec-cab"><span class="sec-num">05</span><h2>La revisión técnica: las preguntas, públicas</h2><span class="lead">PREPÁRENLAS</span></div>
+
+  <p>En la Sesión 13 el docente pasa por cada equipo unos cinco minutos, con el repositorio, la terminal y Etherscan abiertos. Hará <strong>algunas</strong> de estas preguntas, a <strong>cualquiera</strong> de los tres integrantes. No hay preguntas sorpresa: todas están aquí. Quien construyó su parte, las responde sin esfuerzo; quien no, se nota en la primera.</p>
+
+  <table>
+    <tr><th style="width:6%">#</th><th style="width:24%">TEMA</th><th>PREGUNTA</th></tr>
+    <tr><td class="pk">1</td><td>Contrato</td><td>Abran su contrato verificado en Etherscan. ¿Qué hace esta función, línea por línea? ¿Quién puede llamarla?</td></tr>
+    <tr><td class="pk">2</td><td>Contrato</td><td>¿Qué patrón de diseño aplicaron (retiro, control de acceso, pausa, máquina de estados…) y qué problema concreto resuelve en su proyecto?</td></tr>
+    <tr><td class="pk">3</td><td>Pruebas</td><td>Corran la cobertura ahora. ¿Qué línea NO está cubierta? ¿Por qué aceptan ese riesgo o cuándo la cubrirán?</td></tr>
+    <tr><td class="pk">4</td><td>Pruebas</td><td>Muéstrenme una prueba que espere una reversión. ¿Qué error personalizado verifica y qué pasaría si la condición no existiera?</td></tr>
+    <tr><td class="pk">5</td><td>Pruebas</td><td>¿Qué caso límite probaron (cero, máximo, fin de plazo, llamada repetida)? ¿Cuál se les ocurre ahora que no probaron?</td></tr>
+    <tr><td class="pk">6</td><td>Seguridad</td><td>¿Qué dijo Slither? Elijan un hallazgo y expliquen qué hicieron con él.</td></tr>
+    <tr><td class="pk">7</td><td>Seguridad</td><td>¿Qué cuenta tiene privilegios en su contrato? Si esa clave se filtra, ¿qué puede hacer un atacante?</td></tr>
+    <tr><td class="pk">8</td><td>Despliegue</td><td>¿Cómo desplegaron? Muéstrenme el módulo de Ignition. Si lo corro otra vez, ¿qué pasa?</td></tr>
+    <tr><td class="pk">9</td><td>Despliegue</td><td>Muéstrenme una transacción real de su contrato en Sepolia. ¿Qué evento emitió y qué dicen sus argumentos?</td></tr>
+    <tr><td class="pk">10</td><td>Repositorio</td><td>Si clono el repositorio ahora, ¿qué comando corro primero? ¿Dónde están las claves y cómo sé que no están en Git?</td></tr>
+    <tr><td class="pk">11</td><td>Diseño</td><td>¿Qué parte de su proyecto NO está descentralizada? ¿Lo dice el README?</td></tr>
+    <tr><td class="pk">12</td><td>Diseño</td><td>¿Qué dato de su sistema NO debe ir en la cadena, y dónde lo guardan? (Pista: Ley 1581.)</td></tr>
+  </table>
+
+  <div class="caja clave">
+    <div class="caja-et">CÓMO PREPARARSE (15 MINUTOS EN EQUIPO)</div>
+    <p>Cada integrante responde en voz alta tres preguntas al azar sobre la parte que NO programó. Si alguno se queda en blanco, esa es la parte que el equipo tiene que explicarse antes de la sesión. La nota de la revisión es del equipo, pero se construye con las respuestas de cada uno.</p>
+  </div>
+</section>
+
+<!-- ============================================================ 6 -->
+<section class="sec">
+  <div class="sec-cab"><span class="sec-num">06</span><h2>Errores que más puntos cuestan</h2></div>
+  <table>
+    <tr><th style="width:38%">ERROR</th><th>POR QUÉ CUESTA Y CÓMO EVITARLO</th></tr>
+    <tr><td class="pk">«En mi máquina sí corre»</td><td>El README omite un paso (una variable del keystore, una versión de Node). Hagan la prueba del clon limpio con otro integrante.</td></tr>
+    <tr><td class="pk">Cobertura inflada</td><td>Pruebas que llaman funciones sin <code>expect</code>: suben el porcentaje y no prueban nada. En la revisión se nota en la pregunta 4.</td></tr>
+    <tr><td class="pk">Verificado, pero otro código</td><td>Se desplegó una versión y luego se cambió el contrato. Vuelvan a desplegar desde el commit etiquetado.</td></tr>
+    <tr><td class="pk">Secretos en la historia</td><td>Un <code>.env</code> subido y luego borrado sigue en Git. Si pasó: roten la clave (billetera nueva del curso) y reescriban la historia con ayuda del docente.</td></tr>
+    <tr><td class="pk">Todo en el storage</td><td>Arreglos que guardan historial «para la interfaz». Emitan eventos y léanlos con <code>queryFilter</code> (Sesión 13).</td></tr>
+  </table>
+</section>
+
+</body>
+</html>

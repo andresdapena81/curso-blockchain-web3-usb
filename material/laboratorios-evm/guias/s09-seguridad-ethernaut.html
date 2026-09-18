@@ -1,0 +1,314 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<title>Guía · Laboratorio 09</title>
+<!--ESTILOS-->
+</head>
+<body>
+
+<section class="barra">
+  <div class="kicker">LABORATORIO 09 · SEGURIDAD · REENTRANCY, ETHERNAUT Y AUDITORÍA CRUZADA</div>
+  <h1>ROMPER PARA<br>APRENDER A <em>DEFENDER</em></h1>
+  <div class="sub">Explotar un banco en vivo, ganar cinco niveles de Ethernaut hackeándolos, correr Slither<br>y auditar el contrato de otro equipo. Después, el parcial.</div>
+</section>
+
+<dl class="datos">
+  <div><dt>MODALIDAD</dt><dd>Ethernaut y auditoría<br>en parejas · parcial individual</dd></div>
+  <div><dt>REQUISITO</dt><dd>MetaMask (curso) en Sepolia<br>+ Python 3.10 para Slither</dd></div>
+  <div><dt>DURACIÓN</dt><dd>Bloque B ≈ 35 min<br>+ trabajo autónomo</dd></div>
+  <div><dt>META</dt><dd>5 niveles + informe<br>de auditoría</dd></div>
+</dl>
+
+<div class="caja peligro">
+  <div class="caja-et">LA REGLA DE ORO DE HOY</div>
+  <p>Todo lo de esta sesión ocurre en <strong>redes de prueba (Sepolia) o en la red local</strong>, jamás con dinero real. La billetera es la <strong>del curso</strong>, sin fondos reales. La frase semilla no se comparte con nadie —tampoco con el docente—. Estos contratos son material de clase <strong>sin auditar</strong>: existen para ser rotos y entendidos, nunca para custodiar valor.</p>
+</div>
+
+<!-- ============================================================ 1 -->
+<section class="sec">
+  <div class="sec-cab"><span class="sec-num">01</span><h2>Qué vas a hacer, y por qué</h2><span class="lead">LEER PRIMERO</span></div>
+
+  <p>La seguridad de un contrato es distinta de la de una app web: el código es <strong>inmutable</strong> (no hay parche), <strong>público</strong> (cualquiera lo estudia) y <strong>custodia valor</strong> directamente. Para defender, primero hay que saber atacar. Hoy atacas.</p>
+
+  <table>
+    <tr><th style="width:26%">PARTE</th><th style="width:42%">QUÉ HACES</th><th>RESULTADO DE APRENDIZAJE</th></tr>
+    <tr><td class="pk">0 · Reentrancy en vivo</td><td>Ves cómo un atacante vacía un banco con la prueba ya escrita.</td><td>Entender el ataque de The DAO línea por línea.</td></tr>
+    <tr><td class="pk">1 · Ethernaut</td><td>Ganas 5 niveles explotándolos desde la consola del navegador.</td><td>RA5 · identificar y explotar vulnerabilidades típicas.</td></tr>
+    <tr><td class="pk">2 · Slither</td><td>Corres un analizador estático sobre un contrato y lees su salida.</td><td>RA5 · usar herramientas automáticas de análisis.</td></tr>
+    <tr><td class="pk">3 · Auditoría cruzada</td><td>Lees el contrato de otro equipo y entregas hallazgos clasificados.</td><td>RA5 · remediar; leer código ajeno con criterio.</td></tr>
+  </table>
+
+  <div class="caja">
+    <div class="caja-et">QUÉ SE ENTREGA (EVIDENCIA)</div>
+    <ul>
+      <li><strong>Ethernaut:</strong> una captura de la consola por cada nivel superado (5), y una línea por nivel explicando la vulnerabilidad con tus palabras.</li>
+      <li><strong>Slither:</strong> captura de la salida sobre <code>BancoVulnerable.sol</code> y una frase diciendo qué marcó y por qué.</li>
+      <li><strong>Auditoría cruzada #1:</strong> el informe de 1 a 2 páginas con el formato del documento <em>«Auditoría cruzada»</em> del material del proyecto. Vale el 20 % del segundo corte.</li>
+    </ul>
+  </div>
+  <p>El <strong>parcial práctico</strong> (45 % del segundo corte) es aparte, individual, y se explica en la sección 8.</p>
+</section>
+
+<!-- ============================================================ 2 -->
+<section class="sec salto">
+  <div class="sec-cab"><span class="sec-num">02</span><h2>Parte 0 · Reentrancy en vivo</h2><span class="lead">CON EL DOCENTE</span></div>
+
+  <p>Antes de tocar Ethernaut, mira el ataque completo sobre un contrato de juguete. Todo está en el repositorio de laboratorios. Desde <code>material/laboratorios-evm</code> (o tu copia de trabajo):</p>
+  <pre>npx hardhat test test/s09/Reentrancy.test.js</pre>
+
+  <p>Cinco pruebas cuentan la historia entera:</p>
+  <table>
+    <tr><th style="width:34%">CONTRATO</th><th>QUÉ DEMUESTRA</th></tr>
+    <tr><td class="pk">BancoVulnerable</td><td>Tres clientes honestos depositan 10 ETH. El <code>Atacante</code> deposita 1 y sale con <strong>11</strong>. El banco queda en cero y los saldos honestos quedan impagables.</td></tr>
+    <tr><td class="pk">BancoSeguro</td><td>El mismo ataque revierte en cadena y el banco conserva sus 10 ETH. Corrección por CEI + <code>ReentrancyGuard</code>.</td></tr>
+  </table>
+
+  <p>Lee <code>contracts/s09/BancoVulnerable.sol</code>, <code>Atacante.sol</code> y <code>BancoSeguro.sol</code> mientras corre. El fallo está en el <strong>orden</strong>: el banco vulnerable envía el ETH <em>antes</em> de poner el saldo en cero, así que el <code>receive()</code> del atacante vuelve a entrar mientras su saldo sigue en pie.</p>
+
+  <div class="caja">
+    <div class="caja-et">UN DETALLE FINO QUE VALE LA PENA NOTAR</div>
+    <p>Contra <code>BancoSeguro</code>, el ataque no revierte con <code>ReentrancyGuardReentrantCall</code> sino con <code>EnvioFallido</code>. La reentrada choca con el guard dentro del <code>receive()</code> del atacante, ese <code>receive()</code> revierte, y eso hace fallar el envío del banco. La cascada deja todo intacto. El error que llega arriba es el del envío, no el del guard.</p>
+  </div>
+</section>
+
+<!-- ============================================================ 3 -->
+<section class="sec salto">
+  <div class="sec-cab"><span class="sec-num">03</span><h2>Ethernaut · cómo se juega</h2><span class="lead">LA CONSOLA ES TU TERMINAL</span></div>
+
+  <p><strong>Ethernaut</strong>, de OpenZeppelin, es un CTF: cada nivel es un contrato con una vulnerabilidad y «ganas» explotándolo. No se programa en una IDE aparte: se juega desde la <strong>consola del navegador</strong>, hablándole al contrato por su ABI.</p>
+
+  <div class="pregunta">
+    <div class="cab"><div class="n">A</div><div class="enun"><span class="tema">PREPARACIÓN</span>Billetera, red y fondos</div></div>
+    <div class="just">
+      <strong>1.</strong> Abre <code>https://ethernaut.openzeppelin.com</code> y conecta la <strong>MetaMask del curso</strong>.<br>
+      <strong>2.</strong> Selecciona la red <strong>Sepolia</strong> en MetaMask. Ethernaut soporta también Optimism Sepolia, Arbitrum Sepolia, Holesky y Amoy; si eliges una no soportada, el juego te lleva a Sepolia por defecto.<br>
+      <strong>3.</strong> Necesitas algo de ETH de prueba para el gas. Usa el faucet de la unidad o pide al docente que te transfiera desde la wallet institucional.<br>
+      <strong>Prerrequisito:</strong> el nivel 0 (<strong>Hello Ethernaut</strong>) quedó de trabajo de la Sesión 8. Hoy empiezas en Fallback.
+    </div>
+  </div>
+
+  <div class="pregunta">
+    <div class="cab"><div class="n">B</div><div class="enun"><span class="tema">EL CICLO DE CADA NIVEL</span>Instancia, inspección, interacción, envío</div></div>
+    <div class="just">
+      <strong>1. Abre la consola.</strong> <code>Herramientas → Herramientas de desarrollo → Console</code> (o F12). Verás mensajes del juego; uno es tu dirección (<code>player</code>).<br>
+      <strong>2. Pide una instancia.</strong> Botón <strong>«Get New Instance»</strong>: Ethernaut despliega un contrato solo para ti y lo expone como la variable <code>contract</code>. Autoriza la transacción en MetaMask.<br>
+      <strong>3. Inspecciona.</strong> Los comandos clave:
+      <br>· <code>player</code> — tu dirección. · <code>await getBalance(player)</code> — tu saldo. · <code>help()</code> — utilidades.
+      <br>· <code>contract</code> — la instancia. · <code>contract.abi</code> — <strong>todas las funciones que puedes llamar</strong>. · <code>await contract.info()</code> — pistas del nivel.<br>
+      <strong>4. Interactúa.</strong> <code>await contract.laFuncion(args)</code> para llamar; <code>contract.sendTransaction({value: toWei("0.001")})</code> para enviar ETH.<br>
+      <strong>5. Envía.</strong> Botón <strong>«Submit instance»</strong>: Ethernaut comprueba si cumpliste el objetivo.
+    </div>
+  </div>
+
+  <div class="caja clave">
+    <div class="caja-et">EL REFLEJO QUE HAY QUE ADQUIRIR</div>
+    <p>Ante cualquier nivel, <strong>lee primero</strong>: el enunciado, <code>contract.abi</code> y el código fuente del nivel (está enlazado en la página, en el ícono de código). La vulnerabilidad casi siempre salta leyendo, antes de tocar nada. Hackear no es adivinar: es entender qué hace el contrato y encontrar la suposición que rompe.</p>
+  </div>
+</section>
+
+<!-- ============================================================ 4 -->
+<section class="sec salto">
+  <div class="sec-cab"><span class="sec-num">04</span><h2>Los cinco niveles · método y pistas</h2><span class="lead">SIN SOLUCIÓN</span></div>
+
+  <p>Aquí <strong>no está la solución</strong>: está el método y unas pistas escalonadas. Léelas en orden y detente en cuanto se te encienda la bombilla. Resuélvelos en este orden (deja Force para el final, porque exige desplegar un contrato).</p>
+
+  <!-- Fallback -->
+  <div class="pregunta">
+    <div class="cab"><div class="n">1</div><div class="enun"><span class="tema">FALLBACK · control de acceso</span>Hazte owner y vacía el contrato</div></div>
+    <div class="just">
+      <strong>Objetivo:</strong> ser <code>owner</code> del contrato y dejar su balance en cero.<br>
+      <strong>Pregunta guía:</strong> ¿de cuántas formas distintas se puede volver uno <code>owner</code> en este contrato? Mira <code>contract.abi</code>: ¿qué funciones cambian <code>owner</code>?<br>
+      <strong>Pista 1:</strong> hay una condición «normal» para ser owner (contribuir más que el dueño, que empieza con 1000 ether) y hay <strong>otra puerta</strong> más barata.<br>
+      <strong>Pista 2:</strong> revisa la función <code>receive()</code>: ¿qué exige exactamente para cambiar el owner? ¿Cuánto ETH y qué condición previa sobre tu <code>contribution</code>?<br>
+      <strong>Pista 3:</strong> primero cumple la condición previa con una contribución mínima (menor que <code>0.001</code> ether), y luego dispara el <code>receive()</code> con un envío directo pequeño. Ya siendo owner, ¿qué función te deja vaciarlo?<br>
+      <strong>Conecta con:</strong> S7 (receive/fallback) y A.8 de hoy (control de acceso mal ubicado).
+    </div>
+  </div>
+
+  <!-- Fallout -->
+  <div class="pregunta">
+    <div class="cab"><div class="n">2</div><div class="enun"><span class="tema">FAL1OUT · el constructor que no lo era</span>Hazte owner</div></div>
+    <div class="just">
+      <strong>Objetivo:</strong> ser <code>owner</code>.<br>
+      <strong>Pregunta guía:</strong> lee los nombres de las funciones en <code>contract.abi</code> con MUCHA atención. ¿Hay alguna que <em>parezca</em> el constructor pero esté escrita como una función pública normal?<br>
+      <strong>Pista 1:</strong> este contrato es de una versión vieja de Solidity, cuando el constructor era una función con el <strong>mismo nombre</strong> del contrato. ¿El nombre coincide <em>exactamente</em>?<br>
+      <strong>Pista 2:</strong> mira el nombre carácter por carácter. ¿Es una «l» o es un «1»? Si no coincide con el nombre del contrato, esa función no es el constructor: es pública y cualquiera puede llamarla.<br>
+      <strong>Pista 3:</strong> llámala.<br>
+      <strong>Conecta con:</strong> S6 (por qué desde 0.4.22 existe la palabra <code>constructor</code>).
+    </div>
+  </div>
+
+  <!-- Token -->
+  <div class="pregunta">
+    <div class="cab"><div class="n">5</div><div class="enun"><span class="tema">TOKEN · desbordamiento aritmético</span>Pasa de 20 a muchísimos tokens</div></div>
+    <div class="just">
+      <strong>Objetivo:</strong> empiezas con 20 tokens; consigue muchos más.<br>
+      <strong>Pregunta guía:</strong> el <code>transfer</code> hace <code>require(balances[msg.sender] - _value >= 0)</code>. Con enteros <strong>sin signo</strong> (<code>uint</code>), ¿ese <code>require</code> puede ser alguna vez falso?<br>
+      <strong>Pista 1:</strong> una resta de <code>uint</code> nunca es negativa. Si restas más de lo que tienes, el número <strong>da la vuelta</strong> (underflow) hasta un valor gigantesco. Este contrato corre en Solidity 0.6, sin la protección de 0.8.<br>
+      <strong>Pista 2:</strong> ¿qué pasa con <code>balances[msg.sender]</code> si transfieres <strong>más de 20</strong> a cualquier otra dirección? El chequeo pasa, y tu saldo desborda.<br>
+      <strong>Pista 3:</strong> transfiere 21 (o más) a una dirección cualquiera distinta de la tuya. Verifica con <code>(await contract.balanceOf(player)).toString()</code>.<br>
+      <strong>Conecta con:</strong> A.10 de hoy y el caso BeautyChain (CVE-2018-10299, abr 2018).
+    </div>
+  </div>
+
+  <!-- Re-entrancy -->
+  <div class="pregunta">
+    <div class="cab"><div class="n">11</div><div class="enun"><span class="tema">RE-ENTRANCY · el robo de The DAO, a mano</span>Vacía el balance del contrato</div></div>
+    <div class="just">
+      <strong>Objetivo:</strong> dejar el balance de la instancia en cero. Es el mismo fallo de la Parte 0, pero lo explotas tú.<br>
+      <strong>Pregunta guía:</strong> en <code>withdraw</code>, ¿en qué orden ocurren el envío de ETH y el descuento del saldo? ¿Qué se ejecuta en tu contrato cuando recibes ese ETH?<br>
+      <strong>Pista 1:</strong> el contrato envía con <code>call{value:...}</code> <strong>antes</strong> de restar tu saldo. Necesitas un <strong>contrato atacante</strong> con un <code>receive()</code> que vuelva a llamar a <code>withdraw</code>.<br>
+      <strong>Pista 2:</strong> primero deposita (con <code>donate</code>) una cantidad que puedas retirar; consulta el balance de la instancia con <code>await getBalance(instance)</code> para no pedir más de lo que hay.<br>
+      <strong>Pista 3:</strong> en el <code>receive()</code> de tu atacante, si aún queda balance en la instancia, vuelve a llamar <code>withdraw</code>. Despliégalo en Remix (Sepolia), pásale la dirección de la instancia, y dispara el ataque. La estructura es idéntica al <code>Atacante.sol</code> de la Parte 0.<br>
+      <strong>Conecta con:</strong> A.3 a A.7 de hoy y The DAO (jun 2016, ~3,6 M ETH).
+    </div>
+  </div>
+
+  <!-- Force -->
+  <div class="pregunta">
+    <div class="cab"><div class="n">7</div><div class="enun"><span class="tema">FORCE · el saldo que no debería poder subir</span>Deja el balance del contrato en positivo</div></div>
+    <div class="just">
+      <strong>Objetivo:</strong> hacer que el balance del contrato sea mayor que cero. Pero <code>Force</code> no tiene <code>receive</code>, ni <code>fallback</code>, ni funciones <code>payable</code>: no acepta ETH por las vías normales.<br>
+      <strong>Pregunta guía:</strong> ¿existe alguna forma de <strong>forzar</strong> ETH hacia un contrato que no quiere recibirlo? ¿Qué le pasa al saldo de un contrato cuando otro se autodestruye apuntándole?<br>
+      <strong>Pista 1:</strong> <code>selfdestruct(objetivo)</code> envía todo el saldo del contrato que se destruye a <code>objetivo</code>, aunque <code>objetivo</code> no tenga forma de recibirlo.<br>
+      <strong>Pista 2:</strong> despliega en Remix un contrato pequeño con un <code>constructor() payable {}</code>, mándale 1 wei al desplegarlo, y dale una función que haga <code>selfdestruct(payable(&lt;dirección de la instancia&gt;))</code>.<br>
+      <strong>Nota de actualidad:</strong> tras Dencun (EIP-6780, mar 2024) <code>selfdestruct</code> ya no borra el contrato salvo en la misma transacción de creación, pero <strong>sigue transfiriendo el saldo</strong>: el patrón «constructor payable + selfdestruct» sigue resolviendo el nivel.<br>
+      <strong>Conecta con:</strong> la lección de que <code>address(this).balance == 0</code> nunca es una invariante segura.
+    </div>
+  </div>
+
+  <div class="caja alerta">
+    <div class="caja-et">TIEMPOS SUGERIDOS (BLOQUE B, ~35 min de Ethernaut)</div>
+    <p>Fallback 5 min · Fal1out 3 min · Token 7 min · Re-entrancy 10-15 min (el más largo, exige desplegar) · Force 8-10 min. Lo que no alcances queda de trabajo autónomo (pregunta de la semana).</p>
+  </div>
+</section>
+
+<!-- ============================================================ 5 -->
+<section class="sec salto">
+  <div class="sec-cab"><span class="sec-num">05</span><h2>Slither · análisis estático</h2><span class="lead">RECOMENDADO</span></div>
+
+  <p><strong>Slither</strong> revisa el código <em>sin ejecutarlo</em> y marca patrones peligrosos en segundos. Es el primer filtro de seguridad, no el último: no entiende la lógica de negocio ni encuentra fallos de diseño nuevos.</p>
+
+  <div class="caja">
+    <div class="caja-et">INSTALACIÓN (REQUIERE PYTHON 3.10 O SUPERIOR)</div>
+    <p>Comprueba primero que tienes Python: <code>python --version</code> (o <code>python3 --version</code>). Luego:</p>
+    <pre>python -m pip install slither-analyzer</pre>
+    <p>Slither necesita el compilador de Solidity en la versión del contrato. La forma limpia de manejarlo es <code>solc-select</code>:</p>
+    <pre>python -m pip install solc-select
+solc-select install 0.8.28
+solc-select use 0.8.28</pre>
+    <p>Si tu sala no permite instalar Python, hay una <strong>extensión de VS Code</strong> de Slither y alternativas web; úsalas y dilo en tu evidencia.</p>
+  </div>
+
+  <p>Corre Slither sobre el banco vulnerable (desde <code>material/laboratorios-evm</code> o tu copia):</p>
+  <pre>slither contracts/s09/BancoVulnerable.sol</pre>
+
+  <p>Esta es la <strong>salida real</strong> (se ejecutó con Slither 0.11.6 + solc 0.8.28):</p>
+  <pre>INFO:Detectors:
+Reentrancy in BancoVulnerable.retirar() (contracts/s09/BancoVulnerable.sol#21-30):
+    External calls:
+    - (ok,None) = address(msg.sender).call{value: monto}()  (#26)
+    State variables written after the call(s):
+    - saldos[msg.sender] = 0  (#29)
+    BancoVulnerable.saldos can be used in cross function reentrancies
+Reference: .../Detector-Documentation#reentrancy-vulnerabilities-1
+INFO:Detectors:
+Low level call in BancoVulnerable.retirar()  (#26)
+Reference: .../Detector-Documentation#low-level-calls
+INFO:Slither: analyzed (1 contracts with 102 detectors), 2 result(s) found</pre>
+
+  <table>
+    <tr><th style="width:34%">HALLAZGO</th><th>CÓMO LEERLO</th></tr>
+    <tr><td class="pk">reentrancy-eth (ALTA)</td><td>El de arriba. Dice exactamente lo mismo que vimos: hay una llamada externa (línea 26) y <strong>después</strong> se escribe el estado (línea 29). Es el fallo. <strong>Actúa sobre él.</strong></td></tr>
+    <tr><td class="pk">low-level-calls (Informativa)</td><td>Marca el uso de <code>call{value:}</code>. No es un bug: es un aviso de que hay una llamada de bajo nivel. Con el patrón de retiro es correcto. <strong>Falso positivo en este contexto.</strong></td></tr>
+  </table>
+
+  <div class="caja clave">
+    <div class="caja-et">LA LECCIÓN: SEPARAR SEÑAL DE RUIDO</div>
+    <p>Corre Slither ahora sobre <code>contracts/s09/BancoSeguro.sol</code> (usa <code>--filter-paths node_modules</code> para ignorar el ruido de OpenZeppelin). Verás que el hallazgo <strong>ALTO desaparece</strong>: solo queda el aviso informativo del <code>call</code>. Esa diferencia —de dos hallazgos a uno informativo— es la prueba de que la corrección funcionó. Saber cuáles hallazgos son reales y cuáles son ruido es justo lo que se evalúa en la auditoría cruzada.</p>
+  </div>
+</section>
+
+<!-- ============================================================ 6 -->
+<section class="sec salto">
+  <div class="sec-cab"><span class="sec-num">06</span><h2>Parte 2 · Auditoría cruzada #1</h2><span class="lead">EN PAREJAS · 20 % DEL CORTE</span></div>
+
+  <p>Cada equipo entrega el contrato principal de su proyecto y recibe el de otro equipo. Media hora para auditarlo con una lista concreta. <strong>Leer código ajeno es parte de la competencia profesional.</strong></p>
+
+  <ol>
+    <li><strong>Recorre la taxonomía</strong> de las ocho vulnerabilidades (A.2 del deck), una por una, contra el contrato recibido. Pregúntate por cada una: ¿aplica aquí? ¿dónde?</li>
+    <li><strong>Pasa Slither</strong> (o la extensión de VS Code). Separa hallazgos reales de falsos positivos, como hiciste en la sección 5.</li>
+    <li><strong>Clasifica cada hallazgo</strong> con severidad (crítica / alta / media / baja / informativa) y la <strong>línea exacta</strong>.</li>
+    <li><strong>Propón la corrección mínima</strong> de cada uno. <strong>No reescribas</strong> el contrato ajeno.</li>
+  </ol>
+
+  <div class="caja">
+    <div class="caja-et">FORMATO, EQUIPOS Y RÚBRICA</div>
+    <p>El <strong>formato de cada hallazgo</strong> (título, severidad con criterios, ubicación, descripción, escenario de explotación y recomendación), <strong>cómo se asignan los equipos</strong>, qué se entrega y la <strong>rúbrica</strong> están en el documento <em>«Auditoría cruzada»</em> (HTML + PDF) del material del proyecto. Se califica la <strong>calidad de la auditoría</strong>, no cuántos fallos tenga el contrato revisado: un informe que dice «no hallé vulnerabilidades explotables; revisé esto y esto» vale.</p>
+  </div>
+</section>
+
+<!-- ============================================================ 7 -->
+<section class="sec">
+  <div class="sec-cab"><span class="sec-num">07</span><h2>Errores frecuentes</h2><span class="lead">CASI TODO SE RESUELVE AQUÍ</span></div>
+  <table>
+    <tr><th style="width:42%">SÍNTOMA</th><th>CAUSA Y SOLUCIÓN</th></tr>
+    <tr><td class="pk">Ethernaut no reconoce <code>contract</code></td><td>No pediste instancia todavía, o la transacción de «Get New Instance» aún no confirmó. Espera unos segundos y vuelve a intentar.</td></tr>
+    <tr><td class="pk">«insufficient funds» al enviar</td><td>No tienes ETH de prueba en Sepolia para el gas. Usa el faucet de la unidad o pide al docente.</td></tr>
+    <tr><td class="pk">Una llamada «pending» que no resuelve en consola</td><td>Expande la promesa o usa <code>await</code> delante (p. ej. <code>await contract.info()</code>).</td></tr>
+    <tr><td class="pk">El exploit de Re-entrancy no vacía todo</td><td>Depositaste/donaste menos que el balance de la instancia, o tu <code>receive()</code> no vuelve a llamar mientras quede balance. Revisa la condición.</td></tr>
+    <tr><td class="pk">Force: «no puedo enviarle ETH»</td><td>Exacto: por eso hay que forzarlo con <code>selfdestruct</code> desde otro contrato, no con un envío normal.</td></tr>
+    <tr><td class="pk">Slither: «solc not found» o versión equivocada</td><td>Instala y fija la versión con <code>solc-select install 0.8.28</code> y <code>solc-select use 0.8.28</code>.</td></tr>
+    <tr><td class="pk">Slither marca decenas de cosas de OpenZeppelin</td><td>Es ruido de las dependencias. Filtra con <code>--filter-paths node_modules</code>.</td></tr>
+  </table>
+</section>
+
+<!-- ============================================================ 8 -->
+<section class="sec">
+  <div class="sec-cab"><span class="sec-num">08</span><h2>Parcial práctico</h2><span class="lead">INDIVIDUAL · 90 MIN · 45 % DEL CORTE</span></div>
+
+  <p>La evaluación calificada de la sesión va aparte y es <strong>individual</strong>. Se entrega un contrato vulnerable al empezar el bloque C. Tres tareas:</p>
+  <ol>
+    <li><strong>Identificar</strong> cada fallo: nombre, severidad y línea exacta.</li>
+    <li><strong>Explotar</strong> al menos uno con una prueba de Hardhat.</li>
+    <li><strong>Corregir</strong> los fallos, sin romper lo legítimo y <strong>sin reescribir</strong> el contrato entero.</li>
+  </ol>
+
+  <div class="caja peligro">
+    <div class="caja-et">CONDICIONES</div>
+    <p><strong>90 minutos exactos</strong>, en máquina, en el repositorio del curso. <strong>Libro abierto</strong>: material, documentación oficial y el repositorio. <strong>Sin asistentes de IA</strong> (Copilot, ChatGPT y similares) ni ayuda de otra persona: el parcial mide TU criterio de seguridad, que es justo lo que un asistente taparía. Una sospecha fundada anula el parcial. Se entrega el contrato corregido, la prueba del exploit y media página con los hallazgos y sus correcciones. La rúbrica es sobre 20 puntos.</p>
+  </div>
+  <p>Sugerencia de reparto: ~25 min leer e identificar, ~35 min escribir el exploit, ~25 min corregir, ~5 min redactar la media página.</p>
+</section>
+
+<!-- ============================================================ 9 -->
+<section class="sec">
+  <div class="sec-cab"><span class="sec-num">09</span><h2>Preguntas de reflexión</h2><span class="lead">MIRA EL ARTEFACTO REAL</span></div>
+  <ol>
+    <li>Abre <code>contracts/s09/BancoVulnerable.sol</code> y <code>BancoSeguro.sol</code> en dos ventanas. Señala la <strong>única diferencia de orden</strong> que convierte a uno en robo y al otro en seguro. ¿Cuánto gas extra cuesta la corrección por CEI? (Pista: cero.)</li>
+    <li>De los cinco niveles que resolviste, ¿cuál se parece más a un fallo que podría tener <strong>tu proyecto</strong>? Justifícalo mirando tu propio contrato, no en abstracto.</li>
+    <li>Slither marcó <code>low-level-calls</code> también en <code>BancoSeguro</code>, que es correcto. Explica por qué un hallazgo automático puede ser cierto y aun así <strong>no ser una vulnerabilidad</strong>. ¿Qué te dice eso sobre confiar ciegamente en la herramienta?</li>
+  </ol>
+</section>
+
+<!-- ============================================================ 10 -->
+<section class="sec">
+  <div class="sec-cab"><span class="sec-num">10</span><h2>Lista de chequeo y referencias</h2></div>
+  <table>
+    <tr><th style="width:70%">ANTES DE ENTREGAR</th><th>OK</th></tr>
+    <tr><td>Los 5 niveles de Ethernaut superados, con captura de cada uno.</td><td></td></tr>
+    <tr><td>Una línea por nivel explicando la vulnerabilidad con tus palabras.</td><td></td></tr>
+    <tr><td>Captura de la salida de Slither sobre BancoVulnerable + una frase de lectura.</td><td></td></tr>
+    <tr><td>Informe de auditoría cruzada #1 con el formato del material del proyecto.</td><td></td></tr>
+    <tr><td>Las tres preguntas de reflexión respondidas.</td><td></td></tr>
+  </table>
+  <ul>
+    <li>Ethernaut · <code>https://ethernaut.openzeppelin.com</code></li>
+    <li>Slither · <code>https://github.com/crytic/slither</code> · <code>solc-select</code> · <code>https://github.com/crytic/solc-select</code></li>
+    <li>The DAO (jun 2016), Parity (jul y nov 2017), BeautyChain (CVE-2018-10299), Mango Markets (oct 2022): casos citados en el deck de la sesión, con fuentes verificadas.</li>
+  </ul>
+</section>
+
+</body>
+</html>
