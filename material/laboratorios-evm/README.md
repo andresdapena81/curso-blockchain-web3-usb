@@ -56,6 +56,14 @@ Reglas que no admiten excepción:
 
 Ver [`versiones.md`](versiones.md). **No se actualizan a mitad de semestre.**
 
+## Material de referencia, para todo el semestre
+
+| Documento | Para qué |
+|---|---|
+| [`guias/introduccion-a-solidity.pdf`](guias/introduccion-a-solidity.pdf) | Introducción al lenguaje: tipos, storage/memory/calldata, visibilidad, errores, eventos, herencia, envío de ether, y la tabla de errores del primer mes. Se consulta desde la S6 hasta el final. |
+| [`../guias-comunes/crear-la-billetera.pdf`](../guias-comunes/crear-la-billetera.pdf) | Crear la billetera del curso (se hace en la S2, se revisa en la S5). |
+| [`contracts/demo/Tablon.sol`](contracts/demo/Tablon.sol) | Contrato de demostración comentado línea por línea, con 21 pruebas en `test/demo/`. Recorre lo de las sesiones 6 y 7 en un solo archivo. |
+
 ## Índice de laboratorios
 
 | Sesión | Guía | Contratos |

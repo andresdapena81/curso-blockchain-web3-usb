@@ -1,0 +1,607 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<title>Guía común · Crear la billetera del curso</title>
+<!--ESTILOS-->
+<style>
+.sec-cab,h3{break-after:avoid}
+h3{font-size:11pt;margin:5mm 0 2mm}
+/* Las tablas largas de esta guía se parten entre páginas en vez de saltar
+   enteras: la fila es la unidad que no se corta, no la tabla. */
+table{break-inside:auto} tr{break-inside:avoid}
+.caja table{break-inside:avoid}
+</style>
+</head>
+<body>
+
+<section class="barra">
+  <div class="kicker">GUÍA COMÚN · SE HACE EN LA SESIÓN 2 · SE USA DESDE LA SESIÓN 5 HASTA EL FINAL</div>
+  <h1>CREAR LA<br><em>BILLETERA</em><br>DEL CURSO</h1>
+  <div class="sub">Qué es en realidad una billetera, cómo se crea sin equivocarse, y las cuatro reglas<br>que rigen el resto del semestre. Todo en red de prueba, sin un peso real.</div>
+</section>
+
+<dl class="datos">
+  <div><dt>MODALIDAD</dt><dd>Individual<br>cada quien la suya</dd></div>
+  <div><dt>CUÁNDO</dt><dd>Sesión 2 · bloque B<br>15 minutos</dd></div>
+  <div><dt>SE REVISA</dt><dd>Punto de control<br>de la Sesión 5</dd></div>
+  <div><dt>META</dt><dd>Una dirección en Sepolia<br>con saldo de prueba</dd></div>
+</dl>
+
+<div class="caja peligro">
+  <div class="caja-et">LAS CUATRO REGLAS DEL SEMESTRE · NO TIENEN EXCEPCIÓN · SE LEEN ANTES DE INSTALAR NADA</div>
+  <table style="margin:1mm 0 0">
+    <thead><tr><th style="width:5%">#</th><th style="width:45%">LA REGLA</th><th>POR QUÉ, EN UNA LÍNEA</th></tr></thead>
+    <tr><td class="pk">1</td><td><strong>La billetera del curso es desechable y educativa. Nunca se le mete dinero real.</strong></td><td>Su frase va a estar en un papel dentro de un salón y su dirección en el canal del curso: es un instrumento de laboratorio, no una caja fuerte.</td></tr>
+    <tr><td class="pk">2</td><td><strong>La frase de recuperación no se comparte con nadie. Tampoco con el docente.</strong></td><td>Quien tiene la frase <em>es</em> el dueño. No hay forma de revocarla, ni de reclamar, ni de deshacer.</td></tr>
+    <tr><td class="pk">3</td><td><strong>No se firma ninguna transacción cuyo contenido no se entienda.</strong></td><td>Firmar es irreversible y puede autorizar a un tercero a mover todo. Casi ningún robo rompe criptografía: consigue una firma.</td></tr>
+    <tr><td class="pk">4</td><td><strong>La frase y la llave privada no se pegan nunca en un archivo, un repositorio, un chat ni una IA.</strong></td><td>Todo eso se copia, se sincroniza, se respalda y se indexa. Hay robots que vacían una dirección segundos después de que su llave toca un repositorio público.</td></tr>
+  </table>
+  <p style="margin-top:3mm">La sección 02 explica <strong>por qué</strong> cada una. Léanla: una regla que no se entiende se rompe el día que estorba.</p>
+</div>
+
+<div class="caja clave">
+  <div class="caja-et">CÓMO LEER ESTA GUÍA · Y UN AVISO HONESTO SOBRE LAS PANTALLAS</div>
+  <p>Las secciones 01 y 02 son de lectura: explican qué están creando y bajo qué reglas. De la 03 a la 08 es el procedimiento, con «cómo sé que funcionó» en cada paso. De la 09 a la 12 es consulta para el resto del semestre.</p>
+  <p><strong>MetaMask cambia de interfaz varias veces al año.</strong> Donde esta guía nombra un botón exacto es porque se verificó en la documentación oficial el <strong>25 de septiembre de 2026</strong>; donde solo dice <em>qué</em> hay que buscar sin nombrar el botón, es a propósito, porque no se pudo confirmar. Si un texto no coincide con lo que ven, busquen el control que cumple la misma función y sigan: lo que no cambia es el procedimiento.</p>
+</div>
+
+<!-- ============================================================ 1 -->
+<section class="sec">
+  <div class="sec-cab"><span class="sec-num">01</span><h2>Qué es en realidad una billetera</h2><span class="lead">LEER PRIMERO</span></div>
+
+  <p>«Billetera» es un mal nombre y produce la mitad de los errores de los principiantes. Una billetera no guarda monedas, no es una cuenta en una institución, y nadie la abre para ustedes. <strong>Una billetera es un par de llaves y un programa que las usa.</strong> Eso es todo.</p>
+
+  <table>
+    <thead><tr><th style="width:22%">PIEZA</th><th style="width:39%">QUÉ ES</th><th>QUÉ IMPLICA</th></tr></thead>
+    <tr><td class="pk">Llave privada</td><td>Un número entero de 256 bits elegido al azar. En hexadecimal, 64 caracteres.</td><td>Es <strong>el secreto</strong>. Quien lo tiene firma como ustedes, para siempre. Una llave privada no se «resetea».</td></tr>
+    <tr><td class="pk">Llave pública</td><td>Se <strong>calcula</strong> a partir de la privada con la curva elíptica secp256k1. De la privada a la pública, sí; al revés, no.</td><td>Se puede publicar sin riesgo. Sirve para que cualquiera compruebe que una firma salió de la llave privada correspondiente.</td></tr>
+    <tr><td class="pk">Dirección</td><td>Los <strong>últimos 20 bytes</strong> de <code>keccak256</code>(llave pública). Se escribe <code>0x</code> + 40 caracteres hexadecimales: 42 en total.</td><td>Es el nombre público de su cuenta. Es lo que se pega en el canal del curso y en los informes. No es un secreto.</td></tr>
+    <tr><td class="pk">Firma</td><td>Lo que produce la llave privada sobre una transacción o un mensaje.</td><td>La red no le pregunta a nadie si ustedes existen: <strong>verifica la firma</strong>. La firma es la única credencial que hay.</td></tr>
+  </table>
+
+  <div class="caja clave">
+    <div class="caja-et">LA IDEA CENTRAL · NADIE «CREA» LA CUENTA EN NINGUNA PARTE</div>
+    <p>Cuando abren una cuenta en un banco, alguien la aprueba, la registra en su base de datos y desde ese momento existe. Aquí <strong>no pasa nada de eso</strong>. Al crear la billetera, su computador elige un número al azar y deriva de él una dirección. Nadie se enteró: no hubo servidor, ni formulario, ni aprobación. Ese paso no necesita ni internet.</p>
+    <p>Dicho de otra forma: <strong>las direcciones no se crean, se descubren.</strong> Las 2<sup>160</sup> direcciones posibles «existen» desde que la red existe, todas con saldo cero. La suya aparecerá por primera vez en el libro el día que reciba algo o firme algo; hasta entonces es un casillero vacío del que solo ustedes tienen la llave. Por eso no hay «recuperar cuenta»: no hay nadie al otro lado a quien pedírselo.</p>
+  </div>
+
+  <h3>La frase de recuperación (BIP-39)</h3>
+
+  <p>Copiar a mano un número de 64 caracteres hexadecimales es una receta para el desastre: una letra mal transcrita y la cuenta se pierde. El estándar <strong>BIP-39</strong> resuelve eso convirtiendo el azar en palabras tomadas de una lista fija y pública de 2048 palabras:</p>
+
+  <table>
+    <thead><tr><th style="width:20%">FRASE</th><th style="width:24%">AZAR QUE CODIFICA</th><th>LA CUENTA</th></tr></thead>
+    <tr><td class="pk">12 palabras</td><td>128 bits</td><td>128 bits de azar + 4 bits de suma de verificación = 132 bits = 12 × 11 bits. Es lo que genera MetaMask por omisión y sobra.</td></tr>
+    <tr><td class="pk">24 palabras</td><td>256 bits</td><td>256 + 8 = 264 bits = 24 × 11 bits. Lo usan las billeteras físicas. No es «el doble de seguro»: 128 bits ya es inalcanzable por fuerza bruta.</td></tr>
+  </table>
+
+  <p>Esos bits de verificación explican algo que van a notar: si copian mal una palabra, la billetera dice «frase inválida» en vez de abrir una cuenta vacía. <strong>La frase se valida a sí misma.</strong> También explican por qué no se pueden inventar doce palabras bonitas: casi ninguna combinación pasa la verificación.</p>
+
+  <p>De la frase sale una <strong>semilla</strong>, y de la semilla se derivan las llaves privadas en árbol (estándares BIP-32 y BIP-44), en un orden fijo y determinista. Consecuencias que importan:</p>
+
+  <ul>
+    <li><strong>Una frase, muchas cuentas.</strong> «Cuenta 1», «Cuenta 2», «Cuenta 3» son llaves distintas derivadas de la misma frase, en ese orden. No son frases distintas. MetaMask usa la ruta BIP-44 <code>m/44'/60'/0'/0</code>, la única que soporta para frases de billeteras de software.</li>
+    <li><strong>La derivación es reproducible.</strong> Cualquier billetera que implemente el mismo estándar, en cualquier computador del mundo, sin internet, reconstruye las mismas cuentas a partir de la misma frase. Eso es lo que se demuestra en vivo en la Sesión 2 con dos navegadores lado a lado.</li>
+    <li><strong>La frase no «da acceso» a la billetera: es la billetera.</strong> Perderla es perder todo; entregarla es entregar todo. No hay tercera opción.</li>
+  </ul>
+
+  <div class="caja alerta">
+    <div class="caja-et">LA CONFUSIÓN NÚMERO UNO · CONTRASEÑA ≠ FRASE</div>
+    <p>La <strong>contraseña</strong> que van a poner al instalar cifra un archivo dentro de <em>ese</em> navegador, en <em>ese</em> computador, y sirve para desbloquear la extensión ahí. Protege de quien se siente frente a su máquina desbloqueada. <strong>No es la cuenta</strong>: no viaja a ningún servidor, no sirve en otro equipo y —lo dice la documentación de MetaMask con estas palabras— <strong>no recupera la billetera</strong>. Si formatean el computador y solo tienen la contraseña, perdieron la billetera. Si tienen la frase, la contraseña es irrelevante: se pone otra y la cuenta vuelve con su saldo. Y al ladrón que se roba su papel, la contraseña no le estorba: ya no la necesita.</p>
+  </div>
+</section>
+
+<!-- ============================================================ 2 -->
+<section class="sec">
+  <div class="sec-cab"><span class="sec-num">02</span><h2>Las cuatro reglas, explicadas</h2><span class="lead">EL POR QUÉ, NO SOLO EL QUÉ</span></div>
+
+  <div class="pregunta">
+    <div class="cab"><div class="n">1</div><div class="enun"><span class="tema">REGLA 1 · LA BILLETERA DEL CURSO ES DESECHABLE</span>Nunca dinero real, en ninguna cantidad</div></div>
+    <div class="just">
+      <strong>Por qué:</strong> el modelo de amenaza de esta billetera es malísimo <em>a propósito</em>. Su frase se escribe en papel dentro de un salón con treinta personas; la contraseña se teclea en un computador que quizá es de la sala de cómputo; su dirección se publica en el canal del curso; y durante el semestre la van a conectar a Remix, a contratos escritos por ustedes con errores deliberados, a una dApp de práctica y a los retos de seguridad de la Sesión 9. Ese es el trabajo del curso y está bien — <strong>siempre que dentro no haya nada que perder</strong>.<br>
+      <strong>Si quieren operar con fondos reales:</strong> otra billetera, creada fuera de clase, en un equipo de su propiedad, con una frase distinta que nadie del curso vea. No es paranoia: es separar entornos, igual que no se prueba código nuevo contra la base de datos de producción.<br>
+      <strong>Cómo sé que la cumplo:</strong> el selector de red de la billetera del curso nunca dice «Ethereum Mainnet» mientras trabajan. Si lo dice, se detienen y lo cambian.
+    </div>
+  </div>
+
+  <div class="pregunta">
+    <div class="cab"><div class="n">2</div><div class="enun"><span class="tema">REGLA 2 · LA FRASE NO SE COMPARTE CON NADIE</span>Tampoco con el docente, tampoco con su pareja de laboratorio</div></div>
+    <div class="just">
+      <strong>Por qué:</strong> no es una credencial que se pueda cambiar después, es <strong>la cuenta misma</strong>. Si le dan a alguien la clave de su correo, pueden cambiarla y acabar su acceso. Si entregan la frase, no pueden hacer nada: no existe un botón que revoque una frase, ni un administrador que corte una sesión, ni un banco que reverse un movimiento. El otro tiene una copia de la billetera para siempre, y ninguna de las dos copias es «la original».<br>
+      <strong>La razón académica, que además los protege:</strong> en este curso la firma <em>es</em> la identidad. Las evidencias que entregan desde la Sesión 5 valen porque solo ustedes pudieron firmarlas. Si un tercero tiene su frase, sus transacciones dejan de probar quién las hizo, y con ellas se cae el valor de su propio informe.<br>
+      <strong>La regla práctica:</strong> nadie legítimo la pide. Nunca. Ni el soporte de MetaMask, ni el docente, ni un «verificador de airdrop», ni un monitor, ni alguien que dice «te la reviso para ver si la anotaste bien». <strong>Toda</strong> petición de la frase es un intento de robo, sin excepción, incluso viniendo de alguien conocido — porque las cuentas de los conocidos se roban.<br>
+      <strong>Lo que sí se comparte:</strong> la dirección, los 42 caracteres que empiezan por <code>0x</code>. Es pública por diseño.
+    </div>
+  </div>
+
+  <div class="pregunta">
+    <div class="cab"><div class="n">3</div><div class="enun"><span class="tema">REGLA 3 · NO SE FIRMA LO QUE NO SE ENTIENDE</span>La firma es el punto de no retorno</div></div>
+    <div class="just">
+      <strong>Por qué:</strong> una firma no es «aceptar unos términos»; es una orden ejecutable e irreversible. Y no todas las firmas mueven dinero de forma visible: una firma de <code>approve</code> no transfiere nada en el momento, pero autoriza a un contrato a mover sus tokens <strong>cuando quiera, después</strong>. El robo ocurre semanas más tarde, cuando ya nadie recuerda haber firmado. Peor: hay firmas que no son transacciones (por ejemplo permisos fuera de cadena), <strong>no cuestan gas</strong>, no aparecen en el historial y por eso no despiertan sospecha.<br>
+      <strong>Qué hacer en la práctica:</strong> antes de pulsar «confirmar», leer tres cosas: (a) la <strong>red</strong>, que debe ser la de prueba; (b) el <strong>destinatario</strong>, que debe ser el contrato o la persona que ustedes esperan; (c) <strong>qué función</strong> se llama y con qué argumentos. Si la pantalla no muestra un contenido legible, o si no saben responder «¿qué autoriza esto exactamente?», se rechaza. <strong>Rechazar no cuesta nada</strong> y siempre se puede volver a intentar.<br>
+      <strong>En este curso:</strong> en el laboratorio de la Sesión 5 no se firma nada; si algo pide una firma ese día, se rechaza y se avisa. De la Sesión 6 en adelante sí se firma, pero siempre sabiendo qué contrato y qué función, porque son los suyos.
+    </div>
+  </div>
+
+  <div class="pregunta">
+    <div class="cab"><div class="n">4</div><div class="enun"><span class="tema">REGLA 4 · NI FRASE NI LLAVE PRIVADA EN UN ARCHIVO, UN REPOSITORIO, UN CHAT O UNA IA</span>Lo digital se copia solo</div></div>
+    <div class="just">
+      <strong>Un archivo o una foto:</strong> el teléfono sincroniza la galería con la nube, el sistema hace copias de respaldo, el buscador del escritorio indexa el contenido. Un <code>.txt</code> en el escritorio ya está en más sitios de los que creen. La captura de pantalla es la peor versión del problema: acaba en la galería que le muestran a cualquiera.<br>
+      <strong>Un repositorio:</strong> borrar el archivo <strong>no lo borra del historial de Git</strong>: sigue recuperable con <code>git log</code> en cualquier clon. Y hay robots que vigilan los repositorios públicos buscando llaves; el tiempo entre publicar una llave y quedarse sin saldo se mide en <strong>segundos</strong>, no en días. Por eso las guías del curso repiten que ninguna clave ni URL de nodo con clave se escribe en el repositorio, y por eso desde la Sesión 8 se usa el almacén cifrado de Hardhat (<code>npx hardhat keystore set …</code>) en vez de archivos.<br>
+      <strong>Un chat:</strong> el mensaje queda en el servidor, en el respaldo del servidor y en el dispositivo del otro. Si el grupo es del curso, la frase queda a la vista de treinta personas y de quien administre el canal.<br>
+      <strong>Una IA:</strong> lo que escriben sale de su computador, viaja a un proveedor, se almacena, y puede quedar disponible para revisión humana o para entrenar. Además, una vez enviado no hay forma de retirarlo. Una frase pegada en un asistente es una frase publicada. <strong>Si ya lo hicieron, la billetera está quemada:</strong> vayan a la sección 11 y reháganla, no intenten «arreglarla».<br>
+      <strong>Lo único aceptable para el curso:</strong> papel, escrito a mano, en orden, guardado donde ustedes sepan. Para una billetera con valor real: papel o metal, y en más de un sitio físico.
+    </div>
+  </div>
+</section>
+
+<!-- ============================================================ 3 -->
+<section class="sec">
+  <div class="sec-cab"><span class="sec-num">03</span><h2>Instalar MetaMask</h2><span class="lead">UNA SOLA VEZ · 5 MINUTOS</span></div>
+
+  <p>El curso usa <strong>MetaMask</strong> porque es la billetera que Remix reconoce sin configuración y la que aparece en toda la documentación que van a leer. Nada de lo que aprendan depende de ella: los conceptos son iguales en cualquier otra.</p>
+
+  <h3>03.1 · De dónde se descarga</h3>
+
+  <p>Un solo punto de partida: <code>https://metamask.io/download/</code>. Escríbanlo a mano o lleguen desde <code>https://metamask.io</code>. La propia página lo advierte: <em>«Only download MetaMask from the official app store appropriate to your device/OS»</em>. Esa página los manda a la tienda de su navegador; <strong>nunca</strong> descarguen un instalador de un enlace de un chat, de un video, ni del primer resultado patrocinado de un buscador.</p>
+
+  <table>
+    <thead><tr><th style="width:20%">NAVEGADOR</th><th style="width:44%">DÓNDE ESTÁ LA FICHA LEGÍTIMA</th><th>CÓMO SE RECONOCE</th></tr></thead>
+    <tr><td class="pk">Chrome, Edge,<br>Brave, Opera</td><td>Chrome Web Store:<br><code>chromewebstore.google.com/detail/metamask/<strong>nkbihfbeogaeaoehlefnkodbefgpgknn</strong></code></td><td>El <strong>identificador de la extensión</strong> en la URL es el dato más difícil de falsificar: tiene que terminar en <code>nkbihfbeogaeaoehlefnkodbefgpgknn</code>. Publicador: <strong>Consensys Software Inc.</strong> Usuarios: <strong>12 000 000</strong>.</td></tr>
+    <tr><td class="pk">Firefox</td><td><code>addons.mozilla.org/firefox/addon/<strong>ether-metamask</strong>/</code></td><td>Se llama «MetaMask – Crypto Wallet», la línea de autor dice <strong>«by MetaMask»</strong> y muestra <strong>310 512 usuarios</strong>. El fragmento <code>ether-metamask</code> de la dirección es histórico y es el correcto, aunque se vea raro.</td></tr>
+  </table>
+
+  <div class="caja alerta">
+    <div class="caja-et">TRES DETALLES QUE EVITAN INSTALAR UNA FALSIFICACIÓN</div>
+    <ul>
+      <li><strong>Las cifras verificadas el 25 de septiembre de 2026</strong> son las de la tabla. No tienen que coincidir exactamente el día que ustedes miren, pero el orden de magnitud sí: si la ficha muestra <em>cientos</em> o <em>miles</em> de usuarios en lugar de millones, no es la de Chrome. Las falsificaciones copian el ícono y el nombre; no pueden copiar doce millones de instalaciones.</li>
+      <li><strong>La calificación de la ficha de Chrome es baja: 2,7 sobre 5 con 5 900 valoraciones.</strong> Eso no indica fraude: una billetera recibe las quejas de todo el que perdió fondos por su cuenta. No usen la calificación como señal de autenticidad — usen el identificador y el publicador.</li>
+      <li><strong>Miren la lista de resultados antes de instalar.</strong> Busquen «MetaMask» en la tienda y fíjense en cuántas extensiones se llaman casi igual con el ícono casi idéntico. Ese ejercicio de diez segundos es parte de la clase.</li>
+    </ul>
+  </div>
+
+  <h3>03.2 · Navegadores y plataformas</h3>
+
+  <table>
+    <thead><tr><th style="width:26%">DÓNDE</th><th>ESTADO VERIFICADO</th></tr></thead>
+    <tr><td class="pk">Chrome · Firefox</td><td>Los dos que MetaMask prueba activamente: las versiones estables de Chrome de los últimos dos años, y la versión ESR actual y la anterior de Firefox. <strong>Elijan uno de estos dos para el curso.</strong></td></tr>
+    <tr><td class="pk">Edge · Brave · Opera</td><td>Aparecen en la página oficial de descarga y funcionan (Edge y Brave incluso tienen pasos propios en el manual), pero son derivados de Chrome y MetaMask dice que <em>no los prueba activamente</em>. Sirven; ante un problema raro, prueben en Chrome o Firefox antes de dar por roto nada.</td></tr>
+    <tr><td class="pk">Safari</td><td><strong>No hay extensión.</strong> En un Mac, instalen Chrome, Firefox, Edge o Brave.</td></tr>
+    <tr><td class="pk">Teléfono</td><td>Hay app oficial. iOS: ficha <em>«MetaMask: Trade Crypto»</em>, vendedor <strong>ConsenSys AG</strong>, 4,7 estrellas con 76 mil valoraciones. Android: <code>play.google.com/store/apps/details?id=io.metamask</code>, enlazada desde la página oficial. ⚠ VERIFICAR ANTES DE DICTAR: no se pudo leer la ficha de Google Play para confirmar publicador y número de descargas de primera mano.<br><strong>El curso se hace en la extensión del computador</strong>, porque Remix y la dApp de la Sesión 12 se usan en el navegador. La app del teléfono no reemplaza la extensión.</td></tr>
+  </table>
+
+  <h3>03.3 · Si la sala de cómputo no permite instalar extensiones</h3>
+
+  <p>Es un escenario real y hay que resolverlo <strong>antes</strong> de la clase, no durante. En orden de preferencia:</p>
+
+  <table>
+    <thead><tr><th style="width:8%">#</th><th style="width:30%">ALTERNATIVA</th><th>CÓMO SE HACE Y QUÉ LIMITACIÓN TIENE</th></tr></thead>
+    <tr><td class="pk">A</td><td><strong>Su propio portátil</strong></td><td>La opción buena. Es donde la billetera debe vivir, porque la frase y la contraseña quedan en <em>ese</em> perfil de navegador.</td></tr>
+    <tr><td class="pk">B</td><td><strong>Instalar en un perfil de usuario propio del navegador</strong></td><td>En muchas salas el bloqueo es por política del equipo, pero un perfil de Chrome o Firefox iniciado con su propia cuenta sí permite extensiones. Prueben esto primero: toma un minuto.</td></tr>
+    <tr><td class="pk">C</td><td><strong>Instalar Firefox portable o un navegador propio</strong></td><td>Si el equipo permite ejecutar programas de la carpeta del usuario. Depende de la política; se comprueba antes.</td></tr>
+    <tr><td class="pk">D</td><td><strong>Trabajar en pareja</strong></td><td>Plan B inmediato en clase: hacen el procedimiento en el equipo del compañero <strong>mirando</strong>, y crean la suya propia esa misma tarde. <strong>No creen su billetera en el computador de otra persona:</strong> la frase queda anotada en papel suyo, pero la contraseña y el perfil quedan en la máquina ajena.</td></tr>
+    <tr><td class="pk">E</td><td><strong>La app del teléfono</strong></td><td>Sirve para tener la billetera y recibir fondos de prueba, y para el punto de control de la Sesión 5. <strong>No sirve</strong> para Remix (Sesión 6) ni para la dApp (Sesión 12), que necesitan la extensión en un navegador de escritorio.</td></tr>
+  </table>
+
+  <div class="caja">
+    <div class="caja-et">PLAN B DE FONDO · LA RED LOCAL NO NECESITA NINGUNA BILLETERA</div>
+    <p>Si al final no hay forma de tener MetaMask en la sala, <strong>el curso no se detiene</strong>: los laboratorios de las Sesiones 5, 8 y 12 tienen una variante que corre íntegramente en la red local de Hardhat dentro del computador, sin extensión, sin internet y sin fondos. Avísenle al docente en la Sesión 2 para que su evidencia se planifique por esa vía desde el principio. Lo que no se puede es llegar a la Sesión 6 sin haberlo dicho.</p>
+  </div>
+</section>
+
+<!-- ============================================================ 4 -->
+<section class="sec">
+  <div class="sec-cab"><span class="sec-num">04</span><h2>Crear la billetera</h2><span class="lead">PANTALLA POR PANTALLA · 5 MINUTOS</span></div>
+
+  <p>Antes de empezar: <strong>papel y lapicero sobre la mesa</strong>, y nada de teléfonos apuntando a la pantalla. Si están en una sala, miren quién tiene una cámara detrás de ustedes.</p>
+
+  <div class="pregunta">
+    <div class="cab"><div class="n">1</div><div class="enun"><span class="tema">PASO 1 · CREAR, NO IMPORTAR</span>La primera pantalla</div></div>
+    <div class="just">
+      Al terminar la instalación, la extensión se abre sola. La primera decisión es entre <strong>crear una billetera nueva</strong> e <strong>importar una existente</strong>. Elijan <strong>crear una nueva</strong> (<em>«Create a new wallet»</em> / «Crear una nueva billetera»).<br>
+      <strong>Qué NO aceptar:</strong> si en algún momento esta pantalla les pide una frase de recuperación, están en «importar», no en «crear». Salgan de ahí. Y si alguien les dictó doce palabras «para que practiquen», no las escriban: esa billetera tiene otro dueño que puede vaciarla cuando quiera.<br>
+      <strong>Sobre las casillas de condiciones y de datos de uso:</strong> lean qué activan. La analítica opcional se puede rechazar sin perder nada.
+    </div>
+  </div>
+
+  <div class="pregunta">
+    <div class="cab"><div class="n">2</div><div class="enun"><span class="tema">PASO 2 · LA DECISIÓN QUE IMPORTA</span>Frase de recuperación, no inicio de sesión social</div></div>
+    <div class="just">
+      MetaMask ofrece hoy <strong>dos formas</strong> de asegurar una billetera nueva, y esta es la pantalla donde se decide todo:<br>
+      · <strong>Frase secreta de recuperación (SRP)</strong> — lo que su propia documentación llama <em>«the traditional self-custody method»</em>: doce palabras que ustedes guardan.<br>
+      · <strong>Inicio de sesión con Google, Apple o Telegram</strong> + una contraseña. Internamente también existe una frase, pero queda cifrada y partida en cinco fragmentos repartidos en cinco servidores, y se reconstruye con su cuenta social <em>y</em> su contraseña.<br>
+      <strong>En este curso se elige la frase de recuperación, siempre.</strong> Por dos razones: es la única forma de ver de verdad qué es la autocustodia (el tema de la Sesión 2 y del curso entero), y porque con el inicio de sesión social su acceso depende de una cuenta de Google o de Telegram que la universidad no controla y que puede quedar bloqueada a mitad de semestre.<br>
+      <strong>Cómo sé que elegí bien:</strong> el flujo siguiente les muestra doce palabras. Si en cambio les pide entrar a una cuenta de Google, se devuelven.
+    </div>
+  </div>
+
+  <div class="pregunta">
+    <div class="cab"><div class="n">3</div><div class="enun"><span class="tema">PASO 3 · LAS DOCE PALABRAS</span>Al papel, en orden, numeradas</div></div>
+    <div class="just">
+      La extensión genera la frase y la muestra oculta hasta que ustedes decidan revelarla. <strong>Las palabras se generan siempre en inglés</strong> — la documentación de MetaMask dice literalmente que no se traducen. Anótenlas <strong>numeradas del 1 al 12</strong>, con letra grande y legible, revisando las que se confunden (<code>b</code>/<code>d</code>, <code>rn</code>/<code>m</code>, <code>l</code>/<code>1</code>).<br>
+      <strong>Qué NO hacer, en orden de gravedad:</strong> captura de pantalla · foto con el teléfono · nota del teléfono · correo a sí mismo · archivo de texto · mensaje en un chat · pegarla en una IA «para que me la ordene». Cada una de esas opciones aparece explicada en la regla 4 de la sección 02.<br>
+      <strong>Si la interfaz ofrece aplazar el respaldo</strong> («recordármelo después» o equivalente), <strong>no lo acepten</strong>: el objetivo de este ejercicio es precisamente anotar la frase.<br>
+      <strong>Después de anotarla, la extensión suele pedir confirmarla</strong> — normalmente escribiendo algunas palabras en su posición. ⚠ VERIFICAR ANTES DE DICTAR: la documentación oficial de MetaMask no describe hoy esa pantalla de confirmación, así que no se puede garantizar que exista en la versión que ustedes instalen. Si aparece, es buena señal; si no aparece, la frase igual quedó creada y el papel igual es obligatorio.<br>
+      <strong>Dónde se guarda el papel, para el curso:</strong> en su cuaderno o su billetera física. No en el escritorio de la sala, no fotografiado «por si acaso».
+    </div>
+  </div>
+
+  <div class="pregunta">
+    <div class="cab"><div class="n">4</div><div class="enun"><span class="tema">PASO 4 · LA CONTRASEÑA LOCAL</span>Qué protege y qué no</div></div>
+    <div class="just">
+      Pongan una contraseña. <strong>Qué protege:</strong> desbloquear la extensión en <em>ese</em> navegador y en <em>ese</em> computador — es decir, protege de quien se siente frente a su máquina abierta.<br>
+      <strong>Qué NO protege y qué NO hace:</strong> no viaja a ningún servidor, no sirve en otro equipo, no protege el papel de la frase, y <strong>no recupera la billetera</strong> (palabras de la documentación de MetaMask: la contraseña <em>«does not recover your wallet»</em>). Si pierden la contraseña pero tienen la frase, entran de nuevo poniendo una contraseña nueva. Si pierden la frase, la contraseña no vale nada.<br>
+      <strong>Para el curso:</strong> una contraseña que recuerden sin escribirla en un papel pegado al monitor. No reciclen la de su correo ni la del banco; no porque MetaMask vaya a filtrarla, sino porque una contraseña que se teclea en la sala de cómputo no debería abrir nada importante.
+    </div>
+  </div>
+
+  <div class="caja peligro">
+    <div class="caja-et">SI ALGO SALIÓ MAL EN ESTOS CUATRO PASOS, LA SOLUCIÓN ES EMPEZAR DE CERO</div>
+    <p>Si perdieron el papel a mitad del proceso, si dudan de haber copiado bien una palabra, o si alguien vio la pantalla: <strong>no intenten arreglarlo.</strong> Como esta billetera está vacía, rehacerla cuesta tres minutos y no pierden nada. En la extensión: bloqueen, olviden la billetera (o desinstalen y reinstalen la extensión) y vuelvan al paso 1. En la sección 11 está el procedimiento completo y qué hacer si esto pasa cuando ya tenían evidencias entregadas.</p>
+  </div>
+</section>
+
+<!-- ============================================================ 5 -->
+<section class="sec">
+  <div class="sec-cab"><span class="sec-num">05</span><h2>Anatomía de la interfaz</h2><span class="lead">LO QUE HAY QUE SABER LEER</span></div>
+
+  <p>La extensión tiene cuatro zonas. Las posiciones cambian entre versiones; las funciones, no.</p>
+
+  <table>
+    <thead><tr><th style="width:18%">ZONA</th><th style="width:40%">QUÉ MUESTRA</th><th>EL ERROR TÍPICO</th></tr></thead>
+    <tr><td class="pk">Cuentas</td><td>El nombre y la dirección de la cuenta activa, y la lista para cambiar o agregar cuentas. Todas las que agreguen desde el selector salen de la misma frase.</td><td>Creer que cada cuenta tiene su propia frase, o que agregar una cuenta crea una billetera nueva.</td></tr>
+    <tr><td class="pk">Redes</td><td>El selector de red. Determina <strong>en qué libro</strong> se lee el saldo y a qué libro se manda la transacción.</td><td>Mirar el saldo en la red equivocada y creer que los fondos se perdieron. La misma dirección tiene saldos distintos en cada red.</td></tr>
+    <tr><td class="pk">Tokens</td><td>La lista de activos de la red actual. El nativo (ETH) aparece solo; los demás hay que importarlos por dirección de contrato.</td><td>Creer que un token no llegó porque no se ve. La cadena lo tiene; la interfaz no sabe que debe mirarlo.</td></tr>
+    <tr><td class="pk">Actividad</td><td>Las transacciones que <em>esta extensión</em> envió, con su estado. Es un registro local, no la cadena.</td><td>Confundir esta lista con el historial real. La verdad está en el explorador; esta lista puede estar incompleta o desfasada.</td></tr>
+  </table>
+
+  <h3>05.1 · Copiar la dirección y verificarla en el explorador</h3>
+
+  <table>
+    <thead><tr><th style="width:6%">#</th><th style="width:44%">QUÉ HACER</th><th>CÓMO SÉ QUE ESTÁ BIEN</th></tr></thead>
+    <tr><td class="pk">1</td><td>Clic en el nombre de la cuenta, arriba en la extensión: la dirección queda copiada al portapapeles.</td><td>Aparece un aviso de «copiado». No se transcribe a mano nunca: un carácter mal copiado manda los fondos al vacío.</td></tr>
+    <tr><td class="pk">2</td><td>Abrir <code>https://sepolia.etherscan.io</code> y pegarla en el buscador.</td><td>La página abre con su dirección y su saldo. <strong>Miren que diga <code>sepolia.</code></strong> al principio: el explorador de la red principal se ve casi igual y ahí sus fondos de prueba no existen.</td></tr>
+    <tr><td class="pk">3</td><td>Comparar los caracteres: los cuatro primeros y los cuatro últimos de la barra del navegador contra los de la extensión.</td><td>Coinciden. Este hábito de dos segundos es el que atrapa el pegado de una dirección ajena.</td></tr>
+  </table>
+
+  <div class="caja">
+    <div class="caja-et">POR QUÉ LA DIRECCIÓN TIENE MAYÚSCULAS Y MINÚSCULAS MEZCLADAS</div>
+    <p>No es decoración. El estándar EIP-55 usa el patrón de mayúsculas de las letras <code>a</code>–<code>f</code> como <strong>suma de verificación</strong>: se calcula a partir de la propia dirección. Por eso una herramienta puede avisar «dirección inválida» cuando le pegan una con un carácter cambiado, y por eso el explorador y la billetera muestran la misma dirección con el mismo patrón de mayúsculas. Si copian de un lado y pegan en otro y el patrón cambia, algo se alteró en el camino.</p>
+    <p>En los ejemplos de esta guía, cuando hace falta una dirección, se usa <code>0x1111111111111111111111111111111111111111</code>. <strong>Es una dirección inventada</strong>, con un patrón imposible de obtener por azar: no manden nada ahí. Las únicas direcciones reales que esta guía nombra son las cuentas públicas de Hardhat de la sección 07, y se nombran precisamente porque son públicas.</p>
+  </div>
+</section>
+
+<!-- ============================================================ 6 -->
+<section class="sec">
+  <div class="sec-cab"><span class="sec-num">06</span><h2>Añadir la red de pruebas</h2><span class="lead">SEPOLIA · Y LAS OTRAS DOS</span></div>
+
+  <p>Las redes de prueba <strong>vienen ocultas</strong> en MetaMask. Hay que activarlas una vez.</p>
+
+  <div class="pregunta">
+    <div class="cab"><div class="n">1</div><div class="enun"><span class="tema">PRIMERO · MOSTRAR LAS REDES DE PRUEBA</span>Un interruptor, una sola vez</div></div>
+    <div class="just">
+      En la extensión: <strong>menú de arriba a la derecha → «Networks» → al final de la lista, activar «Show test networks»</strong> («Mostrar redes de prueba»). Viene <strong>apagado</strong> por omisión.<br>
+      <strong>Cómo sé que funcionó:</strong> el selector de redes ahora incluye <strong>Sepolia</strong> entre las opciones.<br>
+      <strong>Un detalle relacionado:</strong> en <em>Settings → Developer tools</em> está «Show conversion on test networks», que decide si le pone un precio en pesos al ETH de prueba. Déjenlo apagado: el ETH de prueba <strong>no vale nada</strong> y ver un precio al lado confunde. ⚠ Si vieron una guía vieja que manda a <em>Settings → Advanced</em> para esto, está desactualizada: esa configuración ya no vive ahí.
+    </div>
+  </div>
+
+  <div class="pregunta">
+    <div class="cab"><div class="n">2</div><div class="enun"><span class="tema">SI SEPOLIA NO APARECE · AGREGAR UNA RED A MANO</span>Los cinco campos</div></div>
+    <div class="just">
+      <strong>Menú → «Networks» → botón «Add a custom network»</strong> («Agregar una red personalizada»; el texto varía entre versiones). Pide exactamente cinco datos: nombre de la red, URL de RPC, identificador de cadena, símbolo de la moneda y URL del explorador. Para <strong>cambiar o añadir un RPC</strong> a una red que ya existe: los tres puntos de esa red → <em>Edit</em> → desplegable <em>Default RPC URL</em> → <em>Add RPC URL</em>.<br>
+      <strong>Cómo sé que funcionó:</strong> al seleccionar la red, la extensión muestra un saldo (aunque sea 0) en vez de un error de conexión. Si sale un error, el RPC está caído: pongan otro de la lista.
+    </div>
+  </div>
+
+  <h3>06.1 · Los parámetros, verificados el 25 de septiembre de 2026</h3>
+
+  <table>
+    <thead><tr><th style="width:24%">CAMPO</th><th style="width:38%">SEPOLIA</th><th>OP SEPOLIA</th></tr></thead>
+    <tr><td class="pk">Nombre de la red</td><td>Sepolia</td><td>OP Sepolia</td></tr>
+    <tr><td class="pk">Identificador de cadena</td><td><code>11155111</code></td><td><code>11155420</code></td></tr>
+    <tr><td class="pk">Símbolo de la moneda</td><td><code>ETH</code></td><td><code>ETH</code></td></tr>
+    <tr><td class="pk">Explorador</td><td><code>https://sepolia.etherscan.io</code></td><td><code>https://testnet-explorer.optimism.io</code><br>(también <code>https://sepolia-optimism.etherscan.io</code>)</td></tr>
+    <tr><td class="pk">RPC público,<br>sin clave</td><td><code>https://ethereum-sepolia-rpc.publicnode.com</code><br><code>https://1rpc.io/sepolia</code><br><code>https://rpc.sepolia.ethpandaops.io</code></td><td><code>https://sepolia.optimism.io</code><br><code>https://optimism-sepolia-rpc.publicnode.com</code></td></tr>
+  </table>
+
+  <p>Los tres RPC de Sepolia y los dos de OP Sepolia se probaron el 25 de septiembre de 2026 con una llamada real <code>eth_chainId</code> y respondieron el identificador correcto, <strong>sin pedir clave ni registro</strong>. El de <code>sepolia.optimism.io</code> es el oficial de Optimism, tiene límite de peticiones y no ofrece WebSocket.</p>
+
+  <div class="caja alerta">
+    <div class="caja-et">RPC QUE APARECEN EN GUÍAS VIEJAS Y HOY NO SIRVEN</div>
+    <table style="margin:1mm 0 0">
+      <thead><tr><th style="width:46%">ENDPOINT</th><th>QUÉ PASA HOY (PROBADO)</th></tr></thead>
+      <tr><td class="pk">rpc.sepolia.org · rpc2.sepolia.org</td><td>Los clásicos de todos los tutoriales: <strong>ya no responden</strong> (404 y respuesta vacía). Si su red está configurada con uno de estos, ahí está el problema.</td></tr>
+      <tr><td class="pk">sepolia.drpc.org</td><td>Responde «chain is not available on free plan»: ahora <strong>exige plan pago</strong>.</td></tr>
+      <tr><td class="pk">rpc.ankr.com/eth_sepolia</td><td>«Unauthorized: You must authenticate with an API key». <strong>Exige clave.</strong></td></tr>
+      <tr><td class="pk">eth-sepolia.public.blastapi.io</td><td>Descontinuado.</td></tr>
+      <tr><td class="pk">Infura · Alchemy</td><td>Funcionan bien pero <strong>exigen crear cuenta y usar una clave</strong> dentro de la URL. Por eso no van en esta tabla: una URL con clave <strong>no se escribe en un archivo del repositorio</strong> (regla 4).</td></tr>
+    </table>
+  </div>
+
+  <h3>06.2 · La red local de Hardhat</h3>
+
+  <p>La necesitan en la Sesión 12 y sirve de plan B en varias. Se agrega con el mismo formulario:</p>
+
+  <table>
+    <thead><tr><th style="width:30%">CAMPO</th><th>VALOR</th></tr></thead>
+    <tr><td class="pk">Nombre de la red</td><td>Hardhat local</td></tr>
+    <tr><td class="pk">URL de RPC</td><td><code>http://127.0.0.1:8545</code></td></tr>
+    <tr><td class="pk">Identificador de cadena</td><td><code>31337</code></td></tr>
+    <tr><td class="pk">Símbolo de la moneda</td><td><code>ETH</code></td></tr>
+  </table>
+
+  <p>Esa red solo existe mientras <code>npx hardhat node</code> esté corriendo en su computador. Si la extensión da error de conexión al seleccionarla, el nodo no está levantado.</p>
+
+  <div class="caja">
+    <div class="caja-et">¿Y SI SEPOLIA SE RETIRA? · LO QUE SE PUDO CONFIRMAR HOY</div>
+    <p>Van a encontrar páginas que afirman que Sepolia se retira en septiembre de 2026. <strong>Eso no está confirmado en ninguna fuente oficial.</strong> El 25 de septiembre de 2026, la documentación de ethereum.org (actualizada el 26 de junio de 2026) dice que las dos redes de prueba mantenidas son <strong>Sepolia y Hoodi</strong>, y que <em>«Sepolia is the recommended default testnet for application development»</em>. Lo único real es una <strong>propuesta</strong> de mayo de 2026 en el foro de los desarrolladores: lanzar una red sucesora hacia el primer trimestre de 2027 y retirar Sepolia después, en el segundo o tercer trimestre de 2027. Sin nombre, sin identificador de cadena y sin fecha en firme. La red retirada en 2025 fue Holesky, y Hoodi está pensada para probar validadores, no aplicaciones.</p>
+    <p><strong>⚠ VERIFICAR ANTES DE DICTAR:</strong> confirmen el estado de Sepolia en <code>https://ethereum.org/developers/docs/networks/</code> al inicio de cada semestre. Si alguna vez cambia, cambian los parámetros de la tabla 06.1 y nada más: el procedimiento de esta guía es idéntico para cualquier red de prueba.</p>
+  </div>
+</section>
+
+<!-- ============================================================ 7 -->
+<section class="sec">
+  <div class="sec-cab"><span class="sec-num">07</span><h2>Conseguir ETH de prueba</h2><span class="lead">TRES CAMINOS, EN ESTE ORDEN</span></div>
+
+  <p>Sin saldo no se puede firmar nada: hasta la transacción más pequeña paga gas. El ETH de prueba <strong>no vale dinero</strong> y no se compra: se pide. Tres caminos, y el primero es el del curso.</p>
+
+  <h3>07.1 · Camino 1 · Pedirle al docente (el del curso)</h3>
+
+  <p>El docente reparte desde la <strong>billetera institucional</strong>. Es el camino oficial porque no depende de que un faucet funcione el día de la clase. Lo único que tienen que hacer es publicar <strong>su dirección</strong> (los 42 caracteres, nada más) en el canal del curso, como dice el paso 5 de la Sesión 2. Con eso quedan en la lista de reparto para todo el semestre.</p>
+
+  <p><strong>Cuánto hace falta:</strong> para desplegar y usar el contrato de la Sesión 6 basta con unos <strong>0,003 ETH</strong> de prueba; el resto del semestre, unas décimas más. Si su saldo es cero el día del punto de control de la Sesión 5, se avisa ahí mismo: para eso existe ese punto de control.</p>
+
+  <h3>07.2 · Camino 2 · Faucets públicos, verificados el 25 de septiembre de 2026</h3>
+
+  <p>Un «faucet» (grifo) es una página que regala ETH de prueba. Todos exigen algo, porque si no los vaciarían los robots. Estos son los que se pudieron comprobar hoy:</p>
+
+  <table>
+    <thead><tr><th style="width:26%">FAUCET</th><th style="width:36%">QUÉ EXIGE</th><th>CUÁNTO Y CADA CUÁNTO</th></tr></thead>
+    <tr><td class="pk">pk910 · PoW<br><code>sepolia-faucet.pk910.de</code></td><td><strong>Nada de cuentas.</strong> El navegador «mina» un rato (prueba de trabajo) y hay un captcha para empezar. Sin registro, sin saldo previo.</td><td>Entre <strong>0,05 y 2,5 ETH</strong> por sesión, según cuánto minen. Una sesión cada 24 h; se puede minar hasta 12 h.</td></tr>
+    <tr><td class="pk">QuickNode<br><code>faucet.quicknode.com/<br>ethereum/sepolia</code></td><td>Según su propia página: <strong>sin cuenta, sin publicar en redes y sin saldo en la red principal</strong> — «a brand new wallet can claim». Publicar en X duplica la cantidad, pero es opcional.</td><td>Una vez cada <strong>12 h</strong>. La cantidad base solo se muestra después de escribir la dirección: no se pudo verificar.</td></tr>
+    <tr><td class="pk">Chainlink<br><code>faucets.chain.link/<br>sepolia</code></td><td>Conectar la billetera. La página anuncia también LINK de prueba.</td><td>La página dice <strong>«Drips 0.5 ETH»</strong>. ⚠ VERIFICAR ANTES DE DICTAR: se reporta que pide cuenta de GitHub y 1 LINK en la red principal; no se pudo confirmar en la página.</td></tr>
+    <tr><td class="pk">Google Cloud<br><code>cloud.google.com/<br>application/web3/faucet/<br>ethereum/sepolia</code></td><td><strong>Cuenta de Google</strong> y captcha. Confirmado leyendo la página.</td><td>⚠ VERIFICAR ANTES DE DICTAR: la cantidad y el límite no son legibles sin iniciar sesión. Se reporta ~0,05 ETH al día.</td></tr>
+    <tr><td class="pk">Alchemy<br><code>alchemy.com/faucets/<br>ethereum-sepolia</code></td><td><strong>No pide cuenta de Alchemy, pero exige que su dirección tenga ≥ 0,001 ETH <em>reales</em> en la red principal.</strong> Para una billetera nueva del curso, eso es un muro: no lo van a cumplir y no deben intentarlo.</td><td>0,1 ETH, una vez cada 24 h.</td></tr>
+    <tr><td class="pk">Infura<br><code>infura.io/faucet/sepolia</code></td><td>Cuenta gratuita de Infura / MetaMask Developer.</td><td>⚠ VERIFICAR ANTES DE DICTAR: las fuentes se contradicen entre 0,5 y 0,05 ETH al día.</td></tr>
+  </table>
+
+  <div class="caja alerta">
+    <div class="caja-et">CÓMO USAR UN FAUCET SIN QUE LES ROBEN</div>
+    <ul>
+      <li><strong>Un faucet solo necesita su dirección.</strong> Si les pide la frase de recuperación, la llave privada, o «firmar para verificar la billetera», <strong>es un robo</strong>. Cierren la pestaña.</li>
+      <li><strong>Escriban la dirección del faucet a mano</strong> o úsenla desde esta guía. Los faucets falsos compran anuncios en los buscadores y aparecen arriba del real.</li>
+      <li><strong>Ninguno pide pagar</strong>, ni «desbloquear con una transacción de 0,01 ETH», ni conectar una billetera con fondos reales.</li>
+      <li><strong>Para OP Sepolia:</strong> el oficial es el Superchain Faucet, <code>console.optimism.io/faucet</code>. ⚠ VERIFICAR ANTES DE DICTAR: sus cantidades no son legibles sin iniciar sesión; se reporta una gota pequeña para usuarios sin verificar. El camino práctico es otro: conseguir ETH en Sepolia y <strong>pasarlo</strong> por el puente oficial <code>app.optimism.io/bridge</code>. De Sepolia a OP Sepolia tarda uno a tres minutos; <strong>de vuelta tarda siete días</strong> (el período de impugnación de un rollup optimista, que es justo el tema de la Sesión 16). Planifiquen en ese sentido.</li>
+    </ul>
+  </div>
+
+  <h3>07.3 · Camino 3 · Si nada funciona: la red local de Hardhat</h3>
+
+  <p>Si ningún faucet responde y el docente no está disponible, <strong>el trabajo no se detiene</strong>. La red local de Hardhat es una cadena completa que corre dentro de su computador, sin internet, y arranca con cuentas ya financiadas. Se levanta con:</p>
+
+  <pre>cd "ruta\a\laboratorios-evm"
+npx hardhat node</pre>
+
+  <p>Al arrancar imprime veinte cuentas con <strong>10 000 ETH cada una</strong>, derivadas siempre de la misma frase, que está escrita en la documentación de Hardhat y la conoce todo el mundo:</p>
+
+  <pre>Accounts
+========
+WARNING: Funds sent on live network to accounts with publicly
+known private keys WILL BE LOST.
+
+Account #0: 0xf39Fd6e51aad88F6F4ce6aB8827279cffFb92266 (10000 ETH)
+Account #1: 0x70997970C51812dc3A010C7d01b50e0d17dc79C8 (10000 ETH)
+Account #2: 0x3C44CdDdB6a900fa2b585dd299e03d12FA4293BC (10000 ETH)
+...</pre>
+
+  <div class="caja peligro">
+    <div class="caja-et">POR QUÉ ESAS LLAVES SON PÚBLICAS Y QUÉ SIGNIFICA ESO</div>
+    <p>La frase de la que salen esas veinte cuentas es <strong>literal y públicamente</strong> <code>test test test test test test test test test test test junk</code>, con la ruta de derivación <code>m/44'/60'/0'/0</code>. Está impresa en la documentación de Hardhat y en la de otras herramientas, exactamente para que todo el mundo obtenga las mismas cuentas y los ejemplos de los tutoriales funcionen igual en cualquier máquina. Es una decisión de diseño, no una filtración.</p>
+    <p>Consecuencia inevitable: <strong>cualquier persona del planeta puede firmar como esas cuentas.</strong> Por eso el propio Hardhat advierte en su arranque que los fondos enviados a esas direcciones en una red de verdad <strong>se pierden</strong> — no «se arriesgan»: se pierden, porque hay robots vigilando esas direcciones en todas las redes públicas. Sirven en la red local, donde el saldo es ficticio y la cadena se borra al apagar el nodo, y <strong>en ningún otro sitio, jamás</strong>.</p>
+    <p><strong>La regla del curso, y así lo dice la guía de la Sesión 12:</strong> esas llaves <strong>no se importan en MetaMask</strong>. No hace falta. Lo que se hace es dejar que un script del repositorio le mande fondos locales a <em>su</em> dirección de MetaMask. Importar una llave pública y conocida en la misma extensión donde tienen su cuenta es adquirir la costumbre exacta que este curso intenta desmontar.</p>
+  </div>
+</section>
+
+<!-- ============================================================ 8 -->
+<section class="sec">
+  <div class="sec-cab"><span class="sec-num">08</span><h2>Comprobar que quedó lista</h2><span class="lead">NO SE ASUME: SE VERIFICA</span></div>
+
+  <p>Una billetera «que parece que funciona» no sirve. Estas tres comprobaciones toman cinco minutos y son exactamente lo que se revisa en el punto de control de la Sesión 5.</p>
+
+  <div class="pregunta">
+    <div class="cab"><div class="n">1</div><div class="enun"><span class="tema">COMPROBACIÓN 1 · EL SALDO, EN EL EXPLORADOR</span>No en la billetera: en la cadena</div></div>
+    <div class="just">
+      Peguen su dirección en <code>https://sepolia.etherscan.io</code>. <strong>Salida esperada:</strong> la página de su dirección, con <em>ETH Balance</em> mayor que cero y, en la lista <em>Transactions</em>, la transacción con la que les llegaron los fondos.<br>
+      <strong>Por qué en el explorador y no en la extensión:</strong> porque la extensión muestra lo que <em>ella</em> cree; el explorador muestra lo que está en la cadena. Cuando los dos no coinciden, la cadena tiene razón.<br>
+      <strong>Guarden esa transacción de llegada:</strong> es la «transacción 1» del laboratorio de la Sesión 5.
+    </div>
+  </div>
+
+  <div class="pregunta">
+    <div class="cab"><div class="n">2</div><div class="enun"><span class="tema">COMPROBACIÓN 2 · UNA TRANSFERENCIA MÍNIMA</span>Firmar por primera vez, a propósito y entendiendo qué se firma</div></div>
+    <div class="just">
+      Manden <strong>0,001 ETH de prueba</strong> a un compañero (o a una segunda cuenta suya del mismo selector). En la extensión: <em>Enviar</em> → pegar la dirección de destino → el monto → revisar → confirmar.<br>
+      <strong>Antes de confirmar, lean tres cosas</strong> — esto es la regla 3 puesta en práctica: (a) la red dice <strong>Sepolia</strong>; (b) la dirección de destino coincide en sus primeros y últimos cuatro caracteres con la que les dieron; (c) el monto es 0,001 y la comisión estimada es una fracción ínfima de eso.<br>
+      <strong>Salida esperada:</strong> la transacción aparece en <em>Actividad</em> como pendiente y en unos doce segundos pasa a confirmada. <strong>Cómo sé que funcionó:</strong> el saldo baja en el monto <em>más</em> la comisión, y el compañero ve su saldo subir.
+    </div>
+  </div>
+
+  <div class="pregunta">
+    <div class="cab"><div class="n">3</div><div class="enun"><span class="tema">COMPROBACIÓN 3 · LEER LA TRANSACCIÓN</span>El primer contacto con lo que se hace en la Sesión 5</div></div>
+    <div class="just">
+      En <em>Actividad</em>, abran la transacción y usen el enlace al explorador. Busquen estos seis campos y respóndanse qué significa cada uno:<br>
+      · <strong>Transaction Hash</strong> — el identificador; es lo que se pega en un informe.<br>
+      · <strong>Status</strong> — <code>Success</code>. Una transacción fallida <em>también</em> cobra gas.<br>
+      · <strong>From / To</strong> — deben ser su dirección y la del compañero, sin sorpresas.<br>
+      · <strong>Value</strong> — 0,001 ETH.<br>
+      · <strong>Gas Used</strong> — <strong>21 000</strong>, el costo base de una transferencia simple entre cuentas.<br>
+      · <strong>Nonce</strong> — el contador de su cuenta. Si es su primera transacción enviada, es <code>0</code>.<br>
+      <strong>Si Gas Used no es 21 000:</strong> el destinatario es un contrato, o la red cambió sus precios con una actualización de protocolo. No es un error suyo; la guía de la Sesión 5 lo trata en detalle.
+    </div>
+  </div>
+
+  <h3>08.1 · Lista de chequeo: «mi billetera está lista»</h3>
+
+  <table>
+    <thead><tr><th style="width:6%">✔</th><th>COMPROBACIÓN</th></tr></thead>
+    <tr><td class="pk">☐</td><td>La extensión es la legítima: identificador <code>nkbihfbeogaeaoehlefnkodbefgpgknn</code> en Chrome, o <code>ether-metamask</code> por «MetaMask» en Firefox.</td></tr>
+    <tr><td class="pk">☐</td><td>La billetera se creó con <strong>frase de recuperación</strong>, no con inicio de sesión social.</td></tr>
+    <tr><td class="pk">☐</td><td>Las doce palabras están <strong>en papel</strong>, numeradas, legibles, fuera del computador. Sé dónde está ese papel.</td></tr>
+    <tr><td class="pk">☐</td><td>La frase no está en ninguna foto, archivo, chat, nota del teléfono, correo ni conversación con una IA.</td></tr>
+    <tr><td class="pk">☐</td><td>Sé mi contraseña local y entiendo que <strong>no recupera</strong> la billetera.</td></tr>
+    <tr><td class="pk">☐</td><td>Las redes de prueba están visibles y el selector puede ponerse en <strong>Sepolia</strong>.</td></tr>
+    <tr><td class="pk">☐</td><td>Mi dirección está copiada del botón de copiar (nunca transcrita) y publicada en el canal del curso.</td></tr>
+    <tr><td class="pk">☐</td><td>Mi dirección abre en <code>sepolia.etherscan.io</code> y muestra saldo mayor que cero.</td></tr>
+    <tr><td class="pk">☐</td><td>Hice una transferencia de 0,001 ETH de prueba, quedó <code>Success</code> y leí sus seis campos en el explorador.</td></tr>
+    <tr><td class="pk">☐</td><td>El selector <strong>nunca</strong> ha estado en «Ethereum Mainnet» con esta billetera, y no hay ni un peso real dentro.</td></tr>
+  </table>
+</section>
+
+<!-- ============================================================ 9 -->
+<section class="sec">
+  <div class="sec-cab"><span class="sec-num">09</span><h2>Conectarla, y desconectarla</h2><span class="lead">REMIX · LA dAPP · REVOCAR</span></div>
+
+  <p>Conectar una billetera a un sitio <strong>no le da acceso a sus fondos</strong>: le da permiso para <em>ver</em> su dirección y para <em>pedirle</em> firmas, que ustedes aprueban o rechazan una por una. Lo que sí puede vaciar una cuenta es una firma concedida sin leerla (regla 3).</p>
+
+  <h3>09.1 · Remix (Sesión 6 en adelante)</h3>
+
+  <table>
+    <thead><tr><th style="width:6%">#</th><th style="width:42%">QUÉ HACER</th><th>CÓMO SÉ QUE FUNCIONÓ</th></tr></thead>
+    <tr><td class="pk">1</td><td>Abrir <code>https://remix.ethereum.org</code> <strong>en el mismo navegador</strong> donde está la extensión. Remix no pide cuenta ni instalar nada.</td><td>Carga el editor con la barra de íconos a la izquierda.</td></tr>
+    <tr><td class="pk">2</td><td>Panel <em>Deploy &amp; Run Transactions</em> → <em>Environment</em>: elegir la opción de la billetera del navegador. Según la versión de Remix se llama <strong>Browser Extension</strong> (y dentro, MetaMask) o <strong>Injected Provider – MetaMask</strong>.</td><td>La extensión abre una ventana pidiendo conectar. <strong>Autoricen solo la cuenta del curso</strong>, no todas.</td></tr>
+    <tr><td class="pk">3</td><td>Verificar la red antes de tocar nada más.</td><td>Debajo de <em>Environment</em> dice <strong>Sepolia (11155111)</strong>, y en <em>Account</em> aparece su dirección con su saldo real de prueba. Si dice otra red, cámbienla en la extensión: Remix se actualiza solo.</td></tr>
+  </table>
+
+  <h3>09.2 · Una dApp (Sesión 12)</h3>
+
+  <p>Una página web pide conexión llamando a <code>eth_requestAccounts</code>; la extensión responde con la pantalla de permiso. Dos detalles que cuestan media clase si no se saben:</p>
+  <ul>
+    <li><strong>No abran la página con doble clic.</strong> En <code>file://</code> Chrome no deja actuar a las extensiones (salvo que se active «Permitir acceso a URL de archivo», que viene apagado), así que <code>window.ethereum</code> no existe y la dApp dice «no se detecta una billetera». Sírvanla con <code>npx serve .</code> o <code>python -m http.server</code>.</li>
+    <li><strong>Si cambian de red con la página abierta</strong>, la dApp recibe el evento <code>chainChanged</code>: muchas se recargan solas y hay que volver a pulsar «Conectar». Es comportamiento normal, no un error.</li>
+  </ul>
+
+  <h3>09.3 · Desconectar un sitio y revocar permisos</h3>
+
+  <table>
+    <thead><tr><th style="width:26%">QUÉ QUIERO HACER</th><th>DÓNDE, VERIFICADO EL 25/09/2026</th></tr></thead>
+    <tr><td class="pk">Desconectar<br>un sitio</td><td>Extensión: <strong>menú de arriba a la derecha → «Dapp connections»</strong> → elegir el sitio → <strong>«Disconnect»</strong>. ⚠ Si vieron una guía que habla de «Connected sites», está desactualizada: hoy se llama <em>Dapp connections</em>.</td></tr>
+    <tr><td class="pk">Desconectar<br>todo de golpe</td><td><em>Settings → Security &amp; Privacy → Clear privacy data</em>. En la app del teléfono, desde la pestaña <em>Explore</em>, «Disconnect all».</td></tr>
+    <tr><td class="pk">Revocar la<br>aprobación de<br>un token</td><td><strong>Esto es distinto de desconectar</strong>, y es lo importante. La documentación de MetaMask lo dice explícitamente: después de desconectar, la aplicación <em>«may still be able to access and move your tokens»</em>. La aprobación es un permiso escrito <strong>en la cadena</strong> y solo se quita con otra transacción.<br>La extensión no trae una página de aprobaciones; MetaMask Portfolio sí, pero solo para redes principales. Las herramientas que MetaMask recomienda por nombre son <code>https://revoke.cash</code> (funciona sobre redes de prueba, incluida Sepolia) y <code>https://etherscan.io/tokenapprovalchecker</code>.</td></tr>
+  </table>
+
+  <div class="caja clave">
+    <div class="caja-et">LA DISTINCIÓN QUE HAY QUE LLEVARSE DE ESTA SECCIÓN</div>
+    <p><strong>Desconectar</strong> le quita a un sitio el permiso de <em>hablar</em> con su billetera: es una preferencia guardada en su navegador. <strong>Revocar</strong> le quita a un contrato el permiso de <em>mover sus tokens</em>: es un cambio de estado en la cadena, cuesta gas y es lo único que detiene un robo ya autorizado. Desconectar sin revocar es cerrar la puerta dejando la llave puesta por fuera.</p>
+  </div>
+</section>
+
+<!-- ============================================================ 10 -->
+<section class="sec">
+  <div class="sec-cab"><span class="sec-num">10</span><h2>Problemas frecuentes</h2><span class="lead">SÍNTOMA → CAUSA → SOLUCIÓN</span></div>
+
+  <table>
+    <thead><tr><th style="width:23%">SÍNTOMA</th><th style="width:26%">CAUSA</th><th>SOLUCIÓN</th></tr></thead>
+    <tr><td class="pk">El saldo no aparece,<br>o aparece en cero</td><td>Están en otra red, o el RPC de la red está caído, o el explorador que consultaron es el de la red principal.</td><td>Revisen el selector de red. Peguen la dirección en <code>sepolia.etherscan.io</code>: <strong>si el explorador muestra saldo y la extensión no, el problema es el RPC</strong>. Cámbienlo por otro de la tabla 06.1 (tres puntos de la red → <em>Edit</em> → <em>Add RPC URL</em>).</td></tr>
+    <tr><td class="pk">Red equivocada</td><td>El selector quedó en «Ethereum Mainnet» o en otra red de prueba. La misma dirección tiene saldos distintos en cada libro: nada se perdió.</td><td>Cambien el selector a Sepolia. Si Sepolia no está en la lista, falta activar «Show test networks» (sección 06).</td></tr>
+    <tr><td class="pk">Transacción<br>«pendiente»<br>que no avanza</td><td>La comisión ofrecida quedó por debajo de lo que la red pide, o hay una transacción anterior de la misma cuenta atascada: <strong>el nonce es un contador estricto</strong> y nada se ejecuta hasta que la anterior pase.</td><td><strong>Acelerar</strong> o <strong>cancelar</strong>: pulsen el aviso «Transaction submitted» para abrir el detalle de la transacción, y ahí están los botones <em>Speed up</em> y <em>Cancel</em> (extensión 13.30 o superior). Acelerar reenvía la misma acción pagando más. Cancelar solo se puede <em>intentar</em> mientras siga pendiente: manda una transacción vacía con el <strong>mismo nonce</strong> y más comisión, y gana la que el validador incluya. <strong>No repitan la acción original</strong>: se arriesgan a ejecutarla dos veces.</td></tr>
+    <tr><td class="pk">Hay que forzar<br>un nonce a mano</td><td>Una transacción quedó bloqueada y hay que reemplazarla exactamente.</td><td>En la extensión el nonce personalizado <strong>ya no está en <em>Settings → Advanced</em></strong>: se activa en la propia pantalla de revisión, con <em>«Show advanced details»</em> arriba a la derecha, y aparece el campo <em>Custom nonce</em>. (En la app del teléfono sí sigue en <em>Settings → Advanced</em>.) Si la red usa Smart Transactions, hay que desactivarlas para que el campo aparezca.</td></tr>
+    <tr><td class="pk">«Insufficient funds<br>for gas»</td><td>Tienen menos ETH de la red actual del que cuesta la transacción. <strong>El gas siempre se paga en la moneda nativa de esa red</strong>: tener tokens no sirve, y tener ETH en Sepolia no paga gas en OP Sepolia.</td><td>Consigan ETH de la red correcta (sección 07). Si el mensaje sale en la red principal, pararon justo a tiempo: cambien a Sepolia.</td></tr>
+    <tr><td class="pk">Un token que<br>no se ve</td><td>La cadena tiene su saldo; la extensión no sabe que ese contrato existe. Los tokens no se «reciben»: se consultan.</td><td>Impórtenlo por dirección de contrato: tres puntos de la sección de tokens → <em>Manage tokens</em> → <em>Add custom token</em> → pegar la dirección → <em>Next</em> → <em>Import</em>. La dirección se saca del explorador. Confirmen que el símbolo y los decimales que muestra son los esperados.</td></tr>
+    <tr><td class="pk">Tras reinstalar,<br>la cuenta aparece<br>vacía o falta</td><td>Casi nunca es la frase. Al restaurar, MetaMask solo agrega automáticamente las cuentas derivadas de <strong>esa misma frase</strong> y que tengan saldo de ETH distinto de cero <strong>en la red principal</strong>. Una cuenta que solo vivió en Sepolia, o que solo tiene tokens, no aparece sola. Y las cuentas importadas por llave privada o por billetera física <strong>no se restauran nunca</strong> con la frase.</td><td>Agreguen cuentas en orden hasta que reaparezca la suya: selector de cuenta → <em>Add account or hardware wallet</em> → <em>Ethereum account</em> → <em>Create</em>. Las direcciones son deterministas: siempre salen las mismas y en el mismo orden. <strong>Las redes personalizadas tampoco se restauran</strong>: hay que volver a agregar Sepolia y la red local.</td></tr>
+    <tr><td class="pk">La extensión<br>no abre</td><td>El navegador la tiene deshabilitada u oculta, o quedó a medias tras una actualización.</td><td>Revisen la página de extensiones del navegador: que esté habilitada y anclada a la barra. Si sigue sin abrir, reinicien el navegador; después, desinstalen y reinstalen la extensión. <strong>Se puede reinstalar sin miedo mientras tengan el papel</strong>: la frase reconstruye todo. Sin el papel, no reinstalen nada y vayan a la sección 11.</td></tr>
+    <tr><td class="pk">«Nonce too high»<br>en la red local</td><td>Reiniciaron el nodo de Hardhat: la cadena volvió a cero pero la extensión recuerda el contador viejo.</td><td>Borren los datos de actividad de esa cuenta en la configuración avanzada de la extensión, o quiten y vuelvan a agregar la red local.</td></tr>
+    <tr><td class="pk">Remix no ve<br>la billetera</td><td>Otro navegador, extensión bloqueada, o conexión no autorizada.</td><td>Recarguen Remix, desbloqueen la extensión y acepten la conexión. Tiene que ser el mismo navegador.</td></tr>
+  </table>
+</section>
+
+<!-- ============================================================ 11 -->
+<section class="sec">
+  <div class="sec-cab"><span class="sec-num">11</span><h2>Si se pierde la billetera o la frase</h2><span class="lead">SE REHACE · NO SE RECUPERA</span></div>
+
+  <p>Pasa, y no es una tragedia en este curso. Lo importante es entender por qué la respuesta es siempre la misma.</p>
+
+  <h3>11.1 · Por qué no hay recuperación</h3>
+
+  <p>No es una limitación de MetaMask ni una política que se pueda apelar. <strong>Nadie tiene una copia de su frase.</strong> No hay servidor que la guarde, no hay administrador con un respaldo, no hay soporte con un procedimiento. La frase es el único camino hacia la semilla, y la semilla el único camino hacia la llave privada, y la llave privada la única forma de firmar. La cadena no conoce personas: conoce firmas válidas.</p>
+
+  <p>Lo mismo por el otro lado, y por eso conviene decirlo aquí: <strong>tampoco existe un ataque de fuerza bruta.</strong> Con 128 bits de azar, adivinar una frase es computacionalmente imposible con la tecnología conocida. Esa es la misma propiedad que hace que no haya recuperación: la seguridad y la irreversibilidad son la misma cosa vista de dos lados.</p>
+
+  <p>Un aviso sobre el «soporte» que va a aparecer: en cuanto digan en público que perdieron la frase, alguien les va a escribir por mensaje directo ofreciendo recuperarla con un «servicio de rastreo». <strong>Es una estafa, sin excepción posible</strong> (sección 12). Lo que no existe no se puede recuperar por dinero.</p>
+
+  <h3>11.2 · Qué hacer: rehacerla</h3>
+
+  <table>
+    <thead><tr><th style="width:6%">#</th><th style="width:38%">PASO</th><th>NOTA</th></tr></thead>
+    <tr><td class="pk">1</td><td>Crear una billetera nueva siguiendo las secciones 03 y 04 de esta guía.</td><td>Diez minutos. No intenten «reparar» la vieja.</td></tr>
+    <tr><td class="pk">2</td><td>Anotar la frase nueva en papel. Otra vez.</td><td>Si la primera se perdió, revisen <em>por qué</em> y cambien el sitio donde la guardan.</td></tr>
+    <tr><td class="pk">3</td><td>Publicar la dirección <strong>nueva</strong> en el canal del curso, diciendo que reemplaza la anterior.</td><td>Sin esto no entran en el siguiente reparto de fondos.</td></tr>
+    <tr><td class="pk">4</td><td>Pedir fondos de prueba al docente.</td><td>No esperen a la Sesión 6, donde hacen falta para desplegar.</td></tr>
+    <tr><td class="pk">5</td><td>En el informe en curso, escribir <strong>las dos direcciones</strong> y la fecha del cambio.</td><td>Es lo que permite que quien califique siga el rastro. Dos líneas bastan.</td></tr>
+  </table>
+
+  <h3>11.3 · Qué se pierde y qué no</h3>
+
+  <table>
+    <thead><tr><th style="width:34%">QUÉ PASA CON…</th><th>ESTADO</th></tr></thead>
+    <tr><td class="pk">El saldo de prueba</td><td><strong>Se pierde</strong>, y no importa: no vale dinero. Se pide otra vez.</td></tr>
+    <tr><td class="pk">Las evidencias ya entregadas</td><td><strong>Siguen válidas, todas.</strong> Una transacción confirmada es un hecho permanente de la cadena: su hash sigue abriendo en el explorador, sus <em>logs</em> siguen ahí y su contrato sigue desplegado y verificado. La dirección vieja queda en el informe como la firmante, y eso es precisamente lo que la hace verificable. Perder la llave no borra lo firmado con ella — esa es la propiedad que estudia el curso entero.</td></tr>
+    <tr><td class="pk">Su contrato de la Sesión 6</td><td><strong>Sigue desplegado y funcionando</strong>, y cualquiera puede seguir leyéndolo con <code>verificar</code>. Lo que ya no pueden es actuar como su emisor: <code>emitir</code> y <code>revocar</code> exigen la firma de la dirección vieja. Si les falta una transacción de esa evidencia, despliegan otra instancia con la dirección nueva y lo anotan.</td></tr>
+    <tr><td class="pk">Cosas de valor real</td><td>Aquí no hay ninguna, <strong>porque la regla 1 se cumplió</strong>. Si hubiera habido, estarían perdidas de forma definitiva. Esa es la razón de la regla 1, y esta línea es la lección completa.</td></tr>
+  </table>
+
+  <div class="caja peligro">
+    <div class="caja-et">CUÁNDO HAY QUE REHACERLA AUNQUE NO SE HAYA PERDIDO NADA</div>
+    <p>La billetera está <strong>quemada</strong> y hay que rehacerla, sin discusión, si pasó cualquiera de estas: la frase se escribió en un archivo, un chat, un correo o una IA; se fotografió o se capturó la pantalla; se la dictaron a alguien; alguien más vio el papel; se anotó en un computador ajeno; o firmaron algo que no entendían y después vieron movimientos que no reconocen. <strong>No hay forma de «des-exponer» una frase</strong>: la única respuesta es abandonar esa billetera. Rehacerla cuesta diez minutos; en una billetera con valor real, esos diez minutos son la diferencia entre un susto y una pérdida.</p>
+  </div>
+</section>
+
+<!-- ============================================================ 12 -->
+<section class="sec">
+  <div class="sec-cab"><span class="sec-num">12</span><h2>Estafas que van a ver</h2><span class="lead">NO «PODRÍAN VER»: VAN A VER</span></div>
+
+  <p>En cuanto su dirección sea pública y participen en cualquier canal del tema, esto empieza. No es una advertencia genérica: es la descripción de lo que ocurre.</p>
+
+  <table>
+    <thead><tr><th style="width:24%">LA ESTAFA</th><th style="width:38%">CÓMO SE VE</th><th>CÓMO SE RECONOCE</th></tr></thead>
+    <tr><td class="pk">Soporte falso por<br>mensaje directo</td><td>Escriben «tengo un problema con mi transacción» en un canal público y en menos de un minuto llegan dos o tres mensajes privados de cuentas llamadas «MetaMask Support», «Helpdesk» o similares, muy amables, que piden la frase «para restaurar», o que abran un formulario, o que compartan pantalla.</td><td><strong>El soporte legítimo nunca escribe primero por privado</strong>, y ninguno pide la frase. Que la respuesta llegue en un minuto es la señal: hay robots vigilando esos canales. Bloquear y no responder.</td></tr>
+    <tr><td class="pk">Sitios clonados</td><td>Una copia idéntica de Remix, de un faucet o de la propia página de MetaMask, en un dominio casi igual (una letra cambiada, un guion, otro dominio de nivel superior). Llegan por anuncio arriba de los resultados del buscador, o por un enlace en un chat.</td><td><strong>Lean la barra de direcciones carácter por carácter</strong> antes de conectar la billetera. Escriban las direcciones a mano o usen marcadores propios. Un sitio clonado no necesita robarles nada: solo necesita que ustedes firmen algo en él.</td></tr>
+    <tr><td class="pk">Firma ciega</td><td>Una página pide «firmar para verificar tu billetera», «iniciar sesión» o «reclamar»; la pantalla de firma muestra un bloque de hexadecimal ilegible o un texto que no dice qué autoriza. <strong>No cuesta gas y no aparece en el historial</strong>, así que no parece peligroso. Minutos u horas después la cuenta está vacía.</td><td>Si no pueden leer qué autoriza una firma, <strong>rechácenla</strong>. Rechazar es gratis y siempre se puede volver. Una firma que no se entiende es exactamente la regla 3, y es la forma en que se pierde la mayoría de las cuentas.</td></tr>
+    <tr><td class="pk">Aprobación ilimitada</td><td>Un <code>approve</code> con un monto astronómico (el máximo posible), a favor de un contrato que ustedes no van a volver a usar. No se lleva nada en el momento: deja abierta la puerta. El robo llega semanas después, cuando ya nadie recuerda haber firmado.</td><td>Aprueben <strong>el monto que van a usar</strong>, no «ilimitado», cuando la interfaz lo permita. Y <strong>revoquen</strong> lo que ya no usen con <code>revoke.cash</code>. Desconectar el sitio <strong>no</strong> revoca la aprobación (sección 09).</td></tr>
+    <tr><td class="pk">Airdrops, tokens y<br>NFT que aparecen solos</td><td>Un token con nombre prometedor llega sin que hicieran nada, con un sitio para «reclamarlo». Cualquiera puede mandar cualquier cosa a cualquier dirección: la aparición no prueba nada.</td><td>No interactúen. Reclamar es lo que dispara la firma maliciosa. Un token no deseado se ignora: mientras no lo toquen, no hace nada.</td></tr>
+  </table>
+
+  <div class="caja peligro">
+    <div class="caja-et">LA REGLA QUE RESUELVE EL 90 % DE LOS CASOS</div>
+    <p><strong>Nadie legítimo pide la frase de recuperación. Nunca. Por ningún motivo. Por ningún canal.</strong> Ni MetaMask, ni un explorador, ni un faucet, ni una auditoría, ni un «verificador de airdrop», ni un monitor, ni el docente de este curso. Si alguien la pide, <strong>ya saben que es un robo</strong>, y no hace falta analizar nada más: la petición misma es la prueba. La segunda regla, casi igual de útil: <strong>la urgencia es parte del ataque</strong>. «Se vence en una hora», «tu billetera está en riesgo», «reclama antes de que se acabe». Nada legítimo en esta tecnología necesita que ustedes decidan en treinta segundos.</p>
+  </div>
+</section>
+
+<!-- ============================================================ 13 -->
+<section class="sec" style="break-inside:avoid">
+  <div class="sec-cab"><span class="sec-num">13</span><h2>Referencias</h2><span class="lead">TODAS CONSULTADAS EL 25/09/2026</span></div>
+  <ul>
+    <li>MetaMask. <em>Download</em> · <code>https://metamask.io/download/</code></li>
+    <li>MetaMask. <em>Creating a new wallet</em> · <code>https://support.metamask.io/start/creating-a-new-wallet/</code></li>
+    <li>MetaMask. <em>Secret Recovery Phrase, password and private keys</em> · <code>https://support.metamask.io/start/user-guide-secret-recovery-phrase-password-and-private-keys/</code></li>
+    <li>MetaMask. <em>How to view testnets</em> · <code>https://support.metamask.io/configure/networks/how-to-view-testnets-in-metamask/</code></li>
+    <li>MetaMask. <em>How to add a custom network RPC</em> · <code>https://support.metamask.io/configure/networks/how-to-add-a-custom-network-rpc/</code></li>
+    <li>MetaMask. <em>Speed up or cancel a pending transaction</em> · <code>https://support.metamask.io/manage-crypto/transactions/how-to-speed-up-or-cancel-a-pending-transaction/</code></li>
+    <li>MetaMask. <em>Customize a transaction nonce</em> · <code>https://support.metamask.io/configure/transactions/how-to-customize-a-transaction-nonce/</code></li>
+    <li>MetaMask. <em>Revoke smart contract allowances</em> · <code>https://support.metamask.io/more-web3/learn/how-to-revoke-smart-contract-allowances-token-approvals/</code></li>
+    <li>MetaMask. <em>Add missing accounts after restoring</em> · <code>https://support.metamask.io/configure/accounts/how-to-add-missing-accounts-after-restoring-with-secret-recovery-phrase/</code></li>
+    <li>ethereum.org. <em>Networks</em> (estado de las redes de prueba) · <code>https://ethereum.org/developers/docs/networks/</code></li>
+    <li>Palatinus, M. et al. (2013). <em>BIP-39: Mnemonic code for generating deterministic keys</em> · <code>https://github.com/bitcoin/bips/blob/master/bip-0039.mediawiki</code></li>
+    <li>Wuille, P. (2012). <em>BIP-32: Hierarchical Deterministic Wallets</em> · <code>https://github.com/bitcoin/bips/blob/master/bip-0032.mediawiki</code></li>
+    <li>Palatinus, M. y Rusnak, P. (2014). <em>BIP-44: Multi-Account Hierarchy</em> · <code>https://github.com/bitcoin/bips/blob/master/bip-0044.mediawiki</code></li>
+    <li>Buterin, V. y Van de Sande, A. (2016). <em>EIP-55: Mixed-case checksum address encoding</em> · <code>https://eips.ethereum.org/EIPS/eip-55</code></li>
+    <li>Registro de identificadores de cadena · <code>https://chainid.network/chain/11155111/</code> y <code>/11155420/</code></li>
+    <li>Optimism. <em>Superchain networks</em> y <em>Faucets</em> · <code>https://docs.optimism.io/superchain/networks</code></li>
+    <li>Hardhat. <em>Network reference</em> (cuentas y frase por omisión) · <code>https://hardhat.org/docs/reference/configuration</code></li>
+    <li>Revocar aprobaciones · <code>https://revoke.cash</code> · <code>https://etherscan.io/tokenapprovalchecker</code></li>
+  </ul>
+</section>
+
+</body>
+</html>

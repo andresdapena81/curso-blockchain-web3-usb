@@ -1,0 +1,772 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<title>Guía · Introducción a Solidity</title>
+<!--ESTILOS-->
+<style>.sec-cab,h3{break-after:avoid}
+tr{break-inside:avoid}
+table{break-inside:auto}</style>
+</head>
+<body>
+
+<section class="barra">
+  <div class="kicker">MATERIAL DE REFERENCIA · SESIONES 6 Y 7 · SOLIDITY · TODO EL SEMESTRE</div>
+  <h1>INTRODUCCIÓN A<br><em>SOLIDITY</em>:<br>EL LENGUAJE DE LOS CONTRATOS</h1>
+  <div class="sub">Para quienes ya programan en Java, Python o JavaScript y nunca han escrito un contrato.<br>No es un laboratorio: es el documento que se consulta cuando algo no compila, no cuadra o no se entiende.</div>
+</section>
+
+<dl class="datos">
+  <div><dt>PARA QUIÉN</dt><dd>Quien ya programa<br>y empieza en Solidity</dd></div>
+  <div><dt>VERSIÓN</dt><dd>Solidity 0.8.28<br>OpenZeppelin 5.6.1</dd></div>
+  <div><dt>CÓMO SE USA</dt><dd>De consulta,<br>no de corrido</dd></div>
+  <div><dt>CIFRAS DE GAS</dt><dd>Medidas aquí,<br>no estimadas</dd></div>
+</dl>
+
+<div class="caja clave">
+  <div class="caja-et">CÓMO LEER ESTA GUÍA</div>
+  <p>No se lee de corrido la primera vez. Lean la sección <strong>01</strong> antes de la Sesión 6 —es la que cambia la cabeza— y después vuelvan a lo que les haga falta. Las secciones <strong>14</strong> (errores del primer mes) y <strong>16</strong> (glosario) son las que más van a usar.</p>
+  <p><strong>Todo el código de esta guía compila con 0.8.28</strong> tal como está: se compiló antes de imprimirla. <strong>Todas las cifras de gas se midieron</strong> en la red local de este repositorio (Hardhat 3.16.0, Solidity 0.8.28, optimizador con 200 ejecuciones); no salen de ningún blog. La red local es determinista: si repiten la medición, obtienen los mismos números.</p>
+  <p>Aquí se enseña <strong>el lenguaje</strong>. Los laboratorios 06 y 07 enseñan a <strong>usarlo</strong> —Remix, despliegue, verificación, patrones de fondos, medición de gas— y no se repite aquí lo que está allá.</p>
+</div>
+
+<!-- ============================================================ 1 -->
+<section class="sec">
+  <div class="sec-cab"><span class="sec-num">01</span><h2>Qué es Solidity, y en qué NO se parece a lo que ya saben</h2><span class="lead">LEER PRIMERO</span></div>
+
+  <p>Solidity es un lenguaje compilado, de tipado estático, con clases (se llaman <em>contratos</em>), herencia, interfaces y bibliotecas. Si vienen de Java o de TypeScript, buena parte de la sintaxis les resultará familiar desde el primer minuto: <code>if</code>, <code>for</code>, <code>while</code>, <code>return</code>, llaves, punto y coma, <code>//</code> y <code>/* */</code>. Ese parecido es la trampa: lo que no se parece viene de tres hechos sin equivalente en ningún lenguaje que hayan usado antes.</p>
+
+  <div class="caja peligro">
+    <div class="caja-et">LOS TRES HECHOS QUE LO CAMBIAN TODO</div>
+    <p><strong>1 · El programa no corre en su computador: corre en una máquina compartida por todo el mundo.</strong> No hay <code>main()</code>, ni proceso, ni hilo. El contrato está dormido hasta que alguien le envía una transacción; se despierta, ejecuta una función, guarda lo que cambió y se vuelve a dormir. Entre una llamada y otra pueden pasar años, así que todo lo que quieran recordar tiene que estar <strong>escrito en el estado</strong>: no hay caché en RAM que sobreviva.</p>
+    <p><strong>2 · Cada instrucción cuesta dinero.</strong> Quien llama paga, en ether, cada operación que se ejecuta. Un bucle sobre 10 000 elementos no es «lento», es <strong>imposible</strong>: no cabe en el límite de gas del bloque. Eso invierte reflejos —se guarda poco y se calcula afuera, no al revés—.</p>
+    <p><strong>3 · El código desplegado es inmutable y público.</strong> No hay «subir un parche el viernes»: lo que se despliega queda ahí para siempre, y cualquiera puede leer el bytecode y <strong>todo el estado</strong>, incluidas las variables <code>private</code>. Se parece más a fabricar un chip que a desplegar un servicio web.</p>
+  </div>
+
+  <table>
+    <tr><th style="width:23%">LO QUE YA SABEN</th><th style="width:32%">EN SOLIDITY</th><th>LA DIFERENCIA QUE MUERDE</th></tr>
+    <tr><td class="pk">Clase</td><td><code>contract</code></td><td>Una sola instancia, con dirección propia, desplegada una vez.</td></tr>
+    <tr><td class="pk">Campos de la clase</td><td>Variables de estado</td><td>Persisten para siempre; escribir una cuesta hasta 20 000 de gas.</td></tr>
+    <tr><td class="pk"><code>int</code>, <code>long</code></td><td><code>uint8</code>…<code>uint256</code>, <code>int8</code>…<code>int256</code></td><td>El tamaño por defecto es de <strong>256 bits</strong>, no de 32.</td></tr>
+    <tr><td class="pk"><code>double</code>, <code>float</code></td><td>No existen</td><td>Solo enteros. Sección 13.</td></tr>
+    <tr><td class="pk"><code>HashMap</code>, <code>dict</code>, <code>Map</code></td><td><code>mapping</code></td><td>No se recorre, no tiene tamaño, no se sabe qué claves tiene.</td></tr>
+    <tr><td class="pk"><code>null</code>, <code>None</code></td><td>No existen</td><td>Todo tiene valor por defecto: cero, <code>false</code>, cadena vacía.</td></tr>
+    <tr><td class="pk"><code>try/catch</code> local</td><td><code>revert</code></td><td>No se atrapa dentro de la función: deshace <strong>toda</strong> la transacción.</td></tr>
+    <tr><td class="pk"><code>println</code>, <code>console.log</code></td><td>No existe</td><td>Un contrato no tiene consola. Lo más parecido son los eventos (sección 09).</td></tr>
+    <tr><td class="pk"><code>private</code></td><td><code>private</code></td><td>Limita quién puede <strong>llamar</strong>, no quién puede <strong>ver</strong>. Sección 06.</td></tr>
+    <tr><td class="pk"><code>Math.random()</code>, leer un archivo, llamar una API</td><td>No existen</td><td>Una máquina determinista y aislada no puede sortear ni salir a internet. Eso lo hacen los oráculos (Sesión 14).</td></tr>
+    <tr><td class="pk">Hora del sistema</td><td><code>block.timestamp</code></td><td>Es la hora que <strong>declaró</strong> quien produjo el bloque, y se puede mover.</td></tr>
+  </table>
+
+  <p><strong>La pregunta que hay que hacerse siempre, antes de escribir una línea:</strong> ¿este dato tiene que estar en la cadena? Lo que va a la cadena es público para siempre, cuesta caro de escribir y no se borra. Muchas veces la respuesta honesta es que no. Un contrato bien diseñado guarda lo mínimo para que las reglas se cumplan sin confiar en nadie, y deja el resto afuera.</p>
+</section>
+
+<!-- ============================================================ 2 -->
+<section class="sec">
+  <div class="sec-cab"><span class="sec-num">02</span><h2>Anatomía de un archivo <code>.sol</code></h2></div>
+
+<pre>// SPDX-License-Identifier: MIT
+pragma solidity 0.8.28;
+
+import {Ownable} from "@openzeppelin/contracts/access/Ownable.sol";
+
+/// @title Saludo mínimo
+/// @author Curso Blockchain y Web 3.0 · USB Medellín
+/// @notice Guarda un saludo y dice quién lo puso.
+/// @dev Material de clase, sin auditar.
+contract Saludo is Ownable {
+    string public texto;
+
+    constructor(string memory inicial) Ownable(msg.sender) { texto = inicial; }
+
+    /// @notice Cambia el saludo.
+    /// @param nuevo el texto que queda guardado
+    function cambiar(string calldata nuevo) external onlyOwner { texto = nuevo; }
+}</pre>
+
+  <table>
+    <tr><th style="width:16%">LÍNEA</th><th>QUÉ ES Y POR QUÉ ESTÁ AHÍ</th></tr>
+    <tr><td class="pk">SPDX</td><td>Licencia del <strong>código fuente</strong>; la única línea que puede ir antes del <code>pragma</code>. Si falta, el compilador avisa (advertencia, no error) y el explorador muestra «licencia no especificada» al verificar. Valores usuales: <code>MIT</code>, <code>GPL-3.0</code>, <code>Apache-2.0</code>, <code>UNLICENSED</code> (este último significa «nadie puede reutilizar esto»).</td></tr>
+    <tr><td class="pk"><code>pragma</code></td><td>Qué versiones del compilador aceptan este archivo. Es un filtro que se comprueba <strong>al compilar</strong>, no una importación.</td></tr>
+    <tr><td class="pk"><code>import</code></td><td>Trae símbolos de otro archivo. <strong>Siempre con llaves:</strong> sin ellas se vuelca todo al espacio de nombres actual —incluido lo que ese archivo importó— y después nadie sabe de dónde salió cada símbolo. Las rutas con <code>@</code> las resuelve el gestor de paquetes desde <code>node_modules</code>; Remix las descarga solo.</td></tr>
+    <tr><td class="pk">NatSpec</td><td>Los comentarios <code>///</code> y <code>/** */</code> con etiquetas <code>@</code>. No son adorno: el compilador los guarda en el ABI y en los metadatos, y las billeteras se los muestran al usuario al firmar. Cuando MetaMask dice «¿Confirma cambiar el saludo?» en lenguaje humano, está leyendo esto. <strong>Trampa comprobada:</strong> si una línea del bloque <em>empieza</em> con una arroba que no es una etiqueta conocida, el compilador falla con <code>DocstringParsingError: Documentation tag @… not valid</code>. Una arroba a mitad de línea (un correo, por ejemplo) no molesta; una al principio, sí.</td></tr>
+    <tr><td class="pk"><code>contract</code></td><td>La unidad desplegable. Un archivo puede tener varios; se despliegan por separado.</td></tr>
+  </table>
+
+  <div class="caja alerta">
+    <div class="caja-et">POR QUÉ SE ESCRIBE <code>pragma solidity 0.8.28;</code> Y NO <code>^0.8.0</code></div>
+    <p>El circunflejo significa «0.8.0 o superior, pero menor que 0.9.0». Es lo que verán en casi todos los tutoriales, es cómodo, y esconde un problema serio: <strong>el mismo código compilado con dos versiones distintas produce bytecode distinto</strong>. De ahí salen tres dolores: prueban con 0.8.19 y despliegan con 0.8.28, así que lo que auditaron no es lo que quedó en la cadena; la verificación en el explorador <strong>falla</strong> si no aciertan la versión exacta, y después no hay forma de adivinarla; y dos personas del mismo equipo obtienen bytecode distinto «sin haber cambiado nada». Fijar la versión es gratis y elimina los tres. En bibliotecas que otros van a importar sí tiene sentido el rango —por eso OpenZeppelin lo usa—; en <strong>su</strong> contrato desplegable, no.</p>
+  </div>
+</section>
+
+<!-- ============================================================ 3 -->
+<section class="sec">
+  <div class="sec-cab"><span class="sec-num">03</span><h2>Los tipos</h2><span class="lead">LA TABLA QUE MÁS SE CONSULTA</span></div>
+
+  <table>
+    <tr><th style="width:19%">TIPO</th><th style="width:15%">POR DEFECTO</th><th>QUÉ HAY QUE SABER</th></tr>
+    <tr><td class="pk">uint8 … uint256</td><td><code>0</code></td><td>Sin signo, en pasos de 8 bits. <code>uint</code> = <code>uint256</code>, que llega hasta 2²⁵⁶−1.</td></tr>
+    <tr><td class="pk">int8 … int256</td><td><code>0</code></td><td>Con signo. <code>int</code> = <code>int256</code>. Se usan poco: el dinero de la EVM no es negativo.</td></tr>
+    <tr><td class="pk">bool</td><td><code>false</code></td><td>Ocupa 1 byte en storage, no 1 bit.</td></tr>
+    <tr><td class="pk">address</td><td><code>address(0)</code></td><td>20 bytes. Puede ser una persona o un contrato, y desde dentro <strong>no hay forma fiable de distinguirlas</strong>. <code>address(0)</code> es «el vacío» y también el destino de las quemas de tokens.</td></tr>
+    <tr><td class="pk">address payable</td><td><code>payable(address(0))</code></td><td>Un <code>address</code> que admite <code>.transfer()</code> y <code>.send()</code>. Se obtiene con <code>payable(a)</code>.</td></tr>
+    <tr><td class="pk">bytes32</td><td>32 ceros</td><td>Tamaño fijo, <strong>cabe justo en una ranura</strong>: lo más barato para un hash o un identificador. Se compara con <code>==</code>.</td></tr>
+    <tr><td class="pk">bytes</td><td><code>""</code></td><td>Tamaño variable, con <code>.length</code>. Para datos binarios de largo desconocido.</td></tr>
+    <tr><td class="pk">string</td><td><code>""</code></td><td>Tamaño variable, UTF-8. <strong>No tiene <code>.length</code>, no se indexa y no se compara con <code>==</code>.</strong></td></tr>
+    <tr><td class="pk">enum</td><td>el primer valor</td><td>Azúcar sobre un entero pequeño: <code>enum Estado { Libre, Reservada }</code> → <code>0</code>, <code>1</code>. Las pruebas lo ven como número.</td></tr>
+    <tr><td class="pk">struct</td><td>todo en cero</td><td>Agrupa campos. El <strong>orden de declaración</strong> decide cuántas ranuras ocupa (sección 05).</td></tr>
+    <tr><td class="pk">T[3] (fijo)</td><td>3 valores en cero</td><td>Longitud conocida al compilar. No tiene <code>.push</code>.</td></tr>
+    <tr><td class="pk">T[] (dinámico)</td><td><code>[]</code></td><td><code>.length</code>, <code>.push(x)</code>, <code>.pop()</code>. <strong>Recorrerlo en cadena es caro</strong> y se vuelve imposible si crece sin límite.</td></tr>
+    <tr><td class="pk">mapping(K =&gt; V)</td><td>ver abajo</td><td>Tabla clave → valor. Solo existe en <code>storage</code>: no puede ser parámetro ni variable local.</td></tr>
+  </table>
+
+  <div class="caja peligro">
+    <div class="caja-et">LAS TRES RAREZAS DEL <code>mapping</code></div>
+    <p><strong>1 · No se recorre.</strong> No existe «dame todas las claves», no tiene <code>.length</code>, no se itera. La razón es física: un mapping no guarda las claves en ninguna parte; la posición de cada valor se calcula con un hash. Si necesitan la lista, mantengan un arreglo aparte <strong>a mano</strong> (<code>if (puntos[quien] == 0) _vistos.push(quien);</code>) y paguen por ello.</p>
+    <p><strong>2 · Toda clave existe desde siempre, con valor cero.</strong> Preguntar por una dirección que nunca apareció devuelve <code>0</code>, no un error ni <code>null</code>. Por eso «¿existe este registro?» <strong>no</strong> se puede responder con «¿el valor es distinto de cero?»: hace falta un campo <code>bool existe</code> explícito. Y <code>delete m[k]</code> no «quita la clave»: la pone en cero, que es lo mismo que nunca haber estado.</p>
+    <p><strong>3 · Las claves se pueden nombrar</strong> desde 0.8.18: <code>mapping(address duenno =&gt; uint256 saldo) public saldos;</code> Es solo documentación —genera lo mismo— pero se lee mucho mejor y los nombres llegan al ABI.</p>
+  </div>
+
+  <h3 style="font-size:10.5pt;margin:5mm 0 2mm">3.1 · <code>bytes32</code> frente a <code>bytes</code> frente a <code>string</code></h3>
+  <p><code>bytes32</code> es de tamaño fijo, ocupa <strong>una ranura exacta</strong> y se compara con <code>==</code>: es lo más barato para hashes, identificadores y claves. <code>bytes</code> es de tamaño variable (una ranura de cabecera más los datos) y sirve para binario de largo desconocido: una firma, un <code>calldata</code> guardado. <code>string</code> cuesta lo mismo que <code>bytes</code> y de hecho <em>es</em> un <code>bytes</code> con la promesa de ser UTF-8, promesa que el compilador no verifica.</p>
+  <p>Solidity casi no sabe manipular texto: no hay <code>substring</code>, ni <code>toUpperCase</code>, ni <code>split</code>. Lo que sí hay:</p>
+<pre>// Los strings NO se comparan con ==. Se comparan sus hashes.
+return keccak256(bytes(x)) == keccak256(bytes(y));
+
+return bytes(x).length == 0;   // un string no tiene .length</pre>
+  <p>Y el detalle que muerde: <code>bytes(x).length</code> cuenta <strong>bytes</strong>, no caracteres. En UTF-8 «ñ» ocupa dos bytes y un emoji cuatro. Un límite de 100 no es un límite de 100 letras.</p>
+
+  <h3 style="font-size:10.5pt;margin:5mm 0 2mm">3.2 · Conversiones y truncamiento</h3>
+<pre>function conversiones(uint256 grande) external pure returns (uint8 a, uint16 b) {
+    a = uint8(grande);         // con grande = 300 devuelve 44, SIN avisar
+    b = uint16(a);             // ensanchar nunca pierde nada
+}</pre>
+  <p><strong>Estrechar trunca en silencio.</strong> 300 en binario es <code>0000_0001_0010_1100</code>; <code>uint8</code> se queda con el último byte, <code>0010_1100</code> = 44. No hay error, ni advertencia, ni reversión: el programa sigue con un número falso. Es la fuente de errores más silenciosa del lenguaje, y aparece sobre todo al convertir <code>block.timestamp</code> (que es <code>uint256</code>) a <code>uint64</code> o <code>uint32</code>. Hay media protección: escribir <code>uint8(300)</code> con el <em>literal</em> <strong>no compila</strong> («<code>Explicit type conversion not allowed from "int_const 300" to "uint8"</code>»), pero si el 300 viene dentro de una <strong>variable</strong> el compilador no puede saberlo y la conversión pasa, truncando. La protección cubre los literales, no los datos.</p>
+</section>
+
+<!-- ============================================================ 4 -->
+<section class="sec">
+  <div class="sec-cab"><span class="sec-num">04</span><h2>Dónde vive un dato: <code>storage</code>, <code>memory</code>, <code>calldata</code></h2><span class="lead">CON CIFRAS MEDIDAS</span></div>
+
+  <p>En Java o Python no hay que decir dónde vive un objeto. En Solidity, para todo lo que tenga tamaño variable (arreglos, <code>struct</code>, <code>string</code>, <code>bytes</code>) hay que declararlo, y esa palabra decide el comportamiento <strong>y</strong> el precio.</p>
+
+  <table>
+    <tr><th style="width:13%">ZONA</th><th style="width:18%">CUÁNTO DURA</th><th style="width:13%">SE PUEDE</th><th>PRECIO</th></tr>
+    <tr><td class="pk">storage</td><td>Para siempre, en la cadena</td><td>leer y escribir</td><td>Carísimo: 20 000 por estrenar una ranura, 2 900 por cambiar una que ya tenía valor, y 2 100 más la primera vez que se toca esa ranura en la transacción («en frío»). Leer: 2 100 en frío, 100 después.</td></tr>
+    <tr><td class="pk">memory</td><td>Lo que dura la llamada</td><td>leer y escribir</td><td>Barato, no gratis: 3 de gas por palabra de 32 bytes, y sube al cuadrado a medida que crece.</td></tr>
+    <tr><td class="pk">calldata</td><td>Lo que dura la llamada</td><td>solo leer</td><td>Lo más barato: no se copia nada, los datos ya vienen en la transacción.</td></tr>
+  </table>
+
+  <div class="caja peligro">
+    <div class="caja-et">EL ERROR QUE COMPILA, NO REVIERTE Y NO HACE NADA</div>
+<pre>function usar(uint256 id) external {
+    Ficha storage f = _fichas[id];
+    f.usada = true;              // QUEDA escrito
+}
+
+function usarMal(uint256 id) external view returns (bool) {
+    Ficha memory f = _fichas[id];
+    f.usada = true;             // compila, no revierte y NO cambia nada
+    return f.usada;             // devuelve true... y el storage sigue igual
+}</pre>
+    <p>Es el error número uno de quien empieza, y el más difícil de ver porque <strong>no da ningún síntoma</strong>: la función no falla e incluso devuelve lo que uno espera. Solo lo detecta la prueba que vuelve a leer el estado. Regla: <strong>si lo van a modificar, va en <code>storage</code>.</strong></p>
+  </div>
+
+  <p>La misma función —suma un arreglo y guarda el resultado— con el parámetro de las dos formas, medida:</p>
+  <table>
+    <tr><th style="width:24%">TAMAÑO DEL ARREGLO</th><th style="width:20%">calldata</th><th style="width:20%">memory</th><th>LO QUE CUESTA COPIAR</th></tr>
+    <tr><td class="pk">8 elementos</td><td>29 426</td><td>30 198</td><td>+772 (+2,6 %)</td></tr>
+    <tr><td class="pk">32 elementos</td><td>37 034</td><td>39 848</td><td>+2 814 (+7,6 %)</td></tr>
+    <tr><td class="pk">64 elementos</td><td>47 178</td><td>52 719</td><td>+5 541 (+11,7 %)</td></tr>
+  </table>
+  <p>La diferencia <strong>crece con el tamaño, y más rápido que el tamaño</strong>, porque la memoria se cobra al cuadrado. Con 64 elementos, escribir <code>memory</code> en lugar de <code>calldata</code> sale 11,7 % más caro sin ganar nada. (Los totales incluyen los 21 000 fijos de cualquier transacción: lo que importa es la diferencia entre filas. Sin optimizador, la de 64 sube a 14 564.)</p>
+  <p><strong>La regla:</strong> en funciones <code>external</code>, los parámetros de tamaño variable van en <code>calldata</code>, salvo que haya que modificarlos dentro (<code>calldata</code> es de solo lectura). En funciones <code>public</code> no se puede —como también se llaman desde dentro, el parámetro debe ser <code>memory</code>—, y esa es una buena razón para preferir <code>external</code>.</p>
+</section>
+
+<!-- ============================================================ 5 -->
+<section class="sec">
+  <div class="sec-cab"><span class="sec-num">05</span><h2>Estado, locales, y las ranuras de 32 bytes</h2></div>
+
+  <p><strong>Variable de estado:</strong> se declara dentro del <code>contract</code> y fuera de toda función; vive en <code>storage</code>, persiste entre transacciones y se paga cada escritura. <strong>Variable local:</strong> se declara dentro de una función; vive en la pila o en memoria, desaparece al terminar y es prácticamente gratis.</p>
+
+  <table>
+    <tr><th style="width:15%"></th><th style="width:26%">CUÁNDO SE FIJA EL VALOR</th><th style="width:17%">¿OCUPA RANURA?</th><th>COSTO DE LEERLA</th></tr>
+    <tr><td class="pk">normal</td><td>En cualquier momento</td><td>Sí</td><td>2 100 en frío, 100 en caliente</td></tr>
+    <tr><td class="pk">constant</td><td>Al escribir el código</td><td>No</td><td>Casi cero: el valor se incrusta en el bytecode</td></tr>
+    <tr><td class="pk">immutable</td><td>En el constructor, una vez</td><td>No</td><td>Casi cero: el valor se incrusta al desplegar</td></tr>
+  </table>
+
+  <p>Una <code>immutable</code> <strong>solo</strong> se escribe en el constructor y <strong>no se puede leer dentro de él</strong>: en ese momento el valor todavía no está en el bytecode. Una <code>constant</code> no puede depender de nada de tiempo de ejecución (ni <code>block.timestamp</code>, ni <code>msg.sender</code>).</p>
+
+  <h3 style="font-size:10.5pt;margin:5mm 0 2mm">5.1 · El empaquetado, con la prueba delante</h3>
+  <p>El storage es una lista de ranuras de 32 bytes numeradas desde 0. El compilador coloca las variables de estado <strong>en el orden en que se declaran</strong> y mete varias en la misma ranura si caben; cuando no caben, empieza una nueva. Un <code>uint256</code> ocupa la ranura entera.</p>
+
+<pre>// CABEN EN UNA SOLA RANURA: 20 + 8 + 1 = 29 bytes de 32
+address public autor;      // 20 bytes -&gt; ranura 0
+uint64  public fecha;      //  8 bytes -&gt; ranura 0
+bool    public activo;     //  1 byte  -&gt; ranura 0
+
+// NO EMPAQUETA: cada uno estrena ranura
+uint256 public total;      // ranura 1 (ocupa las 32)
+uint128 public a;          // ranura 2
+uint256 public otro;       // ranura 3  &lt;- se cuela y rompe el grupo
+uint128 public b;          // ranura 4  (a y b habrían compartido ranura)</pre>
+
+  <p>No es teoría. Se desplegó ese contrato, se le dieron valores reconocibles y se leyeron las ranuras con <code>eth_getStorageAt</code>:</p>
+<pre>ranura 0: 0x00000001bbbbbbbbbbbbbbbbaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa
+ranura 1: 0x00000000000000000000000000000000000000000000000000000000000000cc
+ranura 2: 0x00000000000000000000000000000000000000000000000000000000000000dd
+ranura 3: 0x00000000000000000000000000000000000000000000000000000000000000ee
+ranura 4: 0x00000000000000000000000000000000000000000000000000000000000000ff</pre>
+  <p>En la ranura 0 están los tres primeros, pegados de derecha a izquierda: la dirección (<code>aaaa…</code>, 20 bytes), la fecha (<code>bbbb…</code>, 8 bytes) y el <code>bool</code> (<code>01</code>). Los otros cuatro ocupan una ranura cada uno: <code>a</code> y <code>b</code>, que juntos ocupaban 32 bytes exactos, quedaron separados <strong>solo porque se declaró un <code>uint256</code> entre ellos</strong>.</p>
+
+  <p>Lo que cuesta esa distracción, medido sobre dos contratos con los mismos tres datos (<code>address</code> + <code>uint64</code> + <code>bool</code>) escribiéndolos en una sola llamada:</p>
+  <table>
+    <tr><th style="width:34%">CONTRATO</th><th style="width:22%">RANURAS ESCRITAS</th><th style="width:18%">GAS</th><th>DIFERENCIA</th></tr>
+    <tr><td class="pk">Declaraciones seguidas</td><td>1</td><td>44 352</td><td>—</td></tr>
+    <tr><td class="pk">Con un uint256 en medio</td><td>2</td><td>66 463</td><td><strong>+22 111</strong> (+49,9 %)</td></tr>
+  </table>
+  <p>Esos 22 111 son casi exactamente el precio de estrenar una ranura: 20 000 de la escritura más 2 100 del primer acceso. Reordenar tres líneas de declaración ahorró la mitad del costo de la función, en cada llamada y para siempre.</p>
+
+  <div class="caja alerta">
+    <div class="caja-et">QUÉ EMPAQUETA Y QUÉ NO</div>
+    <ul>
+      <li><strong>Empaquetan:</strong> variables <em>consecutivas</em> cuyos tamaños sumen 32 bytes o menos. <code>address</code> (20) + <code>uint64</code> (8) + <code>uint32</code> (4) = 32 justos; cuatro <code>uint64</code> seguidos; 32 <code>bool</code> seguidos (un <code>bool</code> ocupa 1 byte, no 1 bit).</li>
+      <li><strong>No empaquetan nunca:</strong> <code>uint256</code>, <code>int256</code> y <code>bytes32</code>, que ocupan la ranura entera. Los arreglos dinámicos, los <code>mapping</code>, los <code>string</code> y los <code>bytes</code> usan su propia ranura de cabecera y guardan el contenido en otra parte.</li>
+      <li><strong>Las locales no se empaquetan</strong> y su orden no importa: viven en la pila, que trabaja en palabras de 32 bytes. Usar <code>uint8</code> en una local no ahorra nada y a veces cuesta <em>más</em>, porque el compilador añade instrucciones para recortar el valor.</li>
+      <li>El empaquetado solo paga si las variables <strong>se escriben juntas</strong> en la misma transacción.</li>
+    </ul>
+  </div>
+
+  <div class="caja clave">
+    <div class="caja-et">UN CONSEJO MUY REPETIDO QUE HOY YA NO PAGA · MEDIDO</div>
+    <p>«Copien la variable de estado a una local antes de usarla varias veces». Se midió una función que usa <code>base</code> cinco veces, frente a la misma con <code>uint256 b = base;</code> al principio. <strong>Con el optimizador activado, como en este curso: 28 755 frente a 28 782, o sea nada</strong> —esos 27 de gas son ruido—, porque el optimizador ya hace la copia solo. <strong>Sin optimizador: 29 697 frente a 29 335, 362 de ahorro</strong>, que son los cuatro <code>SLOAD</code> en caliente de 100 que se evitan. La copia local sigue siendo más legible y protege de leer un valor que cambió a mitad de función; lo que no se sostiene es el argumento del gas. <strong>Hay que medirlo, no repetirlo:</strong> muchos consejos de optimización que circulan son de antes del optimizador actual.</p>
+  </div>
+</section>
+
+<!-- ============================================================ 6 -->
+<section class="sec">
+  <div class="sec-cab"><span class="sec-num">06</span><h2>Funciones</h2></div>
+
+<pre>function nombre(tipo parámetro) visibilidad mutabilidad modificadores returns (tipo) { ... }</pre>
+
+  <table>
+    <tr><th style="width:15%">VISIBILIDAD</th><th style="width:33%">QUIÉN PUEDE LLAMARLA</th><th>CUÁNDO SE USA</th></tr>
+    <tr><td class="pk">external</td><td>Solo desde fuera (o desde dentro con <code>this.f()</code>).</td><td>La opción por defecto para la interfaz pública. Permite <code>calldata</code>.</td></tr>
+    <tr><td class="pk">public</td><td>Desde fuera y desde dentro.</td><td>Cuando de verdad hace falta llamarla por dentro también.</td></tr>
+    <tr><td class="pk">internal</td><td>Este contrato y los que hereden de él.</td><td>Ayudantes compartidos. Es el valor por defecto de las variables de estado.</td></tr>
+    <tr><td class="pk">private</td><td>Solo este contrato. Ni los herederos.</td><td>Detalles internos que no deben tocarse al heredar.</td></tr>
+  </table>
+  <p>Una variable de estado <code>public</code> no es «modificable por cualquiera»: el compilador le genera <strong>gratis</strong> una función de lectura con su mismo nombre. Escribirla sigue siendo asunto exclusivo del código del contrato.</p>
+
+  <div class="caja peligro">
+    <div class="caja-et"><code>private</code> NO ES SECRETO · LA ADVERTENCIA MÁS IMPORTANTE DE ESTA GUÍA</div>
+    <p><code>private</code> e <code>internal</code> limitan <strong>quién puede llamar o referenciar</strong> un miembro desde otro código Solidity. No esconden nada: todo el storage de un contrato es público, y cualquier nodo responde a <code>eth_getStorageAt(dirección, ranura)</code> devolviendo los 32 bytes que haya ahí, sin permiso de nadie. Se comprobó desplegando este contrato con <code>clave = 1234</code> y leyendo la ranura 0 desde fuera, sin ABI:</p>
+<pre>contract Secreto {
+    uint256 private _clave;          // "privada": nadie la puede LLAMAR
+    constructor(uint256 clave) { _clave = clave; }
+}
+
+ranura 0 → 0x00000000000000000000000000000000000000000000000000000000000004d2 = 1234</pre>
+    <p><strong>Nunca se guarda un secreto en una cadena pública.</strong> Ni una contraseña, ni una clave de API, ni la respuesta de un sorteo antes de revelarla, ni un dato personal «porque está en una variable privada». Si algo tiene que ser secreto y estar en cadena, se guarda su <strong>hash</strong> y el valor se revela después (patrón <em>commit-reveal</em>).</p>
+  </div>
+
+  <table>
+    <tr><th style="width:15%">MUTABILIDAD</th><th style="width:29%">SE COMPROMETE A</th><th>CONSECUENCIA</th></tr>
+    <tr><td class="pk">(ninguna)</td><td>Puede escribir el estado.</td><td>Siempre exige una transacción y siempre cuesta gas.</td></tr>
+    <tr><td class="pk">view</td><td>Lee el estado, no lo escribe.</td><td>Llamada desde fuera: la responde el nodo, <strong>sin transacción y sin costo</strong>.</td></tr>
+    <tr><td class="pk">pure</td><td>Ni lee ni escribe el estado.</td><td>Igual que <code>view</code>, y además se razona sobre ella como una función matemática.</td></tr>
+    <tr><td class="pk">payable</td><td>Acepta ether.</td><td>Sin esta palabra, la función <strong>rechaza</strong> cualquier envío de valor.</td></tr>
+  </table>
+  <p><strong>«Gratis» describe a quien pregunta, no a la función.</strong> Una <code>view</code> es gratis cuando la llama una interfaz desde fuera, porque el nodo la ejecuta en su copia sin escribir nada. Pero si <strong>otro contrato</strong> la llama dentro de una transacción, el cómputo se ejecuta de verdad y se paga. Las mismas líneas, dos precios, según quién pregunte.</p>
+
+  <h3 style="font-size:10.5pt;margin:5mm 0 2mm">6.1 · Retornos múltiples, sobrecarga, y llamarse a sí mismo</h3>
+<pre>/// Dos valores de retorno, con nombre: no hace falta escribir `return`.
+function partir(uint256 x) external pure returns (uint256 mitad, uint256 resto) {
+    mitad = x / 2;
+    resto = x % 2;
+}
+
+/// Sobrecarga: mismo nombre, firmas distintas.
+function sumar(uint256 x, uint256 y) public pure returns (uint256) { return x + y; }
+function sumar(uint256 x, uint256 y, uint256 z) public pure returns (uint256) { return x + y + z; }
+
+uint256 s = sumar(x, 1);         // llamada INTERNA: un salto, casi gratis
+uint256 t = this.desdeFuera();   // llamada EXTERNA a sí mismo: ~700 gas más</pre>
+  <p>Los retornos múltiples se reciben con paréntesis —<code>(uint256 m, uint256 r) = partir(7);</code>— y se descarta lo que no interese dejando el hueco: <code>(, uint256 r) = partir(7);</code>. La sobrecarga funciona dentro de Solidity, pero desde fuera <strong>las dos funciones tienen selectores distintos</strong> y las bibliotecas cliente obligan a escribir la firma completa (<code>contrato["sumar(uint256,uint256)"](…)</code>): usarla poco ahorra dolores.</p>
+  <p>La última línea cuesta: <strong>26 650 frente a 27 349 de gas, 699 de diferencia</strong>, medido. Una llamada interna es un salto dentro del mismo bytecode; escribir <code>this.f()</code> la convierte en un mensaje de verdad, con codificación ABI, opcode <code>CALL</code> y decodificación del retorno. Solo se justifica para llamar una función <code>external</code> desde dentro, o cuando se quiere a propósito que <code>msg.sender</code> pase a ser el propio contrato —lo cual, hecho sin darse cuenta, rompe el control de acceso—.</p>
+</section>
+
+<!-- ============================================================ 7 -->
+<section class="sec">
+  <div class="sec-cab"><span class="sec-num">07</span><h2>Las variables globales</h2><span class="lead">EL CONTEXTO DE LA LLAMADA</span></div>
+
+  <p>No se declaran: están siempre disponibles. Son la única ventana que tiene el contrato al mundo.</p>
+  <table>
+    <tr><th style="width:20%">VARIABLE</th><th style="width:12%">TIPO</th><th>QUÉ ES · Y LA TRAMPA</th></tr>
+    <tr><td class="pk">msg.sender</td><td>address</td><td>Quién hizo <strong>esta</strong> llamada. Si una persona llama a A y A llama a B, dentro de B <code>msg.sender</code> es <strong>A</strong>, no la persona. Es la base de todo control de acceso.</td></tr>
+    <tr><td class="pk">msg.value</td><td>uint256</td><td>Cuántos wei vienen en esta llamada. Solo tiene sentido en funciones <code>payable</code>.</td></tr>
+    <tr><td class="pk">msg.data</td><td>bytes calldata</td><td>Los datos completos: 4 bytes de selector + argumentos. Es lo que lee un <code>fallback</code>. <code>msg.sig</code> es solo el selector.</td></tr>
+    <tr><td class="pk">block.timestamp</td><td>uint256</td><td>Segundos Unix que <strong>declaró</strong> quien produjo el bloque. No es un reloj exacto: se puede mover unos segundos. Sirve para plazos de minutos u horas; <strong>no sirve para sortear nada</strong> ni para decidir quién llegó primero por medio segundo.</td></tr>
+    <tr><td class="pk">block.number</td><td>uint256</td><td>Altura del bloque. Avanza de a uno, pero el tiempo entre bloques no es constante entre redes: contar bloques no es contar tiempo.</td></tr>
+    <tr><td class="pk">block.chainid</td><td>uint256</td><td>Identificador de red (1 = Ethereum, 11155111 = Sepolia). Hace que una firma de una red no valga en otra (Sesión 13).</td></tr>
+    <tr><td class="pk">tx.origin</td><td>address</td><td>La cuenta de persona que <strong>inició</strong> toda la cadena de llamadas. <strong>Nunca para autorizar.</strong></td></tr>
+    <tr><td class="pk">address(this)</td><td>address</td><td>La dirección del propio contrato. <code>address(this).balance</code> da su saldo en wei.</td></tr>
+    <tr><td class="pk">gasleft()</td><td>uint256</td><td>Cuánto gas queda en esta ejecución. Para medir, y para decidir si alcanza para una llamada externa.</td></tr>
+  </table>
+
+  <div class="caja peligro">
+    <div class="caja-et">POR QUÉ <code>tx.origin</code> NO SIRVE PARA AUTORIZAR</div>
+    <p>Suena razonable: «solo el dueño puede llamar, así que compruebo <code>tx.origin == duenno</code>». El ataque tiene tres pasos: (1) el atacante despliega un contrato cuyo <code>receive()</code> llama a <code>retirarTodo()</code> del contrato de la víctima; (2) convence al dueño de enviarle un poco de ether a ese contrato, con cualquier excusa; (3) el dueño firma el envío. La cadena queda <strong>dueño → contrato del atacante → contrato de la víctima</strong>, y dentro de la víctima <code>msg.sender</code> es el contrato del atacante —la comprobación fallaría—, pero <code>tx.origin</code> <strong>sigue siendo el dueño</strong>. La comprobación pasa y el contrato se vacía.</p>
+    <p>El dueño firmó una cosa y autorizó otra sin enterarse. <strong>Para autorizar siempre se usa <code>msg.sender</code>.</strong> La documentación oficial de Solidity lo dice con esas palabras: «nunca use <code>tx.origin</code> para autorización». Su único uso legítimo es responder a «¿esta llamada vino directa de una persona o pasó por un contrato?», y hasta eso es frágil.</p>
+  </div>
+</section>
+
+<!-- ============================================================ 8 -->
+<section class="sec">
+  <div class="sec-cab"><span class="sec-num">08</span><h2>Errores: <code>require</code>, <code>revert</code>, errores propios y <code>assert</code></h2></div>
+
+  <p>En Solidity no hay excepciones que se atrapen y se manejen dentro de la función. Solo hay una cosa: <strong>revertir</strong>. Y revertir significa deshacer todo.</p>
+
+  <div class="caja clave">
+    <div class="caja-et">QUÉ SE DESHACE Y QUÉ NO</div>
+    <p><strong>Se deshace todo.</strong> Una transacción de Ethereum es atómica: si se revierte en la última línea, se deshacen todas las escrituras de estado desde el principio, todos los eventos emitidos y todas las transferencias de ether, incluidas las de los contratos que se llamaron en el camino. La cadena queda como si la transacción no hubiera existido: no hay estados intermedios ni «se alcanzó a guardar la mitad».</p>
+    <p><strong>No se deshace el gas gastado.</strong> La transacción <em>sí</em> ocurrió: está en el bloque con <code>Status: Fail</code>, y quien la firmó pagó todo el trabajo hecho antes de revertir; solo se devuelve el gas que sobró del límite. Por eso una validación cara al final es mala idea: quien se equivoca paga todo lo anterior. <strong>Validar primero, y barato.</strong></p>
+  </div>
+
+  <table>
+    <tr><th style="width:24%">FORMA</th><th style="width:28%">QUÉ LLEGA A QUIEN LLAMA</th><th>CUÁNDO SE USA</th></tr>
+    <tr><td class="pk">require(cond, "texto")</td><td><code>Error(string)</code></td><td>Lo clásico. Legible, pero la cadena de texto se paga.</td></tr>
+    <tr><td class="pk">revert("texto")</td><td><code>Error(string)</code></td><td>Lo mismo, cuando la condición se lee mejor al revés con un <code>if</code>.</td></tr>
+    <tr><td class="pk">revert MiError(a, b)</td><td><code>MiError(tipo,tipo)</code></td><td><strong>Lo recomendado hoy.</strong> Con parámetros. Desde 0.8.4.</td></tr>
+    <tr><td class="pk">assert(cond)</td><td><code>Panic(0x01)</code></td><td>Para invariantes internas, nunca para entradas.</td></tr>
+  </table>
+
+<pre>error SaldoInsuficiente(uint256 pedido, uint256 disponible);
+
+function conRequire(uint256 pedido) external view {
+    require(pedido &lt;= saldo, "saldo insuficiente");
+}
+
+function conErrorPropio(uint256 pedido) external view {
+    if (pedido &gt; saldo) revert SaldoInsuficiente(pedido, saldo);
+}</pre>
+
+  <p>Comparando dos contratos idénticos salvo por eso —uno con <code>require(v &gt; 100, "el valor debe ser mayor que cien unidades")</code> y otro con un error propio de dos parámetros—:</p>
+  <table>
+    <tr><th style="width:30%">MEDICIÓN</th><th style="width:20%">require + texto</th><th style="width:18%">error propio</th><th>DIFERENCIA</th></tr>
+    <tr><td class="pk">Gas de despliegue</td><td>105 123</td><td>93 223</td><td><strong>−11 900 (−11,3 %)</strong></td></tr>
+    <tr><td class="pk">Gas al revertir</td><td>3 216</td><td>3 177</td><td>−39 (−1,2 %)</td></tr>
+  </table>
+  <div class="caja alerta">
+    <div class="caja-et">UN MATIZ QUE CASI NADIE CUENTA BIEN</div>
+    <p>Se repite mucho que los errores personalizados «ahorran mucho gas al revertir». <strong>Nuestra medición dice que no: al revertir la diferencia son 39 de gas, ruido.</strong> Donde sí se nota es en el <strong>despliegue</strong>: −11 900, porque la cadena de texto viaja dentro del bytecode y se paga al poner el contrato en la cadena. Se paga una vez, pero también cuenta para el límite de 24 576 bytes por contrato (EIP-170), que es un muro real en contratos grandes. Y la razón principal para usarlos no es el gas: es que <strong>llevan parámetros</strong>. No es lo mismo «pago incorrecto» que <code>PagoIncorrecto(esperado: 1000, recibido: 900)</code>.</p>
+  </div>
+
+  <h3 style="font-size:10.5pt;margin:5mm 0 2mm">8.1 · Para qué sirve <code>assert</code> de verdad</h3>
+  <p>La regla: <strong><code>require</code> y <code>revert</code> son para lo que el usuario puede hacer mal; <code>assert</code> es para lo que <em>nosotros</em> podemos haber escrito mal.</strong> Un <code>assert</code> que falla no dice «el usuario envió un dato inválido», dice «hay un error en este contrato». Nunca debería poder fallar. Solidity lo distingue en el resultado: <code>require</code> produce <code>Error(string)</code> y <code>assert</code> produce <code>Panic(uint256)</code> con un código.</p>
+  <table>
+    <tr><th style="width:14%">CÓDIGO</th><th>QUÉ PASÓ</th></tr>
+    <tr><td class="pk">0x01</td><td>Falló un <code>assert</code>.</td></tr>
+    <tr><td class="pk">0x11</td><td>Desbordamiento aritmético (suma, resta o multiplicación fuera de rango).</td></tr>
+    <tr><td class="pk">0x12</td><td>División o módulo por cero.</td></tr>
+    <tr><td class="pk">0x32</td><td>Índice fuera del rango de un arreglo.</td></tr>
+  </table>
+  <p>Cuando una prueba falla con «Panic 0x11», no busquen un <code>require</code>: busquen una resta que se fue por debajo de cero, casi siempre <code>a - b</code> con <code>b &gt; a</code>.</p>
+  <p><strong>Dato histórico que todavía circula mal:</strong> antes de 0.8.0 un <code>assert</code> fallido usaba el opcode <code>INVALID</code> y <strong>se quedaba con todo el gas</strong> del límite. Desde 0.8.0 usa <code>REVERT</code> como todo lo demás y devuelve el sobrante. Si leen que «assert te quema todo el gas», es información vieja.</p>
+</section>
+
+<!-- ============================================================ 9 -->
+<section class="sec">
+  <div class="sec-cab"><span class="sec-num">09</span><h2>Eventos y logs</h2></div>
+
+  <p>Un evento no cambia el estado: escribe una entrada en el <strong>registro</strong> (<em>log</em>) de la transacción. Es el único mecanismo que tiene un contrato para contarle algo al mundo de fuera.</p>
+
+<pre>/// Hasta 3 parámetros `indexed`: son los que se pueden filtrar.
+event Transferido(address indexed de, address indexed a, uint256 monto);
+
+emit Transferido(msg.sender, a, monto);</pre>
+
+  <div class="caja peligro">
+    <div class="caja-et">EL PUNTO QUE HAY QUE GRABARSE: UN CONTRATO NO PUEDE LEER EVENTOS</div>
+    <p>Ni los suyos ni los de nadie. Los logs no son accesibles desde la EVM: viven en el recibo de la transacción, fuera del estado. Existen <strong>solo</strong> para quien mira desde fuera —interfaces, indexadores, exploradores, auditorías—.</p>
+    <p><strong>La regla de decisión:</strong> si un dato lo necesita la <em>lógica</em> del contrato, va a <code>storage</code> y se paga; si lo necesita la <em>interfaz</em>, va en un evento y cuesta mucho menos. Emitir un evento creyendo que eso «guarda» el dato es un error de diseño que no da síntomas hasta que otra función lo necesita.</p>
+  </div>
+
+  <p>Lo que se ahorra, guardando el mismo <code>uint256</code> de las dos maneras:</p>
+  <table>
+    <tr><th style="width:38%">CÓMO SE GUARDA</th><th style="width:16%">GAS</th><th>COMENTARIO</th></tr>
+    <tr><td class="pk">Evento con 1 <code>indexed</code></td><td>22 840</td><td>Incluye los 21 000 fijos. El log en sí: 375 + 2×375 + 32×8 = <strong>1 381</strong>.</td></tr>
+    <tr><td class="pk">Escribir un <code>mapping</code> nuevo</td><td>43 606</td><td>Estrenar ranura: +20 766 sobre el evento.</td></tr>
+    <tr><td class="pk">Actualizar ese <code>mapping</code></td><td>26 506</td><td>Ya no estrena ranura: baja a +3 666.</td></tr>
+  </table>
+
+  <p>Cada evento deja hasta cuatro <em>topics</em>. El primero es siempre el <strong>hash keccak256 de la firma del evento</strong> (<code>Transferido(address,address,uint256)</code>): por eso es idéntico en todos los contratos que declaren ese evento, y por eso un explorador lo reconoce. Los otros tres son los parámetros <code>indexed</code>; el resto va concatenado en el campo <code>data</code>.</p>
+  <ul>
+    <li><strong>Se indexa lo que se va a buscar:</strong> direcciones, identificadores, categorías. «Todas las transferencias hacia esta dirección» es una consulta barata gracias a eso.</li>
+    <li><strong>No se indexa lo que solo se va a leer:</strong> montos, textos. Cada topic cuesta 375 de gas más; los datos no indexados, 8 por byte.</li>
+    <li><strong>Trampa:</strong> si se marca <code>indexed</code> un <code>string</code> o un <code>bytes</code>, en el topic no queda el texto sino su <strong>hash</strong> —un topic son 32 bytes fijos—. Se puede buscar por igualdad exacta, pero el valor original se pierde. Casi nunca es lo que uno quería.</li>
+    <li>Un evento <code>anonymous</code> no guarda la firma en el topic 0: gana un topic indexado (cuatro) y cuesta un poco menos, pero deja de ser reconocible. Es raro verlo.</li>
+  </ul>
+</section>
+
+<!-- ============================================================ 10 -->
+<section class="sec">
+  <div class="sec-cab"><span class="sec-num">10</span><h2>Modificadores y el <code>_;</code></h2></div>
+
+  <p>Un modificador es código que envuelve a una función. El <code>_;</code> marca el sitio exacto donde se inserta el cuerpo de la función modificada.</p>
+
+<pre>modifier soloJefe() {
+    if (msg.sender != jefe) revert NoEsJefe(msg.sender);
+    _;                       // aquí se inserta el cuerpo de la función
+}
+
+modifier contando() {
+    entradas += 1;
+    _;
+    entradas -= 1;           // lo de después del `_;` corre AL SALIR
+}
+
+function cambiar(address nuevo) external soloJefe contando { jefe = nuevo; }</pre>
+
+  <ul>
+    <li>Se aplican <strong>en el orden en que se escriben</strong>, de izquierda a derecha, anidándose. Arriba: la comprobación de <code>soloJefe</code>, después <code>entradas += 1</code>, después el cuerpo, después <code>entradas -= 1</code>.</li>
+    <li>Si un modificador <strong>no</strong> tiene <code>_;</code>, el cuerpo de la función nunca se ejecuta. Compila igual. Es un error clásico y silencioso.</li>
+    <li>Pueden recibir argumentos: <code>modifier libre(uint256 franja)</code>, usado como <code>function reservar(uint256 franja) external libre(franja)</code>.</li>
+    <li>Es el mecanismo de <code>onlyOwner</code>, <code>whenNotPaused</code> y <code>nonReentrant</code> de OpenZeppelin.</li>
+  </ul>
+
+  <div class="caja alerta">
+    <div class="caja-et">SU LÍMITE: NO RECIBEN NI DEVUELVEN DATOS DE LA FUNCIÓN</div>
+    <p>Un modificador no ve los parámetros de la función que envuelve (salvo los que se le pasen explícitamente), no puede leer lo que la función va a devolver, y no puede entregarle un valor calculado. Si la comprobación necesita un dato intermedio —el saldo que ya se leyó, el monto que se acaba de calcular—, el modificador obliga a <strong>leerlo dos veces</strong>, y en Solidity leer dos veces se paga dos veces.</p>
+    <p><strong>La alternativa:</strong> una función <code>internal</code> que reciba lo que necesite y devuelva lo que haga falta. Más larga de escribir, más barata de ejecutar y más fácil de seguir. Los modificadores brillan en comprobaciones que no dependen de nada —quién llama, si está pausado, en qué fase está el contrato—; fuera de eso suelen estorbar.</p>
+  </div>
+</section>
+
+<!-- ============================================================ 11 -->
+<section class="sec">
+  <div class="sec-cab"><span class="sec-num">11</span><h2>Herencia, interfaces, contratos abstractos y bibliotecas</h2></div>
+
+  <table>
+    <tr><th style="width:17%">PIEZA</th><th style="width:31%">QUÉ ES</th><th>SE USA PARA</th></tr>
+    <tr><td class="pk">contract A is B</td><td>Herencia. El bytecode desplegado es <strong>uno solo</strong>, con todo junto.</td><td>Reutilizar estado y comportamiento: <code>Ownable</code>, <code>Pausable</code>.</td></tr>
+    <tr><td class="pk">interface</td><td>Solo firmas <code>external</code>. Sin estado, sin constructor, sin implementación.</td><td>Hablar con un contrato ajeno del que solo se conoce la dirección: <code>IERC20</code>.</td></tr>
+    <tr><td class="pk">abstract contract</td><td>Puede tener estado y funciones implementadas, pero al menos una sin cuerpo.</td><td>Una base compartida que obliga a los hijos a completar algo. No se despliega sola.</td></tr>
+    <tr><td class="pk">library</td><td>Funciones sin estado propio. Si son todas <code>internal</code>, el compilador las <strong>incrusta</strong> y no hay despliegue aparte.</td><td>Cálculos reutilizables: porcentajes, matemáticas, conjuntos.</td></tr>
+  </table>
+
+<pre>interface IMedible {
+    function medir() external view returns (uint256);
+}
+
+abstract contract Base {
+    /// `virtual`: un hijo puede reemplazarla. Sin cuerpo: el hijo DEBE escribirla.
+    function nombre() public view virtual returns (string memory);
+
+    function saludo() public view returns (string memory) {
+        return string.concat("hola, ", nombre());
+    }
+}
+
+library Porcentaje {
+    /// Puntos básicos: 100 bps = 1 %. Multiplicar ANTES de dividir.
+    function bps(uint256 monto, uint256 puntos) internal pure returns (uint256) {
+        return (monto * puntos) / 10_000;
+    }
+}
+
+contract Hijo is Base, IMedible {
+    using Porcentaje for uint256;   // ahora uint256(1000).bps(500) se escribe como método
+
+    function nombre() public pure override returns (string memory) { return "hijo"; }
+    function medir() external pure returns (uint256) { return uint256(1000).bps(500); }
+}</pre>
+
+  <ul>
+    <li><strong><code>virtual</code></strong> en la madre: «esta se puede reemplazar». <strong><code>override</code></strong> en la hija: «esta reemplaza a la de arriba». Las dos son obligatorias: el compilador no deja sobrescribir por accidente. Para llamar a la versión de la madre, <code>super.f()</code>.</li>
+    <li><strong><code>using A for B</code></strong> pega las funciones de la biblioteca <code>A</code> al tipo <code>B</code> como si fueran métodos: <code>monto.bps(500)</code> es exactamente <code>Porcentaje.bps(monto, 500)</code>. Es azúcar sintáctica; no cambia el gas.</li>
+    <li>Un <code>abstract contract</code> no se puede desplegar, y una <code>interface</code> tampoco: se usa para <em>envolver</em> una dirección existente, <code>IERC20(direccion).transfer(...)</code>.</li>
+  </ul>
+
+  <div class="caja clave">
+    <div class="caja-et">EL ORDEN DE LINEALIZACIÓN, EN UNA LÍNEA</div>
+    <p>En <code>contract C is A, B</code> las bases se escriben <strong>de la más general a la más derivada</strong> —si el compilador se queja con «Linearization of inheritance graph impossible», casi siempre están al revés— y, en caso de conflicto, <strong>gana la de más a la derecha</strong>: Solidity resuelve la herencia múltiple con C3 recorriendo la lista de derecha a izquierda. En la práctica: <code>Ownable</code> y compañía primero, su lógica después. <strong>Si vienen de Python, ojo:</strong> Python también usa C3, pero el orden en que se escriben las bases es <strong>el contrario</strong>; la documentación de Solidity lo advierte expresamente.</p>
+  </div>
+</section>
+
+<!-- ============================================================ 12 -->
+<section class="sec">
+  <div class="sec-cab"><span class="sec-num">12</span><h2>Ether: recibirlo y enviarlo</h2></div>
+
+  <p><code>payable</code> es el interruptor que decide si el dinero puede entrar. Una función sin <code>payable</code> que reciba valor hace revertir la transacción sola, sin escribir nada.</p>
+
+  <table>
+    <tr><th style="width:24%">FORMA</th><th style="width:16%">GAS QUE ENTREGA</th><th style="width:17%">SI FALLA</th><th>VEREDICTO HOY</th></tr>
+    <tr><td class="pk">a.transfer(monto)</td><td>2 300 fijos</td><td>Revierte</td><td><strong>Desaconsejada.</strong> El límite fijo ya no es confiable.</td></tr>
+    <tr><td class="pk">a.send(monto)</td><td>2 300 fijos</td><td>Devuelve <code>false</code></td><td><strong>Peor aún:</strong> si no se comprueba el <code>false</code>, el fallo pasa inadvertido.</td></tr>
+    <tr><td class="pk">a.call{value: m}("")</td><td>Todo el disponible</td><td>Devuelve <code>false</code></td><td><strong>La recomendada</strong>, con una condición: el estado ya debe estar en orden.</td></tr>
+  </table>
+
+<pre>function retirar() external {
+    uint256 monto = pendiente[msg.sender];
+    pendiente[msg.sender] = 0;                                    // 1 · effects
+    (bool ok, ) = payable(msg.sender).call{value: monto}("");      // 2 · interaction
+    if (!ok) revert EnvioFallido();
+}</pre>
+  <p>La coma suelta en <code>(bool ok, )</code> descarta el segundo valor devuelto —los datos de retorno—, que aquí no interesan.</p>
+
+  <div class="caja peligro">
+    <div class="caja-et">POR QUÉ CAMBIÓ LA RECOMENDACIÓN · EIP-1884</div>
+    <p>Durante años el consejo fue el contrario: usar <code>transfer()</code>, porque su límite de 2 300 de gas impedía que el receptor ejecutara código y, con eso, impedía la reentrada. Era una defensa que venía puesta.</p>
+    <p>En 2019 la actualización <strong>Istanbul</strong> incluyó la <strong>EIP-1884</strong>, que subió el precio de varios opcodes —entre ellos <code>SLOAD</code>, de 200 a 800—. De un día para otro, contratos correctos que recibían dinero con un <code>receive()</code> que leía una sola variable dejaron de caber en 2 300 de gas: los envíos hacia ellos empezaron a revertir y ese dinero quedó inalcanzable. No fue un error de esos contratos; fue que el suelo se movió, y la propia EIP lo anticipa en su sección de compatibilidad. El precio volvió a moverse después: hoy <code>SLOAD</code> no cuesta 800 sino <strong>2 100 en frío y 100 en caliente</strong>, por la EIP-2929.</p>
+    <p>La lección de fondo: <strong>un número mágico de gas escrito en el lenguaje no puede ser una garantía de seguridad</strong>, porque los precios de la EVM cambian —y cambiaron dos veces en cinco años—. Hoy se usa <code>call</code>, y la protección contra la reentrada se consigue con el <strong>orden de las operaciones</strong> (checks-effects-interactions) y con el patrón de retiro: el Laboratorio 07.</p>
+  </div>
+
+<pre>receive()  external payable { emit Recibido(msg.sender, msg.value, false); }
+fallback() external payable { emit Recibido(msg.sender, msg.value, true); }</pre>
+  <p>Ninguna de las dos lleva la palabra <code>function</code>, y las dos son <code>external</code>. <code>receive()</code> corre cuando llega ether <strong>sin datos</strong>; si no existe pero hay un <code>fallback() payable</code>, corre ese; si no hay ninguno, revierte. <code>fallback()</code> corre cuando llegan datos que <strong>no coinciden con ninguna función</strong>. Este mismo mecanismo —un <code>fallback</code> que reenvía toda llamada desconocida a otra dirección con <code>delegatecall</code>— es lo que hace posibles los contratos actualizables: potente y peligroso a partes iguales.</p>
+
+  <div class="caja alerta">
+    <div class="caja-et">UN CONTRATO PUEDE RECIBIR ETHER SIN QUE SU CÓDIGO INTERVENGA</div>
+    <p>Aunque no declaren <code>receive</code> ni <code>fallback</code> —y aunque los declaren y hagan <code>revert</code>—, hay dos caminos por los que le llega ether a un contrato <strong>sin ejecutar ni una línea suya</strong>: ser el destino de un <code>selfdestruct</code> y ser la dirección que recibe las recompensas de un bloque. En los dos casos el saldo sube y el contrato no se entera; la documentación oficial lo dice sin rodeos: no puede reaccionar y por lo tanto tampoco puede rechazarlo.</p>
+    <p>La consecuencia práctica: <strong>nunca hagan que la lógica dependa de que <code>address(this).balance</code> sea exactamente lo que ustedes contabilizaron.</strong> Puede ser mayor. Un contrato que exija <code>require(address(this).balance == totalRegistrado)</code> se puede bloquear para siempre desde fuera, gratis, por cualquiera. La contabilidad se lleva en variables propias; el saldo real solo se consulta.</p>
+  </div>
+</section>
+
+<!-- ============================================================ 13 -->
+<section class="sec">
+  <div class="sec-cab"><span class="sec-num">13</span><h2>Aritmética: sin desbordes silenciosos y sin decimales</h2></div>
+
+  <p><strong>Desde Solidity 0.8.0, toda operación aritmética que se desborde revierte</strong> con <code>Panic(0x11)</code>. Antes daba la vuelta en silencio: en un <code>uint8</code>, <code>255 + 1</code> era <code>0</code> y <code>0 - 1</code> era <code>255</code>. De ahí salieron robos famosos, y por eso existía <code>SafeMath</code>, que hoy no hace falta y no debería aparecer en código nuevo.</p>
+<pre>function desborda(uint8 x) external pure returns (uint8) {
+    return x + 1;                 // con x = 255 REVIERTE (Panic 0x11)
+}
+
+function sinRevisar(uint8 x) external pure returns (uint8) {
+    unchecked { return x + 1; }   // con x = 255 devuelve 0, en silencio
+}</pre>
+  <div class="caja">
+    <div class="caja-et">CUÁNDO SE JUSTIFICA <code>unchecked</code></div>
+    <p><code>unchecked</code> apaga la comprobación dentro de sus llaves y recupera el comportamiento viejo. Cada comprobación cuesta unas pocas decenas de gas, así que la tentación de apagarla «para optimizar» es grande y casi siempre mala. Solo se justifica cuando ustedes pueden <strong>demostrar</strong> que el desbordamiento es imposible, y conviene escribir esa demostración en un comentario al lado. El caso de libro es el contador de un bucle acotado:</p>
+<pre>for (uint256 i = 0; i &lt; xs.length; ) {
+    s += xs[i];
+    unchecked { ++i; }        // i no puede desbordar: el límite es xs.length
+}</pre>
+    <p><code>i</code> nunca pasa de <code>xs.length</code>: desbordar un <code>uint256</code> es físicamente imposible. Fuera de casos así de claros —y de restas donde un <code>require</code> anterior ya garantizó el orden—, dejen la comprobación puesta. Lo que se ahorra son decenas de gas; lo que se arriesga es todo.</p>
+  </div>
+
+  <h3 style="font-size:10.5pt;margin:5mm 0 2mm">13.1 · No hay decimales. Ninguno.</h3>
+  <p>Solidity declara tipos de punto fijo (<code>fixed</code>, <code>ufixed</code>) pero <strong>no están implementados</strong>: se pueden declarar y no se pueden usar. De punto flotante no hay ni la promesa. <code>1 / 3</code> es <code>0</code>. Una máquina que debe dar el mismo resultado en miles de nodos no se puede permitir el redondeo de los flotantes.</p>
+  <p>La respuesta del ecosistema es trabajar siempre con <strong>la unidad más pequeña, en enteros</strong>: <code>1 wei</code> = 1; <code>1 gwei</code> = 10⁹ wei (para hablar de precios de gas); <code>1 ether</code> = 10¹⁸ wei (para hablar con humanos, y <strong>solo se convierte en la interfaz</strong>). Un ERC-20 hace lo mismo con su campo <code>decimals</code>: si vale 18, «1,5 fichas» se guarda como <code>1500000000000000000</code>. La cadena solo ve enteros; la coma la pone la interfaz.</p>
+
+  <div class="caja peligro">
+    <div class="caja-et">MULTIPLICAR ANTES DE DIVIDIR</div>
+    <p>Como la división entera descarta el resto, el orden cambia el resultado. El 3 % de 250:</p>
+<pre>return (monto / 100) * 3;     // 250/100 = 2 -&gt; 6.  Se perdió el resto.
+return (monto * 3) / 100;     // 250*3/100 = 7.  Multiplicar ANTES de dividir.</pre>
+    <p>6 frente a 7. En wei, esa diferencia repetida en miles de operaciones es dinero real que se evapora. <strong>Multiplicar siempre primero</strong>, vigilando lo único que eso puede provocar: que el producto intermedio se desborde. Con <code>uint256</code> hay muchísimo margen, pero si trabajan en <code>uint64</code> o <code>uint128</code>, conviertan a <code>uint256</code> antes de multiplicar.</p>
+    <p>La convención del sector para los porcentajes son los <strong>puntos básicos</strong> (<em>bps</em>): 10 000 bps = 100 %, así que 1 % son 100 bps y 0,25 % son 25 bps. Permite expresar fracciones finas sin decimales: <code>(monto * bps) / 10_000</code>. El guion bajo de <code>10_000</code> es solo para leerlo mejor; el compilador lo ignora.</p>
+  </div>
+</section>
+
+<!-- ============================================================ 14 -->
+<section class="sec">
+  <div class="sec-cab"><span class="sec-num">14</span><h2>Los errores del primer mes</h2><span class="lead">SÍNTOMA → CAUSA → ARREGLO</span></div>
+
+  <table>
+    <tr><th style="width:26%">SÍNTOMA</th><th style="width:34%">CAUSA</th><th>ARREGLO</th></tr>
+    <tr><td class="pk">La función corre, no falla, y el estado no cambió</td><td>Declararon <code>Struct memory x = …</code> en lugar de <code>storage</code>: modificaron una copia.</td><td>Cambiar <code>memory</code> por <code>storage</code>. Si no hay que modificar nada, <code>storage</code> también sirve y evita la copia.</td></tr>
+    <tr><td class="pk"><code>Operator == not compatible with types string memory</code></td><td>Compararon dos <code>string</code> con <code>==</code>.</td><td><code>keccak256(bytes(a)) == keccak256(bytes(b))</code>. Para «¿está vacío?», <code>bytes(a).length == 0</code>.</td></tr>
+    <tr><td class="pk">«Ya registré ese dato» y el contrato dice que no existe</td><td>Un <code>mapping</code> devuelve cero para toda clave: no distingue «vacío» de «nunca puesto».</td><td>Guardar un <code>bool existe</code> en el <code>struct</code> y comprobarlo.</td></tr>
+    <tr><td class="pk">Quieren recorrer un <code>mapping</code> y no encuentran cómo</td><td>No se puede: no guarda las claves.</td><td>Mantener un <code>address[]</code> aparte con <code>push</code> a mano. Cuesta gas: decidan si de verdad hace falta.</td></tr>
+    <tr><td class="pk"><code>Panic 0x11</code> en una resta que «no puede fallar»</td><td>Resta por debajo de cero en un <code>uint</code>: <code>a - b</code> con <code>b &gt; a</code>. No hay negativos.</td><td>Comprobar el orden antes (<code>if (b &gt; a) revert …</code>) o replantear el cálculo.</td></tr>
+    <tr><td class="pk">Un porcentaje da cero o un número raro</td><td>Dividieron antes de multiplicar; no hay decimales.</td><td><code>(monto * puntos) / 10_000</code>. Nunca <code>(monto / 10_000) * puntos</code>.</td></tr>
+    <tr><td class="pk">Una fecha o un contador dan un número absurdo</td><td>Truncamiento silencioso al convertir a un tipo más pequeño (<code>uint32(block.timestamp)</code>).</td><td>Usar un tipo que alcance (<code>uint64</code> para marcas de tiempo) y convertir solo cuando se sepa que cabe.</td></tr>
+    <tr><td class="pk">La función tiene un modificador y el cuerpo nunca se ejecuta</td><td>Al modificador le falta el <code>_;</code>.</td><td>Poner el <code>_;</code> donde debe insertarse el cuerpo. Sin él compila igual: hay que mirarlo.</td></tr>
+    <tr><td class="pk">La interfaz dice que guardó el dato y el contrato no lo tiene</td><td>Se emitió un evento creyendo que eso lo guarda. Un contrato no puede leer eventos.</td><td>Si lo necesita la lógica, va a <code>storage</code>. El evento es solo para quien mira desde fuera.</td></tr>
+    <tr><td class="pk">El envío de ether falla siempre contra cierto contrato</td><td>Usaron <code>transfer()</code>/<code>send()</code> y al receptor no le alcanzan los 2 300 de gas (EIP-1884).</td><td>Usar <code>call{value: m}("")</code> con el estado ya actualizado antes, y comprobar el <code>bool</code>.</td></tr>
+    <tr><td class="pk">Guardaron algo «privado» y apareció publicado</td><td><code>private</code> limita quién llama, no quién ve. El storage se lee con <code>eth_getStorageAt</code>.</td><td>No guardar secretos en cadena. Guardar el hash y revelar después.</td></tr>
+    <tr><td class="pk">La verificación en el explorador falla «sin haber cambiado nada»</td><td>Compilador, optimización o <em>runs</em> distintos a los del despliegue. Con <code>^0.8.0</code> ni se sabe cuál se usó.</td><td>Fijar <code>pragma solidity 0.8.28;</code> y anotar compilador, optimización y runs al desplegar.</td></tr>
+    <tr><td class="pk"><code>No arguments passed to the base constructor</code> al heredar de <code>Ownable</code></td><td>OpenZeppelin <strong>5</strong> exige el dueño inicial; en la versión 4 ese parámetro no existía.</td><td><code>constructor(...) Ownable(msg.sender) { ... }</code>. Casi todos los tutoriales de internet son de la 4.</td></tr>
+    <tr><td class="pk"><code>Member "increaseAllowance" not found</code> en un ERC-20</td><td>OpenZeppelin 5 <strong>eliminó</strong> <code>increaseAllowance</code> y <code>decreaseAllowance</code> de <code>ERC20</code>: no eran del estándar. Nada las reemplaza.</td><td><code>approve</code> con el valor exacto nuevo. Para operar sobre tokens <em>ajenos</em> existen <code>safeIncreaseAllowance</code> y <code>safeDecreaseAllowance</code> en <code>SafeERC20</code> (comprobado en la 5.6.1 del curso).</td></tr>
+    <tr><td class="pk"><code>DocstringParsingError: Documentation tag @… not valid</code></td><td>Una línea del bloque NatSpec <em>empieza</em> con una arroba que no es etiqueta conocida (un correo partido, una mención).</td><td>Que la arroba no quede al principio de la línea, o usar una etiqueta válida (<code>@custom:algo</code>). A mitad de línea no molesta.</td></tr>
+  </table>
+</section>
+
+<!-- ============================================================ 15 -->
+<section class="sec">
+  <div class="sec-cab"><span class="sec-num">15</span><h2>Un contrato de referencia, comentado</h2><span class="lead">COMPILA CON 0.8.28</span></div>
+
+  <p>Reserva de la sala de cómputo: cada franja horaria se reserva una sola vez y se paga por adelantado; cancelar devuelve la mitad. Es pequeño a propósito, y tiene una pieza de casi cada sección de esta guía.</p>
+  <p><strong>Lectura complementaria:</strong> en el repositorio está <code>contracts/demo/Tablon.sol</code>, el tablón de anuncios que se alquila por tiempo que se explica en clase. Es otro contrato distinto, comentado línea por línea y con 21 pruebas en verde. Este de aquí es más corto y sirve de plantilla; ese otro sirve para leer con calma el <em>por qué</em> de cada decisión.</p>
+
+<pre>// SPDX-License-Identifier: MIT
+pragma solidity 0.8.28;
+
+import {Ownable} from "@openzeppelin/contracts/access/Ownable.sol";
+
+/// @title Reserva de la sala de cómputo
+/// @notice Cada franja se reserva una vez, se paga por adelantado y cancelar devuelve la mitad.
+/// @dev CONTRATO DE REFERENCIA DE LA GUÍA. Sin auditar, nunca con dinero real.
+contract ReservaSala is Ownable {
+    enum Estado { Libre, Reservada, Cancelada }          // 0, 1, 2
+
+    struct Reserva {
+        address quien;       // 20 bytes ┐
+        uint64 hechaEn;      //  8 bytes ├ 31 de 32: UNA sola ranura
+        uint16 personas;     //  2 bytes │
+        Estado estado;       //  1 byte  ┘
+    }
+
+    uint16  public constant  CUPO = 30;                 // se sabe al escribir
+    uint256 public immutable precioFranja;              // se decide al desplegar
+
+    mapping(uint256 franja =&gt; Reserva datos) public reservas;
+    mapping(address quien  =&gt; uint256 wei_) public saldo;
+    uint256[] private _franjasUsadas;                   // el mapping no se recorre
+
+    event Reservada(uint256 indexed franja, address indexed quien, uint16 personas);
+    event Cancelada(uint256 indexed franja, address indexed quien, uint256 reembolso);
+    event Retirado(address indexed quien, uint256 monto);
+
+    error FranjaOcupada(uint256 franja, address porQuien);
+    error PersonasFueraDeRango(uint16 recibido, uint16 cupo);
+    error PagoIncorrecto(uint256 esperado, uint256 recibido);
+    error NoEsSuya(uint256 franja);
+    error SinSaldo();
+    error EnvioFallido();
+    error NoRecibeEnviosSueltos();
+
+    constructor(uint256 precioFranja_) Ownable(msg.sender) {
+        precioFranja = precioFranja_;                   // única escritura posible
+    }
+
+    modifier libre(uint256 franja) {
+        Reserva storage r = reservas[franja];
+        if (r.estado == Estado.Reservada) revert FranjaOcupada(franja, r.quien);
+        _;                                              // aquí entra la función
+    }
+
+    /// @notice Reserva una franja pagando exactamente `precioFranja` wei.
+    function reservar(uint256 franja, uint16 personas) external payable libre(franja) {
+        if (personas == 0 || personas &gt; CUPO) revert PersonasFueraDeRango(personas, CUPO);
+        if (msg.value != precioFranja) revert PagoIncorrecto(precioFranja, msg.value);
+
+        if (reservas[franja].hechaEn == 0) _franjasUsadas.push(franja);
+        reservas[franja] = Reserva({
+            quien: msg.sender, hechaEn: uint64(block.timestamp),
+            personas: personas, estado: Estado.Reservada
+        });
+        saldo[owner()] += msg.value;                    // se acredita, no se envía
+        emit Reservada(franja, msg.sender, personas);
+    }
+
+    /// @notice Cancela su propia reserva. Devuelve la mitad de lo pagado.
+    function cancelar(uint256 franja) external {
+        Reserva storage r = reservas[franja];           // `storage`: queda escrito
+        if (r.quien != msg.sender || r.estado != Estado.Reservada) revert NoEsSuya(franja);
+        r.estado = Estado.Cancelada;
+
+        uint256 devolver = precioFranja / 2;            // enteros: 3 wei / 2 = 1
+        uint256 caja = saldo[owner()];
+        if (devolver &gt; caja) devolver = caja;
+        saldo[owner()] = caja - devolver;
+        saldo[msg.sender] += devolver;
+        emit Cancelada(franja, msg.sender, devolver);
+    }
+
+    /// @notice Retira el saldo propio. Checks → Effects → Interactions.
+    function retirar() external {
+        uint256 monto = saldo[msg.sender];
+        if (monto == 0) revert SinSaldo();
+
+        saldo[msg.sender] = 0;                                      // EFFECTS
+        (bool ok, ) = payable(msg.sender).call{value: monto}("");    // INTERACTION
+        if (!ok) revert EnvioFallido();
+        emit Retirado(msg.sender, monto);
+    }
+
+    function franjasUsadas() external view returns (uint256) { return _franjasUsadas.length; }
+
+    /// @notice Ocupación en porcentaje entero. Multiplicar ANTES de dividir.
+    function ocupacion(uint256 franjasDelDia) external view returns (uint256) {
+        if (franjasDelDia == 0) return 0;               // nunca dividir por cero
+        return (_franjasUsadas.length * 100) / franjasDelDia;
+    }
+
+    /// @dev Aun rechazando, el contrato puede recibir ether a la fuerza: nunca
+    ///      confíen en `address(this).balance` como contabilidad.
+    receive() external payable { revert NoRecibeEnviosSueltos(); }
+    fallback() external payable { revert NoRecibeEnviosSueltos(); }
+}</pre>
+
+  <div class="caja clave">
+    <div class="caja-et">CINCO PREGUNTAS SOBRE ESTE CONTRATO</div>
+    <p>Se responden leyéndolo, sin desplegarlo. Buen repaso antes de un parcial.</p>
+    <ol>
+      <li>¿Cuántas ranuras de storage escribe <code>reservar</code> la primera vez que se usa una franja? ¿Y la segunda vez que se reserva <em>esa misma</em> franja después de cancelarla?</li>
+      <li><code>CUPO</code> es <code>constant</code> y <code>precioFranja</code> es <code>immutable</code>. ¿Por qué no puede ser al revés?</li>
+      <li>En <code>cancelar</code> se usa <code>Reserva storage r</code>. ¿Qué pasaría exactamente con <code>memory</code>, y lo notaría alguna prueba evidente?</li>
+      <li><code>_franjasUsadas</code> crece y nunca se reduce. ¿Qué pasa si alguien reserva 100 000 franjas? ¿Alguna función deja de servir?</li>
+      <li>El <code>modifier libre</code> lee <code>reservas[franja]</code> y <code>reservar</code> la vuelve a leer en la línea del <code>if</code>. ¿Cuánto cuesta esa segunda lectura y cómo se evitaría? (Sección 10.)</li>
+    </ol>
+  </div>
+</section>
+
+<!-- ============================================================ 16 -->
+<section class="sec">
+  <div class="sec-cab"><span class="sec-num">16</span><h2>Glosario</h2></div>
+  <table>
+    <tr><th style="width:19%">TÉRMINO</th><th>QUÉ SIGNIFICA</th></tr>
+    <tr><td class="pk">ABI</td><td>El «contrato de comunicación»: qué funciones tiene y con qué tipos. Lo que necesita una interfaz para hablarle.</td></tr>
+    <tr><td class="pk">Bytecode</td><td>El resultado de compilar: lo que de verdad queda en la cadena. Por eso se verifica el código fuente.</td></tr>
+    <tr><td class="pk">EIP / ERC</td><td>Propuesta numerada de cambio a Ethereum. Un ERC es una EIP de estándares de aplicación (ERC-20, ERC-721).</td></tr>
+    <tr><td class="pk">EOA</td><td>Cuenta controlada por una llave privada: una persona, no un contrato.</td></tr>
+    <tr><td class="pk">EVM</td><td>La máquina que ejecuta el bytecode, igual en todos los nodos.</td></tr>
+    <tr><td class="pk">Gas</td><td>Unidad de trabajo. Cada opcode cuesta una cantidad fija; el precio en ether lo pone el mercado.</td></tr>
+    <tr><td class="pk">keccak256</td><td>La función hash de Ethereum. Variante de SHA-3, no idéntica al SHA3-256 estándar.</td></tr>
+    <tr><td class="pk">Log / evento</td><td>Entrada en el recibo de la transacción. La lee quien mira desde fuera; el contrato no.</td></tr>
+    <tr><td class="pk">NatSpec</td><td>Comentarios <code>@notice</code>, <code>@param</code>, <code>@dev</code>. Van al ABI y los muestran las billeteras.</td></tr>
+    <tr><td class="pk">Opcode</td><td>Instrucción de la EVM: <code>SLOAD</code>, <code>SSTORE</code>, <code>CALL</code>…</td></tr>
+    <tr><td class="pk">Panic</td><td>Error del propio lenguaje, con código: desbordamiento, división por cero, <code>assert</code> fallido.</td></tr>
+    <tr><td class="pk">Ranura (<em>slot</em>)</td><td>Cada casilla de 32 bytes del storage, numeradas desde 0.</td></tr>
+    <tr><td class="pk">Revertir</td><td>Abortar deshaciendo todos los cambios de la transacción. No devuelve el gas ya gastado.</td></tr>
+    <tr><td class="pk">Selector</td><td>Los 4 primeros bytes del hash de la firma de una función. Identifica a cuál se llama.</td></tr>
+    <tr><td class="pk">SPDX</td><td>Lista estándar de identificadores de licencia. Va en la primera línea del archivo.</td></tr>
+    <tr><td class="pk">Topic</td><td>Cada campo indexado de un log. Hasta cuatro; el primero es la firma del evento.</td></tr>
+    <tr><td class="pk">wei</td><td>La unidad mínima de ether. 1 ether = 10¹⁸ wei. La cadena solo trabaja en wei.</td></tr>
+  </table>
+</section>
+
+<!-- ============================================================ 17 -->
+<section class="sec">
+  <div class="sec-cab"><span class="sec-num">17</span><h2>Documentación oficial</h2><span class="lead">ENLACES VERIFICADOS</span></div>
+  <p>Cuando esta guía y la documentación oficial no coincidan, <strong>manda la documentación oficial</strong>: avísenle al docente y se corrige. Todos estos enlaces se abrieron y funcionan sin cuenta.</p>
+  <p><strong>Solidity 0.8.28</strong> — todas las páginas cuelgan de <code>https://docs.soliditylang.org/en/v0.8.28/</code>:</p>
+  <ul>
+    <li><code>types.html</code> — tipos, conversiones, valores por defecto. · <code>cheatsheet.html</code> — resumen de una página.</li>
+    <li><code>contracts.html</code> — visibilidad, herencia y linealización, eventos, <code>receive</code>/<code>fallback</code>.</li>
+    <li><code>control-structures.html</code> — errores, <code>require</code>, <code>assert</code> y los códigos de <code>Panic</code>.</li>
+    <li><code>units-and-global-variables.html</code> — <code>msg</code>, <code>block</code>, <code>tx</code>, <code>wei</code>, <code>ether</code>.</li>
+    <li><code>security-considerations.html</code> — por qué <code>private</code> no es secreto y <code>tx.origin</code> no autoriza.</li>
+    <li><code>internals/layout_in_storage.html</code> — ranuras y empaquetado del storage.</li>
+    <li><code>natspec-format.html</code> · <code>080-breaking-changes.html</code> · <code>common-patterns.html</code> (retiro, control de acceso, máquina de estados).</li>
+  </ul>
+  <p><strong>OpenZeppelin Contracts 5.x</strong> — <code>https://docs.openzeppelin.com/contracts/5.x/</code>, con <code>Ownable</code> en <code>/api/access</code> y el token en <code>/api/token/erc20</code>. Lo que se eliminó al pasar de la 4 a la 5 está en las notas de versión: <code>https://github.com/OpenZeppelin/openzeppelin-contracts/releases/tag/v5.0.0</code></p>
+  <p><strong>Las EIP que se citan aquí</strong> — <code>https://eips.ethereum.org/EIPS/eip-NNNN</code>:</p>
+  <ul>
+    <li><strong>1884</strong> (2019) · subió <code>SLOAD</code> de 200 a 800 y dejó sin piso a <code>transfer()</code>.</li>
+    <li><strong>2929</strong> (2021) · los precios vigentes: 2 100 en frío, 100 en caliente, 2 900 para modificar una ranura.</li>
+    <li><strong>2200</strong> · reglas de medición de <code>SSTORE</code>. · <strong>2028</strong> · bajó el byte no cero de <code>calldata</code> de 68 a 16.</li>
+    <li><strong>170</strong> · límite de 24 576 bytes de bytecode por contrato.</li>
+  </ul>
+  <p>Y dos referencias de consulta rápida: la lista oficial de licencias, <code>https://spdx.org/licenses/</code>, y el precio de cada opcode de la EVM, <code>https://www.evm.codes/</code></p>
+  <div class="caja">
+    <div class="caja-et">CÓMO SE MIDIERON LAS CIFRAS DE ESTA GUÍA</div>
+    <p>Todas las cifras de gas salen de contratos pequeños desplegados en la red local de Hardhat 3.16.0, con Solidity 0.8.28 y el optimizador en 200 ejecuciones —la configuración congelada del curso, en <code>versiones.md</code>—, leyendo el <code>gasUsed</code> del recibo de cada transacción. Las lecturas de ranuras se hicieron con <code>eth_getStorageAt</code>. Ustedes pueden repetir cualquiera de estas mediciones: la red local es determinista y da los mismos números.</p>
+  </div>
+</section>
+
+</body>
+</html>
+
