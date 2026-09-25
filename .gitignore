@@ -9,3 +9,6 @@ __pycache__/
 ignition/deployments/
 .env
 *.log
+
+# Bloqueos temporales de PowerPoint / LibreOffice
+~$*
