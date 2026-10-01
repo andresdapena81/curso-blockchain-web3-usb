@@ -33,6 +33,9 @@ material/
 ├── build-sesion-NN.js               el código que genera cada presentación
 ├── lib/                             motor de decks con validación de maqueta
 ├── actividad-04-estonia/            actividad de investigación + guía en PDF
+├── clase-solidity-paso-a-paso/      construir un contrato en vivo en Remix, en
+│                                    seis versiones: cada una se rompe y la
+│                                    siguiente función arregla esa rotura
 ├── proyecto/                        proyecto integrador: anteproyecto, avances,
 │                                    entrega final, ensayo, auditoría cruzada, planillas
 ├── laboratorio-02/ 03/ 04/          labs en Python y JavaScript (andamiaje + pruebas)
