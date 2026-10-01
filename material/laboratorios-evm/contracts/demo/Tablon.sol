@@ -8,17 +8,22 @@
 //   Se escribe con un identificador de la lista SPDX: MIT, GPL-3.0, Apache-2.0,
 //   UNLICENSED... "UNLICENSED" significa "nadie puede reutilizar esto".
 
-pragma solidity 0.8.28;
+pragma solidity 0.8.34;
 //
 // ↑ QUÉ VERSIÓN DEL COMPILADOR PUEDE COMPILAR ESTE ARCHIVO.
-//   Aquí está FIJA en 0.8.28: ninguna otra versión lo compila. Es lo que
+//   Aquí está FIJA en 0.8.34: ninguna otra versión lo compila. Es lo que
 //   queremos en un curso y en producción, porque el mismo código compilado con
 //   otra versión produce otro bytecode.
 //
 //   Verán mucho `pragma solidity ^0.8.0;` en tutoriales. El acento circunflejo
 //   significa "0.8.0 o superior, pero menor que 0.9.0". Es cómodo y peligroso:
 //   el contrato que ustedes probaron con 0.8.19 puede acabar desplegado con
-//   0.8.28, que genera bytecode distinto.
+//   0.8.34, que genera bytecode distinto.
+//
+//   Y no es solo el bytecode: al cambiar de compilador cambia también el
+//   objetivo de la EVM. Este curso pasó de 0.8.28 (objetivo `cancun`) a
+//   0.8.34 (objetivo `osaka`), y se volvieron a medir todas las cifras de gas
+//   del material para comprobar qué se movía. Movieron tres, en 1 unidad.
 //
 //   Detalle que casi nadie menciona: desde 0.8.0 las operaciones aritméticas
 //   REVIERTEN al desbordarse. Antes de 0.8.0 daban la vuelta en silencio

@@ -297,11 +297,11 @@ no cobrado       = Gas Used × (Max − precio efectivo)</pre>
     <div class="cab"><div class="n">3</div><div class="enun"><span class="tema">3 MINUTOS · MEDIR</span>Correr el script de medición</div></div>
     <div class="just">
       <pre>npx hardhat run scripts/s05/medir-gas.js</pre>
-      El script despliega <code>Operaciones</code> en la <strong>red local de Hardhat</strong> (dentro de su computador: no gasta ETH de prueba ni necesita internet), ejecuta cada operación y lee el <code>gasUsed</code> de cada recibo. <strong>Salida esperada</strong> (Hardhat 3.16, Solidity 0.8.28, optimizador con 200 ejecuciones):
+      El script despliega <code>Operaciones</code> en la <strong>red local de Hardhat</strong> (dentro de su computador: no gasta ETH de prueba ni necesita internet), ejecuta cada operación y lee el <code>gasUsed</code> de cada recibo. <strong>Salida esperada</strong> (Hardhat 3.16, Solidity 0.8.34, optimizador con 200 ejecuciones):
       <pre>  OPERACIÓN                                            GAS USADO
   ────────────────────────────────────────────────────────────────
   Transferir ETH entre cuentas (sin contrato)              21.000
-  Desplegar el contrato                                   271.161
+  Desplegar el contrato                                   271.173
   Escribir en una ranura vacía (0 → 42)                    43.602
   Sobrescribir una ranura ocupada (42 → 43)                26.479
   Leer la ranura, dentro de una transacción                23.364

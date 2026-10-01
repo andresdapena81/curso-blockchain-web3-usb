@@ -22,7 +22,7 @@
 
 <div class="caja clave">
   <div class="caja-et">CÓMO LEER ESTA GUÍA</div>
-  <p>Está escrita para que puedan hacer el laboratorio <strong>sin ayuda</strong>, incluso si se perdieron la clase. Cada paso dice qué escribir, qué deberían ver y cómo saber que funcionó. Si algo no sale como aquí se describe, vayan primero a la sección <strong>13 · Errores frecuentes</strong>. Las cifras de gas de esta guía no son estimaciones: se midieron con <code>npx hardhat test --gas-stats</code> sobre este mismo repositorio (Hardhat 3.16.0, Solidity 0.8.28, optimizador con 200 ejecuciones). La red local es determinista: ustedes deben obtener exactamente las mismas.</p>
+  <p>Está escrita para que puedan hacer el laboratorio <strong>sin ayuda</strong>, incluso si se perdieron la clase. Cada paso dice qué escribir, qué deberían ver y cómo saber que funcionó. Si algo no sale como aquí se describe, vayan primero a la sección <strong>13 · Errores frecuentes</strong>. Las cifras de gas de esta guía no son estimaciones: se midieron con <code>npx hardhat test --gas-stats</code> sobre este mismo repositorio (Hardhat 3.16.0, Solidity 0.8.34, optimizador con 200 ejecuciones). La red local es determinista: ustedes deben obtener exactamente las mismas.</p>
 </div>
 
 <!-- ============================================================ 1 -->
@@ -251,7 +251,7 @@ if (!ok) revert EnvioFallido();</pre>
   <p>Se despliega <strong>antes</strong> de la tabla de gas a propósito: el plazo de la subasta (10 minutos) corre mientras trabajan la Parte 4.</p>
   <ol>
     <li>Abran <code>app.remix.live</code>. En el explorador de archivos, creen una carpeta <code>s07</code> y dentro <strong>tres</strong> archivos: <code>ISubasta.sol</code>, <code>Porcentajes.sol</code> y <code>Subasta.sol</code>. Peguen en cada uno el contenido de <strong>su</strong> versión. Los tres en la <strong>misma</strong> carpeta: los <code>import "./ISubasta.sol"</code> son relativos.</li>
-    <li>Pestaña <em>Solidity compiler</em>: versión <code>0.8.28</code>, <em>Advanced configurations</em> → <em>Enable optimization</em> con <code>200</code>. Compilen <code>Subasta.sol</code>. Los <code>import</code> de <code>@openzeppelin</code> se descargan solos. <strong>Cómo sé que funcionó:</strong> marca verde en el ícono del compilador.</li>
+    <li>Pestaña <em>Solidity compiler</em>: versión <code>0.8.34</code>, <em>Advanced configurations</em> → <em>Enable optimization</em> con <code>200</code>. Compilen <code>Subasta.sol</code>. Los <code>import</code> de <code>@openzeppelin</code> se descargan solos. <strong>Cómo sé que funcionó:</strong> marca verde en el ícono del compilador.</li>
     <li>Pestaña <em>Deploy &amp; run</em>: <em>Environment</em> = <em>Injected Provider – MetaMask</em>. La billetera debe estar en <strong>Sepolia</strong> y con la cuenta del curso. Contrato: <code>Subasta</code>.</li>
     <li>Parámetros del constructor: <code>duracionSegundos</code> = <code>600</code>, <code>pujaMinima_</code> = <code>1000000000000000</code> (eso es 0,001 ETH en wei). Pulsen <em>transact</em>, lean la ventana de la billetera (red, contrato nuevo, sin valor) y confirmen. <strong>Anoten la dirección del contrato.</strong></li>
     <li><strong>Primera puja</strong> desde la cuenta 1: en el campo <em>Value</em> escriban <code>1</code> y elijan la unidad <code>milliether</code> (o <code>1000000000000000</code> en <code>wei</code>), luego el botón <code>pujar</code>. <strong>Segunda puja</strong> desde la cuenta 2 con <code>2</code> milliether. Guarden los dos hashes de transacción.</li>
@@ -309,7 +309,7 @@ npx hardhat test test/s07/GasPushPull.test.js --grep "escenario B" --gas-stats</
     <li>Cuando hayan pasado 10 minutos desde el despliegue, lean <code>estado</code>: debe devolver <code>1</code> (<code>PorFinalizar</code>). Si devuelve <code>0</code>, esperen: el reloj es el de los bloques de Sepolia, no el de su computador.</li>
     <li>Llamen <code>finalizar</code> desde <strong>cualquier</strong> cuenta. <strong>Cómo sé que funcionó:</strong> <code>estado</code> devuelve <code>2</code> y en el explorador aparece el evento <code>SubastaFinalizada</code>. Guarden el hash.</li>
     <li>Desde la cuenta 1 (la superada): <code>retirar</code>. Desde la cuenta que desplegó (la dueña): <code>retirar</code>. Guarden al menos un hash. <strong>Cómo sé que funcionó:</strong> <code>pendientes</code> de las dos cuentas vuelve a <code>0</code> y el saldo del contrato en el explorador es 0 ETH.</li>
-    <li><strong>Opcional, recomendado:</strong> verificar el código en <code>sepolia.etherscan.io</code> → <em>Contract</em> → <em>Verify and Publish</em>. Como el contrato importa otros archivos, el formulario de un solo archivo suele fallar: usen la opción <em>Standard-Json-Input</em> del explorador o el complemento de verificación de Remix. Compilador <code>0.8.28</code> y optimización <code>200</code>, exactamente los mismos del despliegue. En la Sesión 8 esto se automatiza con un solo comando.</li>
+    <li><strong>Opcional, recomendado:</strong> verificar el código en <code>sepolia.etherscan.io</code> → <em>Contract</em> → <em>Verify and Publish</em>. Como el contrato importa otros archivos, el formulario de un solo archivo suele fallar: usen la opción <em>Standard-Json-Input</em> del explorador o el complemento de verificación de Remix. Compilador <code>0.8.34</code> y optimización <code>200</code>, exactamente los mismos del despliegue. En la Sesión 8 esto se automatiza con un solo comando.</li>
   </ol>
 </section>
 
@@ -419,7 +419,7 @@ npx hardhat test test/s07/GasPushPull.test.js --grep "escenario B" --gas-stats</
 <section class="sec">
   <div class="sec-cab"><span class="sec-num">17</span><h2>Referencias</h2></div>
   <ul>
-    <li>Documentación de Solidity 0.8.28 · <em>Layout of State Variables in Storage</em>. <code>https://docs.soliditylang.org/en/v0.8.28/internals/layout_in_storage.html</code></li>
+    <li>Documentación de Solidity 0.8.34 · <em>Layout of State Variables in Storage</em>. <code>https://docs.soliditylang.org/en/v0.8.34/internals/layout_in_storage.html</code></li>
     <li>OpenZeppelin Contracts 5.x · <em>Access Control</em> (Ownable, Ownable2Step) y <em>Utils</em> (Pausable). <code>https://docs.openzeppelin.com/contracts/5.x/api/access</code></li>
     <li>EIP-1884 · <em>Repricing for trie-size-dependent opcodes</em> (SLOAD de 200 a 800). <code>https://eips.ethereum.org/EIPS/eip-1884</code></li>
     <li>EIP-2929 · <em>Gas cost increases for state access opcodes</em> (2 100 en frío, 2 900 para modificar). <code>https://eips.ethereum.org/EIPS/eip-2929</code></li>

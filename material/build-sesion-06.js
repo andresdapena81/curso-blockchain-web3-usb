@@ -7,9 +7,20 @@
 
    Cifras reales usadas en el deck (calculadas, no estimadas):
    - Gas de CertificadosUSB medido en la red local de Hardhat 3.16 con
-     Solidity 0.8.28 y optimizador 200 (despliegue 554 715; emitir 94 807
-     el primero y 77 707 los siguientes; revocar 32 352; cambiarEmisor
-     28 636).
+     Solidity 0.8.34 y optimizador 200 (despliegue 557 963, 2 221 bytes de
+     código; emitir 94 806 el primero y 77 706 los siguientes; revocar
+     32 460; cambiarEmisor 28 636).
+     Escenario exacto de la medición, para repetirla: contrato recién
+     desplegado; programa "Ingenieria de Sistemas"; los hashes de
+     "diploma-2026-0002.pdf · contenido del archivo" y de
+     "diploma-2026-0003.pdf · contenido del archivo" (ninguno de los dos
+     tiene un byte en cero, así que los dos cuestan lo mismo en el campo
+     data y la resta de los dos emitir da el ahorro limpio de la ranura);
+     motivo de la revocación "Error en la fecha de grado".
+     Vueltas a medir el 1-oct-2026, al pasar el curso de 0.8.28 a 0.8.34:
+     el despliegue subió de 554 715 a 557 963 (el código pasó de 2 206 a
+     2 221 bytes) y los dos emitir bajaron 1 unidad; revocar y
+     cambiarEmisor no se movieron.
    - Hash del archivo scripts/s06/diploma-de-prueba.pdf y de su versión
      con un bit cambiado, calculados con scripts/s06/hash-documento.js.
    ===================================================================== */
@@ -110,7 +121,7 @@ async function construir() {
   {
     const s = await D.lamina({ kicker: "A.2 · la forma de un archivo", titulo: "Anatomía de un contrato", ic: "documento", tituloSize: 30 });
     D.codigo(s, `// SPDX-License-Identifier: MIT
-pragma solidity ^0.8.28;
+pragma solidity 0.8.34;
 
 contract Contador {
     uint256 public cuenta;             // estado
@@ -124,7 +135,7 @@ contract Contador {
 }`, { x: M, y: 1.9, w: 6.6, h: 4.8, lang: "sol", titulo: "contador.sol", size: 12.5 });
     const partes = [
       ["LICENCIA", "Primera línea. Los contratos verificados son públicos: la licencia dice qué se puede hacer con ese código."],
-      ["PRAGMA", "Rango de versiones del compilador. Protege de compilar con una versión con otras reglas."],
+      ["PRAGMA", "Qué versión del compilador puede compilar el archivo. Protege de compilar con una versión con otras reglas."],
       ["CONTRACT", "Como una clase: agrupa estado y funciones. Se despliega en su propia dirección."],
       ["ESTADO", "Variables que viven en storage. Persisten y cuestan (Sesión 5)."],
       ["EVENTOS Y FUNCIONES", "Lo que el contrato expone y lo que cuenta al exterior."],
@@ -140,13 +151,13 @@ contract Contador {
   {
     const s = await D.lamina({ kicker: "A.3 · la versión del compilador", titulo: "pragma: fijar con quién se compila", ic: "candado", tituloSize: 28 });
     D.tabla(s, ["escritura", "qué acepta", "cuándo usarla"], [
-      ["pragma solidity 0.8.28;", "Solo 0.8.28.", "Contratos que se despliegan: el bytecode verificado debe ser reproducible."],
-      ["pragma solidity ^0.8.28;", "0.8.28 o superior, dentro de 0.8.x.", "Bibliotecas y material que se reutiliza. Es la que usamos en clase."],
+      ["pragma solidity 0.8.34;", "Solo 0.8.34.", "Contratos que se despliegan: el bytecode verificado debe ser reproducible. Es la que usamos en clase."],
+      ["pragma solidity ^0.8.34;", "0.8.34 o superior, dentro de 0.8.x.", "Bibliotecas y material que otros reutilizan con otra versión."],
       ["pragma solidity >=0.8.0 <0.9.0;", "Todo el rango indicado.", "Código que otros compilarán con versiones distintas."],
     ], { y: 1.9, h: 2.5, colW: [3.9, 3.3, 4.893], size: 12 });
     await D.ficha(s, { tipo: "alerta", etiqueta: "Por qué importa la 0.8", x: M, y: 4.65, w: CW, h: 1.35, texto: "Desde la versión 0.8.0, una suma que se desborda revierte automáticamente. Antes daba la vuelta en silencio: 255 + 1 en un uint8 daba 0. Ese cambio eliminó una familia entera de robos, como veremos en la Sesión 9.", size: 13 });
     D.parrafo(s, "Error típico al verificar en el explorador: elegir otra versión del compilador. El bytecode no coincide y la verificación falla.", { y: 6.2, h: 0.55, size: 13, color: C.ocre });
-    s.addNotes("Con ^0.8.28, Remix puede ofrecer una versión más nueva: en el laboratorio se elige 0.8.28 exacta para que coincida con versiones.md y con la verificación. El compilador queda grabado en los metadatos del bytecode desplegado.");
+    s.addNotes("Todos los archivos del curso fijan 0.8.34 exacta (versiones.md): ninguna otra versión los compila. En el laboratorio hay que dejar ese mismo número en el desplegable de Remix, porque es el que se declara al verificar; el compilador queda grabado en los metadatos del bytecode desplegado. Contar aquí el caso real: el curso estaba fijado en 0.8.28, Remix empezó a abrir con 0.8.34 y cada archivo fallaba con 'ParserError: Source file requires different compiler version'. Se pasó el curso a 0.8.34 y hubo que volver a medir todas las cifras de gas del material: casi ninguna se movió, pero el despliegue de este mismo contrato subió 3 248 (A.7). Cambiar de compilador obliga a volver a medir; es el mismo argumento de la lámina.");
   }
 
   {
@@ -179,7 +190,7 @@ if (bytes(p).length == 0) { }                          // ¿vacío?`, { x: M, y:
       { et: "La consecuencia de los ceros", texto: "No hay «null». Un certificado que nunca se emitió no da error: devuelve ceros. Por eso el laboratorio guarda un campo existe." },
       { et: "La de los strings", texto: "Comparar textos exige hashearlos. Por eso en cadena se prefieren bytes32 e identificadores numéricos." },
       { y: 5.25, h: 1.58, size: 11.5 });
-    s.addNotes("Las líneas del bloque son válidas en Solidity 0.8.28 (dentro de una función). Error típico en Remix: escribir p == 'x' y no entender el error del compilador 'Operator == not compatible with types string'. bytes(programa).length es exactamente lo que usa emitir() para rechazar un programa vacío.");
+    s.addNotes("Las líneas del bloque son válidas en Solidity 0.8.34 (dentro de una función). Error típico en Remix: escribir p == 'x' y no entender el error del compilador 'Operator == not compatible with types string'. bytes(programa).length es exactamente lo que usa emitir() para rechazar un programa vacío.");
   }
 
   {
@@ -202,16 +213,16 @@ if (bytes(p).length == 0) { }                          // ¿vacío?`, { x: M, y:
   {
     const s = await D.lamina({ kicker: "A.7 · el costo del storage, medido", titulo: "Cuánto cuesta el contrato de hoy", ic: "gas", tituloSize: 29 });
     D.tabla(s, ["operación en CertificadosUSB", "gas medido", "por qué"], [
-      ["Desplegar", "554 715", "Guardar 2 206 bytes de código en la cadena, más el constructor."],
-      ["Emitir el primer certificado", "94 807", "Estrena 2 ranuras del certificado y la del contador emitidos (0 → 1)."],
-      ["Emitir los siguientes", "77 707", "El contador ya existe: 1 → 2 cuesta 5 000 y no 22 100. Diferencia: 17 100."],
-      ["Revocar", "32 352", "Cambia un bool en una ranura que ya existe, y emite un evento."],
+      ["Desplegar", "557 963", "Guardar 2 221 bytes de código en la cadena, más el constructor."],
+      ["Emitir el primer certificado", "94 806", "Estrena 2 ranuras del certificado y la del contador emitidos (0 → 1)."],
+      ["Emitir los siguientes", "77 706", "El contador ya existe: 1 → 2 cuesta 5 000 y no 22 100. Diferencia: 17 100."],
+      ["Revocar", "32 460", "Cambia un bool en una ranura que ya existe, y emite un evento."],
       ["Cambiar el emisor", "28 636", "Sobrescribe una dirección."],
       ["Verificar (view)", "0 para quien consulta", "Es una lectura al nodo, no una transacción."],
     ], { y: 1.9, h: 3.75, colW: [3.8, 2.4, 5.893], size: 11.5 });
     D.parrafo(s, "Con una tarifa base cercana a 1 gwei, como la de Sepolia en septiembre de 2026, desplegar cuesta del orden de 0,0006 ETH de prueba y emitir, 0,0001.", { y: 5.8, h: 0.55, size: 12.5 });
     D.parrafo(s, "Error típico: «guardemos el PDF del diploma en el contrato». Un PDF de 100 KB son más de 3 000 ranuras: decenas de millones de gas.", { y: 6.35, h: 0.45, size: 12, color: C.ocre });
-    s.addNotes("Medido con Hardhat 3.16 / Solidity 0.8.28 / optimizador 200 en la red local. La diferencia 94 807 − 77 707 = 17 100 = 22 100 − 5 000 es exactamente la tabla de la S5. ⚠ VERIFICAR ANTES DE DICTAR: si Sepolia ya activó Glamsterdam (prevista para el 6-oct-2026), crear estado cuesta más (EIP-8037) y estas cifras cambian en Sepolia, no en la red local.");
+    s.addNotes("Medido con Hardhat 3.16 / Solidity 0.8.34 / optimizador 200 en la red local. La diferencia 94 806 − 77 706 = 17 100 = 22 100 − 5 000 es exactamente la tabla de la S5; sale limpia porque los dos hashes de la medición no tienen ningún byte en cero y cuestan igual en el campo data. El 'revocar' depende del motivo: 32 460 es con 'Error en la fecha de grado'. Al pasar el curso de 0.8.28 a 0.8.34 el despliegue subió 3 248 (el código pasó de 2 206 a 2 221 bytes) y los dos emitir bajaron 1: cambiar de compilador cambia el bytecode, y por eso se vuelve a medir. ⚠ VERIFICAR ANTES DE DICTAR: si Sepolia ya activó Glamsterdam (prevista para el 6-oct-2026), crear estado cuesta más (EIP-8037) y estas cifras cambian en Sepolia, no en la red local.");
   }
 
   {
@@ -441,11 +452,11 @@ function verificar(bytes32 h) external view
     D.pasos(s, [
       ["ABRIR", "app.remix.live, en el navegador donde está la billetera del curso."],
       ["CREAR ARCHIVO", "File Explorer → carpeta contracts → nuevo archivo CertificadosUSB.sol. Pegar el andamiaje: andamiaje/s06/CertificadosUSB.sol."],
-      ["COMPILADOR", "Pestaña Solidity Compiler: versión 0.8.28. En Advanced Configurations, activar optimización con 200 ejecuciones."],
+      ["COMPILADOR", "Pestaña Solidity Compiler → desplegable Compiler: 0.8.34+commit.80d5c536. En Advanced Configurations, activar optimización con 200 ejecuciones."],
       ["COMPILAR", "Compile CertificadosUSB.sol. Salida esperada: marca verde en el ícono del compilador y ningún error en rojo."],
     ], { y: 1.9, alto: 0.84, gap: 0.12, anchoEt: 2.5, size: 12.5 });
     await D.ficha(s, { tipo: "alerta", etiqueta: "Por qué compilar antes de escribir", x: M, y: 5.8, w: CW, h: 0.98, texto: "El andamiaje compila tal como viene. Si no compila antes de tocarlo, el problema es de configuración, no de su código.", size: 12.5 });
-    s.addNotes("Los avisos amarillos del andamiaje (parámetros sin usar) son normales: desaparecen al completar los TODO. ⚠ VERIFICAR ANTES DE DICTAR: la interfaz de Remix cambia seguido; revisar la semana anterior que los nombres de pestañas y opciones coincidan con la guía.");
+    s.addNotes("Hoy Remix abre con 0.8.34 por omisión, que es justo la del curso: la mayoría no tendrá que tocar el desplegable, pero hay que mirarlo igual. Si Remix abre con otra versión, el archivo falla con 'ParserError: Source file requires different compiler version' porque el pragma está fijo: se corrige eligiendo 0.8.34 en el desplegable, nunca bajándole el pin al archivo. Los avisos amarillos del andamiaje (parámetros sin usar) son normales: desaparecen al completar los TODO. ⚠ VERIFICAR ANTES DE DICTAR: la interfaz de Remix cambia seguido; revisar la semana anterior que los nombres de pestañas y opciones coincidan con la guía.");
   }
 
   {
@@ -509,7 +520,7 @@ node scripts/s06/hash-documento.js scripts/s06/diploma-de-prueba-alterado.pdf
     D.pasos(s, [
       ["BUSCAR", "sepolia.etherscan.io → la dirección del contrato. Ver la transacción de creación y las de uso."],
       ["LOGS", "Abrir la emisión → pestaña Logs: CertificadoEmitido, con el hash del diploma en Topics[1] (A.14)."],
-      ["VERIFY", "Pestaña Contract → Verify and Publish: Solidity (Single file), v0.8.28, licencia MIT, optimización Yes con 200."],
+      ["VERIFY", "Pestaña Contract → Verify and Publish: Solidity (Single file), v0.8.34+commit.80d5c536, licencia MIT, optimización Yes con 200."],
       ["PEGAR", "El código exacto que se desplegó. Si todo coincide aparece la marca verde de verificado."],
       ["LEER", "Read Contract → verificar(hash): cualquier persona, sin billetera, comprueba el diploma."],
     ], { y: 1.9, alto: 0.76, gap: 0.1, anchoEt: 1.9, size: 12.5 });

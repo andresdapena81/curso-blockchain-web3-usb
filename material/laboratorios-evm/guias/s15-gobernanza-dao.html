@@ -86,7 +86,7 @@ npm install</pre>
     <div class="cab"><div class="n">3.3</div><div class="enun"><span class="tema">COMPROBAR LAS VERSIONES CONGELADAS</span>Las del archivo versiones.md</div></div>
     <div class="just">
       <pre>npx hardhat --version     # 3.16.0</pre>
-      Solidity 0.8.28 y OpenZeppelin 5.6.1 los fija el proyecto: no instalen nada más.
+      Solidity 0.8.34 y OpenZeppelin 5.6.1 los fija el proyecto: no instalen nada más.
     </div>
   </div>
 
@@ -94,7 +94,7 @@ npm install</pre>
     <div class="cab"><div class="n">3.4</div><div class="enun"><span class="tema">COMPILAR</span>La primera vez tarda un poco</div></div>
     <div class="just">
       <pre>npx hardhat compile</pre>
-      <strong>Cómo sé que funcionó:</strong> <code>Compiled … Solidity files with solc 0.8.28</code> (o <code>Nothing to compile</code>). Un aviso <em>«Function state mutability can be restricted to view»</em> en <code>s05/Operaciones.sol</code> es esperado: ese contrato es de otra sesión.
+      <strong>Cómo sé que funcionó:</strong> <code>Compiled … Solidity files with solc 0.8.34 (evm target: osaka)</code> (o <code>Nothing to compile</code>). Un aviso <em>«Function state mutability can be restricted to view»</em> en <code>s05/Operaciones.sol</code> es esperado: ese contrato es de otra sesión.
     </div>
   </div>
 
@@ -317,8 +317,8 @@ TimelockUSB ──(pasado el retardo, llama a liberar())──&gt; Tesoreria (ow
   [   0 s] estado       Active
   [   0 s] votar        tx 0xde55…  gas 83.256
   [   0 s] estado       Succeeded
-  [   0 s] encolar      tx 0x46bd…  gas 145.311
-  [   0 s] ejecutar     tx 0x51ed…  gas 98.066
+  [   0 s] encolar      tx 0x46bd…  gas 145.323
+  [   0 s] ejecutar     tx 0x51ed…  gas 98.078
   [   0 s] estado       Executed
   [   0 s] tesoreria    0.002 → 0.001 ETH</pre>
     </div>

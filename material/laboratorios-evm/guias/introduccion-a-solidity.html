@@ -18,7 +18,7 @@ table{break-inside:auto}</style>
 
 <dl class="datos">
   <div><dt>PARA QUIÉN</dt><dd>Quien ya programa<br>y empieza en Solidity</dd></div>
-  <div><dt>VERSIÓN</dt><dd>Solidity 0.8.28<br>OpenZeppelin 5.6.1</dd></div>
+  <div><dt>VERSIÓN</dt><dd>Solidity 0.8.34<br>OpenZeppelin 5.6.1</dd></div>
   <div><dt>CÓMO SE USA</dt><dd>De consulta,<br>no de corrido</dd></div>
   <div><dt>CIFRAS DE GAS</dt><dd>Medidas aquí,<br>no estimadas</dd></div>
 </dl>
@@ -26,7 +26,7 @@ table{break-inside:auto}</style>
 <div class="caja clave">
   <div class="caja-et">CÓMO LEER ESTA GUÍA</div>
   <p>No se lee de corrido la primera vez. Lean la sección <strong>01</strong> antes de la Sesión 6 —es la que cambia la cabeza— y después vuelvan a lo que les haga falta. Las secciones <strong>14</strong> (errores del primer mes) y <strong>16</strong> (glosario) son las que más van a usar.</p>
-  <p><strong>Todo el código de esta guía compila con 0.8.28</strong> tal como está: se compiló antes de imprimirla. <strong>Todas las cifras de gas se midieron</strong> en la red local de este repositorio (Hardhat 3.16.0, Solidity 0.8.28, optimizador con 200 ejecuciones); no salen de ningún blog. La red local es determinista: si repiten la medición, obtienen los mismos números.</p>
+  <p><strong>Todo el código de esta guía compila con 0.8.34</strong> tal como está: se compiló antes de imprimirla. <strong>Todas las cifras de gas se midieron</strong> en la red local de este repositorio (Hardhat 3.16.0, Solidity 0.8.34, optimizador con 200 ejecuciones); no salen de ningún blog. La red local es determinista: si repiten la medición, obtienen los mismos números.</p>
   <p>Aquí se enseña <strong>el lenguaje</strong>. Los laboratorios 06 y 07 enseñan a <strong>usarlo</strong> —Remix, despliegue, verificación, patrones de fondos, medición de gas— y no se repite aquí lo que está allá.</p>
 </div>
 
@@ -66,7 +66,7 @@ table{break-inside:auto}</style>
   <div class="sec-cab"><span class="sec-num">02</span><h2>Anatomía de un archivo <code>.sol</code></h2></div>
 
 <pre>// SPDX-License-Identifier: MIT
-pragma solidity 0.8.28;
+pragma solidity 0.8.34;
 
 import {Ownable} from "@openzeppelin/contracts/access/Ownable.sol";
 
@@ -94,8 +94,9 @@ contract Saludo is Ownable {
   </table>
 
   <div class="caja alerta">
-    <div class="caja-et">POR QUÉ SE ESCRIBE <code>pragma solidity 0.8.28;</code> Y NO <code>^0.8.0</code></div>
-    <p>El circunflejo significa «0.8.0 o superior, pero menor que 0.9.0». Es lo que verán en casi todos los tutoriales, es cómodo, y esconde un problema serio: <strong>el mismo código compilado con dos versiones distintas produce bytecode distinto</strong>. De ahí salen tres dolores: prueban con 0.8.19 y despliegan con 0.8.28, así que lo que auditaron no es lo que quedó en la cadena; la verificación en el explorador <strong>falla</strong> si no aciertan la versión exacta, y después no hay forma de adivinarla; y dos personas del mismo equipo obtienen bytecode distinto «sin haber cambiado nada». Fijar la versión es gratis y elimina los tres. En bibliotecas que otros van a importar sí tiene sentido el rango —por eso OpenZeppelin lo usa—; en <strong>su</strong> contrato desplegable, no.</p>
+    <div class="caja-et">POR QUÉ SE ESCRIBE <code>pragma solidity 0.8.34;</code> Y NO <code>^0.8.0</code></div>
+    <p>El circunflejo significa «0.8.0 o superior, pero menor que 0.9.0». Es lo que verán en casi todos los tutoriales, es cómodo, y esconde un problema serio: <strong>el mismo código compilado con dos versiones distintas produce bytecode distinto</strong>. De ahí salen tres dolores: prueban con 0.8.19 y despliegan con 0.8.34, así que lo que auditaron no es lo que quedó en la cadena; la verificación en el explorador <strong>falla</strong> si no aciertan la versión exacta, y después no hay forma de adivinarla; y dos personas del mismo equipo obtienen bytecode distinto «sin haber cambiado nada». Fijar la versión es gratis y elimina los tres. En bibliotecas que otros van a importar sí tiene sentido el rango —por eso OpenZeppelin lo usa—; en <strong>su</strong> contrato desplegable, no.</p>
+    <p><strong>Y hay un segundo efecto que casi nadie menciona: la versión del compilador también decide PARA QUÉ EVM se genera el código.</strong> Cada compilador trae un <em>objetivo de EVM</em> (<em>EVM target</em>) por omisión, que es el conjunto de opcodes que da por disponibles. Este curso vio el cambio en vivo: al pasar de <code>0.8.28</code> a <code>0.8.34</code> el objetivo por omisión pasó de <code>cancun</code> a <code>osaka</code>, y Hardhat lo dice en una línea al compilar —<code>Compiled N Solidity files with solc 0.8.34 (evm target: osaka)</code>—. Vale la pena leer esa línea: si el objetivo es más nuevo que la red donde van a desplegar, el contrato puede usar un opcode que allá no existe y fallar al desplegarse o al ejecutarse. Es otra razón para fijar la versión y anotarla: «mi contrato» no es solo el código fuente, es el código fuente <strong>más</strong> el compilador <strong>más</strong> el objetivo de EVM.</p>
   </div>
 </section>
 
@@ -586,7 +587,7 @@ return (monto * 3) / 100;     // 250*3/100 = 7.  Multiplicar ANTES de dividir.</
     <tr><td class="pk">La interfaz dice que guardó el dato y el contrato no lo tiene</td><td>Se emitió un evento creyendo que eso lo guarda. Un contrato no puede leer eventos.</td><td>Si lo necesita la lógica, va a <code>storage</code>. El evento es solo para quien mira desde fuera.</td></tr>
     <tr><td class="pk">El envío de ether falla siempre contra cierto contrato</td><td>Usaron <code>transfer()</code>/<code>send()</code> y al receptor no le alcanzan los 2 300 de gas (EIP-1884).</td><td>Usar <code>call{value: m}("")</code> con el estado ya actualizado antes, y comprobar el <code>bool</code>.</td></tr>
     <tr><td class="pk">Guardaron algo «privado» y apareció publicado</td><td><code>private</code> limita quién llama, no quién ve. El storage se lee con <code>eth_getStorageAt</code>.</td><td>No guardar secretos en cadena. Guardar el hash y revelar después.</td></tr>
-    <tr><td class="pk">La verificación en el explorador falla «sin haber cambiado nada»</td><td>Compilador, optimización o <em>runs</em> distintos a los del despliegue. Con <code>^0.8.0</code> ni se sabe cuál se usó.</td><td>Fijar <code>pragma solidity 0.8.28;</code> y anotar compilador, optimización y runs al desplegar.</td></tr>
+    <tr><td class="pk">La verificación en el explorador falla «sin haber cambiado nada»</td><td>Compilador, optimización o <em>runs</em> distintos a los del despliegue. Con <code>^0.8.0</code> ni se sabe cuál se usó.</td><td>Fijar <code>pragma solidity 0.8.34;</code> y anotar compilador, optimización y runs al desplegar.</td></tr>
     <tr><td class="pk"><code>No arguments passed to the base constructor</code> al heredar de <code>Ownable</code></td><td>OpenZeppelin <strong>5</strong> exige el dueño inicial; en la versión 4 ese parámetro no existía.</td><td><code>constructor(...) Ownable(msg.sender) { ... }</code>. Casi todos los tutoriales de internet son de la 4.</td></tr>
     <tr><td class="pk"><code>Member "increaseAllowance" not found</code> en un ERC-20</td><td>OpenZeppelin 5 <strong>eliminó</strong> <code>increaseAllowance</code> y <code>decreaseAllowance</code> de <code>ERC20</code>: no eran del estándar. Nada las reemplaza.</td><td><code>approve</code> con el valor exacto nuevo. Para operar sobre tokens <em>ajenos</em> existen <code>safeIncreaseAllowance</code> y <code>safeDecreaseAllowance</code> en <code>SafeERC20</code> (comprobado en la 5.6.1 del curso).</td></tr>
     <tr><td class="pk"><code>DocstringParsingError: Documentation tag @… not valid</code></td><td>Una línea del bloque NatSpec <em>empieza</em> con una arroba que no es etiqueta conocida (un correo partido, una mención).</td><td>Que la arroba no quede al principio de la línea, o usar una etiqueta válida (<code>@custom:algo</code>). A mitad de línea no molesta.</td></tr>
@@ -595,13 +596,13 @@ return (monto * 3) / 100;     // 250*3/100 = 7.  Multiplicar ANTES de dividir.</
 
 <!-- ============================================================ 15 -->
 <section class="sec">
-  <div class="sec-cab"><span class="sec-num">15</span><h2>Un contrato de referencia, comentado</h2><span class="lead">COMPILA CON 0.8.28</span></div>
+  <div class="sec-cab"><span class="sec-num">15</span><h2>Un contrato de referencia, comentado</h2><span class="lead">COMPILA CON 0.8.34</span></div>
 
   <p>Reserva de la sala de cómputo: cada franja horaria se reserva una sola vez y se paga por adelantado; cancelar devuelve la mitad. Es pequeño a propósito, y tiene una pieza de casi cada sección de esta guía.</p>
   <p><strong>Lectura complementaria:</strong> en el repositorio está <code>contracts/demo/Tablon.sol</code>, el tablón de anuncios que se alquila por tiempo que se explica en clase. Es otro contrato distinto, comentado línea por línea y con 21 pruebas en verde. Este de aquí es más corto y sirve de plantilla; ese otro sirve para leer con calma el <em>por qué</em> de cada decisión.</p>
 
 <pre>// SPDX-License-Identifier: MIT
-pragma solidity 0.8.28;
+pragma solidity 0.8.34;
 
 import {Ownable} from "@openzeppelin/contracts/access/Ownable.sol";
 
@@ -742,7 +743,7 @@ contract ReservaSala is Ownable {
 <section class="sec">
   <div class="sec-cab"><span class="sec-num">17</span><h2>Documentación oficial</h2><span class="lead">ENLACES VERIFICADOS</span></div>
   <p>Cuando esta guía y la documentación oficial no coincidan, <strong>manda la documentación oficial</strong>: avísenle al docente y se corrige. Todos estos enlaces se abrieron y funcionan sin cuenta.</p>
-  <p><strong>Solidity 0.8.28</strong> — todas las páginas cuelgan de <code>https://docs.soliditylang.org/en/v0.8.28/</code>:</p>
+  <p><strong>Solidity 0.8.34</strong> — todas las páginas cuelgan de <code>https://docs.soliditylang.org/en/v0.8.34/</code>:</p>
   <ul>
     <li><code>types.html</code> — tipos, conversiones, valores por defecto. · <code>cheatsheet.html</code> — resumen de una página.</li>
     <li><code>contracts.html</code> — visibilidad, herencia y linealización, eventos, <code>receive</code>/<code>fallback</code>.</li>
@@ -763,7 +764,8 @@ contract ReservaSala is Ownable {
   <p>Y dos referencias de consulta rápida: la lista oficial de licencias, <code>https://spdx.org/licenses/</code>, y el precio de cada opcode de la EVM, <code>https://www.evm.codes/</code></p>
   <div class="caja">
     <div class="caja-et">CÓMO SE MIDIERON LAS CIFRAS DE ESTA GUÍA</div>
-    <p>Todas las cifras de gas salen de contratos pequeños desplegados en la red local de Hardhat 3.16.0, con Solidity 0.8.28 y el optimizador en 200 ejecuciones —la configuración congelada del curso, en <code>versiones.md</code>—, leyendo el <code>gasUsed</code> del recibo de cada transacción. Las lecturas de ranuras se hicieron con <code>eth_getStorageAt</code>. Ustedes pueden repetir cualquiera de estas mediciones: la red local es determinista y da los mismos números.</p>
+    <p>Todas las cifras de gas salen de contratos pequeños desplegados en la red local de Hardhat 3.16.0, con Solidity 0.8.34 y el optimizador en 200 ejecuciones —la configuración congelada del curso, en <code>versiones.md</code>—, leyendo el <code>gasUsed</code> del recibo de cada transacción. Las lecturas de ranuras se hicieron con <code>eth_getStorageAt</code>. Ustedes pueden repetir cualquiera de estas mediciones: la red local es determinista y da los mismos números.</p>
+    <p>Las cifras se midieron primero con <code>0.8.28</code> (objetivo <code>cancun</code>) y, al cambiar el curso de compilador, se <strong>volvieron a medir todas</strong> con <code>0.8.34</code> (objetivo <code>osaka</code>) compilando los mismos contratos: <strong>ninguna cambió</strong>. Que el compilador cambie no obliga a que el gas cambie —lo que cambia el precio del gas son las bifurcaciones de la red, no el compilador—, pero eso <em>se comprueba</em>, no se supone: es exactamente el hábito que esta guía les pide.</p>
   </div>
 </section>
 

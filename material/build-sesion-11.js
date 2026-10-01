@@ -1,5 +1,11 @@
 /* =====================================================================
    Sesión 11 · NFTs, ERC-721/1155 y almacenamiento descentralizado
+
+   Cifras de gas de la lámina A.9, medidas con Hardhat 3.16 / solc 0.8.34 /
+   optimizador 200 (ver las notas de esa lámina para el escenario exacto).
+   Vueltas a medir el 1-oct-2026 al pasar el curso de 0.8.28 a 0.8.34:
+   guardar bytes subió 1 unidad de gas (770 542 → 770 543 el KB;
+   14 570 318 → 14 570 319 los 20 KB) y emitir de DiplomaUSB no se movió.
    ===================================================================== */
 
 const path = require("path");
@@ -180,13 +186,13 @@ uri(2) -> "ipfs://bafy.../{id}.json"   // la app reemplaza {id}`, { x: M, y: 2.9
     const s = await D.lamina({ kicker: "A.9 · ¿y si la imagen va en la cadena?", titulo: "Medido: guardar bytes cuesta una fortuna", ic: "gas", tituloSize: 26 });
     D.parrafo(s, "Lo medimos en Hardhat con un contrato que solo hace datos = d (almacenamiento permanente en la cadena):", { y: 1.85, h: 0.6, size: 14 });
     D.tabla(s, ["qué se guarda", "gas medido", "comentario"], [
-      ["1 KB de bytes", "770 482", "Ya es 15 veces una transferencia de FUSB (51 692)."],
-      ["20 KB de bytes", "14 569 502", "Unos 730 000 de gas por KB."],
+      ["1 KB de bytes", "770 543", "Ya es 15 veces una transferencia de FUSB (51 692)."],
+      ["20 KB de bytes", "14 570 319", "Unos 730 000 de gas por KB."],
       ["Imagen de 100 KB", "≈ 73 millones (extrapolado)", "No cabe en un bloque de la red local de Hardhat (60 millones)."],
-      ["El tokenURI (66 caracteres)", "173 838 · emitir completo", "Incluye crear el token, el dueño y el enlace."],
+      ["El tokenURI (67 caracteres)", "173 850 · emitir completo", "Incluye crear el token, el dueño y el enlace."],
     ], { y: 2.55, h: 2.65, colW: [3.0, 3.1, 5.993], size: 11.5 });
     await D.ficha(s, { tipo: "termino", etiqueta: "La conclusión de ingeniería", x: M, y: 5.4, w: CW, h: 1.3, texto: "En la cadena va lo que necesita consenso: quién es el dueño y un compromiso con el contenido (el CID). El contenido pesado va afuera. Hay NFT «100 % on-chain» (SVG pequeños generados por código), pero son la excepción.", size: 12.5 });
-    s.addNotes("Cifras medidas con Hardhat 3.16 / solc 0.8.28 (optimizador 200) en la preparación del curso: contrato Almacen { bytes datos; guardar(bytes) }. El 100 KB es extrapolación lineal. No conviertan a pesos: el precio del gas y del ETH cambia cada hora; el orden de magnitud es lo que importa. El límite de gas de la red principal también cambia (subió varias veces en 2025): si lo citan, consúltenlo el día de la clase en un explorador.");
+    s.addNotes("Cifras medidas con Hardhat 3.16 / solc 0.8.34 (optimizador 200): contrato Almacen { bytes datos; function guardar(bytes calldata d) { datos = d; } }, contrato nuevo en cada medición y relleno de bytes 0x01 (sin ningún byte en cero, que es el caso realista de una imagen: con 1 KB de ceros serían 121 455, seis veces menos, porque un byte en cero cuesta 4 en el campo data y 0 en la ranura). Las dos de FUSB y del tokenURI salen de --gas-stats sobre test/s10/FichaUSB.test.js y test/s11/DiplomaUSB.test.js. El 100 KB es extrapolación lineal. No conviertan a pesos: el precio del gas y del ETH cambia cada hora; el orden de magnitud es lo que importa. El límite de gas de la red principal también cambia (subió varias veces en 2025): si lo citan, consúltenlo el día de la clase en un explorador.");
   }
 
   {

@@ -11,7 +11,8 @@
 
    Cifras reales usadas en el deck (todas calculadas, no estimadas):
    - Mediciones de gas: scripts/s05/medir-gas.js en la red local de Hardhat
-     3.16 / Solidity 0.8.28 / optimizador 200.
+     3.16 / Solidity 0.8.34 / optimizador 200. Vueltas a medir el 1-oct-2026
+     al pasar el curso de 0.8.28 a 0.8.34: ninguna cambió.
    - Transacciones y bloques de Sepolia consultados por RPC el 17-sep-2026
      (bloques 11 727 239 a 11 727 246). La fórmula de EIP-1559 reproduce la
      tarifa base del bloque siguiente en los nueve bloques revisados.
@@ -444,7 +445,7 @@ SSTORE        // guarda 7 en la ranura 0 · pila: []`, { x: M, y: 2.75, w: 6.3, 
     D.codigo(s, `function sumar(uint256[] calldata datos)  // no se copia: 39 360 de gas (50 números)
 function sumar(uint256[] memory datos)    // se copia antes: 42 058 de gas`, { x: M, y: 5.05, w: CW, h: 0.95, lang: "sol", size: 12 });
     D.parrafo(s, "Error típico: creer que memory «guarda» algo. Al terminar la llamada desaparece; si el dato debe sobrevivir, tiene que ir a storage, y eso se paga.", { y: 6.12, h: 0.65, size: 12.5, color: C.ocre });
-    s.addNotes("Las dos cifras son medidas con scripts/s05/medir-gas.js (Hardhat 3.16, Solidity 0.8.28, optimizador 200). El error 'stack too deep' de Solidity viene del límite de 16: aparece cuando una función tiene demasiadas variables locales.");
+    s.addNotes("Las dos cifras son medidas con scripts/s05/medir-gas.js (Hardhat 3.16, Solidity 0.8.34, optimizador 200). El error 'stack too deep' de Solidity viene del límite de 16: aparece cuando una función tiene demasiadas variables locales.");
   }
 
   {

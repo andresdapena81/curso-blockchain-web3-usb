@@ -95,7 +95,7 @@
   <div class="pregunta">
     <div class="cab"><div class="n">1</div><div class="enun"><span class="tema">ABRIR REMIX</span>Un entorno completo dentro del navegador</div></div>
     <div class="just">
-      Vayan a <code>https://app.remix.live</code> <strong>en el mismo navegador donde está la billetera</strong> (Remix se mudó a esa dirección en septiembre de 2026; <code>remix.ethereum.org</code> todavía abre). Remix no pide cuenta ni instalar nada. <strong>Lo primero, antes de escribir nada:</strong> en el panel del compilador elijan la versión <code>0.8.28+commit.7893614a</code>. Si dejan la que viene por omisión, que es más nueva, cualquier archivo del curso falla con <code>ParserError: Source file requires different compiler version</code>, porque los archivos fijan la versión a propósito. A la izquierda hay una barra de íconos: cada ícono es un complemento (<em>plugin</em>). Los tres que usan hoy son el <strong>explorador de archivos</strong>, el <strong>compilador de Solidity</strong> y <strong>Deploy &amp; Run Transactions</strong>. Abajo, la <strong>terminal</strong> muestra cada transacción.<br>
+      Vayan a <code>https://app.remix.live</code> <strong>en el mismo navegador donde está la billetera</strong> (Remix se mudó a esa dirección en septiembre de 2026; <code>remix.ethereum.org</code> todavía abre). Remix no pide cuenta ni instalar nada. <strong>Lo primero, antes de escribir nada:</strong> en el panel del compilador confirmen que la versión seleccionada sea <code>0.8.34+commit.80d5c536</code>. Hoy es la que Remix trae por omisión, así que lo más normal es que ya esté puesta; de todas maneras <strong>se mira</strong>, porque Remix cambia su versión por omisión cada pocos meses y los archivos del curso fijan la versión a propósito: con cualquier otra fallan con <code>ParserError: Source file requires different compiler version</code>. Si eso les pasa, no le bajen el <code>pragma</code> al archivo: elijan la versión del curso en el desplegable. A la izquierda hay una barra de íconos: cada ícono es un complemento (<em>plugin</em>). Los tres que usan hoy son el <strong>explorador de archivos</strong>, el <strong>compilador de Solidity</strong> y <strong>Deploy &amp; Run Transactions</strong>. Abajo, la <strong>terminal</strong> muestra cada transacción.<br>
       <strong>Cómo sé que funcionó:</strong> ven un espacio de trabajo con las carpetas <code>contracts</code>, <code>scripts</code> y <code>tests</code>.
     </div>
   </div>
@@ -112,8 +112,8 @@
     <div class="cab"><div class="n">3</div><div class="enun"><span class="tema">CONFIGURAR EL COMPILADOR</span>Las mismas opciones que usarán al verificar</div></div>
     <div class="just">
       Ícono <strong>Solidity Compiler</strong>:
-      <br>· <em>Compiler</em>: <code>0.8.28+commit.7893614a</code>. Elíjanla exacta aunque Remix proponga una más nueva: es la versión congelada del curso.
-      <br>· <em>Advanced Configurations</em>: activar <strong>Enable optimization</strong> con <strong>200</strong> ejecuciones. <em>EVM Version</em>: dejar la predeterminada (<code>default</code>).
+      <br>· <em>Compiler</em>: <code>0.8.34+commit.80d5c536</code>, la versión congelada del curso. Hoy coincide con la que Remix propone; si el desplegable muestra otra, elijan esta exacta.
+      <br>· <em>Advanced Configurations</em>: activar <strong>Enable optimization</strong> con <strong>200</strong> ejecuciones. <em>EVM Version</em>: dejar la predeterminada (<code>default</code>), que con 0.8.34 significa <code>osaka</code>.
       <br><strong>Anoten estas tres opciones:</strong> el paso de verificación en el explorador exige repetirlas idénticas.
     </div>
   </div>
@@ -123,7 +123,7 @@
     <div class="just">
       Clic en <strong>Compile CertificadosUSB.sol</strong> (o Ctrl + S).<br>
       <strong>Salida esperada:</strong> una marca verde sobre el ícono del compilador. Pueden aparecer <strong>advertencias amarillas</strong> («Unused function parameter»): son normales, porque los parámetros todavía no se usan. Desaparecen al completar los TODO.<br>
-      <strong>Si aparece un error rojo:</strong> no se copió el archivo completo, o la versión elegida es menor que 0.8.28. El andamiaje compila tal como viene.
+      <strong>Si aparece un error rojo:</strong> no se copió el archivo completo, o la versión elegida en el desplegable no es la del curso (0.8.34). El andamiaje compila tal como viene.
     </div>
   </div>
 </section>
@@ -258,7 +258,7 @@ node scripts/s06/hash-documento.js scripts/s06/diploma-de-prueba-alterado.pdf
       <br>· <strong>Red:</strong> Sepolia. Si dice cualquier otra, rechacen.
       <br>· <strong>Tipo:</strong> despliegue de contrato («Contract deployment»), sin destinatario.
       <br>· <strong>Valor:</strong> 0 ETH.
-      <br>· <strong>Costo estimado:</strong> del orden de 0,0005 a 0,002 ETH de prueba. El despliegue consume unas 555 000 unidades de gas (medido en la red local); el precio depende de la tarifa base del momento.<br>
+      <br>· <strong>Costo estimado:</strong> del orden de 0,0005 a 0,002 ETH de prueba. El despliegue consume unas 558 000 unidades de gas (medido en la red local); el precio depende de la tarifa base del momento.<br>
       Confirmen. <strong>Salida esperada:</strong> en 12 a 30 segundos la terminal de Remix muestra la transacción con ✔ y en <em>Deployed Contracts</em> aparece <code>CERTIFICADOSUSB AT 0x…</code>. <strong>Copien esa dirección</strong> (ícono de copiar) y guárdenla: es la evidencia principal.
     </div>
   </div>
@@ -299,7 +299,7 @@ node scripts/s06/hash-documento.js scripts/s06/diploma-de-prueba-alterado.pdf
     <div class="just">
       En la página del contrato → pestaña <strong>Contract</strong> → <strong>Verify and Publish</strong>. Primera pantalla:
       <br>· <em>Compiler Type</em>: <strong>Solidity (Single file)</strong>.
-      <br>· <em>Compiler Version</em>: <strong>v0.8.28+commit.7893614a</strong>.
+      <br>· <em>Compiler Version</em>: <strong>v0.8.34+commit.80d5c536</strong>.
       <br>· <em>Open Source License Type</em>: <strong>MIT License (MIT)</strong> (la del encabezado SPDX).
       <br>Segunda pantalla: peguen el código <strong>exacto</strong> que compilaron en Remix, completo. <em>Optimization</em>: <strong>Yes</strong>; en la configuración avanzada, <em>Runs</em>: <strong>200</strong> y <em>EVM Version</em>: <strong>default</strong>. <em>Constructor Arguments</em>: vacío (el constructor no recibe parámetros). Completen la verificación anti-bots y envíen.<br>
       <strong>Salida esperada:</strong> «Successfully generated Bytecode and ABI for Contract Address». En la pestaña <em>Contract</em> aparece una marca verde y las subpestañas <em>Read Contract</em> y <em>Write Contract</em>.
@@ -352,7 +352,7 @@ copy andamiaje\s06\CertificadosUSB.sol contracts\s06\CertificadosUSB.sol    (Win
   <div class="sec-cab"><span class="sec-num">12</span><h2>Puntos de control</h2><span class="lead">¿VOY BIEN?</span></div>
   <table>
     <tr><th style="width:14%">MINUTO</th><th>DEBERÍAN TENER</th></tr>
-    <tr><td class="pk">10</td><td>El andamiaje compilado en Remix con 0.8.28 y optimización 200.</td></tr>
+    <tr><td class="pk">10</td><td>El andamiaje compilado en Remix con 0.8.34 y optimización 200.</td></tr>
     <tr><td class="pk">25</td><td>TODO 1, 2, 3 y 4: emitir funciona y <code>emitidos</code> = 1 en la Remix VM.</td></tr>
     <tr><td class="pk">45</td><td>Los siete TODO y la tabla de la sección 06 recorrida sin sorpresas.</td></tr>
     <tr><td class="pk">50</td><td>Los dos hashes del diploma calculados (o tomados de la sección 07).</td></tr>
@@ -378,7 +378,7 @@ copy andamiaje\s06\CertificadosUSB.sol contracts\s06\CertificadosUSB.sol    (Win
   <div class="sec-cab"><span class="sec-num">14</span><h2>Errores frecuentes</h2><span class="lead">CASI TODO SE RESUELVE AQUÍ</span></div>
   <table>
     <tr><th style="width:38%">SÍNTOMA</th><th>CAUSA Y SOLUCIÓN</th></tr>
-    <tr><td class="pk">Error rojo al compilar el andamiaje</td><td>Archivo incompleto o versión de compilador menor a 0.8.28.</td></tr>
+    <tr><td class="pk">Error rojo al compilar el andamiaje</td><td>Archivo incompleto o versión de compilador distinta de 0.8.34.</td></tr>
     <tr><td class="pk">«Gas estimation failed» al emitir</td><td>Una validación revierte: hash en cero, programa vacío, hash ya emitido o cuenta distinta del emisor. Lean el error que muestra la terminal.</td></tr>
     <tr><td class="pk">Nadie puede emitir, ni siquiera quien desplegó</td><td>Falta el TODO 2: el emisor quedó en la dirección cero.</td></tr>
     <tr><td class="pk"><code>revocar</code> no cambia nada</td><td>Usaron <code>Certificado memory c</code> en lugar de <code>storage</code>: modificaron una copia.</td></tr>
@@ -415,7 +415,7 @@ Pareja: Nombre 1 · Nombre 2                 Fecha: DD/MM/AAAA
 
 1. CONTRATO
    Dirección: https://sepolia.etherscan.io/address/0x…   (verificado: sí)
-   Compilador: 0.8.28 · optimización 200 · EVM default
+   Compilador: 0.8.34 · optimización 200 · EVM default
 
 2. TRANSACCIONES
    Emisión   : https://sepolia.etherscan.io/tx/0x…   gas usado: …

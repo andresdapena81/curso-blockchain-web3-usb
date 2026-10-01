@@ -22,7 +22,7 @@
 
 <div class="caja clave">
   <div class="caja-et">CÓMO LEER ESTA GUÍA</div>
-  <p>Está escrita para hacer el laboratorio <strong>sin ayuda</strong>, desde un computador de la sala recién encendido. Cada paso dice qué escribir, qué deberían ver y cómo saber que funcionó. Las salidas que se muestran son <strong>reales</strong>: se obtuvieron con este mismo repositorio (Hardhat 3.16.0, Solidity 0.8.28). Si algo no coincide, vayan a <strong>16 · Errores frecuentes</strong>.</p>
+  <p>Está escrita para hacer el laboratorio <strong>sin ayuda</strong>, desde un computador de la sala recién encendido. Cada paso dice qué escribir, qué deberían ver y cómo saber que funcionó. Las salidas que se muestran son <strong>reales</strong>: se obtuvieron con este mismo repositorio (Hardhat 3.16.0, Solidity 0.8.34). Si algo no coincide, vayan a <strong>16 · Errores frecuentes</strong>.</p>
 </div>
 
 <!-- ============================================================ 1 -->
@@ -85,7 +85,7 @@ npx hardhat --version     # esperado: 3.16.0</pre>
   <div class="sec-cab"><span class="sec-num">04</span><h2>El proyecto por dentro</h2></div>
   <table>
     <tr><th style="width:34%">RUTA</th><th>QUÉ ES</th></tr>
-    <tr><td class="pk">hardhat.config.js</td><td>Compilador 0.8.28 con optimizador (200), redes <code>sepolia</code> y <code>opSepolia</code>, verificación. Los secretos aparecen solo como <code>configVariable("NOMBRE")</code>: nunca el valor.</td></tr>
+    <tr><td class="pk">hardhat.config.js</td><td>Compilador 0.8.34 con optimizador (200), redes <code>sepolia</code> y <code>opSepolia</code>, verificación. Los secretos aparecen solo como <code>configVariable("NOMBRE")</code>: nunca el valor.</td></tr>
     <tr><td class="pk">contracts/s08/Recaudo.sol</td><td>El contrato a probar.</td></tr>
     <tr><td class="pk">contracts/s08/RecaudoMutante1..3.sol</td><td>Los mutantes. <strong>No se abren</strong> hasta el final.</td></tr>
     <tr><td class="pk">andamiaje/s08/Recaudo.test.js</td><td>La plantilla de su suite, con dos pruebas de ejemplo y los grupos armados.</td></tr>
@@ -430,7 +430,7 @@ git diff --staged</pre>
   <table>
     <tr><th style="width:26%">PIEZA</th><th>ESTADO MÍNIMO</th></tr>
     <tr><td class="pk">Repositorio</td><td>En GitHub, los tres integrantes con permisos, el docente como colaborador. Estructura de la lámina C.1 (contracts, test, ignition, docs).</td></tr>
-    <tr><td class="pk">Versiones</td><td>Las del curso, exactas: Hardhat 3.16.0, Solidity 0.8.28, OpenZeppelin 5.6.1 (<code>npm install --save-exact</code>). <code>package-lock.json</code> incluido.</td></tr>
+    <tr><td class="pk">Versiones</td><td>Las del curso, exactas: Hardhat 3.16.0, Solidity 0.8.34, OpenZeppelin 5.6.1 (<code>npm install --save-exact</code>). <code>package-lock.json</code> incluido.</td></tr>
     <tr><td class="pk">Contrato principal</td><td>Compila con <code>npx hardhat compile</code>. Aplica al menos dos patrones de la Sesión 7.</td></tr>
     <tr><td class="pk">Suite inicial</td><td>Al menos 5 pruebas, con al menos una de cada familia (caso feliz, reversión, permisos, eventos, borde).</td></tr>
     <tr><td class="pk">Secretos y .gitignore</td><td>Ninguno en el repositorio. El mismo <code>.gitignore</code> del curso.</td></tr>

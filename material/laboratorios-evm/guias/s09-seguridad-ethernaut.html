@@ -196,15 +196,15 @@
     <pre>python -m pip install slither-analyzer</pre>
     <p>Slither necesita el compilador de Solidity en la versión del contrato. La forma limpia de manejarlo es <code>solc-select</code>:</p>
     <pre>python -m pip install solc-select
-solc-select install 0.8.28
-solc-select use 0.8.28</pre>
+solc-select install 0.8.34
+solc-select use 0.8.34</pre>
     <p>Si tu sala no permite instalar Python, hay una <strong>extensión de VS Code</strong> de Slither y alternativas web; úsalas y dilo en tu evidencia.</p>
   </div>
 
   <p>Corre Slither sobre el banco vulnerable (desde <code>material/laboratorios-evm</code> o tu copia):</p>
   <pre>slither contracts/s09/BancoVulnerable.sol</pre>
 
-  <p>Esta es la <strong>salida real</strong> (se ejecutó con Slither 0.11.6 + solc 0.8.28):</p>
+  <p>Esta es la <strong>salida real</strong> (se ejecutó con Slither 0.11.6 + solc 0.8.34):</p>
   <pre>INFO:Detectors:
 Reentrancy in BancoVulnerable.retirar() (contracts/s09/BancoVulnerable.sol#21-30):
     External calls:
@@ -259,7 +259,7 @@ INFO:Slither: analyzed (1 contracts with 102 detectors), 2 result(s) found</pre>
     <tr><td class="pk">Una llamada «pending» que no resuelve en consola</td><td>Expande la promesa o usa <code>await</code> delante (p. ej. <code>await contract.info()</code>).</td></tr>
     <tr><td class="pk">El exploit de Re-entrancy no vacía todo</td><td>Depositaste/donaste menos que el balance de la instancia, o tu <code>receive()</code> no vuelve a llamar mientras quede balance. Revisa la condición.</td></tr>
     <tr><td class="pk">Force: «no puedo enviarle ETH»</td><td>Exacto: por eso hay que forzarlo con <code>selfdestruct</code> desde otro contrato, no con un envío normal.</td></tr>
-    <tr><td class="pk">Slither: «solc not found» o versión equivocada</td><td>Instala y fija la versión con <code>solc-select install 0.8.28</code> y <code>solc-select use 0.8.28</code>.</td></tr>
+    <tr><td class="pk">Slither: «solc not found» o versión equivocada</td><td>Instala y fija la versión con <code>solc-select install 0.8.34</code> y <code>solc-select use 0.8.34</code>.</td></tr>
     <tr><td class="pk">Slither marca decenas de cosas de OpenZeppelin</td><td>Es ruido de las dependencias. Filtra con <code>--filter-paths node_modules</code>.</td></tr>
   </table>
 </section>

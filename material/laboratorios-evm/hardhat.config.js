@@ -20,7 +20,7 @@ import { configVariable } from "hardhat/config";
 export default {
   plugins: [toolbox],
   solidity: {
-    version: "0.8.28",
+    version: "0.8.34",
     settings: { optimizer: { enabled: true, runs: 200 } },
   },
   networks: {

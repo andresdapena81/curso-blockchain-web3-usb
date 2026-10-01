@@ -1,5 +1,5 @@
 // SPDX-License-Identifier: MIT
-pragma solidity ^0.8.28;
+pragma solidity 0.8.34;
 
 /**
  * @title MultisigUSB · Laboratorio 15 · una cuenta que exige m de n firmas · VERSIÓN DE TRABAJO

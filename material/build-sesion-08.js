@@ -2,7 +2,8 @@
    Sesión 08 · Entorno profesional: Hardhat, pruebas y despliegue
    Estándar de la Sesión 4. Todas las cifras (cobertura, pruebas, gas,
    salidas de consola) se midieron en una copia del repositorio con
-   Hardhat 3.16.0 / solc 0.8.28.
+   Hardhat 3.16.0 / solc 0.8.34. Las cifras de gas se volvieron a medir el
+   1-oct-2026, al pasar el curso de 0.8.28 a 0.8.34: no cambiaron.
    REGLA DE ESTE DECK: no revelar cuáles son los mutantes de Recaudo ni
    qué cambia cada uno. Se enseña a pensar en bordes; los ejemplos de
    mutación usan la Subasta de la S7, no Recaudo.
@@ -125,7 +126,7 @@ async function construir() {
     D.codigo(s, `export default {
   plugins: [toolbox],
   solidity: {
-    version: "0.8.28",
+    version: "0.8.34",
     settings: { optimizer: { enabled: true, runs: 200 } },
   },
   networks: {
@@ -600,7 +601,7 @@ proyecto-equipo/
 ├── .gitignore
 └── README.md             qué hace, cómo instalar, cómo probar`, { x: M, y: 1.9, w: 7.6, h: 4.85, lang: "js", size: 10.5 });
     D.lista(s, [
-      "Usen las mismas versiones del curso (versiones.md): Hardhat 3.16.0, Solidity 0.8.28, OpenZeppelin 5.6.1.",
+      "Usen las mismas versiones del curso (versiones.md): Hardhat 3.16.0, Solidity 0.8.34, OpenZeppelin 5.6.1.",
       "Repositorio en GitHub, los tres integrantes con permisos y el docente como colaborador.",
       "El borrador de la S7 se mueve a contracts/ y se le escriben pruebas con el método de hoy.",
     ], { x: M + 7.9, y: 1.9, w: CW - 7.9, h: 4.85, size: 12.5, gap: 10 });

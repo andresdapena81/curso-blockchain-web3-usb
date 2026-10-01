@@ -3,7 +3,10 @@
    Estándar de la Sesión 4: cada concepto con idea llana, ejemplo trabajado
    y error típico; notas en todas las láminas; verificación al cierre de
    cada bloque. Las cifras de gas se MIDIERON con --gas-stats (Hardhat
-   3.16.0, solc 0.8.28, optimizador 200) en test/s07/GasPushPull.test.js.
+   3.16.0, solc 0.8.34, optimizador 200) en test/s07/GasPushPull.test.js
+   (escenarios A y B) y en test/s07/Subasta.test.js (Empaquetado). Vueltas
+   a medir el 1-oct-2026 al pasar el curso de 0.8.28 a 0.8.34: ninguna de
+   las cifras del deck cambió.
    ===================================================================== */
 
 const path = require("path");
@@ -519,7 +522,7 @@ npx hardhat test test/s07/Subasta.test.js
   {
     const s = await D.lamina({ kicker: "B.6 · parte 3 · desplegar primero · 10 minutos", titulo: "Subasta en Sepolia: arrancar el reloj", ic: "cohete", tituloSize: 27 });
     D.pasos(s, [
-      ["REMIX", "Crear ISubasta.sol, Porcentajes.sol y Subasta.sol en la MISMA carpeta. Compilar con 0.8.28 y optimización 200."],
+      ["REMIX", "Crear ISubasta.sol, Porcentajes.sol y Subasta.sol en la MISMA carpeta. Compilar con 0.8.34 y optimización 200."],
       ["DESPLEGAR", "Injected Provider, red Sepolia, billetera del curso. duracionSegundos = 600 · pujaMinima_ = 1000000000000000 (0,001 ETH)."],
       ["DOS PUJAS", "Desde dos cuentas: 0,001 ETH y luego 0,002 ETH (Value en la unidad correcta). Guardar los dos hashes."],
       ["MIENTRAS VENCE", "Diez minutos: se usan para la tabla de gas (B.7). Después: finalizar, y retirar desde la superada y desde la dueña."],

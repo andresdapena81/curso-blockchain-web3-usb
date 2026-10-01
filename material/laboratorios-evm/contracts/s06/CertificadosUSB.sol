@@ -1,5 +1,5 @@
 // SPDX-License-Identifier: MIT
-pragma solidity ^0.8.28;
+pragma solidity 0.8.34;
 
 /**
  * @title Registro de certificados académicos · Laboratorio 06 · VERSIÓN DE TRABAJO
