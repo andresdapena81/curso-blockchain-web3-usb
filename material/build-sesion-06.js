@@ -439,7 +439,7 @@ function verificar(bytes32 h) external view
   {
     const s = await D.lamina({ kicker: "B.1 · 10 minutos", titulo: "Preparar y compilar en Remix", ic: "pantalla", tituloSize: 29 });
     D.pasos(s, [
-      ["ABRIR", "remix.ethereum.org, en el navegador donde está la billetera del curso."],
+      ["ABRIR", "app.remix.live, en el navegador donde está la billetera del curso."],
       ["CREAR ARCHIVO", "File Explorer → carpeta contracts → nuevo archivo CertificadosUSB.sol. Pegar el andamiaje: andamiaje/s06/CertificadosUSB.sol."],
       ["COMPILADOR", "Pestaña Solidity Compiler: versión 0.8.28. En Advanced Configurations, activar optimización con 200 ejecuciones."],
       ["COMPILAR", "Compile CertificadosUSB.sol. Salida esperada: marca verde en el ícono del compilador y ningún error en rojo."],
