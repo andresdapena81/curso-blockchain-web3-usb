@@ -1,0 +1,553 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<title>Guía del estudiante · Construir un contrato paso a paso</title>
+<!--ESTILOS-->
+<style>
+.sec-cab,h3{break-after:avoid}
+.barra .sub strong{color:var(--blanco)}
+table{break-inside:auto}
+tr{break-inside:avoid}
+.pregunta .cuerpo{padding:3mm 4mm 0.5mm}
+.pregunta .cuerpo table{margin:2mm 0 3.5mm}
+.pregunta .cuerpo p:last-child{margin-bottom:2.5mm}
+.porque{border-left:3.5px solid var(--violeta);background:var(--superf);padding:2.5mm 3.5mm;margin:0 0 3.5mm;color:var(--tinta)}
+.porque .et{font-family:"Courier New",monospace;font-size:6.8pt;letter-spacing:.13em;display:block;color:var(--violeta-os);margin-bottom:1.5mm;font-weight:bold}
+.porque p{margin:0 0 2mm}
+.porque p:last-child{margin-bottom:0}
+.rompe{border-left:3.5px solid var(--rojo);background:#FCF4F3;padding:2.5mm 3.5mm;margin:0 0 3.5mm}
+.rompe .et{font-family:"Courier New",monospace;font-size:6.8pt;letter-spacing:.13em;display:block;color:var(--rojo);margin-bottom:1.5mm;font-weight:bold}
+.rompe p{margin:0 0 2mm}
+.rompe p:last-child{margin-bottom:0}
+h3{font-size:10pt;margin:4mm 0 2mm}
+td.ok{color:var(--verde)}
+.v{font-family:"Courier New",monospace;font-size:7.2pt;letter-spacing:.1em;color:var(--ocre);font-weight:bold}
+</style>
+</head>
+<body>
+
+<section class="barra">
+  <div class="kicker">SESIÓN 6 BIS · SOLIDITY · GUÍA PARA SEGUIR LA CLASE Y REPETIRLA SOLOS</div>
+  <h1>CONSTRUIR UN<br><em>CONTRATO</em> PASO A PASO,<br>ROMPIÉNDOLO SEIS VECES</h1>
+  <div class="sub">Seis versiones del mismo contrato. Las seis compilan. <strong>Las cinco primeras están mal</strong>, y cada una está mal de una forma distinta.<br>Ninguna función aparece porque el temario lo diga: cada una existe porque la versión anterior se rompió sin ella.</div>
+</section>
+
+<dl class="datos">
+  <div><dt>DÓNDE</dt><dd>Remix<br>app.remix.live</dd></div>
+  <div><dt>QUÉ HACE FALTA</dt><dd>Un navegador.<br>Nada instalado.</dd></div>
+  <div><dt>CUÁNTO TOMA SOLOS</dt><dd>2 h 30<br>escribiendo</dd></div>
+  <div><dt>DINERO REAL</dt><dd>Ninguno.<br>Nunca.</dd></div>
+</dl>
+
+<div class="caja clave">
+  <div class="caja-et">CÓMO SE USA ESTA GUÍA</div>
+  <p><strong>En clase:</strong> no corran detrás copiando. Miren, pregunten, y marquen en esta guía la comprobación que no les quedó clara. Todo lo que el profesor escriba en vivo está acá.</p>
+  <p><strong>En casa:</strong> háganlo <strong>de nuevo desde cero</strong>, con el archivo vacío, <strong>escribiendo</strong>. Copiar y pegar los seis pasos toma cuatro minutos y no sirve para nada. Escribirlos toma dos horas y media y es la diferencia entre haber visto Solidity y saber Solidity.</p>
+  <p><strong>Los seis pasos son el MISMO archivo que crece.</strong> No se crean seis archivos. Cada paso agrega o cambia unas líneas sobre el anterior. El código completo de cada versión está en <code>material/clase-solidity-paso-a-paso/pasos/paso-1.sol</code> … <code>paso-6.sol</code>: ábranlo <strong>después</strong> de intentarlo, no antes.</p>
+  <p><strong>Si algo no coincide con lo que dice la guía</strong>, vayan a la sección 9 (errores frecuentes). La interfaz de Remix cambia de vez en cuando: si un botón no está exactamente donde dice acá, busquen el <strong>nombre de la acción</strong>; la lógica no cambia.</p>
+</div>
+
+<div class="caja peligro">
+  <div class="caja-et">SEGURIDAD · ESTO NO SE NEGOCIA NUNCA</div>
+  <ul>
+    <li>Todo este ejercicio se hace en la <strong>Remix VM</strong> o en una <strong>red local</strong>. Nunca en una red real, nunca con dinero real.</li>
+    <li>Los 100 ETH de cada cuenta de la Remix VM <strong>no existen</strong>. Son de juguete y solo valen dentro de esa pestaña.</li>
+    <li>La frase de recuperación de una billetera no se escribe en Remix, ni en un archivo, ni en un chat, ni se le muestra al profesor. Nadie legítimo la pide.</li>
+    <li>Este contrato es <strong>material de clase sin auditar</strong>. No se despliega en una red real ni se usa con plata de nadie.</li>
+    <li>En la cadena no va ningún dato personal: ni nombres, ni cédulas, ni correos. En este ejercicio solo van direcciones y nombres de equipos.</li>
+  </ul>
+</div>
+
+<!-- ============================================================ 1 -->
+<section class="sec">
+  <div class="sec-cab"><span class="sec-num">01</span><h2>El problema, y qué van a terminar teniendo</h2><span class="lead">LEER PRIMERO</span></div>
+  <p>El laboratorio presta equipos: proyectores, kits de Arduino, cámaras. El registro vive en una hoja de papel pegada a la pared. Nadie sabe quién tiene el proyector, nadie sabe desde cuándo, y cuando no vuelve, no pasa nada.</p>
+  <p>Al final de los seis pasos, el contrato hace esto:</p>
+  <table>
+    <tr><th style="width:30%">FUNCIÓN</th><th>QUÉ HACE</th><th style="width:19%">QUIÉN LA LLAMA</th></tr>
+    <tr><td class="pk">registrar(nombre)</td><td>Agrega un equipo al inventario y devuelve su <code>id</code>. Emite un evento.</td><td>Solo el encargado</td></tr>
+    <tr><td class="pk">prestar(id, dias)</td><td>Se lleva el equipo por un plazo de 1 a 14 días, dejando el depósito exacto.</td><td>Cualquiera</td></tr>
+    <tr><td class="pk">devolver(id)</td><td>Devuelve el equipo. A tiempo: el depósito le queda acreditado. En mora: queda para el laboratorio.</td><td>Solo quien lo tiene</td></tr>
+    <tr><td class="pk">retirar()</td><td>Cobra lo que el contrato le debe a quien llama.</td><td>Cualquiera con saldo</td></tr>
+    <tr><td class="pk">recuperar(id)</td><td>Recupera un equipo a la fuerza y se queda con el depósito.</td><td>Solo el encargado</td></tr>
+    <tr><td class="pk">estaDisponible(id)<br>quienLoTiene(id)<br>estaVencido(id)<br>diasDeMora(id)</td><td>Consultas. Son <code>view</code>: leer no cuesta nada y no genera una transacción.</td><td>Cualquiera, gratis</td></tr>
+  </table>
+  <div class="caja">
+    <div class="caja-et">LA IDEA QUE ATRAVIESA TODA LA GUÍA</div>
+    <p>Cada paso <strong>rompe</strong> la versión anterior en vivo, y la función siguiente existe <strong>para arreglar esa rotura concreta</strong>. Cuando lleguen al paso 6, deberían poder explicar cada palabra del contrato respondiendo «¿qué se rompía sin esto?». Si hay una que no pueden justificar así, pregúntenla.</p>
+    <p>Y atención: la rotura del paso 1 <strong>no es un error rojo</strong>. Es una transacción que sale perfecta y produce algo imposible. Esa es la clase de error que de verdad cuesta plata.</p>
+  </div>
+</section>
+
+<!-- ============================================================ 2 -->
+<section class="sec">
+  <div class="sec-cab"><span class="sec-num">02</span><h2>Paso 0 · Abrir Remix y crear el archivo</h2><span class="lead">5 MINUTOS</span></div>
+  <div class="pregunta">
+    <div class="cab"><div class="n">0</div><div class="enun"><span class="tema">UNA SOLA VEZ, AL EMPEZAR</span>Entorno completo dentro del navegador</div></div>
+    <div class="cuerpo">
+      <table>
+        <tr><th style="width:5%"></th><th style="width:40%">QUÉ HACER</th><th>CÓMO SÉ QUE QUEDÓ</th></tr>
+        <tr><td class="pk">1</td><td>Abran <code>https://app.remix.live</code>. No pide cuenta ni instalar nada.<br><span style="display:block;margin-top:4px;font-size:.84em;color:#6F6B80">Remix se mudó de dirección en septiembre de 2026. La antigua, <code>remix.ethereum.org</code>, todavía abre, pero la oficial es esta: actualicen el marcador. Si alguna vez ven otra dirección parecida, desconfíen.</span></td><td>A la izquierda hay una barra de íconos: cada uno es un complemento. Hoy usan tres: el <strong>explorador de archivos</strong>, el <strong>compilador de Solidity</strong> y <strong>Deploy &amp; Run Transactions</strong>. Abajo, la <strong>terminal</strong>.</td></tr>
+        <tr><td class="pk">2</td><td>En el explorador de archivos, creen un archivo nuevo llamado <code>PrestamoEquipos.sol</code>.</td><td>Aparece en la lista y se abre vacío en el editor. <code>.sol</code> es la extensión por omisión en Remix.</td></tr>
+        <tr><td class="pk">3</td><td>Abran el <strong>compilador de Solidity</strong> y elijan la versión <code>0.8.28+commit.7893614a</code>.</td><td>El panel muestra esa versión. <strong>Elíjanla exacta</strong> aunque Remix proponga una más nueva: es la versión congelada del curso, y es con la que están verificados los seis pasos.</td></tr>
+        <tr><td class="pk">4</td><td>Abran <strong>Deploy &amp; Run Transactions</strong>. En <em>ENVIRONMENT</em>, elijan la <strong>primera opción Remix VM</strong> del desplegable.</td><td>El selector <em>Account</em> lista <strong>10 cuentas con 100 ETH</strong> cada una. Si no las ven, no están en la Remix VM. (Hay varias Remix VM, cada una con el nombre de un <em>hard fork</em> entre paréntesis: usen la primera.)</td></tr>
+      </table>
+      <div class="caja alerta">
+        <div class="caja-et">EL CICLO QUE VAN A REPETIR SEIS VECES</div>
+        <p><strong>escribir → compilar → Deploy → probar a mano con la tabla del paso</strong>. Y una advertencia que ahorra media hora de confusión: <strong>cada <em>Deploy</em> crea un contrato nuevo y vacío.</strong> El anterior sigue en la lista con su estado. Usen siempre <strong>el último</strong> de <em>Deployed Contracts</em>, y expándanlo con el triangulito de la izquierda para ver sus funciones.</p>
+        <p>Los botones vienen en colores según lo que hace la función: los de <strong>lectura</strong> (<code>view</code>) son de un color y no cuestan nada; los que hacen una <strong>transacción</strong>, de otro; y los que además aceptan ether (<code>payable</code>), de un tercero. El color exacto depende del tema visual de Remix. Lo que importa: unos son gratis y otros no.</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ============================================================ 3 · PASO 1 -->
+<section class="sec salto">
+  <div class="sec-cab"><span class="sec-num">03</span><h2>Paso 1 · El contrato recuerda</h2><span class="lead">ESTADO Y <code>msg.sender</code></span></div>
+  <div class="pregunta">
+    <div class="cab"><div class="n">1</div><div class="enun"><span class="tema">QUÉ HAY QUE ESCRIBIR · ARCHIVO COMPLETO EN <code>pasos/paso-1.sol</code></span>15 líneas: dos variables de estado y dos funciones</div></div>
+    <div class="cuerpo">
+      <ul>
+        <li>La licencia (<code>// SPDX-License-Identifier: MIT</code>) y <code>pragma solidity 0.8.28;</code>.</li>
+        <li><code>contract PrestamoEquipos { … }</code>.</li>
+        <li>Dos variables de <strong>estado</strong>: <code>string public nombreEquipo = "Proyector Epson";</code> y <code>address public prestadoA;</code>.</li>
+        <li><code>function prestar() public</code>, que pone <code>prestadoA = msg.sender;</code>.</li>
+        <li><code>function devolver() public</code>, que pone <code>prestadoA = address(0);</code>.</li>
+      </ul>
+      <div class="porque">
+        <span class="et">EL POR QUÉ DE CADA COSA, EN UNA LÍNEA</span>
+        <p><strong>Variable de estado:</strong> vive en la cadena; sigue ahí mañana y después de cerrar el navegador (en una cadena real).</p>
+        <p><strong><code>public</code> en una variable:</strong> le regala a usted la función de lectura, gratis; no hay que escribirla.</p>
+        <p><strong><code>msg.sender</code>:</strong> la dirección que <strong>firmó</strong> esta transacción. En Solidity nadie dice quién es: lo demuestra firmando. No hay campo de usuario que se pueda mentir.</p>
+        <p><strong><code>address(0)</code>:</strong> la dirección cero, el «vacío» de Ethereum. La usamos para decir «no lo tiene nadie». Va a volver todo el día.</p>
+      </div>
+      <h3>Qué hay que comprobar</h3>
+      <table>
+        <tr><th style="width:5%"></th><th style="width:34%">CUENTA · QUÉ LLAMAR</th><th>SALIDA ESPERADA</th></tr>
+        <tr><td class="pk">1</td><td>Compilar.</td><td>Marca verde en el ícono del compilador y <strong>cero avisos</strong>. Si hay avisos, algo está distinto del archivo del paso.</td></tr>
+        <tr><td class="pk">2</td><td>Cuenta 1 → <strong>Deploy</strong>, y leer <code>prestadoA</code>.</td><td><code>0x0000000000000000000000000000000000000000</code>. No hubo que inicializar nada: en Solidity todo arranca en cero.</td></tr>
+        <tr><td class="pk">3</td><td>Leer <code>nombreEquipo</code>.</td><td><code>Proyector Epson</code>.</td></tr>
+        <tr><td class="pk">4</td><td>Cuenta 1 → <code>prestar()</code>, y volver a leer <code>prestadoA</code>.</td><td>La dirección de la cuenta 1. <strong>Compárenla con el selector <em>Account</em></strong>: los primeros cuatro caracteres y los últimos cuatro.</td></tr>
+        <tr><td class="pk">5</td><td>Cambiar <em>Account</em> a la <strong>cuenta 2</strong> → <code>prestar()</code> otra vez → leer <code>prestadoA</code>.</td><td><strong>Funciona, y queda la cuenta 2.</strong> La transacción sale bien, sin un solo error.</td></tr>
+      </table>
+      <div class="rompe">
+        <span class="et">QUÉ SE ROMPIÓ · Y POR QUÉ ESTA ES LA ROTURA MÁS IMPORTANTE DE LA GUÍA</span>
+        <p>El equipo cambió de manos y la cuenta 1 <strong>nunca lo devolvió</strong>. No hay ningún mensaje de error, porque el programa hizo exactamente lo que se le pidió.</p>
+        <p>La rotura no es un error rojo: es que <strong>todo salió bien y el resultado es imposible</strong> en la vida real. La mayoría de los errores graves en contratos son así: no son excepciones, son reglas que nadie escribió.</p>
+        <p><strong>Pregúntense antes de seguir:</strong> ¿qué tendría que haber pasado cuando la cuenta 2 apretó el botón? → Que la transacción se cayera. Eso es el paso 2.</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ============================================================ 4 · PASO 2 -->
+<section class="sec">
+  <div class="sec-cab"><span class="sec-num">04</span><h2>Paso 2 · El contrato dice NO</h2><span class="lead">ERRORES PERSONALIZADOS Y <code>view</code></span></div>
+  <div class="pregunta">
+    <div class="cab"><div class="n">2</div><div class="enun"><span class="tema">QUÉ HAY QUE ESCRIBIR · <code>pasos/paso-2.sol</code></span>Sobre el mismo archivo: dos errores, una consulta y dos guardias</div></div>
+    <div class="cuerpo">
+      <ul>
+        <li>Dos declaraciones nuevas, dentro del contrato: <code>error EquipoOcupado(address loTiene);</code> y <code>error NoLoTienesTu();</code>.</li>
+        <li><code>function estaDisponible() public view returns (bool)</code>, que devuelve <code>prestadoA == address(0)</code>.</li>
+        <li>Primera línea de <code>prestar()</code>: <code>if (!estaDisponible()) revert EquipoOcupado(prestadoA);</code>.</li>
+        <li>Primera línea de <code>devolver()</code>: <code>if (prestadoA != msg.sender) revert NoLoTienesTu();</code>.</li>
+      </ul>
+      <div class="porque">
+        <span class="et">EL POR QUÉ DE CADA COSA, EN UNA LÍNEA</span>
+        <p><strong>Error personalizado:</strong> el «no» del contrato con nombre propio y <strong>con datos adentro</strong>. <code>EquipoOcupado(prestadoA)</code> no dice «no se puede»: dice <em>quién lo tiene</em>. Cuesta menos gas que un texto y una interfaz lo puede distinguir y mostrar bien.</p>
+        <p><strong><code>revert</code>:</strong> deshace <strong>todo</strong> lo que la transacción tocó, como si nunca hubiera pasado. No queda nada a medias. Lo único que se pierde es el gas.</p>
+        <p><strong><code>view</code>:</strong> la función lee el estado y no lo cambia; llamarla desde fuera <strong>no genera transacción y no cuesta gas</strong>. Es una pregunta, no una orden.</p>
+        <p><strong>Validar primero, siempre:</strong> la guardia va en la primera línea, antes de tocar el estado.</p>
+      </div>
+      <div class="caja alerta">
+        <div class="caja-et">¿Y <code>require</code>?</div>
+        <p>Existe, y lo van a ver en todos los tutoriales viejos: <code>require(condición, "texto");</code>. Hace lo mismo, pero el mensaje es un texto, cuesta más gas y no lleva datos estructurados. En esta clase <code>require</code> aparece <strong>una sola vez</strong>, en el paso 6, al final de <code>retirar()</code>, y ahí van a poder comparar las dos formas lado a lado. Para validar reglas de negocio, prefieran el error personalizado.</p>
+      </div>
+      <h3>Qué hay que comprobar</h3>
+      <p>Compilen y <strong>vuelvan a desplegar</strong>: el contrato de antes no tiene las funciones nuevas.</p>
+      <table>
+        <tr><th style="width:5%"></th><th style="width:34%">CUENTA · QUÉ LLAMAR</th><th>SALIDA ESPERADA</th></tr>
+        <tr><td class="pk">1</td><td><code>estaDisponible()</code></td><td><code>true</code>, debajo del botón, sin transacción.</td></tr>
+        <tr><td class="pk">2</td><td>Cuenta 1 → <code>prestar()</code>, y <code>estaDisponible()</code></td><td>Funciona; ahora <code>false</code>.</td></tr>
+        <tr><td class="pk">3</td><td>Cuenta <strong>2</strong> → <code>prestar()</code></td><td><strong>REVIERTE.</strong> La terminal marca la transacción como fallida y muestra el nombre del error, <code>EquipoOcupado</code>, con la dirección de la cuenta 1 adentro. Expandan el detalle de la transacción en la terminal y <strong>léanla</strong>.</td></tr>
+        <tr><td class="pk">4</td><td>Cuenta 2 → <code>devolver()</code></td><td><strong>REVIERTE</strong> con <code>NoLoTienesTu</code>. Sin esta guardia, cualquiera «devuelve» el equipo de otro y se lo lleva al segundo siguiente.</td></tr>
+        <tr><td class="pk">5</td><td>Cuenta 1 → <code>devolver()</code>, y después cuenta 2 → <code>prestar()</code></td><td>Las dos funcionan. El ciclo cierra.</td></tr>
+      </table>
+      <div class="rompe">
+        <span class="et">QUÉ SE ROMPIÓ</span>
+        <p>Nada, con un clic: el contrato ya se defiende bien. Lo que está mal es el <strong>diseño</strong>: este contrato maneja <strong>un</strong> equipo. El laboratorio tiene cuarenta.</p>
+        <p><strong>¿Vamos a desplegar cuarenta contratos?</strong> Cuarenta despliegues, cuarenta direcciones que alguien tiene que anotar, otro despliegue cada vez que entre un equipo nuevo, y cuarenta preguntas para saber qué hay disponible. Eso es el paso 3.</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ============================================================ 5 · PASO 3 -->
+<section class="sec salto">
+  <div class="sec-cab"><span class="sec-num">05</span><h2>Paso 3 · Muchos equipos, un contrato</h2><span class="lead"><code>struct</code>, <code>mapping</code>, <code>calldata</code></span></div>
+  <div class="pregunta">
+    <div class="cab"><div class="n">3</div><div class="enun"><span class="tema">QUÉ HAY QUE ESCRIBIR · <code>pasos/paso-3.sol</code></span>El paso con más cambios: todas las funciones reciben un <code>id</code></div></div>
+    <div class="cuerpo">
+      <ul>
+        <li><strong>Se van</strong> las dos variables de estado del paso 1.</li>
+        <li><strong>Entra</strong> <code>struct Equipo</code> con tres campos: <code>string nombre</code>, <code>address prestadoA</code>, <code>bool existe</code>.</li>
+        <li><code>mapping(uint256 id =&gt; Equipo) public equipos;</code> y <code>uint256 public totalEquipos;</code>.</li>
+        <li>Dos errores más: <code>EquipoNoRegistrado(uint256 id)</code> y <code>NombreVacio()</code>.</li>
+        <li><code>function registrar(string calldata nombre) public returns (uint256 id)</code>: rechaza el nombre vacío, incrementa <code>totalEquipos</code>, usa ese número como <code>id</code> y guarda el <code>Equipo</code>.</li>
+        <li><code>estaDisponible</code>, <code>prestar</code> y <code>devolver</code> pasan a recibir <code>uint256 id</code>, y las tres comprueban <code>existe</code>.</li>
+      </ul>
+      <div class="porque">
+        <span class="et">EL POR QUÉ DE CADA COSA, EN UNA LÍNEA</span>
+        <p><strong><code>struct</code>:</strong> un tipo que ustedes inventan, para que los datos que van juntos viajen juntos.</p>
+        <p><strong><code>mapping</code>:</strong> una tabla; usted da una llave y recibe un valor. Con <strong>dos rarezas</strong> que arruinan proyectos: <em>(a)</em> <strong>no se puede recorrer</strong> — no existe «dame todos los equipos», por eso llevamos <code>totalEquipos</code> a mano; <em>(b)</em> <strong>toda llave existe desde siempre, llena de ceros</strong> — pregunte por el equipo 7.000.000 y le contesta sin quejarse.</p>
+        <p><strong>El campo <code>existe</code>:</strong> por la rareza (b). Es lo único que distingue «el equipo 99 no está registrado» de «el equipo 99 está libre». Sin él, el contrato contesta una mentira cómoda.</p>
+        <p><strong><code>calldata</code>:</strong> el texto se lee directo de los datos de la transacción, sin copiarlo a memoria. Es la opción más barata para un parámetro que la función no modifica.</p>
+        <p><strong>Los <code>id</code> arrancan en 1:</strong> <code>totalEquipos++</code> va <strong>antes</strong> de asignar el <code>id</code>. Así «id 0» significa siempre «no existe», en un lenguaje donde todo arranca en cero.</p>
+      </div>
+      <h3>Qué hay que comprobar</h3>
+      <table>
+        <tr><th style="width:5%"></th><th style="width:34%">CUENTA · QUÉ LLAMAR</th><th>SALIDA ESPERADA</th></tr>
+        <tr><td class="pk">1</td><td><code>registrar</code> con <code>"Proyector Epson"</code> (con comillas: es un <code>string</code>), y otra vez con <code>"Kit Arduino"</code>.</td><td>Las dos funcionan. <code>totalEquipos</code> → <code>2</code>. <strong>Ojo:</strong> <code>registrar</code> devuelve el <code>id</code>, pero Remix <strong>no</strong> lo muestra, porque es una transacción. El valor de retorno de una transacción no lo puede leer nadie desde fuera. Eso lo arreglan los <strong>eventos</strong>, en el paso 6.</td></tr>
+        <tr><td class="pk">2</td><td><code>equipos</code> con <code>1</code>, y con <code>2</code>.</td><td>Los tres campos: el nombre, <code>prestadoA</code> en la dirección cero, <code>existe: true</code>. Esta función de lectura no la escribieron: la regaló el <code>public</code> del <code>mapping</code>.</td></tr>
+        <tr><td class="pk">3</td><td>Cuenta 1 → <code>prestar(1)</code>. Cuenta 2 → <code>prestar(2)</code>.</td><td>Las dos funcionan y <strong>conviven</strong>: dos dueños distintos, un solo contrato.</td></tr>
+        <tr><td class="pk">4</td><td>Cuenta 2 → <code>prestar(1)</code>.</td><td><strong>REVIERTE</strong> con <code>EquipoOcupado</code> y la cuenta 1 adentro. La defensa del paso 2 sigue viva para los cuarenta equipos: se escribió una sola vez.</td></tr>
+        <tr><td class="pk">5</td><td><code>estaDisponible(99)</code>.</td><td><strong>REVIERTE</strong> con <code>EquipoNoRegistrado(99)</code>. Fíjense en lo raro: es una función <code>view</code>, una simple pregunta, y <strong>también</strong> puede revertir. Sin el campo <code>existe</code> habría contestado <code>true</code>.</td></tr>
+        <tr><td class="pk">6</td><td><code>prestar(99)</code>.</td><td>REVIERTE también con <code>EquipoNoRegistrado(99)</code>, <strong>no</strong> con <code>EquipoOcupado</code>: <code>prestar</code> llama a <code>estaDisponible</code> y el error de adentro sale hasta afuera tal cual. Los <code>revert</code> se propagan.</td></tr>
+      </table>
+      <div class="rompe">
+        <span class="et">QUÉ SE ROMPIÓ · HÁGANLO USTEDES, CON LA CUENTA 3</span>
+        <p>Cambien a la <strong>cuenta 3</strong> (que es un estudiante cualquiera, no el laboratorio) y llamen a <code>registrar("Portatil que no existe")</code>.</p>
+        <p><strong>Funciona.</strong> <code>totalEquipos</code> → <code>3</code>. Cualquiera puede meter inventario inventado en el registro del laboratorio, y el contrato le da las gracias.</p>
+        <p><strong>Pregúntense:</strong> ¿quién debería poder registrar? Y la difícil: ¿<em>cómo</em> hace el contrato para saber que yo soy esa persona? No hay usuarios ni contraseñas, y no puede haberlos: todo lo que el contrato guarda es <strong>público</strong>, incluida la contraseña. Lo único que hay es: quién firmó. Eso es el paso 4.</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ============================================================ 6 · PASO 4 -->
+<section class="sec">
+  <div class="sec-cab"><span class="sec-num">06</span><h2>Paso 4 · Quién manda aquí</h2><span class="lead"><code>constructor</code> Y <code>modifier</code></span></div>
+  <div class="pregunta">
+    <div class="cab"><div class="n">4</div><div class="enun"><span class="tema">QUÉ HAY QUE ESCRIBIR · <code>pasos/paso-4.sol</code></span>Cuatro cosas, y una conversación que no es técnica</div></div>
+    <div class="cuerpo">
+      <ul>
+        <li><code>address public encargado;</code> y un error más: <code>SoloElEncargado(address quienLlamo)</code>.</li>
+        <li><code>constructor() { encargado = msg.sender; }</code>.</li>
+        <li><code>modifier soloEncargado() { if (msg.sender != encargado) revert SoloElEncargado(msg.sender); _; }</code>.</li>
+        <li>Pegarle <code>soloEncargado</code> a <code>registrar</code>: va <strong>entre la visibilidad y el <code>returns</code></strong>.</li>
+        <li><code>function recuperar(uint256 id) public soloEncargado</code>, que pone <code>prestadoA</code> en cero.</li>
+      </ul>
+      <div class="porque">
+        <span class="et">EL POR QUÉ DE CADA COSA, EN UNA LÍNEA</span>
+        <p><strong><code>constructor</code>:</strong> corre <strong>una sola vez en la vida del contrato</strong>, en el despliegue. Nunca más, no aparece como botón, no existe después. Lo que se grabe ahí queda grabado.</p>
+        <p><strong><code>modifier</code>:</strong> una condición que se repite, escrita una sola vez. El <code>_;</code> no es adorno: es <strong>el hueco donde se mete el cuerpo de la función</strong>. Lo que está antes del <code>_;</code> corre antes; por eso la validación va arriba.</p>
+        <p><strong><code>recuperar()</code>:</strong> alguien se graduó, perdió la billetera, o simplemente no devuelve. Sin esta función ese equipo queda prestado <strong>para siempre</strong>, y en la cadena «para siempre» es literal. Es la primera función que entra no porque algo se rompió, sino porque algo se puede <em>trancar</em> y no hay cómo destrabarlo.</p>
+        <p><strong>Por qué <code>prestar</code> NO lleva el modificador:</strong> prestar lo puede hacer cualquiera; registrar, no. Decidir <em>qué</em> función lleva la guardia es el diseño; poner la guardia es lo fácil.</p>
+      </div>
+      <h3>Qué hay que comprobar</h3>
+      <table>
+        <tr><th style="width:5%"></th><th style="width:34%">CUENTA · QUÉ LLAMAR</th><th>SALIDA ESPERADA</th></tr>
+        <tr><td class="pk">1</td><td>Desplegar <strong>con la cuenta 1</strong> y leer <code>encargado</code>.</td><td>La dirección de la cuenta 1. Nadie preguntó nada: lo decidió el hecho de que fue esa cuenta la que desplegó.</td></tr>
+        <tr><td class="pk">2</td><td>Cuenta <strong>3</strong> → <code>registrar("Portatil que no existe")</code>.</td><td><strong>REVIERTE</strong> con <code>SoloElEncargado</code> y la dirección de la cuenta 3 adentro. El mismo clic que funcionaba en el paso 3 ahora se cae, y el error dice quién lo intentó.</td></tr>
+        <tr><td class="pk">3</td><td>Cuenta 1 → <code>registrar("Proyector Epson")</code>.</td><td>Funciona. <code>totalEquipos</code> → <code>1</code>.</td></tr>
+        <tr><td class="pk">4</td><td>Cuenta 2 → <code>prestar(1)</code>.</td><td>Funciona: <code>prestar</code> no lleva el modificador, a propósito.</td></tr>
+        <tr><td class="pk">5</td><td>Cuenta 1 → <code>recuperar(1)</code>, y leer <code>equipos(1)</code>.</td><td><code>prestadoA</code> vuelve a la dirección cero <strong>sin que la cuenta 2 haya hecho nada</strong>.</td></tr>
+        <tr><td class="pk">6</td><td>Cuenta 2 → <code>recuperar(1)</code>.</td><td>REVIERTE con <code>SoloElEncargado</code>.</td></tr>
+      </table>
+      <div class="rompe">
+        <span class="et">QUÉ SE ROMPIÓ · NO ES TÉCNICO, Y ES LO MÁS IMPORTANTE DEL PASO</span>
+        <p>Acabamos de arreglar un problema y de crear uno más grande: le dimos a <strong>una sola dirección</strong> el poder de quitarle el equipo a cualquiera. Y miren el contrato: <strong>no hay forma de cambiar de encargado.</strong></p>
+        <p>Si esa llave se pierde, nadie registra un equipo nunca más y nadie recupera nada, jamás. Si se la roban, el inventario es del ladrón. Y no se puede arreglar editando el contrato, porque ya está desplegado.</p>
+        <p><strong>Lo grave no es tener un dueño:</strong> casi todo contrato tiene uno. Lo grave es no darse cuenta de que lo hay. Cuando lean un contrato ajeno, la primera pregunta es: <em>¿quién manda aquí, y qué pasa si esa llave se pierde?</em></p>
+        <p>Lo que falta —poder traspasar el cargo— ya está escrito y auditado: se llama <code>Ownable</code>, de OpenZeppelin. Lo usan en la próxima sesión. Hoy se escribe a mano para que cuando lo usen sepan qué hay adentro.</p>
+        <p><strong>Y falta algo obvio:</strong> nadie dijo hasta cuándo. Eso es el paso 5.</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ============================================================ 7 · PASO 5 -->
+<section class="sec salto">
+  <div class="sec-cab"><span class="sec-num">07</span><h2>Paso 5 · Hasta cuándo</h2><span class="lead">EL TIEMPO, CON TODO LO QUE TRAE</span></div>
+  <div class="pregunta">
+    <div class="cab"><div class="n">5</div><div class="enun"><span class="tema">QUÉ HAY QUE ESCRIBIR · <code>pasos/paso-5.sol</code></span>Un campo, una constante, un parámetro y dos consultas</div></div>
+    <div class="cuerpo">
+      <ul>
+        <li>En el <code>struct</code>, un campo nuevo <strong>antes</strong> de <code>existe</code>: <code>uint64 vence;</code>.</li>
+        <li><code>uint64 public constant PLAZO_MAXIMO = 14 days;</code> y el error <code>PlazoInvalido(uint64 maximo)</code>.</li>
+        <li><code>prestar</code> pasa a ser <code>prestar(uint256 id, uint64 dias)</code>: calcula <code>plazo = dias * 1 days</code>, rechaza <code>dias == 0</code> y <code>plazo &gt; PLAZO_MAXIMO</code>, y fija <code>vence = uint64(block.timestamp) + plazo</code>.</li>
+        <li><code>devolver</code> y <code>recuperar</code> tienen que poner <code>vence = 0</code> además de <code>prestadoA</code>. <strong>Es el olvido típico</strong>: deja basura en el estado.</li>
+        <li><code>estaVencido(id)</code> y <code>diasDeMora(id)</code>, las dos <code>view</code>.</li>
+      </ul>
+      <div class="porque">
+        <span class="et">EL POR QUÉ DE CADA COSA, EN UNA LÍNEA</span>
+        <p><strong><code>block.timestamp</code>:</strong> el contrato <strong>no tiene reloj</strong>; no puede preguntar la hora ni llamar a un servidor. Lo único que sabe del tiempo es la hora que <em>el bloque dice que es</em>, en segundos, sin decimales. <strong>Dos avisos que van siempre con esa línea:</strong> <em>(a)</em> quien produce el bloque la puede mover unos segundos — para «catorce días» da igual, para sortear algo <strong>jamás</strong>; <em>(b)</em> es un <code>uint256</code>, por eso el <code>uint64(...)</code>.</p>
+        <p><strong>La suma no hay que protegerla:</strong> si desbordara, Solidity 0.8 revierte sola. Antes de 2021 había que escribirlo a mano y ahí se perdió mucha plata.</p>
+        <p><strong><code>constant</code>:</strong> no ocupa estado, va grabada en el código. Y <code>14 days</code> es solo azúcar: el compilador lo convierte a segundos.</p>
+        <p><strong>La división de <code>diasDeMora</code>:</strong> en Solidity <strong>no hay decimales</strong>. No hay <code>float</code>, no hay coma. La división <strong>trunca</strong>: un día y veintidós horas de mora son <em>un</em> día. No es un error del lenguaje: es una decisión que les toca tomar a propósito.</p>
+        <p><strong>Por qué <code>uint64</code> y no <code>uint256</code> para <code>vence</code>:</strong> <code>address</code> (20 bytes) + <code>uint64</code> (8) + <code>bool</code> (1) = 29, y caben en <strong>una</strong> ranura de 32. Con <code>uint256</code> harían falta dos ranuras y cada préstamo costaría más. Ordenar los campos de un <code>struct</code> ahorra dinero real.</p>
+      </div>
+      <h3>Qué hay que comprobar</h3>
+      <table>
+        <tr><th style="width:5%"></th><th style="width:34%">CUENTA · QUÉ LLAMAR</th><th>SALIDA ESPERADA</th></tr>
+        <tr><td class="pk">1</td><td>Desplegar con cuenta 1, <code>registrar("Proyector Epson")</code>, y leer <code>PLAZO_MAXIMO</code>.</td><td><code>1209600</code>. Son 14 × 86 400: catorce días en segundos.</td></tr>
+        <tr><td class="pk">2</td><td>Cuenta 2 → <code>prestar(1, 2)</code>, y leer <code>equipos(1)</code>.</td><td>Funciona. <code>vence</code> es un número de diez cifras: el reloj de Unix, segundos desde el 1.º de enero de 1970. Es el único formato de fecha que hay acá.</td></tr>
+        <tr><td class="pk">3</td><td><code>estaVencido(1)</code> y <code>diasDeMora(1)</code>.</td><td><code>false</code> y <code>0</code>.</td></tr>
+        <tr><td class="pk">4</td><td>Cuenta 1 → <code>devolver(1)</code>.</td><td>REVIERTE con <code>NoLoTienesTu</code>: el equipo es de la cuenta 2.</td></tr>
+        <tr><td class="pk">5</td><td>Cuenta 2 → <code>prestar(1, 0)</code>.</td><td><strong>REVIERTE</strong> con <code>PlazoInvalido(1209600)</code>. El error no dice «mal»: dice cuál es el máximo.</td></tr>
+        <tr><td class="pk">6</td><td>Cuenta 2 → <code>prestar(1, 15)</code>, y después <code>prestar(1, 14)</code>.</td><td>El de 15 revierte; <strong>el de 14 entra</strong>. El borde exacto sí vale, y hay una prueba escrita solo para ese borde.</td></tr>
+      </table>
+      <div class="caja alerta">
+        <div class="caja-et">AQUÍ SE ROMPE LA HERRAMIENTA, NO EL CONTRATO · Y ES IMPORTANTE QUE LO SEPAN</div>
+        <p>Van a querer ver la mora. Prestan el equipo por un día, esperan… y no pasa nada. <strong>En la Remix VM el reloj no avanza solo</strong>, y en una red de prueba pública como Sepolia tampoco se puede adelantar: el tiempo es el que es. No hay botón de «mañana».</p>
+        <p><strong>Su contrato no está mal.</strong> Esta es la razón por la que todo contrato con plazos se prueba en una <strong>red local propia</strong>: es la única donde ustedes mandan el reloj. Cómo se hace está en la sección 11, y cómo se verifica sin Remix, en la 10.</p>
+      </div>
+      <div class="rompe">
+        <span class="et">QUÉ SE ROMPIÓ</span>
+        <p><code>estaVencido(1)</code> dice <code>true</code>. El contrato <strong>sabe</strong> quién está en mora. ¿Y ahora qué? Nada. No puede ir a buscar el equipo, no puede llamar a nadie, no puede bloquear un carné.</p>
+        <p>Un contrato no tiene manos y no tiene teléfono. Lo único que puede hacer en el mundo es <strong>mover plata</strong>. Entonces, si estar en mora tiene que costar algo, tiene que costar plata, y la plata tiene que estar adentro antes. Eso es el paso 6.</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ============================================================ 8 · PASO 6 -->
+<section class="sec salto">
+  <div class="sec-cab"><span class="sec-num">08</span><h2>Paso 6 · Que la mora cueste</h2><span class="lead">DINERO, EVENTOS Y EL PATRÓN DE RETIRO</span></div>
+  <div class="pregunta">
+    <div class="cab"><div class="n">6</div><div class="enun"><span class="tema">QUÉ HAY QUE ESCRIBIR · <code>pasos/paso-6.sol</code></span>El paso más largo. Háganlo en cuatro tramos y prueben entre cada uno.</div></div>
+    <div class="cuerpo">
+      <ol>
+        <li><strong>El dinero entra:</strong> <code>uint256 public immutable deposito;</code>, el <code>constructor(uint256 deposito_)</code> que lo fija, la palabra <code>payable</code> en <code>prestar</code>, y la validación <code>if (msg.value != deposito) revert DepositoIncorrecto(deposito, msg.value);</code>.</li>
+        <li><strong>El dinero se anota:</strong> <code>mapping(address quien =&gt; uint256 wei_) public saldo;</code> y, en <code>devolver</code>, calcular <code>bool aTiempo = block.timestamp &lt;= equipos[id].vence;</code> y acreditar <code>saldo[aTiempo ? msg.sender : encargado] += deposito;</code>.</li>
+        <li><strong>El dinero se cobra:</strong> <code>function retirar() public</code>, con el orden de las dos líneas finales <strong>exacto</strong>.</li>
+        <li><strong>Lo que queda:</strong> los tres eventos y sus <code>emit</code>; <code>quienLoTiene(id)</code>; <code>recuperar</code> que ahora acredita el depósito al encargado; y <code>receive()</code> / <code>fallback()</code>.</li>
+      </ol>
+      <div class="porque">
+        <span class="et">EL POR QUÉ DE CADA COSA, EN UNA LÍNEA</span>
+        <p><strong>Para qué todo esto:</strong> un contrato no tiene manos. Lo único que puede hacer en el mundo real es <strong>tener plata y decidir si la devuelve</strong>. Eso es lo único que lo hace distinto de un formulario con una base de datos: en el formulario la regla la aplica una persona que puede decidir no aplicarla; acá la regla y la plata viven en el mismo sitio y la regla se cumple sola.</p>
+        <p><strong><code>payable</code>:</strong> el interruptor que permite que entre ether. <strong>Sin esa palabra la función rechaza cualquier envío</strong>: no lo ignora, revierte. <code>msg.value</code> es cuánto venía en el sobre.</p>
+        <p><strong>Monto exacto, ni un wei más:</strong> aceptar de más obligaría a devolver cambio, y devolverle plata a un desconocido es justo la operación delicada. Rechazar es gratis.</p>
+        <p><strong><code>immutable</code>:</strong> se fija al desplegar y no hay función que lo cambie. Más barato de leer que una variable normal.</p>
+        <p><strong>El <code>mapping saldo</code> y el PATRÓN DE RETIRO:</strong> <code>devolver</code> <strong>no envía</strong> el dinero: solo lo anota. El contrato queda debiendo, y quien quiere cobrar llama a <code>retirar()</code>. Dos razones: <em>(a)</em> si el que recibe es un contrato que rechaza el envío, se caería la operación entera, y uno solo bloquearía el sistema para todos; <em>(b)</em> y esta es la grave: <strong>enviar ether le entrega el control de la ejecución al que recibe</strong>. Su código corre en medio del suyo y puede volver a entrar y cobrar otra vez. Así se perdieron 3,6 millones de ether en 2016.</p>
+        <p><strong>El orden de las dos últimas líneas de <code>retirar()</code> no es estilo:</strong> el saldo <strong>en cero ANTES de enviar</strong>. Si el que recibe vuelve a entrar, ya no hay nada que cobrar. Invertir esas dos líneas vacía el contrato.</p>
+        <p><strong>El <code>require(ok, "el envio fallo")</code> del final:</strong> la única vez en toda la clase. Compárenlo con los errores personalizados de arriba: mensaje de texto, más gas, sin datos. Para una condición técnica interna sirve; para una regla de negocio, no.</p>
+        <p><strong>Eventos:</strong> no cambian el estado, escriben en el registro de la transacción. Cuestan mucho menos que guardar lo mismo y son de donde una interfaz o una auditoría saca la historia. Con una condición que sorprende: <strong>un contrato no puede leer sus propios eventos.</strong> Son para afuera. (Y resuelven lo del paso 3: el <code>id</code> que <code>registrar</code> devolvía y nadie podía ver.)</p>
+        <p><strong><code>indexed</code> en un evento:</strong> marca un parámetro para que se pueda <strong>filtrar</strong> desde fuera («dame todos los <code>Prestado</code> del equipo 1»). Hay un límite de tres por evento.</p>
+        <p><strong><code>receive()</code> y <code>fallback()</code>:</strong> nunca se llaman a propósito. <code>receive</code> corre si alguien manda ether sin decir para qué; <code>fallback</code>, si alguien llama a una función que no existe (nombre mal escrito, ABI viejo). Acá las dos <strong>rechazan</strong>, y es una decisión: plata que entra sin saber de quién ni para qué equipo es plata que después nadie sabe de quién era.</p>
+      </div>
+      <h3>Qué hay que comprobar</h3>
+      <table>
+        <tr><th style="width:5%"></th><th style="width:34%">CUENTA · QUÉ LLAMAR</th><th>SALIDA ESPERADA</th></tr>
+        <tr><td class="pk">1</td><td>Cuenta 1 → <strong>Deploy</strong> con <code>deposito_</code> = <code>100000000000000000</code>. Leer <code>deposito</code>.</td><td>El mismo número. Son <strong>0,1 ETH en wei</strong> (diecisiete ceros). Acá todo se cuenta en wei, la unidad más chica: un cero de menos y el depósito es una décima parte, sin que nada avise.</td></tr>
+        <tr><td class="pk">2</td><td>Cuenta 1 → <code>registrar("Proyector Epson")</code>. <strong>Expandir el detalle de la transacción en la terminal y buscar los <em>logs</em>.</strong></td><td>El evento <code>EquipoRegistrado</code> con el <code>id</code> <code>1</code> y el nombre. Ahí está el <code>id</code> que en el paso 3 no se podía ver, y no costó una variable de estado.</td></tr>
+        <tr><td class="pk">3</td><td>Cuenta 2 → <code>prestar(1, 2)</code> con el campo <em>VALUE</em> en <strong>0</strong>.</td><td><strong>REVIERTE</strong> con <code>DepositoIncorrecto</code> y los dos números adentro: <code>100000000000000000</code> esperado, <code>0</code> recibido. El error no dice que se equivocaron: dice <strong>en cuánto</strong>.</td></tr>
+        <tr><td class="pk">4</td><td>Poner <em>VALUE</em> en <code>100000000000000000</code> con la unidad en <strong>Wei</strong> (o <code>0.1</code> con la unidad en <strong>Ether</strong>) y repetir.</td><td>Funciona. En los <em>logs</em>, el evento <code>Prestado</code> con el <code>vence</code>. Si Remix les muestra el saldo de la cuenta, bajó <strong>un poco más</strong> de 0,1 ETH: 0,1 del depósito y el resto es gas. <strong>El gas no vuelve nunca</strong>, pase lo que pase con la transacción.</td></tr>
+        <tr><td class="pk">5</td><td>Cuenta 2 → <code>prestar(1, 2)</code> otra vez con el depósito correcto.</td><td>REVIERTE con <code>EquipoOcupado</code> <strong>y el depósito no se pierde</strong>: al revertir, el ether vuelve solo. Solo se pierde el gas.</td></tr>
+        <tr><td class="pk">6</td><td>Cuenta 2 → <code>devolver(1)</code> (a tiempo). Leer <code>saldo</code> con la dirección de la cuenta 2.</td><td><code>100000000000000000</code>. <strong>Y la billetera de la cuenta 2 no subió.</strong> El contrato dice que le debe 0,1 ETH y todavía no le pagó: <strong>no está roto, es el patrón de retiro</strong>. En los <em>logs</em>, <code>Devuelto</code> con <code>aTiempo: true</code>.</td></tr>
+        <tr><td class="pk">7</td><td>Cuenta 2 → <code>retirar()</code>, y volver a leer <code>saldo(cuenta 2)</code>.</td><td>Ahora sí llega el dinero. <code>saldo</code> → <code>0</code>.</td></tr>
+        <tr><td class="pk">8</td><td>Cuenta 2 → <code>retirar()</code> otra vez. Y cuenta 3 → <code>retirar()</code>.</td><td>Las dos <strong>REVIERTEN</strong> con <code>SinSaldo</code>. Nadie cobra dos veces y nadie cobra lo que no le deben.</td></tr>
+        <tr><td class="pk">9</td><td>Mandar <strong>1 wei al contrato sin llamar ninguna función</strong>: en el panel de la instancia desplegada, el campo de interacción de bajo nivel (el que recibe <em>calldata</em>) <strong>vacío</strong>, con <em>VALUE</em> en <code>1</code> Wei, y enviar.</td><td><strong>REVIERTE</strong> con <code>EnvioDirectoNoPermitido</code>: entró por <code>receive()</code>. Ese ether no tenía dueño ni equipo.</td></tr>
+      </table>
+      <div class="caja">
+        <div class="caja-et">SI NO ENCUENTRAN DÓNDE SE VE EL SALDO DE LA CUENTA</div>
+        <p>Dónde muestra Remix el saldo de la cuenta y de la instancia desplegada cambia entre versiones. No pierdan tiempo buscándolo: todo lo importante se comprueba con <code>saldo(dirección)</code>, que es una función del contrato, más el hecho de que la cuenta pudo pagar el depósito. La frase que importa es «el contrato me debe y todavía no me pagó», y eso lo prueba <code>saldo()</code>.</p>
+      </div>
+      <div class="rompe">
+        <span class="et">QUÉ QUEDÓ ROTO · Y ESTA ES LA ÚNICA QUE NO SE ARREGLA</span>
+        <p>Llegaron al final y el contrato tiene un hueco grande: <strong>el que devuelve un minuto tarde pierde los 0,1 ETH completos</strong>, igual que el que devuelve tres semanas tarde. Y <code>diasDeMora</code>, que escribieron en el paso 5 y que cuenta los días exactos, <strong>no se usa para nada</strong> en el paso 6.</p>
+        <p>La regla que se programó <strong>no es la regla que se quería</strong>. Ese es el primer ejercicio de ampliación (sección 13), y no tiene solución publicada en ninguna parte.</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ============================================================ 9 -->
+<section class="sec salto">
+  <div class="sec-cab"><span class="sec-num">09</span><h2>Errores frecuentes, su causa y su arreglo</h2><span class="lead">VENIR ACÁ ANTES DE PREGUNTAR</span></div>
+  <h3>De Remix y del entorno</h3>
+  <table>
+    <tr><th style="width:27%">LO QUE PASA</th><th style="width:33%">POR QUÉ PASA</th><th>CÓMO SE ARREGLA</th></tr>
+    <tr><td class="pk"><code>ParserError: Source file requires different compiler version</code></td><td>El archivo exige <code>pragma solidity 0.8.28;</code> y Remix está compilando con otra versión (hoy abre por omisión con una más nueva). No es un error del código.</td><td>Panel <em>Solidity Compiler</em> → desplegable <em>COMPILER</em> → elegir <strong>0.8.28+commit.7893614a</strong>. Es la versión congelada del semestre, la misma con la que corren las pruebas. <strong>No</strong> cambien el <code>pragma</code> del archivo para que compile: eso haría que el código del curso deje de ser reproducible.</td></tr>
+    <tr><td class="pk">El botón <em>Deploy</em> no hace nada</td><td>El contrato no está compilado, o el desplegable de contratos no tiene seleccionado <code>PrestamoEquipos</code>.</td><td>Compilen hasta ver la marca verde y confirmen el contrato seleccionado. Si hay varios contratos en el archivo, hay que elegir el correcto.</td></tr>
+    <tr><td class="pk">Llamo una función y «no pasa nada»</td><td>Están usando una instancia <strong>vieja</strong> de <em>Deployed Contracts</em>, de antes de agregar la función.</td><td>Cada <em>Deploy</em> crea un contrato <strong>nuevo y vacío</strong>. Usen siempre el último de la lista; borren los anteriores de la vista para no equivocarse.</td></tr>
+    <tr><td class="pk">Desapareció el contrato o el inventario quedó vacío</td><td>Recargaron la pestaña y el estado de la Remix VM volvió al inicial (depende de la opción de guardar el estado del entorno, en el panel de ajustes).</td><td>Volver a desplegar y volver a registrar: dos transacciones. Anoten en un papel el <code>id</code> de cada equipo mientras trabajan.</td></tr>
+    <tr><td class="pk">Las diez cuentas no aparecen en <em>Account</em></td><td>No están en la Remix VM: quedó seleccionado otro entorno.</td><td><em>ENVIRONMENT</em> → la <strong>primera</strong> opción Remix VM. Deben verse 10 cuentas con 100 ETH.</td></tr>
+    <tr><td class="pk">El campo <em>VALUE</em> no me deja escribir</td><td>La función seleccionada no es <code>payable</code>: no puede recibir ether.</td><td>Solo <code>prestar</code> es <code>payable</code> en el paso 6. Si no lo es y ustedes creen que sí, les falta la palabra <code>payable</code> en la firma.</td></tr>
+    <tr><td class="pk">Mandé 0,1 y el contrato dice que recibió 100000000000000000000000000</td><td>El <strong>selector de unidad</strong> al lado de <em>VALUE</em> estaba en Wei cuando ustedes pensaban en Ether, o al revés.</td><td>Revisen la unidad en cada envío. <code>0.1</code> <strong>Ether</strong> = <code>100000000000000000</code> <strong>Wei</strong>. Es el error de dedo más caro del curso.</td></tr>
+    <tr><td class="pk">El <code>string</code> no se guarda bien</td><td>Lo escribieron sin comillas en el campo del argumento.</td><td>Los <code>string</code> van con comillas dobles: <code>"Proyector Epson"</code>. Los números, sin comillas.</td></tr>
+    <tr><td class="pk">Cambié el código y el contrato sigue igual</td><td>Compilaron pero no volvieron a desplegar. El código de un contrato desplegado <strong>no se puede cambiar</strong>.</td><td>Compilar <strong>y</strong> desplegar. Esto no es una molestia de Remix: es cómo funciona la cadena. Un contrato desplegado es inmutable.</td></tr>
+  </table>
+  <h3>De Solidity · errores de compilación y de ejecución</h3>
+  <table>
+    <tr><th style="width:27%">LO QUE DICE</th><th style="width:33%">POR QUÉ PASA</th><th>CÓMO SE ARREGLA</th></tr>
+    <tr><td class="pk">La versión del compilador no coincide con el <code>pragma</code></td><td>El <code>pragma solidity 0.8.28;</code> es exacto y el compilador seleccionado es otro.</td><td>Pongan el compilador en <code>0.8.28+commit.7893614a</code>. No cambien el <code>pragma</code>: la versión del curso está congelada a propósito.</td></tr>
+    <tr><td class="pk">Falta el especificador de ubicación de datos para un parámetro</td><td>Un parámetro de tipo <code>string</code>, <code>bytes</code> o arreglo en una función externa necesita <code>calldata</code> o <code>memory</code>.</td><td><code>string calldata nombre</code>. Para un parámetro que no se modifica, <code>calldata</code> es lo más barato.</td></tr>
+    <tr><td class="pk">Identificador no declarado</td><td>Casi siempre una mayúscula: <code>Equipos</code> por <code>equipos</code>, o un error declarado después de usarse en otro archivo.</td><td>Solidity distingue mayúsculas. Lean el número de línea del error: está exacto.</td></tr>
+    <tr><td class="pk">Tipos no convertibles / falta una conversión explícita</td><td>Mezclaron <code>uint256</code> con <code>uint64</code>. <code>block.timestamp</code> es <code>uint256</code> y <code>vence</code> es <code>uint64</code>.</td><td>Conversión explícita: <code>uint64(block.timestamp)</code>. Solidity no convierte solo cuando se puede perder información.</td></tr>
+    <tr><td class="pk">La transacción revierte y no sé por qué</td><td>Alguna guardia se activó. El error <strong>dice cuál</strong>.</td><td>Expandan el detalle de la transacción en la terminal y lean el <strong>nombre</strong> del error y sus <strong>argumentos</strong>. Los seis errores del contrato están en la tabla de abajo.</td></tr>
+    <tr><td class="pk">Esperaba <code>EquipoOcupado</code> y salió <code>EquipoNoRegistrado</code></td><td>El <code>id</code> no existe. <code>prestar</code> llama primero a <code>estaDisponible</code>, que revierte si el equipo no está registrado.</td><td>Registren el equipo primero. Y recuerden: los <code>id</code> empiezan en <strong>1</strong>, no en 0.</td></tr>
+    <tr><td class="pk">Esperaba <code>DepositoIncorrecto</code> y salió <code>PlazoInvalido</code></td><td>El <strong>orden de las validaciones</strong>: <code>prestar</code> comprueba disponibilidad, después el plazo, y <strong>por último</strong> el depósito.</td><td>No es un error: es lo que significa «validar primero, siempre». Si pasan <code>dias = 0</code>, nunca llegan a mirar el dinero.</td></tr>
+    <tr><td class="pk"><code>diasDeMora</code> devuelve menos de lo que esperaba</td><td>La división entera <strong>trunca</strong>. No hay decimales en Solidity.</td><td>No es un error del lenguaje. Si necesitan precisión, trabajen en una unidad más chica (horas, o segundos) y decidan el redondeo a propósito.</td></tr>
+    <tr><td class="pk"><code>estaVencido</code> siempre da <code>false</code> aunque pasó el plazo</td><td>En la Remix VM <strong>el reloj no avanza solo</strong>, y en una red pública no se puede adelantar.</td><td>No es un error de su contrato. Secciones 10 y 11: o corren las pruebas, o mueven el reloj de una red local.</td></tr>
+  </table>
+  <h3>Los seis errores del contrato final, y qué significa cada uno</h3>
+  <table>
+    <tr><th style="width:34%">ERROR</th><th>QUIERE DECIR</th></tr>
+    <tr><td class="pk">EquipoNoRegistrado(id)</td><td>Ese <code>id</code> no existe en el inventario. Los <code>id</code> empiezan en 1.</td></tr>
+    <tr><td class="pk">EquipoOcupado(loTiene)</td><td>Está prestado, y la dirección que trae adentro es la de quien lo tiene.</td></tr>
+    <tr><td class="pk">NoLoTienesTu()</td><td>Están intentando devolver un equipo que no es suyo.</td></tr>
+    <tr><td class="pk">SoloElEncargado(quienLlamo)</td><td>Esa función es solo del encargado, y el error dice qué dirección lo intentó.</td></tr>
+    <tr><td class="pk">PlazoInvalido(maximo)</td><td>Pidieron 0 días o más del máximo. El número que trae es el máximo en segundos: 1209600.</td></tr>
+    <tr><td class="pk">DepositoIncorrecto(esperado, recibido)</td><td>El <em>VALUE</em> no era el depósito exacto. Trae los dos números para comparar.</td></tr>
+    <tr><td class="pk">SinSaldo()</td><td>El contrato no les debe nada. Ya cobraron, o devolvieron en mora.</td></tr>
+    <tr><td class="pk">NombreVacio()</td><td>Registraron con <code>""</code>.</td></tr>
+    <tr><td class="pk">EnvioDirectoNoPermitido()</td><td>Mandaron ether sin llamar una función, o llamaron a una que no existe.</td></tr>
+  </table>
+</section>
+
+<!-- ============================================================ 10 -->
+<section class="sec salto">
+  <div class="sec-cab"><span class="sec-num">10</span><h2>Cómo correr las pruebas</h2><span class="lead">25 PRUEBAS · 3 MINUTOS</span></div>
+  <p>El contrato final del paso 6 está también en el proyecto de Hardhat del curso, con <strong>25 pruebas automáticas</strong>. Sirven para dos cosas: <strong>demostrar la mora</strong>, que en Remix no se puede, y <strong>comprobar que su versión se comporta igual</strong> que la de referencia.</p>
+  <p>Hace falta Node.js 22 y haber hecho <code>npm install</code> una vez en <code>material/laboratorios-evm</code> (eso se hizo en la Sesión 5).</p>
+  <pre>cd material/laboratorios-evm
+npx hardhat test test/demo/PrestamoEquipos.test.js</pre>
+  <p><strong>Salida esperada:</strong> seis bloques de pruebas y <strong>25 en verde, cero fallas</strong>. Los bloques son: inventario (6), prestar (4), devolver a tiempo (5), <strong>mora (4)</strong>, recuperar a la fuerza (3) y dinero que llega solo (3).</p>
+  <div class="caja clave">
+    <div class="caja-et">LAS CUATRO PRUEBAS QUE VALE LA PENA LEER CON CALMA</div>
+    <ul>
+      <li><strong>Pasado el plazo, <code>estaVencido</code> es cierto y <code>diasDeMora</code> cuenta los días:</strong> presta por 1 día, adelanta 4, y espera <code>3</code>. Esto es lo que no se puede hacer en Remix.</li>
+      <li><strong>La división entera trunca: 1,9 días de mora se cuentan como 1.</strong> La prueba <em>mide</em> lo que la guía afirma.</li>
+      <li><strong>Devolver en mora: el depósito queda para el laboratorio.</strong> Y el equipo vuelve a estar disponible: el laboratorio no pierde el activo.</li>
+      <li><strong>El borde: devolver en el último segundo del plazo cuenta como a tiempo.</strong> Fija el <code>&lt;=</code> de <code>devolver</code>. Si fuera <code>&lt;</code>, alguien perdería 0,1 ETH por un segundo.</li>
+    </ul>
+    <p>Abran <code>test/demo/PrestamoEquipos.test.js</code> y lean esas cuatro. No hace falta entender todavía cómo se escriben: hace falta ver que <strong>una prueba dice en una línea qué comportamiento se exige</strong>. En la Sesión 8 las van a escribir ustedes.</p>
+  </div>
+  <div class="caja alerta">
+    <div class="caja-et">SI QUIEREN PROBAR SU PROPIO CÓDIGO</div>
+    <p>Las pruebas compilan lo que haya en <code>contracts/demo/PrestamoEquipos.sol</code>, que es la copia de referencia del paso 6. Para probar <strong>lo que ustedes escribieron</strong>, péguenlo ahí <strong>en su copia local</strong> del repositorio y vuelvan a correr. Si pasan las 25, el comportamiento es el correcto.</p>
+  </div>
+</section>
+
+<!-- ============================================================ 11 -->
+<section class="sec">
+  <div class="sec-cab"><span class="sec-num">11</span><h2>Cómo mover el reloj</h2><span class="lead">LA ÚNICA FORMA DE VER LA MORA EN REMIX</span></div>
+  <p>La Remix VM no deja adelantar el reloj y una red pública tampoco. Pero una <strong>red local propia</strong> sí: ahí el reloj es suyo. Esto conecta Remix con una red de Hardhat que corre en su computador.</p>
+  <table>
+    <tr><th style="width:5%"></th><th style="width:44%">QUÉ HACER</th><th>SALIDA ESPERADA</th></tr>
+    <tr><td class="pk">1</td><td>En una terminal, dentro de <code>material/laboratorios-evm</code>:<br><code>npx hardhat node</code><br>Déjenla abierta: esa terminal <strong>es</strong> la red.</td><td>Imprime una lista de cuentas de prueba con sus llaves privadas y queda escuchando. Datos de la red: <strong>chainId 31337</strong>, RPC <strong>http://127.0.0.1:8545</strong>.<br><strong>Esas llaves privadas son públicas y de juguete:</strong> están en la documentación de Hardhat, las tiene todo el mundo. Nunca les manden nada real.</td></tr>
+    <tr><td class="pk">2</td><td>En Remix, <em>ENVIRONMENT</em> → el entorno de desarrollo que conecta con un <strong>nodo de Hardhat</strong>. La documentación de Remix lo llama <strong>Hardhat Provider</strong>; en el desplegable puede aparecer dentro del grupo <em>Dev</em>. El nodo del punto 1 ya tiene que estar corriendo.</td><td>El selector <em>Account</em> cambia: ahora son las cuentas del nodo local, no las de la Remix VM. <strong>El contrato que tenían desplegado no viaja:</strong> hay que volver a desplegar.</td></tr>
+    <tr><td class="pk">3</td><td>Desplegar ahí el paso 6, <code>registrar</code> un equipo y <code>prestar(1, 1)</code> con el depósito.</td><td><code>estaVencido(1)</code> → <code>false</code>, <code>diasDeMora(1)</code> → <code>0</code>.</td></tr>
+    <tr><td class="pk">4</td><td>En una <strong>segunda</strong> terminal, en la misma carpeta:<br><strong>PowerShell:</strong><br><code>$env:DIAS="3"; npx hardhat run scripts/demo/adelantar-reloj.js --network localhost</code><br><strong>bash:</strong><br><code>DIAS=3 npx hardhat run scripts/demo/adelantar-reloj.js --network localhost</code></td><td>Tres líneas: el bloque y la fecha <strong>antes</strong>, el bloque y la fecha <strong>después</strong>, y<br><code>el reloj avanzó 3.00 días (259200 segundos)</code>.<br>Si dice que no pudo mover el reloj, es que el nodo del punto 1 no está corriendo o falta <code>--network localhost</code>.</td></tr>
+    <tr><td class="pk">5</td><td>En Remix, volver a llamar <code>estaVencido(1)</code> y <code>diasDeMora(1)</code>.</td><td><code>estaVencido</code> → <strong><code>true</code></strong>. <code>diasDeMora</code> → <strong><code>2</code></strong> (tres días transcurridos menos un día de plazo).</td></tr>
+    <tr><td class="pk">6</td><td><code>devolver(1)</code> con la cuenta que lo tiene, y leer <code>saldo</code> de esa cuenta y del <code>encargado</code>.</td><td>El de quien devolvió: <code>0</code>. El del encargado: <code>100000000000000000</code>. <strong>El depósito se quedó en el laboratorio.</strong> En los <em>logs</em>, <code>Devuelto</code> con <code>aTiempo: false</code>.</td></tr>
+  </table>
+  <div class="caja peligro">
+    <div class="caja-et">LA IDEA QUE HAY QUE LLEVARSE DE ESTA SECCIÓN</div>
+    <p>Ustedes acaban de <strong>mover el tiempo</strong>. En una red local eso se puede, y por eso una red local sirve para probar. En una cadena pública no se puede, y <strong>por eso una cadena pública sirve para algo</strong>. Si el reloj de la red donde vive el contrato lo puede mover el que administra la red, el plazo no vale nada.</p>
+  </div>
+</section>
+
+<!-- ============================================================ 12 -->
+<section class="sec salto">
+  <div class="sec-cab"><span class="sec-num">12</span><h2>Preguntas de repaso</h2><span class="lead">RESPONDER SIN VOLVER A LEER</span></div>
+  <p>Estas cinco no se contestan copiando una definición: hay que haber hecho los pasos. Escriban la respuesta antes de buscarla.</p>
+  <div class="pregunta">
+    <div class="cab"><div class="n">1</div><div class="enun"><span class="tema">PASO 1 · LA ROTURA SIN ERROR</span>En el paso 1, la cuenta 2 se llevó un equipo que tenía la cuenta 1 y la transacción salió <strong>bien</strong>. Explique por qué es un error grave aunque no haya ningún mensaje de error, y diga qué clase de problema es ese: ¿de sintaxis, de lógica, o de reglas que nadie escribió?</div></div>
+    <div class="espacio"></div>
+  </div>
+  <div class="pregunta">
+    <div class="cab"><div class="n">2</div><div class="enun"><span class="tema">PASO 3 · EL CAMPO <code>existe</code></span>¿Por qué el <code>struct Equipo</code> necesita el campo <code>bool existe</code>, si el <code>mapping</code> ya contesta cuando se le pregunta por cualquier <code>id</code>? Diga exactamente qué contestaría <code>estaDisponible(99)</code> sin ese campo, y por qué esa respuesta es peor que un error.</div></div>
+    <div class="espacio"></div>
+  </div>
+  <div class="pregunta">
+    <div class="cab"><div class="n">3</div><div class="enun"><span class="tema">PASO 4 · LA LLAVE PERDIDA</span>El encargado se graduó y perdió la billetera. Diga <strong>qué deja de funcionar exactamente</strong> en el contrato del paso 6 (nombre las funciones), y por qué no se puede arreglar editando el código. Después diga qué le falta al contrato para que esto no fuera un problema.</div></div>
+    <div class="espacio"></div>
+  </div>
+  <div class="pregunta">
+    <div class="cab"><div class="n">4</div><div class="enun"><span class="tema">PASO 6 · EL ORDEN DE DOS LÍNEAS</span>En <code>retirar()</code>, el saldo se pone en cero <strong>antes</strong> de enviar el dinero. Explique qué podría hacer un contrato malicioso si esas dos líneas estuvieran al revés, y por qué el problema aparece justo en el momento de enviar ether y no antes.</div></div>
+    <div class="espacio"></div>
+  </div>
+  <div class="pregunta">
+    <div class="cab"><div class="n">5</div><div class="enun"><span class="tema">LA PREGUNTA DEL CURSO</span>Para el laboratorio de equipos de <strong>nuestra</strong> universidad, ¿este contrato hacía falta? Responda sí o no y defiéndalo en cinco líneas. Después describa <strong>un cambio concreto en la situación</strong> (no en el código) que daría vuelta su respuesta.</div></div>
+    <div class="espacio"></div>
+  </div>
+</section>
+
+<!-- ============================================================ 13 -->
+<section class="sec salto">
+  <div class="sec-cab"><span class="sec-num">13</span><h2>Ejercicios de ampliación</h2><span class="lead">SIN SOLUCIÓN PUBLICADA</span></div>
+  <p>Los tres parten del paso 6. <strong>No hay solución en ninguna parte</strong>, ni en el repositorio público ni en el del docente: el valor está en pelearse con la decisión de diseño, no en llegar a un código concreto. Para cada uno, antes de escribir, contesten por escrito las tres preguntas que trae.</p>
+  <div class="pregunta">
+    <div class="cab"><div class="n">A</div><div class="enun"><span class="tema">EL QUE ARREGLA EL HUECO QUE QUEDÓ ABIERTO</span>Cobrar la mora <strong>por día</strong>, en vez de quedarse con todo el depósito</div></div>
+    <div class="cuerpo">
+      <p>Hoy el que devuelve un minuto tarde pierde los 0,1 ETH completos, igual que el que devuelve tres semanas tarde. Y <code>diasDeMora</code> existe desde el paso 5 y no se usa. Hagan que <code>devolver</code> cobre una multa por día de mora y acredite el resto a quien devolvió.</p>
+      <p><strong>Antes de escribir, contesten:</strong></p>
+      <ol>
+        <li>La multa diaria, ¿se fija al desplegar como el depósito, o se calcula como una fracción de él? Defiendan la elección.</li>
+        <li><strong>No hay decimales.</strong> Si la multa es «el 10 % del depósito por día», ¿cómo se calcula eso sin coma, y qué pasa con lo que se trunca? ¿Quién se queda con el resto?</li>
+        <li>¿Qué pasa si la mora acumulada <strong>pasa</strong> el depósito? ¿Se queda en el depósito, o el contrato empieza a reclamar una deuda que no puede cobrar? Decidan, y digan por qué es una decisión y no una cuenta.</li>
+      </ol>
+      <p><strong>Cómo saben que avanzaron:</strong> cuando puedan explicar por qué su respuesta a la pregunta 3 es la correcta <em>para este caso</em>, aunque la otra también sea defendible.</p>
+    </div>
+  </div>
+  <div class="pregunta">
+    <div class="cab"><div class="n">B</div><div class="enun"><span class="tema">EL QUE PARECE FÁCIL Y NO LO ES</span>Permitir <strong>prórroga</strong>: extender un préstamo antes de que se venza</div></div>
+    <div class="cuerpo">
+      <p>Agreguen una función que le permita a quien tiene el equipo correr la fecha de vencimiento.</p>
+      <p><strong>Antes de escribir, contesten:</strong></p>
+      <ol>
+        <li>¿Quién puede pedir la prórroga: solo quien lo tiene, o también el encargado? ¿Y se puede pedir <strong>estando ya en mora</strong>? Si se puede, la multa deja de existir: cualquiera prorroga el día que vence. Si no se puede, ¿qué le pasa a alguien que se enfermó?</li>
+        <li>El <code>PLAZO_MAXIMO</code> es de 14 días. ¿La prórroga se suma sobre el vencimiento, o el total sigue sin poder pasar de 14 días desde el préstamo? Son dos contratos distintos.</li>
+        <li>¿Cuesta algo prorrogar? Si es gratis, ¿qué impide prorrogar indefinidamente y quedarse con el equipo todo el semestre, cumpliendo las reglas?</li>
+      </ol>
+      <p><strong>Cómo saben que avanzaron:</strong> cuando encuentren solos que la pregunta 1 puede volver inútil toda la mora del paso 6.</p>
+    </div>
+  </div>
+  <div class="pregunta">
+    <div class="cab"><div class="n">C</div><div class="enun"><span class="tema">EL QUE CHOCA CON LOS LÍMITES DE LA CADENA · Y CON LA LEY</span>Llevar <strong>historial</strong> de quién tuvo cada equipo</div></div>
+    <div class="cuerpo">
+      <p>Hoy el contrato solo sabe quién tiene el equipo <strong>ahora</strong>. Hagan que se pueda saber quién lo tuvo antes.</p>
+      <p><strong>Antes de escribir, contesten:</strong></p>
+      <ol>
+        <li>El <code>mapping</code> <strong>no se puede recorrer</strong>. ¿Van a guardar el historial en el estado (un arreglo por equipo, que crece y cuesta gas en cada préstamo) o les basta con los <strong>eventos</strong> que ya existen, que son casi gratis pero que <strong>el contrato no puede leer</strong>? Decidan según quién necesita el historial: ¿una pantalla, u otra función del contrato?</li>
+        <li>Si crece en el estado: ¿qué pasa con el gas de <code>prestar</code> en el préstamo número doscientos? ¿Y quién paga ese costo que sube?</li>
+        <li><strong>La pregunta que no es técnica.</strong> «Quién tuvo cada equipo» es un dato que, cruzado con el horario de un curso, puede identificar a una persona. La cadena es <strong>pública e inmutable</strong>, y la Ley 1581 de 2012 le da a toda persona derecho a rectificar y a pedir la supresión de sus datos. ¿Se puede cumplir ese derecho sobre algo que no se puede borrar? ¿Qué guardarían en su lugar?</li>
+      </ol>
+      <p><strong>Cómo saben que avanzaron:</strong> cuando puedan defender, por escrito y en cinco líneas, que la respuesta correcta a la pregunta 3 puede ser <strong>no guardar el historial en la cadena</strong>.</p>
+    </div>
+  </div>
+</section>
+
+<!-- ============================================================ 14 -->
+<section class="sec">
+  <div class="sec-cab"><span class="sec-num">14</span><h2>Dónde está todo, y lo que hay que verificar</h2><span class="lead">CIERRE</span></div>
+  <table>
+    <tr><th style="width:42%">QUÉ</th><th>DÓNDE</th></tr>
+    <tr><td>Las seis versiones del contrato</td><td class="pk">material/clase-solidity-paso-a-paso/pasos/paso-1.sol … paso-6.sol</td></tr>
+    <tr><td>Copia probada de la versión final</td><td class="pk">material/laboratorios-evm/contracts/demo/PrestamoEquipos.sol</td></tr>
+    <tr><td>Las 25 pruebas</td><td class="pk">material/laboratorios-evm/test/demo/PrestamoEquipos.test.js</td></tr>
+    <tr><td>El script para mover el reloj</td><td class="pk">material/laboratorios-evm/scripts/demo/adelantar-reloj.js</td></tr>
+    <tr><td>Remix IDE</td><td class="pk">https://app.remix.live</td></tr>
+    <tr><td>Documentación de Remix · entornos y despliegue</td><td class="pk">https://remix-ide.readthedocs.io/en/latest/run.html<br>https://remix-ide.readthedocs.io/en/latest/create_deploy.html</td></tr>
+    <tr><td>Versiones congeladas del semestre</td><td class="pk">material/laboratorios-evm/versiones.md</td></tr>
+  </table>
+  <div class="caja alerta">
+    <div class="caja-et">SI LA INTERFAZ DE REMIX NO COINCIDE CON ESTA GUÍA</div>
+    <p>Remix cambia de vez en cuando y hay cosas que esta guía describe <strong>a propósito</strong> de forma genérica, porque el nombre exacto varía entre versiones: el nombre del entorno que conecta con un nodo de Hardhat, el nombre del <em>fork</em> de cada Remix VM, dónde se muestra el saldo de una cuenta, y cómo se llama el campo de interacción de bajo nivel para mandar ether sin llamar una función.</p>
+    <p>Cuando eso pase, <strong>busquen el nombre de la acción, no la posición del botón</strong>, y confirmen en la documentación de arriba. Si encuentran que algo de esta guía quedó viejo, <strong>avísenlo por el canal del curso con el enlace de la documentación</strong>: se corrige el material. Reportar una fuente que quedó vieja es trabajo del curso, no una queja.</p>
+  </div>
+  <div class="caja clave">
+    <div class="caja-et">LAS TRES FRASES QUE DEBERÍAN QUEDAR</div>
+    <ol>
+      <li><strong>En Solidity nadie dice quién es: lo demuestra firmando.</strong> No hay usuarios ni contraseñas, porque todo lo que el contrato guarda es público. Solo hay <code>msg.sender</code>.</li>
+      <li><strong>Un contrato no tiene manos.</strong> Lo único que puede hacer en el mundo es tener plata y decidir si la devuelve. Si una regla tiene que costar algo, tiene que costar plata.</li>
+      <li><strong>La habilidad que vale no es escribir Solidity.</strong> Es saber cuándo <em>no</em> usar una blockchain y poder defender esa decisión. Para este laboratorio, la respuesta honesta es que no hacía falta.</li>
+    </ol>
+  </div>
+</section>
+
+</body>
+</html>
