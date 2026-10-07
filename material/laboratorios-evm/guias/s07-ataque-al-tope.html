@@ -1,0 +1,796 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<title>Guía · Laboratorio 07 · Ataque al tope</title>
+<!--ESTILOS-->
+</head>
+<body>
+
+<section class="barra">
+  <div class="kicker">LABORATORIO 07 · SESIÓN 7 · LEER CONTRATOS · EN EQUIPOS DE PROYECTO · CALIFICABLE</div>
+  <h1>REVENDAN UNA<br>ENTRADA SOBRE<br><em>EL TOPE</em></h1>
+  <div class="sub">Hoy no se escribe un contrato: se lee uno ajeno hasta encontrarle la grieta. El contrato es el del proyecto del docente, el encargo es romperlo, y se puede: tiene un hueco real que se encontró preparando esta sesión. Ustedes lo van a explotar, lo van a arreglar y van a escribir la prueba que lo habría atrapado.</div>
+</section>
+
+<dl class="datos">
+  <div><dt>MODALIDAD</dt><dd>En equipos de<br>proyecto, en la sala</dd></div>
+  <div><dt>DURACIÓN</dt><dd>≈70 min en clase<br>+ cierre en casa</dd></div>
+  <div><dt>REQUISITO</dt><dd>Node.js 22 y el repositorio<br><code>laboratorios-evm</code></dd></div>
+  <div><dt>META</dt><dd>5 intentos entendidos<br>+ la compuerta explotada</dd></div>
+</dl>
+
+<div class="caja clave">
+  <div class="caja-et">CÓMO LEER ESTA GUÍA</div>
+  <p>Está escrita para hacer el laboratorio <strong>sin ayuda</strong>, desde un computador de la sala recién encendido. Todas las salidas que aparecen son <strong>reales</strong>: se obtuvieron con este mismo repositorio (Hardhat 3.16.0, Solidity 0.8.34, OpenZeppelin 5.6.1). Si algo no coincide, vayan a <strong>19 · Errores frecuentes</strong>.</p>
+  <p><strong>Una advertencia de orden:</strong> las secciones van en orden a propósito y hay dos paradas obligatorias (10 y 16.3). La guía está construida para que cada respuesta se gane leyendo el contrato. Saltarse una parada convierte el laboratorio en copiar una línea, y lo que se evalúa —y lo que van a necesitar en la Sesión 8 sobre su propio contrato— es el método de lectura.</p>
+</div>
+
+<!-- ============================================================ 1 -->
+<section class="sec">
+  <div class="sec-cab"><span class="sec-num">01</span><h2>El encargo, en una línea</h2><span class="lead">LEER PRIMERO</span></div>
+
+  <div class="caja peligro">
+    <div class="caja-et">EL ENCARGO</div>
+    <p style="font-size:12pt;font-family:'Arial Black',Arial,sans-serif;color:var(--tinta);line-height:1.2">Revendan una entrada por encima del tope.</p>
+    <p style="margin-top:3mm">Eso es todo. No hay más instrucciones sobre <em>cómo</em>. El contrato está en <code>contracts/s07/EntradasVulnerable.sol</code>, son 263 líneas, y promete que eso no se puede hacer. Averigüen si la promesa es cierta.</p>
+  </div>
+
+  <p><strong>Objetivo de la sesión:</strong> cambiar de lado. Hasta la Sesión 6 ustedes escribieron contratos; hoy leen uno que no escribieron y lo atacan. <strong>Resultado de aprendizaje:</strong> RA3 (programar aplicando patrones y estándares), y es la antesala del RA5 (identificar y remediar vulnerabilidades), que se trabaja en la Sesión 9.</p>
+
+  <p>El contrato es el del <strong>proyecto del docente</strong>: entradas de un evento como ERC-721 con un <strong>tope de reventa</strong>. Su tesis cabe en una frase, y está escrita en sus propios comentarios: <em>la regla de reventa deja de ser un término y condiciones y pasa a ser algo que no se puede incumplir</em>. Hoy se pone a prueba esa frase.</p>
+
+  <div class="caja alerta">
+    <div class="caja-et">LO QUE PASÓ DE VERDAD, Y POR ESO ESTA SESIÓN CAMBIÓ</div>
+    <p>Este contrato se iba a mostrar hoy como ejemplo de regla bien hecha. Preparando la sesión, probando el ataque que ustedes van a correr en la sección 16, <strong>el contrato se rompió</strong>: la promesa era falsa. El hueco llevaba publicado varias semanas, con pruebas en verde y una especificación escrita que lo daba por imposible.</p>
+    <p>Así que el laboratorio ahora tiene dos archivos: <code>EntradasVulnerable.sol</code>, la versión que estuvo publicada, y <code>Entradas.sol</code>, la corregida esta mañana. La diferencia son <strong>tres líneas</strong>. Nadie va a contarles cuáles hasta que hayan hecho saltar la primera.</p>
+    <p>Que esto haya pasado con el contrato del docente, no con uno de juguete, es el contenido de la sesión. Un contrato con pruebas verdes, documentación bonita y una tesis convincente puede estar roto. La única defensa es leerlo así.</p>
+  </div>
+
+  <div class="caja clave">
+    <div class="caja-et">LA IDEA QUE ORDENA TODA LA SESIÓN</div>
+    <p>Si no pueden responder las cuatro pasadas sobre su propio contrato, <strong>ese contrato todavía no es suyo</strong>. Da igual quién escribió las líneas: si nadie del equipo sabe por qué están ahí, el equipo no lo controla. Hoy practicamos las cuatro pasadas sobre un contrato ajeno porque es más fácil ser despiadado con el código de otro. En el bloque C las repiten sobre el propio, y en la Sesión 8 lo defienden.</p>
+  </div>
+
+  <div class="caja">
+    <div class="caja-et">REGLA DEL JUEGO: NO SE TOCAN LOS CONTRATOS DEL REPOSITORIO</div>
+    <p><code>EntradasVulnerable.sol</code>, <code>Entradas.sol</code>, <code>AtacanteTope.sol</code> y <code>AtacanteCompuerta.sol</code> <strong>no se modifican</strong>. Atacar un contrato editándolo no es atacarlo: es escribir otro contrato. El ataque se hace <strong>desde afuera</strong>, que es como lo haría alguien de verdad: con llamadas, con contratos propios y con lo que el contrato expone al mundo. Si ya editaron alguno sin querer: <code>git checkout contracts/s07/</code>.</p>
+  </div>
+</section>
+
+<!-- ============================================================ 2 -->
+<section class="sec">
+  <div class="sec-cab"><span class="sec-num">02</span><h2>Qué se entrega</h2><span class="lead">EVIDENCIA DE LA SESIÓN</span></div>
+  <p>Por equipo, cuatro cosas:</p>
+  <ol>
+    <li><strong>La ficha de lectura</strong> (<code>material/proyecto/ficha-lectura-contrato.pdf</code>) llena a mano sobre <code>EntradasVulnerable.sol</code>: las cuatro pasadas y la página de defensa.</li>
+    <li><strong>La evidencia del ataque de la compuerta</strong>: la salida de <code>npx hardhat test test/s07/CompuertaAbierta.test.js</code> y la tabla de la sección 16.6, que dice qué pasó con cada entrada en cada versión.</li>
+    <li><strong>La explicación de las tres líneas</strong>, con sus palabras: por qué el cambio en <code>_update</code> cierra el hueco y por qué no rompe la reventa normal. Entre cinco y diez renglones. Sección 16.5.</li>
+    <li><strong>Su prueba de regresión</strong>: <code>test/s07/&lt;equipo&gt;/Regresion.test.js</code>, una prueba escrita por ustedes que esté <strong>en rojo contra <code>EntradasVulnerable</code> y en verde contra <code>Entradas</code></strong>. Esa es la definición de prueba de regresión: la que habría atrapado el fallo antes de publicarlo.</li>
+  </ol>
+  <p><strong>Reto extra, opcional</strong> (sección 18): un sexto intento de invención propia, distinto de los cinco de la guía y distinto del de la compuerta, con su prueba. Suma, no reemplaza.</p>
+  <div class="caja">
+    <div class="caja-et">UNA PRUEBA QUE FALLA VALE LO MISMO QUE UNA QUE PASA</div>
+    <p>La rúbrica (sección 22) no premia encontrar agujeros: premia <strong>demostrar</strong> lo que pasa. Una prueba de regresión que ustedes escribieron, que falla contra la versión vulnerable con un mensaje que se entiende, vale 5,0. Una afirmación sin prueba que la respalde vale 0: en este oficio, lo que no se demuestra no cuenta.</p>
+  </div>
+</section>
+
+<!-- ============================================================ 3 -->
+<section class="sec salto">
+  <div class="sec-cab"><span class="sec-num">03</span><h2>Preparación desde cero en la sala</h2><span class="lead">10 MINUTOS</span></div>
+
+  <h3 style="font-size:10.5pt;margin:2mm 0 2mm">3.1 · Abrir una terminal en la carpeta del repositorio</h3>
+  <p>En Windows, abran la carpeta <code>laboratorios-evm</code> en el Explorador, hagan clic en la barra de dirección, escriban <code>powershell</code> y Enter. En macOS o Linux: <code>cd</code> y arrastren la carpeta a la terminal. Comprueben con <code>dir</code> (Windows) o <code>ls</code>: deben ver <code>hardhat.config.js</code> y <code>package.json</code>.</p>
+
+  <h3 style="font-size:10.5pt;margin:4mm 0 2mm">3.2 · Comprobar las herramientas</h3>
+  <pre>node --version            # esperado: v22.x.x
+npx hardhat --version     # esperado: 3.16.0</pre>
+  <p>Si <code>node</code> no se reconoce, instalen Node.js 22 LTS desde <code>nodejs.org</code> y abran una terminal nueva. Si falta <code>node_modules</code>, corran <code>npm install</code> una vez (tarda varios minutos en la red de la sala; las líneas <code>npm WARN</code> no son errores).</p>
+
+  <h3 style="font-size:10.5pt;margin:4mm 0 2mm">3.3 · Correr el registro de los cinco intentos</h3>
+  <pre>npx hardhat test test/s07/AtaqueAlTope.test.js</pre>
+  <p><strong>Salida esperada</strong> (real, recortada en el encabezado de compilación):</p>
+  <pre>Compiled 37 Solidity files with solc 0.8.34 (evm target: osaka)
+Running Mocha tests
+
+  S07 · el revendedor programa su propio contrato
+    √ la compra original sí funciona: el atacante es dueño de la entrada 1
+    √ ★ intento 1 · transferFrom directo: BLOQUEADO
+    √ ★ intento 2 · safeTransferFrom: BLOQUEADO igual
+    √ ★ intento 3 · aprobar a un cómplice: la aprobación SE CONCEDE…
+    √ ★ …pero el cómplice tampoco puede moverla: BLOQUEADO
+    √ ★ intento 4 · poner en venta por encima del tope: RECHAZADO con el tope adentro
+    √ ★ el borde: justo EN el tope sí se acepta
+    √ ★ intento 5 · vender en el tope y cobrar la diferencia POR FUERA: el contrato
+      no lo impide
+    √ el saldo del atacante refleja SOLO lo que pasó por el contrato
+
+  S07 · lo que el bloqueo NO impide
+    √ una entrada se puede seguir revendiendo cuantas veces quieran, siempre bajo
+      el tope
+    √ ★ tras el cierre de la reventa, ni el revendedor más hábil mueve la entrada
+
+  11 passing (272ms)</pre>
+  <p><strong>Cómo sé que funcionó:</strong> <code>11 passing</code> y ningún <code>failing</code>. La advertencia sobre <code>Operaciones.sol</code> («can be restricted to view») viene de la Sesión 5, es intencional y no es un error.</p>
+  <p><strong>No corran todavía</strong> <code>test/s07/CompuertaAbierta.test.js</code>: es el reto final y su salida cuenta el final. Va en la sección 16.</p>
+
+  <div class="caja alerta">
+    <div class="caja-et">LEAN BIEN QUÉ SIGNIFICA «11 PASSING» AQUÍ</div>
+    <p>Estas pruebas <strong>no</strong> comprueban que el contrato esté bien. Comprueban que <strong>pasa lo que dice el nombre de cada prueba</strong>. Cuatro están en verde porque el ataque <strong>falla</strong>, y una está en verde porque el ataque <strong>funciona</strong>. Una suite en verde describe un comportamiento; no lo aprueba.</p>
+    <p>Y hay una prueba de ese hecho que no se puede discutir: la versión vulnerable del contrato <strong>pasaba estas once pruebas</strong>, y estaba rota. Lo que no se prueba no está probado, y eso es el laboratorio de la Sesión 8.</p>
+  </div>
+</section>
+
+<!-- ============================================================ 4 -->
+<section class="sec">
+  <div class="sec-cab"><span class="sec-num">04</span><h2>El proyecto por dentro</h2></div>
+  <table>
+    <tr><th style="width:38%">RUTA</th><th>QUÉ ES</th></tr>
+    <tr><td class="pk">contracts/s07/<br>EntradasVulnerable.sol</td><td><strong>El objetivo del ataque y la copia de lectura de hoy.</strong> La versión que estuvo publicada hasta el 7 de octubre de 2026. 263 líneas. Es la que se lee en las pasadas 1 a 3 y la que se explota en la sección 16.</td></tr>
+    <tr><td class="pk">contracts/s07/Entradas.sol</td><td>La versión <strong>corregida</strong>. Idéntica salvo tres líneas en <code>_update</code>, y esas líneas vienen comentadas. <strong>No se abre hasta la sección 16.4.</strong></td></tr>
+    <tr><td class="pk">contracts/s07/AtacanteTope.sol</td><td>Un revendedor que sabe programar: no usa la interfaz oficial, llama al contrato directamente. Trae los cinco intentos de las secciones 9 a 14.</td></tr>
+    <tr><td class="pk">contracts/s07/<br>AtacanteCompuerta.sol</td><td>La prueba de concepto del reto final. <strong>No se abre hasta la sección 16.</strong></td></tr>
+    <tr><td class="pk">test/s07/AtaqueAlTope.test.js</td><td>El registro de los cinco intentos: 11 pruebas. Es el documento que van a leer línea por línea.</td></tr>
+    <tr><td class="pk">test/s07/CompuertaAbierta.test.js</td><td>El mismo ataque contra las dos versiones: 4 pruebas. <strong>No se corre hasta la sección 16.2.</strong></td></tr>
+    <tr><td class="pk">demo-entradas/ARQUITECTURA.md</td><td>La especificación escrita por el autor del contrato: interfaz función por función, decisiones de diseño, intercambios y tabla de amenazas. Dice que el hueco de la sección 16 no existe. <strong>Sirve de contraste: compárenla con lo que de verdad hace el código.</strong></td></tr>
+  </table>
+  <p>Y lo que van a crear ustedes, en subcarpetas con el nombre de su equipo para que seis equipos trabajen sin pisarse:</p>
+  <table>
+    <tr><th style="width:38%">RUTA</th><th>QUÉ ES</th></tr>
+    <tr><td class="pk">test/s07/&lt;equipo&gt;/<br>Regresion.test.js</td><td>Su prueba de regresión: roja contra la vulnerable, verde contra la corregida.</td></tr>
+    <tr><td class="pk">contracts/s07/&lt;equipo&gt;/<br>MiAtacante.sol</td><td>Solo si hacen el reto extra: su copia del atacante con un sexto intento propio.</td></tr>
+  </table>
+  <p>Reemplacen <code>&lt;equipo&gt;</code> por su número o nombre, en minúsculas y sin espacios (<code>equipo-3</code>, por ejemplo).</p>
+</section>
+
+<!-- ============================================================ 5 -->
+<section class="sec">
+  <div class="sec-cab"><span class="sec-num">05</span><h2>El método: leer un contrato en cuatro pasadas</h2><span class="lead">LA COLUMNA VERTEBRAL</span></div>
+  <p>Un contrato no se lee de arriba abajo como una novela. Se lee cuatro veces, buscando una cosa distinta cada vez. Las tres primeras son inventario; la cuarta es el ataque.</p>
+  <table>
+    <tr><th style="width:8%">#</th><th style="width:30%">LA PREGUNTA</th><th>QUÉ SE BUSCA, Y QUÉ SE IGNORA</th></tr>
+    <tr><td class="pk">1</td><td><strong>¿Qué promete?</strong></td><td>Solo <strong>nombres</strong>: funciones públicas y externas, eventos, errores. <strong>No se leen los cuerpos.</strong> Es un índice: qué dice el contrato que hace, antes de comprobar si lo hace.</td></tr>
+    <tr><td class="pk">2</td><td><strong>¿Quién manda?</strong></td><td>Direcciones privilegiadas (<code>owner</code>, roles, cualquier dirección guardada en el estado), qué puede hacer cada una, y <strong>qué pasa el día en que se pierde esa llave</strong>.</td></tr>
+    <tr><td class="pk">3</td><td><strong>¿Por dónde entra y sale el dinero?</strong></td><td><code>payable</code>, <code>msg.value</code>, saldos guardados, envíos (<code>transfer</code>, <code>send</code>, <code>call</code>). Cada peso que entra tiene que tener una salida con nombre y dueño.</td></tr>
+    <tr><td class="pk">4</td><td><strong>¿Qué pasa si…?</strong></td><td>La pasada del adversario. Se agarra cada regla y se le pregunta qué la rompe. Es la que ocupa el resto de esta guía, y la que encontró el hueco de la sección 16.</td></tr>
+  </table>
+  <p>Las pasadas 1 a 3 se hacen con lápiz y sin correr nada, en unos quince minutos. Llénenlas en la <strong>ficha de lectura</strong> mientras hacen las secciones 6, 7 y 8.</p>
+  <div class="caja clave">
+    <div class="caja-et">POR QUÉ EN ESTE ORDEN Y NO EN OTRO</div>
+    <p>Porque la pasada 4 sin las tres primeras es adivinar. Para preguntar «¿qué pasa si lo llamo dos veces?» hay que saber primero qué se puede llamar; para preguntar «¿y si se pierde la llave?» hay que saber primero quién tiene llave. El atacante que improvisa prueba cosas al azar; el que lee en pasadas sabe dónde mirar y por qué.</p>
+  </div>
+</section>
+
+<!-- ============================================================ 6 -->
+<section class="sec salto">
+  <div class="sec-cab"><span class="sec-num">06</span><h2>Pasada 1 · ¿Qué promete?</h2><span class="lead">5 MINUTOS · SOLO NOMBRES</span></div>
+  <p>Abran <code>contracts/s07/EntradasVulnerable.sol</code> y recorran solo las firmas. Esto es lo que el contrato expone al mundo. <strong>Antes de leer ningún cuerpo</strong>, llenen la última columna: qué creen que hace cada función, nada más que por su nombre y sus parámetros.</p>
+  <table>
+    <tr><th style="width:38%">FUNCIÓN PÚBLICA O EXTERNA</th><th style="width:14%">¿CUESTA GAS?</th><th>SOLO POR EL NOMBRE, ¿QUÉ CREO QUE HACE?</th></tr>
+    <tr><td class="pk">comprar() payable → tokenId</td><td>Sí</td><td></td></tr>
+    <tr><td class="pk">ponerEnVenta(tokenId, precio)</td><td>Sí</td><td></td></tr>
+    <tr><td class="pk">quitarDeVenta(tokenId)</td><td>Sí</td><td></td></tr>
+    <tr><td class="pk">comprarReventa(tokenId) payable</td><td>Sí</td><td></td></tr>
+    <tr><td class="pk">retirar()</td><td>Sí</td><td></td></tr>
+    <tr><td class="pk">asignarValidador(address)</td><td>Sí</td><td></td></tr>
+    <tr><td class="pk">marcarUsada(tokenId)</td><td>Sí</td><td></td></tr>
+    <tr><td class="pk">esValida(tokenId, portador) view</td><td>No</td><td></td></tr>
+    <tr><td class="pk">quedanDisponibles() view</td><td>No</td><td></td></tr>
+    <tr><td class="pk">reventaAbierta() view</td><td>No</td><td></td></tr>
+    <tr><td class="pk">+ todo lo de ERC721 y Ownable</td><td>Varía</td><td></td></tr>
+  </table>
+  <p>La última fila importa tanto como las otras diez: el contrato hereda de <code>ERC721</code> y de <code>Ownable</code>, y con ellos hereda <strong>funciones públicas que nadie escribió aquí</strong>: <code>transferFrom</code>, <code>safeTransferFrom</code>, <code>approve</code>, <code>setApprovalForAll</code>, <code>ownerOf</code>, <code>balanceOf</code>, <code>transferOwnership</code>, <code>renounceOwnership</code>. Un contrato promete también lo que hereda, y responde por ello.</p>
+
+  <h3 style="font-size:10.5pt;margin:4mm 0 2mm">6.1 · Los eventos: lo que el contrato deja por escrito</h3>
+  <pre>EntradaEmitida(tokenId, comprador, precio)      PuestaEnVenta(tokenId, precio)
+QuitadaDeVenta(tokenId)                         Revendida(tokenId, de, a, precio)
+Retirado(titular, monto)                        EntradaUsada(tokenId, portador)
+ValidadorCambiado(anterior, nuevo)</pre>
+  <p>Los eventos son el rastro auditable. Pregunta de la pasada 1: <strong>¿hay alguna función que cambie el estado y no emita ningún evento?</strong> Recórranlas una por una y anótenlo en la ficha. En este contrato la respuesta es que no hay ninguna: las siete funciones que escriben estado emiten evento, y las heredadas (<code>approve</code>, <code>setApprovalForAll</code>, <code>transferOwnership</code>) traen el suyo. Eso también es un resultado, y vale anotarlo: <strong>el rastro parece completo</strong>.</p>
+  <p>Guarden la palabra «parece». En la sección 16 van a comprobar que en la versión vulnerable <strong>una entrada cambia de dueño sin que se emita <code>Revendida</code></strong>, y ese hueco en el rastro es justamente lo que va a servirles para escribir la prueba de regresión.</p>
+
+  <h3 style="font-size:10.5pt;margin:4mm 0 2mm">6.2 · Los errores: lo que el contrato promete rechazar</h3>
+  <pre>AforoAgotado          PagoIncorrecto(esperado, recibido)   NoEsPropietario
+PrecioSobreTope(tope, pedido)   ReventaCerrada     NoEstaEnVenta
+TransferenciaDirectaBloqueada   SinSaldo           EntradaYaUsada
+NoAutorizado          NoSePuedeComprarASiMismo</pre>
+  <div class="caja clave">
+    <div class="caja-et">GUARDEN ESTE CABO SUELTO</div>
+    <p>En esa lista hay un error que promete algo que <strong>ninguna de las diez funciones públicas parece hacer</strong>: <code>TransferenciaDirectaBloqueada</code>. Ninguna función del contrato se llama «transferir». ¿Quién lanza entonces ese error, y desde dónde? Anoten la pregunta y sigan: en la pasada 4 va a ser la clave.</p>
+    <p>Esto es el valor de la pasada 1 hecha en serio. El inventario de nombres no solo dice qué hay: deja ver <strong>los huecos</strong>, y los huecos son por donde se entra.</p>
+  </div>
+</section>
+
+<!-- ============================================================ 7 -->
+<section class="sec">
+  <div class="sec-cab"><span class="sec-num">07</span><h2>Pasada 2 · ¿Quién manda?</h2><span class="lead">5 MINUTOS</span></div>
+  <p>Busquen en el estado todas las direcciones y todos los controles de acceso. En este contrato hay tres poderes y conviene no confundirlos:</p>
+  <table>
+    <tr><th style="width:18%">QUIÉN</th><th style="width:30%">QUÉ PUEDE HACER</th><th style="width:26%">QUÉ NO PUEDE HACER</th><th>SI PIERDE LA LLAVE…</th></tr>
+    <tr><td class="pk">owner<br>(organizador)</td><td><code>asignarValidador</code>, <code>marcarUsada</code>, retirar <em>su</em> saldo (el recaudo del lote original), y lo que trae <code>Ownable</code> (<code>transferOwnership</code>, <code>renounceOwnership</code>).</td><td>Mover entradas ajenas. Saltarse el tope. Emitir sin pago. Cambiar aforo, precio, tope o cierre: son <code>immutable</code>.</td><td>El recaudo queda <strong>inmovilizado</strong>: <code>retirar()</code> paga a <code>msg.sender</code> y el saldo está anotado a nombre del <code>owner</code>. Nadie más puede sacarlo. Tampoco se puede volver a asignar un validador.</td></tr>
+    <tr><td class="pk">validador<br>(puerta)</td><td>Solo <code>marcarUsada</code>. Consultar <code>esValida</code> no cuesta gas ni exige permiso.</td><td>Emitir, mover o vender entradas. Retirar dinero.</td><td>Casi nada: el <code>owner</code> asigna otro. Es un rol deliberadamente débil porque el dispositivo de la puerta se presta y se pierde.</td></tr>
+    <tr><td class="pk">dueño de<br>una entrada</td><td><code>ponerEnVenta</code>, <code>quitarDeVenta</code>, <code>retirar</code> su saldo, <code>approve</code>, <code>setApprovalForAll</code>.</td><td>Transferir la entrada por su cuenta. Pedir más que el tope.</td><td>Pierde la entrada y pierde el saldo que tuviera acreditado. No hay recuperación.</td></tr>
+  </table>
+  <div class="caja">
+    <div class="caja-et">COMPROBADO EN LA RED LOCAL</div>
+    <p>Tras una compra del lote original a 0,1 ETH, <code>saldos[owner]</code> vale <code>100000000000000000</code> (0,1 ETH en wei). Si otra cuenta llama a <code>retirar()</code>, revierte con <code>SinSaldo()</code>. No hay función de rescate, ni de pausa, ni de administración del dinero ajeno. Eso es una decisión de diseño con dos filos: nadie puede robar el saldo de otro, y nadie puede rescatarlo.</p>
+  </div>
+  <p><strong>La pregunta de la pasada 2 que casi nadie se hace:</strong> ¿qué cosas <em>no</em> puede hacer nadie? En este contrato, nadie —ni el <code>owner</code>— puede corregir una emisión equivocada, devolver un pago ni cambiar el tope. La inmutabilidad corta para los dos lados, y hay que poder decirlo en voz alta en la sustentación.</p>
+</section>
+
+<!-- ============================================================ 8 -->
+<section class="sec">
+  <div class="sec-cab"><span class="sec-num">08</span><h2>Pasada 3 · ¿Por dónde entra y sale el dinero?</h2><span class="lead">5 MINUTOS</span></div>
+  <table>
+    <tr><th style="width:26%">PUERTA</th><th style="width:12%">DIRECCIÓN</th><th>QUÉ PASA CON EL DINERO</th></tr>
+    <tr><td class="pk">comprar() payable</td><td>Entra</td><td>Exige <code>msg.value == precioOriginal</code>, exacto. El monto se <strong>acredita</strong> a <code>saldos[owner()]</code>; no se le envía a nadie.</td></tr>
+    <tr><td class="pk">comprarReventa() payable</td><td>Entra</td><td>Exige <code>msg.value == oferta.precio</code>, exacto. Se acredita a <code>saldos[vendedor]</code> <strong>antes</strong> de mover el token.</td></tr>
+    <tr><td class="pk">retirar()</td><td>Sale</td><td>Única salida. Pone <code>saldos[msg.sender] = 0</code> <strong>antes</strong> del <code>call</code>, y exige que el envío no falle. Patrón de retiro: el contrato nunca envía por su cuenta.</td></tr>
+    <tr><td class="pk">(ninguna otra)</td><td>—</td><td>No hay <code>receive</code> ni <code>fallback</code>. El contrato <strong>no acepta</strong> ether a secas.</td></tr>
+  </table>
+  <div class="caja">
+    <div class="caja-et">DOS COSAS COMPROBADAS EN LA RED LOCAL</div>
+    <p><strong>a ·</strong> Enviar ether al contrato sin llamar a ninguna función revierte:</p>
+    <pre style="margin:2mm 0">Transaction reverted: function selector was not recognized and
+there's no fallback nor receive function</pre>
+    <p><strong>b ·</strong> Pagar <em>de más</em> en una reventa tampoco pasa. Con una oferta de 0,12 ETH y un pago de 0,5:</p>
+    <pre style="margin:2mm 0">reverted with custom error
+'PagoIncorrecto(120000000000000000, 500000000000000000)'</pre>
+    <p>El pago tiene que ser <strong>exacto</strong>: ni un wei más, ni uno menos. Guarden ese dato: cierra de entrada el intento más obvio de «pago lo que quiera por encima del tope».</p>
+  </div>
+  <p><strong>La pregunta de la pasada 3:</strong> ¿todo lo que entra tiene una salida con nombre y dueño? Aquí sí: cada wei que entra queda anotado en <code>saldos</code> a nombre de alguien, y la única salida paga a quien la pide lo que tiene anotado. Hagan ese balance en su propio contrato: si entra dinero que no queda anotado a nombre de nadie, ese dinero está atrapado para siempre.</p>
+</section>
+
+<!-- ============================================================ 9 -->
+<section class="sec salto">
+  <div class="sec-cab"><span class="sec-num">09</span><h2>Pasada 4 · los dos primeros intentos</h2><span class="lead">LA PASADA DEL ADVERSARIO</span></div>
+  <p>Aquí empieza el ataque. El personaje es un revendedor que <strong>sabe programar</strong>: no usa la interfaz oficial del organizador, llama al contrato directamente desde un contrato propio. Eso es <code>contracts/s07/AtacanteTope.sol</code>, y es exactamente lo que haría alguien con malas intenciones y una tarde libre.</p>
+  <p>Lo primero que hace es comprar una entrada <strong>con su contrato</strong>, no con su billetera, al precio oficial:</p>
+  <pre>function comprarOriginal() external payable returns (uint256) {
+    return entradas.comprar{value: msg.value}();
+  }</pre>
+  <p>Y funciona: la prueba comprueba que <code>ownerOf(1)</code> es la dirección del contrato atacante. <strong>El dueño registrado de la entrada 1 no es una persona: es un programa.</strong> Guarden ese detalle; es la llave de la sección 16.</p>
+
+  <h3 style="font-size:10.5pt;margin:5mm 0 2mm">9.1 · Intento 1 · «le paso la entrada a mi comprador y él me paga por fuera»</h3>
+  <p>El intento obvio, el que todo el mundo prueba primero. Si el problema es el precio que registra el contrato, no registremos ningún precio: moverla y cobrar aparte.</p>
+  <pre>function intentoTransferenciaDirecta(uint256 tokenId, address comprador) external {
+    IERC721(address(entradas)).transferFrom(address(this), comprador, tokenId);
+  }</pre>
+  <p>Es legítimo del todo desde el punto de vista del estándar: <code>transferFrom</code> es una función pública de cualquier ERC-721, y quien la llama es el dueño del token. Su prueba:</p>
+  <pre>it("★ intento 1 · transferFrom directo: BLOQUEADO", async () => {
+  const { entradas, atacante, victima, tokenId } = await loadFixture(desplegarYComprar);
+  await expect(atacante.intentoTransferenciaDirecta(tokenId, victima.address))
+    .to.be.revertedWithCustomError(entradas, "TransferenciaDirectaBloqueada");
+});</pre>
+  <p><strong>Resultado:</strong> revierte con <code>TransferenciaDirectaBloqueada</code>. <strong>Pregunta:</strong> el contrato no define ninguna función llamada <code>transferFrom</code>. La hereda de <code>ERC721</code>, que es código de OpenZeppelin que nadie tocó. ¿Cómo consigue el contrato que una función heredada, que él no escribió, revierta con <em>su</em> error?</p>
+
+  <h3 style="font-size:10.5pt;margin:5mm 0 2mm">9.2 · Intento 2 · «la versión segura de la transferencia, por si acaso»</h3>
+  <p>Hipótesis razonable: tal vez el bloqueo está puesto encima de <code>transferFrom</code> y el estándar ofrece otra puerta. ERC-721 tiene dos familias de transferencia, y <code>safeTransferFrom</code> recorre un camino distinto: avisa al receptor con <code>onERC721Received</code>.</p>
+  <pre>function intentoTransferenciaSegura(uint256 tokenId, address comprador) external {
+    IERC721(address(entradas)).safeTransferFrom(address(this), comprador, tokenId);
+  }</pre>
+  <p><strong>Resultado:</strong> revierte con <strong>el mismo error</strong>, <code>TransferenciaDirectaBloqueada</code>.</p>
+  <p>Eso es información valiosa: dos caminos distintos del estándar, con firmas distintas y comprobaciones distintas, mueren con el mismo error. <strong>El bloqueo no está en la puerta: está más adentro, en un sitio por el que pasan las dos.</strong></p>
+  <p>Y anoten de paso una frase del intento 2 que vuelve a aparecer, decisiva, en la sección 16: <em><code>safeTransferFrom</code> avisa al receptor</em>. Avisar significa <strong>llamar a código ajeno</strong>. Todavía no hagan nada con eso.</p>
+</section>
+
+<!-- ============================================================ 10 -->
+<section class="sec">
+  <div class="sec-cab"><span class="sec-num">10</span><h2>Primera parada obligatoria · su hipótesis, por escrito</h2><span class="lead">5 MINUTOS · CON LÁPIZ</span></div>
+  <div class="caja peligro">
+    <div class="caja-et">NO PASEN A LA SECCIÓN 11 TODAVÍA</div>
+    <p>La sección 11 contiene la respuesta. Antes de leerla, cada equipo escribe su hipótesis en la ficha de lectura. No importa si es correcta: importa que esté escrita <strong>antes</strong>. Un diagnóstico que se formula después de ver la respuesta no enseña nada, y en la Sesión 8 no van a tener la respuesta a mano.</p>
+  </div>
+  <p>Con <code>EntradasVulnerable.sol</code> abierto, y sin usar buscador de texto todavía, respondan:</p>
+  <ol>
+    <li><strong>¿Dónde está el bloqueo?</strong> Las dos transferencias del estándar pasan por él. Busquen en el contrato algo que (a) no sea una función pública, (b) <code>ERC721</code> llame siempre, y (c) el contrato pueda reescribir. ¿Cómo se llama en Solidity esa figura de «reescribir una función del padre»?</li>
+    <li><strong>¿Cómo distingue el bloqueo una transferencia prohibida de una permitida?</strong> Porque <code>comprarReventa</code> sí mueve entradas, y la emisión también crea tokens. Si el bloqueo rechazara todo movimiento, el contrato no funcionaría. Hay un interruptor. Búsquenlo en las variables de estado: hay una que no se parece a ninguna otra.</li>
+    <li><strong>Si tuvieran que desactivar el tope cambiando una sola línea del contrato, ¿cuál cambiarían?</strong> (Hipotético: no lo editen. Es la prueba de que entendieron dónde está el corazón.)</li>
+  </ol>
+  <p>Ahora, y solo ahora, sigan.</p>
+</section>
+
+<!-- ============================================================ 11 -->
+<section class="sec salto">
+  <div class="sec-cab"><span class="sec-num">11</span><h2>La revelación · el gancho <code>_update</code></h2><span class="lead">EL CORAZÓN DEL CONTRATO</span></div>
+  <p>Está en las últimas líneas del contrato, bajo un comentario que dice <em>el corazón del contrato</em>. No es una función pública: por eso no apareció en la pasada 1.</p>
+  <pre>// contracts/s07/EntradasVulnerable.sol
+function _update(address to, uint256 tokenId, address auth)
+    internal override returns (address)
+{
+    address from = _ownerOf(tokenId);
+    if (from != address(0) && !_transferenciaAbierta) {
+        revert TransferenciaDirectaBloqueada();
+    }
+    return super._update(to, tokenId, auth);
+}</pre>
+
+  <h3 style="font-size:10.5pt;margin:4mm 0 2mm">11.1 · Qué es <code>_update</code></h3>
+  <p>En OpenZeppelin 5, <code>_update</code> es el <strong>único punto</strong> por el que pasa cualquier cambio de dueño de un token ERC-721. No es una convención amable: es la arquitectura del contrato base. <code>transferFrom</code>, <code>safeTransferFrom</code>, <code>_mint</code>, <code>_safeMint</code>, <code>_burn</code> y <code>_transfer</code> terminan todos llamando a <code>_update</code>. Un cuello de botella a propósito.</p>
+  <p>Y <code>_update</code> es <code>virtual</code>, es decir, un contrato hijo puede <strong>reescribirlo</strong> con <code>override</code>. Eso es lo que hace este contrato: se mete en el cuello de botella y pone un portero. Tres piezas:</p>
+  <table>
+    <tr><th style="width:34%">LA PIEZA</th><th>QUÉ HACE</th></tr>
+    <tr><td class="pk">from != address(0)</td><td>Distingue <strong>acuñar</strong> de <strong>mover</strong>. Al emitir una entrada, el dueño anterior es la dirección cero: no hay nada que bloquear, y <code>comprar()</code> funciona.</td></tr>
+    <tr><td class="pk">!_transferenciaAbierta</td><td>La compuerta. Es un <code>bool private</code> que vale <code>false</code>… salvo durante un rato. <strong>Cuánto rato, exactamente, es la pregunta de toda esta guía.</strong></td></tr>
+    <tr><td class="pk">super._update(...)</td><td>Si pasó el portero, se delega al comportamiento normal de ERC-721. El contrato no reimplementa el estándar: lo envuelve.</td></tr>
+  </table>
+  <p>Y la compuerta la abre <strong>una sola función del contrato</strong>, después de haber verificado todo:</p>
+  <pre>// dentro de comprarReventa, DESPUÉS de verificar oferta, cierre, uso y pago exacto:
+delete ofertas[tokenId];
+saldos[vendedor] += msg.value;
+
+_transferenciaAbierta = true;
+_safeTransfer(vendedor, msg.sender, tokenId, "");
+_transferenciaAbierta = false;
+
+emit Revendida(tokenId, vendedor, msg.sender, msg.value);</pre>
+
+  <h3 style="font-size:10.5pt;margin:4mm 0 2mm">11.2 · El argumento del autor, que es casi correcto</h3>
+  <p>Así lo razonó quien escribió el contrato, y así está escrito en <code>demo-entradas/ARQUITECTURA.md</code>:</p>
+  <div class="caja">
+    <div class="caja-et">EL RAZONAMIENTO, TAL COMO ESTÁ PUBLICADO</div>
+    <p>Para mover una entrada hay que pasar por <code>_update</code>. Para pasar por <code>_update</code> hay que tener la compuerta abierta. La compuerta es <code>private</code>: ninguna función externa la toca, ni hay <em>setter</em>, ni se expone en ninguna firma. Solo la abre <code>comprarReventa</code>, y solo tras comprobar que hay una oferta activa, que la reventa no está cerrada, que la entrada no está usada y que el pago es <strong>exactamente</strong> el precio de la oferta. Y ese precio ya pasó por <code>ponerEnVenta</code>, que rechaza cualquier valor por encima del tope. <em>No hay un segundo camino porque no hay un segundo <code>_update</code>.</em></p>
+  </div>
+  <p>Y para los intentos 1 a 4, el argumento <strong>se cumple</strong>: nada de lo que viene en las secciones 12 y 13 lo rompe. Es un buen diseño y hay que reconocérselo. El control no está puesto en cada puerta —no hay un <code>require</code> repetido en <code>transferFrom</code> y otro en <code>safeTransferFrom</code>—, está puesto <strong>en el punto por donde pasa el estado</strong>. Esa es la idea que hay que copiar.</p>
+
+  <div class="caja alerta">
+    <div class="caja-et">PERO EL ARGUMENTO TIENE UN HUECO, Y ESTÁ EN UNA PALABRA</div>
+    <p>«Solo la abre <code>comprarReventa</code>, <strong>y la cierra inmediatamente después</strong>.» Esa frase es verdad, y aun así es el problema. <strong>¿Después de qué, exactamente?</strong></p>
+    <p>Miren otra vez las tres líneas de arriba y pregúntense qué ocurre, paso a paso, <em>durante</em> <code>_safeTransfer</code>. Lo dijo el intento 2: la transferencia segura <strong>avisa al receptor</strong>. Si el receptor es un contrato, ¿quién está ejecutando código en ese momento, y en qué estado está la compuerta mientras lo hace?</p>
+    <p>No respondan todavía. Primero, los intentos 3 y 4, que son cortos. El reto final es la sección 16.</p>
+  </div>
+
+  <div class="caja clave">
+    <div class="caja-et">LA LECCIÓN DE LECTURA, QUE ES MÁS IMPORTANTE QUE EL TRUCO</div>
+    <p>Lo que hace cumplir la regla principal del contrato <strong>no aparece en su interfaz pública</strong>. Una pasada 1 sola —la que haría cualquiera que lea «qué funciones tiene»— no lo habría encontrado nunca. Lo que lo delató fue un cabo suelto del inventario: un <strong>error</strong> declarado que ninguna función pública parecía poder lanzar.</p>
+    <p>Apliquen eso a su propio contrato antes de la Sesión 8: <strong>¿dónde está la línea que hace cumplir su regla principal, y se ve desde afuera?</strong> Si está en un <code>modifier</code>, en un <code>override</code> de un gancho de OpenZeppelin o en una variable <code>private</code>, nadie que lea su interfaz va a entender el contrato. Documentarlo es su trabajo, y es la primera pregunta de la defensa.</p>
+  </div>
+</section>
+
+<!-- ============================================================ 12 -->
+<section class="sec">
+  <div class="sec-cab"><span class="sec-num">12</span><h2>Intento 3 · aprobar a un cómplice</h2><span class="lead">LA TRAMPA PEDAGÓGICA</span></div>
+  <p>Con <code>_update</code> entendido, los intentos 3 y 4 se leen ya sabiendo el final. Pero el 3 enseña algo distinto, y por eso tiene <strong>dos</strong> pruebas.</p>
+  <pre>function intentoAprobarAComplice(uint256 tokenId, address complice) external {
+    IERC721(address(entradas)).approve(complice, tokenId);
+  }</pre>
+  <p>Primera prueba: la aprobación <strong>se concede</strong>. No revierte. <code>getApproved(tokenId)</code> devuelve la dirección del cómplice.</p>
+  <pre>await atacante.intentoAprobarAComplice(tokenId, complice.address);
+expect(await entradas.getApproved(tokenId)).to.equal(complice.address);</pre>
+  <p>Segunda prueba: el cómplice intenta usar su permiso y revierte con <code>TransferenciaDirectaBloqueada</code>.</p>
+  <div class="caja clave">
+    <div class="caja-et">POR QUÉ ESTO IMPORTA Y NO ES UN DETALLE</div>
+    <p><strong>Aprobar no mueve nada: solo anota un permiso.</strong> <code>approve</code> escribe en un mapa y emite un evento; no pasa por <code>_update</code> porque no cambia de dueño a nadie. El bloqueo aparece cuando alguien <em>usa</em> el permiso. <strong>El control va en el ejercicio del permiso, no en su concesión.</strong></p>
+    <p>La trampa es de lectura, y es muy común: ver que una llamada «pasa» y concluir que el ataque funciona. En cadena, <strong>que una transacción no revierta no significa que haya conseguido nada</strong>. Hay que mirar el estado después. La prueba del intento 3 está en verde y el ataque fracasó.</p>
+  </div>
+  <p><strong>Comprobado en la red local</strong>, por si piensan que el permiso «para todas las entradas» es distinto: con <code>setApprovalForAll(complice, true)</code>, la consulta <code>isApprovedForAll</code> devuelve <code>true</code> —el permiso también se concede— y el <code>transferFrom</code> del operador revierte igual con <code>TransferenciaDirectaBloqueada()</code>. Mismo cuello de botella, mismo portero.</p>
+</section>
+
+<!-- ============================================================ 13 -->
+<section class="sec">
+  <div class="sec-cab"><span class="sec-num">13</span><h2>Intento 4 · pedir más que el tope</h2><span class="lead">Y EL BORDE EXACTO</span></div>
+  <p>Si la entrada solo se mueve por <code>comprarReventa</code>, usemos <code>comprarReventa</code>… pero con un precio abusivo.</p>
+  <pre>function intentoPrecioSobreTope(uint256 tokenId, uint256 precioAbusivo) external {
+    entradas.ponerEnVenta(tokenId, precioAbusivo);
+  }</pre>
+  <p>Con tope 0,12 ETH y un precio de 0,5, revierte, y el error <strong>lleva los dos números adentro</strong>:</p>
+  <pre>await expect(atacante.intentoPrecioSobreTope(tokenId, abusivo))
+  .to.be.revertedWithCustomError(entradas, "PrecioSobreTope")
+  .withArgs(TOPE, abusivo);</pre>
+  <p>Fíjense en <code>.withArgs(TOPE, abusivo)</code>: la prueba no se contenta con «revirtió», exige <strong>qué tope se aplicó y qué precio se pidió</strong>. Un error personalizado con argumentos es documentación ejecutable; copien la costumbre en su proyecto.</p>
+  <p>Y hay una segunda prueba, la del <strong>borde</strong>: con el precio exactamente igual al tope, la oferta <strong>se acepta</strong> (<code>oferta.activa === true</code>, <code>oferta.precio === TOPE</code>). Porque la comparación del contrato es <code>precio &gt; topeReventa</code>, no <code>&gt;=</code>. Un tope que excluyera su propio valor sería un tope distinto del que anuncia la especificación.</p>
+  <div class="caja">
+    <div class="caja-et">EL BORDE SIEMPRE SE PRUEBA DE LOS DOS LADOS</div>
+    <p>Una prueba que solo comprueba que 0,5 se rechaza no distingue un contrato con <code>&gt;</code> de uno con <code>&gt;=</code>: los dos rechazan 0,5. Hacen falta las dos pruebas —el valor justo en el límite se acepta, el valor justo por encima se rechaza— para fijar el comportamiento. Esto es exactamente lo que cazan los mutantes del laboratorio de la Sesión 8.</p>
+  </div>
+</section>
+
+<!-- ============================================================ 14 -->
+<section class="sec salto">
+  <div class="sec-cab"><span class="sec-num">14</span><h2>Intento 5 · el canal lateral</h2><span class="lead">EL LÍMITE HONESTO</span></div>
+  <pre>function ponerEnVentaEnElTope(uint256 tokenId) external {
+    if (msg.sender != duenno) revert NoEraElDuenno();
+    entradas.ponerEnVenta(tokenId, entradas.topeReventa());
+  }</pre>
+  <p>No hay truco. El revendedor pone la entrada en venta <strong>en el tope exacto</strong>, que es perfectamente legal, y le cobra la diferencia al comprador <strong>por fuera de la cadena</strong>: en efectivo, por transferencia bancaria, en cripto a otra dirección. La prueba lo escenifica así:</p>
+  <pre>// 1 · El comprador le paga al revendedor por fuera de la cadena.
+const porFuera = ethers.parseEther("0.38");
+await victima.sendTransaction({ to: revendedor.address, value: porFuera });
+
+// 2 · Y ahora la reventa "legal", en el tope exacto.
+await atacante.connect(revendedor).ponerEnVentaEnElTope(tokenId);
+await entradas.connect(victima).comprarReventa(tokenId, { value: TOPE });
+
+expect(await entradas.ownerOf(tokenId)).to.equal(victima.address);</pre>
+  <p>La víctima pagó <strong>0,12 en cadena y 0,38 por fuera: 0,5 en total, cuatro veces el tope</strong>. Y la prueba siguiente remata el argumento: <code>saldos[atacante]</code> vale exactamente <code>TOPE</code>. Lo cobrado por fuera <strong>no aparece en ninguna parte del estado del contrato</strong>. Todo lo que el contrato puede ver dice que la regla se cumplió.</p>
+
+  <div class="caja peligro">
+    <div class="caja-et">LA FRASE QUE HAY QUE SABER DECIR</div>
+    <p>La regla de un contrato rige <strong>lo que pasa adentro del contrato</strong>. Un pago que ocurre por fuera es, para él, inexistente: no es que lo tolere, es que no tiene ningún órgano con el que verlo. Esto <strong>no es un error del contrato</strong>: es el límite de lo que un contrato puede hacer cumplir, y vale para todos, incluido el de ustedes.</p>
+    <p>Distingan bien los dos hallazgos de este laboratorio: el intento 5 es un <strong>límite</strong> (no se puede arreglar con código) y el de la sección 16 es un <strong>fallo</strong> (se arregla con tres líneas). Confundirlos es el error más común al auditar.</p>
+  </div>
+
+  <h3 style="font-size:10.5pt;margin:5mm 0 2mm">14.1 · ¿Entonces el tope es inútil?</h3>
+  <p>Es la pregunta correcta, y la respuesta es <strong>no</strong>. Pero tiene que argumentarse, no afirmarse. Cuatro argumentos, los cuatro verificables en el código:</p>
+
+  <table>
+    <tr><th style="width:28%">ARGUMENTO</th><th>DÓNDE SE VE</th></tr>
+    <tr><td class="pk">1 · El acuerdo por fuera reintroduce el riesgo que el contrato eliminaba</td><td><code>comprarReventa</code> no restringe quién compra: cualquier dirección puede tomar una oferta activa. <strong>Comprobado:</strong> con la oferta puesta «para» un comprador pactado, un tercero cualquiera llama <code>comprarReventa</code> y se lleva la entrada. El que pagó 0,38 por fuera no tiene nada que reclamar: no hay contrato que lo respalde, ni en cadena ni en papel. El pago por fuera <em>funciona</em>, pero convierte una compra con garantías en un acto de fe.</td></tr>
+    <tr><td class="pk">2 · Mata la reventa a escala, que es la que hace daño</td><td>El esquema del intento 5 es <strong>trato a trato</strong>: negociar, cobrar por fuera, poner la oferta, esperar que el pactado llegue primero. No hay escaparate, ni precio público, ni reputación, ni automatización. Un bot no puede cobrarle por fuera a quinientos compradores sin exponerse quinientas veces. El contrato no elimina al revendedor de barrio; elimina el <strong>mercado industrial</strong> de reventa.</td></tr>
+    <tr><td class="pk">3 · Deja el rastro completo del lado de la cadena</td><td>Cada reventa emite <code>Revendida(tokenId, de, a, precio)</code>. El organizador puede ver qué cuentas compran y revenden repetidamente, y tiene dos palancas que sí funcionan: <code>cierreReventa</code> (después no se mueve nada, <strong>comprobado</strong>) y <code>marcarUsada</code>. La parte oscura es el precio, no el flujo.</td></tr>
+    <tr><td class="pk">4 · Cambia quién carga con la prueba</td><td>Antes, el organizador prometía un tope y nadie podía comprobarlo. Ahora el tope es público, <code>immutable</code> y verificable por cualquiera, y quien quiera rodearlo tiene que montar una operación por fuera y asumir su riesgo. Eso no es cero: es haber movido el fraude de lo gratuito y automático a lo caro y manual.</td></tr>
+  </table>
+
+  <div class="caja clave">
+    <div class="caja-et">EL CRITERIO PROFESIONAL, Y LA TESIS DEL CURSO</div>
+    <p>Un contrato no se juzga por si es imposible rodearlo —ninguno lo es—, sino por <strong>si su autor sabe exactamente qué hace cumplir y qué no</strong>. El equipo que dice «mi contrato impide la reventa abusiva» está vendiendo humo. El que dice «mi contrato impide que el precio registrado en cadena supere el tope, y no puede ver pagos por fuera; a cambio, la reventa deja de ser un mercado y vuelve a ser un trato con riesgo» está haciendo ingeniería.</p>
+    <p>Esa segunda frase es la que el docente va a pedir en la Sesión 8, con la tercera pregunta de la defensa: <strong>díganme una cosa que su contrato NO puede impedir, y por qué siguen pensando que vale la pena</strong>.</p>
+  </div>
+</section>
+
+<!-- ============================================================ 15 -->
+<section class="sec">
+  <div class="sec-cab"><span class="sec-num">15</span><h2>Lo que el bloqueo no impide</h2><span class="lead">CUATRO COSAS MÁS, COMPROBADAS</span></div>
+  <p>Antes del reto final, cuatro comportamientos que no son fallos del tope, pero que cualquiera que lea el contrato debería poder enunciar. Son material de hallazgo para la ficha.</p>
+
+  <table>
+    <tr><th style="width:32%">COMPORTAMIENTO</th><th>POR QUÉ, Y QUÉ IMPLICA</th></tr>
+    <tr><td class="pk">a · Reventa en cadena, cuantas veces quieran</td><td>Nada limita el número de reventas: la prueba la revende dos veces seguidas en el tope y la entrada termina en una tercera dirección. El tope limita el <strong>precio de cada</strong> reventa, no cuántas hay. Si quisieran limitarlas, haría falta un contador por token que el contrato no tiene.</td></tr>
+    <tr><td class="pk">b · Una oferta con precio <strong>cero</strong> es válida</td><td><strong>Comprobado:</strong> <code>ponerEnVenta(1, 0)</code> se acepta (<code>oferta.activa = true</code>, <code>precio = 0</code>) y <code>comprarReventa(1, {value: 0})</code> transfiere la entrada. Es el intento 5 en su forma más pura: el traspaso gratuito. Y es también el uso más honesto que tiene —regalarle la entrada a un amigo—, así que no está claro que haya que prohibirlo. Pregunta para la ficha: ¿es un hallazgo o es una función?</td></tr>
+    <tr><td class="pk">c · El dueño registrado puede ser un contrato</td><td><strong>Comprobado:</strong> con la entrada 1 en poder del contrato atacante, <code>esValida(1, direcciónDelContrato)</code> devuelve <code>true</code> y <code>esValida(1, direcciónDelRevendedor)</code> devuelve <code>false</code>. El portador válido es el programa, no la persona que lo controla. ¿Cómo entra esa persona al concierto? Eso no lo resuelve el contrato: lo resuelve la app de puerta, y hay que decirlo.</td></tr>
+    <tr><td class="pk">d · Un bot puede quedarse con la oferta recién publicada</td><td><code>comprarReventa</code> solo exige que haya oferta activa, que la reventa esté abierta, que la entrada no esté usada, que el pago sea exacto y que el comprador no sea el vendedor. <strong>No hay nada</strong> que reserve la oferta para nadie. Quien vigile las transacciones pendientes y pague más gas compra antes que la persona que llevaba una hora esperando. Esa familia se llama <strong>front-running / MEV</strong> y se estudia en la Sesión 9 y en la Sesión 14.</td></tr>
+  </table>
+
+  <div class="caja">
+    <div class="caja-et">UN QUINTO, QUE SÍ ES UNA DEFENSA QUE FUNCIONA</div>
+    <p>La reentrada en <code>retirar()</code> no sirve de nada, y conviene comprobarlo en vez de creerlo. <strong>Comprobado:</strong> un contrato con un <code>receive()</code> que vuelve a llamar a <code>retirar()</code> entra una vez más, la segunda llamada no consigue nada y el contrato se lleva <strong>exactamente 0,12 ETH</strong>, con <code>saldos</code> en cero al terminar. La razón está en el orden de tres líneas: <code>saldos[msg.sender] = 0</code> va <strong>antes</strong> del <code>call</code>.</p>
+    <p>Retengan la forma del argumento, porque es exactamente la del reto final: <strong>el estado quedó cerrado antes de entregar el control a código ajeno</strong>. Donde eso se cumple, no hay ataque. Donde no se cumple… sección 16.</p>
+  </div>
+</section>
+
+<!-- ============================================================ 16 -->
+<section class="sec salto">
+  <div class="sec-cab"><span class="sec-num">16</span><h2>El reto final · la compuerta abierta</h2><span class="lead">AQUÍ SE ROMPE EL CONTRATO</span></div>
+  <p>Los cinco intentos anteriores se estrellaron o revelaron un límite. Este rompe la promesa del contrato: <strong>una entrada sale por fuera del tope, sin pasar por <code>comprarReventa</code>, sin registrar ningún precio y sin dejar rastro de reventa</strong>. Y usa solo lo que el contrato expone al mundo.</p>
+
+  <h3 style="font-size:10.5pt;margin:4mm 0 2mm">16.1 · La idea, en tres frases</h3>
+  <ol>
+    <li><code>comprarReventa</code> abre la compuerta y llama a <code>_safeTransfer</code>.</li>
+    <li><code>_safeTransfer</code>, por el estándar, <strong>avisa al receptor</strong> llamando a su <code>onERC721Received</code>. Si el receptor es un contrato, <strong>su código corre en ese momento</strong>.</li>
+    <li>En la versión vulnerable, la compuerta se cierra en la línea <em>siguiente</em> a <code>_safeTransfer</code>, es decir, <strong>después</strong> del aviso. Así que el código del receptor se ejecuta con la compuerta abierta.</li>
+  </ol>
+  <p>Y con la compuerta abierta, ese receptor puede llamar a <code>transferFrom</code> y mover <strong>otra entrada suya</strong>, a donde quiera, al precio que haya pactado por fuera. El portero de <code>_update</code> lo deja pasar: ve la compuerta abierta y supone que quien está moviendo el token es <code>comprarReventa</code>.</p>
+  <p>Eso es <code>contracts/s07/AtacanteCompuerta.sol</code>. Lo importante son dos funciones:</p>
+  <pre>/// Prepara el escape: qué entrada propia se quiere sacar y hacia dónde.
+function prepararEscape(uint256 tokenId, address haciaDonde) external {
+    tokenAEscapar = tokenId;
+    destino = haciaDonde;
+}
+
+/// Dispara la compra legítima de otra entrada; el escape ocurre en el callback.
+function comprarYEscapar(uint256 tokenEnVenta) external payable {
+    entradas.comprarReventa{value: msg.value}(tokenEnVenta);
+}
+
+function onERC721Received(address, address, uint256, bytes calldata)
+    external returns (bytes4)
+{
+    if (destino != address(0)) {
+        address haciaDonde = destino;
+        destino = address(0);          // una sola vez, para no entrar en bucle
+        // La compuerta sigue abierta en este instante: movemos UNA ENTRADA
+        // PROPIA sin pasar por comprarReventa y, por tanto, sin tope.
+        try IERC721(address(entradas))
+              .transferFrom(address(this), haciaDonde, tokenAEscapar) {
+            loLogro = true;
+        } catch {
+            loLogro = false;
+        }
+    }
+    return IERC721Receiver.onERC721Received.selector;
+}</pre>
+  <p>Fíjense en el <code>try / catch</code>: no es decoración. Si el <code>transferFrom</code> del escape revierte y el atacante no lo atrapa, <strong>la reversión se propaga y tumba la compra legítima entera</strong>. Con el <code>catch</code>, el atacante pierde el escape pero se queda con la entrada que compró. Un atacante prudente nunca arriesga la operación buena por la mala.</p>
+
+  <h3 style="font-size:10.5pt;margin:5mm 0 2mm">16.2 · Corran el ataque</h3>
+  <pre>npx hardhat test test/s07/CompuertaAbierta.test.js</pre>
+  <p><strong>Salida esperada</strong> (real):</p>
+  <pre>  S07 · el ataque de la compuerta · versión VULNERABLE
+    √ ★ el atacante saca su entrada por fuera del tope desde onERC721Received
+
+  S07 · el mismo ataque · versión CORREGIDA
+    √ ★ la compuerta se cierra antes del aviso, y el escape falla
+    √ y la compra legítima que disparaba el ataque sí se completa
+    √ ★ y una reventa normal entre personas sigue funcionando
+
+  4 passing</pre>
+  <p>El escenario que montan las cuatro pruebas es el mismo, y vale la pena leerlo despacio en <code>test/s07/CompuertaAbierta.test.js</code>:</p>
+  <table>
+    <tr><th style="width:12%">PASO</th><th>QUÉ OCURRE</th></tr>
+    <tr><td class="pk">1</td><td>El atacante compra la <strong>entrada 1</strong> con su contrato, al precio oficial. Es la que quiere sacar.</td></tr>
+    <tr><td class="pk">2</td><td>Otra persona compra la <strong>entrada 2</strong> y la pone en venta <strong>en el tope</strong>. Todo legal.</td></tr>
+    <tr><td class="pk">3</td><td>El atacante llama <code>prepararEscape(1, comprador)</code>: anota qué quiere sacar y hacia dónde.</td></tr>
+    <tr><td class="pk">4</td><td>El atacante llama <code>comprarYEscapar(2)</code> pagando el tope. Compra de verdad la entrada 2… y, dentro del aviso de recepción, saca la entrada 1.</td></tr>
+  </table>
+  <p>Y lo que quedó, comprobado contra la versión vulnerable:</p>
+  <pre>expect(await atacante.loLogro()).to.equal(true);
+expect(await entradas.ownerOf(1)).to.equal(comprador.address);   // se escapó
+expect(await entradas.saldos(atacante.target)).to.equal(0n);     // sin precio</pre>
+  <div class="caja peligro">
+    <div class="caja-et">LO QUE ACABAN DE VER, DICHO SIN ADORNOS</div>
+    <p>La entrada 1 cambió de dueño. <strong>El contrato no registró ningún precio por ese traspaso</strong> (<code>saldos</code> del atacante en cero), no emitió <code>Revendida</code>, no consultó el tope y no comprobó siquiera que hubiera una oferta. Lo que el comprador haya pagado por fuera puede ser diez veces el tope: para el contrato, ese movimiento es indistinguible de nada.</p>
+    <p>La promesa del contrato —«da igual que alguien escriba su propio programa: el contrato lo rechaza»— era <strong>falsa</strong>, y estuvo publicada semanas con once pruebas en verde y una especificación que la daba por demostrada.</p>
+  </div>
+
+  <h3 style="font-size:10.5pt;margin:5mm 0 2mm">16.3 · Segunda parada obligatoria</h3>
+  <div class="caja alerta">
+    <div class="caja-et">ANTES DE ABRIR <code>Entradas.sol</code></div>
+    <p>Escriban en la ficha, en una frase, <strong>cuál es la corrección</strong>. Tienen todo lo necesario: saben dónde está el portero, saben cuándo se abre la compuerta y acaban de ver cuándo se cierra. La pregunta exacta es: <em>¿en qué momento debería cerrarse la compuerta para que el aviso al receptor ya no la encuentre abierta?</em></p>
+    <p>Escríbanlo. Después abran el archivo. Casi todos los equipos aciertan en esta parada, y la sensación de acertar es el objetivo del laboratorio.</p>
+  </div>
+
+  <h3 style="font-size:10.5pt;margin:5mm 0 2mm">16.4 · Las tres líneas</h3>
+  <p>Ahora sí: abran <code>contracts/s07/Entradas.sol</code> y vayan a <code>_update</code>. En VS Code pueden comparar los dos archivos directamente: selecciónenlos en el explorador, clic derecho, <em>Compare Selected</em>. La única diferencia de todo el contrato está aquí.</p>
+  <pre>// ANTES · EntradasVulnerable.sol
+if (from != address(0) && !_transferenciaAbierta) {
+    revert TransferenciaDirectaBloqueada();
+}
+return super._update(to, tokenId, auth);
+
+// DESPUÉS · Entradas.sol
+if (from != address(0)) {
+    if (!_transferenciaAbierta) revert TransferenciaDirectaBloqueada();
+    // La compuerta es de UN SOLO USO y se cierra aquí, antes de que
+    // `_safeTransfer` avise al receptor.
+    _transferenciaAbierta = false;
+}
+return super._update(to, tokenId, auth);</pre>
+
+  <h3 style="font-size:10.5pt;margin:5mm 0 2mm">16.5 · Por qué funciona · esto lo escriben ustedes</h3>
+  <p>Es el entregable 3 (cinco a diez renglones, con sus palabras). Para que salga bien, respondan estas cuatro preguntas; están en orden y cada una se contesta mirando el código:</p>
+  <table>
+    <tr><th style="width:8%">#</th><th>LA PREGUNTA</th></tr>
+    <tr><td class="pk">1</td><td>¿En qué <strong>momento</strong> del recorrido de <code>_safeTransfer</code> corre <code>_update</code>, y en qué momento corre el aviso <code>onERC721Received</code>? ¿Cuál va primero? (Está en <code>ERC721.sol</code> de OpenZeppelin: <code>_safeTransfer</code> → <code>_transfer</code> → <code>_update</code>, y <strong>después</strong> la comprobación del receptor.)</td></tr>
+    <tr><td class="pk">2</td><td>Si la compuerta se pone en <code>false</code> dentro de <code>_update</code>, ¿en qué estado la encuentra el aviso al receptor? ¿Y qué le pasa al <code>transferFrom</code> del escape?</td></tr>
+    <tr><td class="pk">3</td><td>¿Por qué la línea <code>_transferenciaAbierta = false;</code> que sigue estando en <code>comprarReventa</code> ya no hace falta, y por qué no estorba? ¿Qué significa que la compuerta sea «de un solo uso»?</td></tr>
+    <tr><td class="pk">4</td><td>¿Por qué la corrección <strong>no rompe</strong> la reventa normal? (La cuarta prueba del archivo lo comprueba: una reventa entre dos personas sigue funcionando. Expliquen por qué tenía que seguir funcionando.)</td></tr>
+  </table>
+  <p>Contra la versión corregida, el escape falla. <strong>Comprobado:</strong> <code>loLogro()</code> queda en <code>false</code>, <code>ownerOf(1)</code> sigue siendo el contrato atacante, y la compra de la entrada 2 se completa igual. Y si se le quita el <code>try / catch</code> al atacante para ver qué error se estaba tragando, aparece:</p>
+  <pre>reverted with custom error 'TransferenciaDirectaBloqueada()'</pre>
+  <p>Es el mismo error del intento 1. El portero volvió a hacer su trabajo.</p>
+
+  <h3 style="font-size:10.5pt;margin:5mm 0 2mm">16.6 · La tabla del informe</h3>
+  <table>
+    <tr><th style="width:26%">AL FINAL DEL ATAQUE…</th><th style="width:37%">CONTRA <code>EntradasVulnerable</code></th><th>CONTRA <code>Entradas</code></th></tr>
+    <tr><td class="pk">¿Quién tiene la entrada 1?</td><td></td><td></td></tr>
+    <tr><td class="pk">¿Quién tiene la entrada 2?</td><td></td><td></td></tr>
+    <tr><td class="pk">saldos del atacante</td><td></td><td></td></tr>
+    <tr><td class="pk">¿Se emitió <code>Revendida</code> por la entrada 1?</td><td></td><td></td></tr>
+    <tr><td class="pk">loLogro()</td><td></td><td></td></tr>
+    <tr><td class="pk">¿Cuánto pagó de más el comprador, y dónde consta?</td><td></td><td></td></tr>
+  </table>
+
+  <h3 style="font-size:10.5pt;margin:5mm 0 2mm">16.7 · Su prueba de regresión</h3>
+  <p>Una <strong>prueba de regresión</strong> es la que habría atrapado el fallo antes de publicarlo. Su criterio de aceptación es exacto y se comprueba en treinta segundos:</p>
+  <div class="caja clave">
+    <div class="caja-et">EL CRITERIO</div>
+    <p>Su prueba tiene que estar <strong>en rojo contra <code>EntradasVulnerable</code></strong> y <strong>en verde contra <code>Entradas</code></strong>. Si pasa contra las dos, no prueba nada. Si falla contra las dos, está mal escrita.</p>
+  </div>
+  <p>El truco para correr la misma prueba contra los dos contratos es una variable de entorno, igual que en el cazador de mutantes de la Sesión 8:</p>
+  <pre>// test/s07/&lt;equipo&gt;/Regresion.test.js
+import { expect } from "chai";
+import { network } from "hardhat";
+
+const { ethers, networkHelpers } = await network.create();
+const { time } = networkHelpers;
+
+const CONTRATO = process.env.CONTRATO ?? "Entradas";   // así se cambia de versión
+const PRECIO = ethers.parseEther("0.1");
+const TOPE   = ethers.parseEther("0.12");
+
+async function montar() {
+  const [, atacanteEOA, vendedor, comprador] = await ethers.getSigners();
+  const cierre = (await time.latest()) + 7 * 24 * 60 * 60;
+  const entradas = await ethers.deployContract(CONTRATO,
+    ["Concierto USB", 50, PRECIO, TOPE, cierre]);
+  const atacante = await ethers.deployContract("AtacanteCompuerta",
+    [entradas.target], atacanteEOA);
+  await atacante.connect(atacanteEOA).comprarOriginal({ value: PRECIO });
+  await entradas.connect(vendedor).comprar({ value: PRECIO });
+  await entradas.connect(vendedor).ponerEnVenta(2, TOPE);
+  return { entradas, atacante, atacanteEOA, comprador };
+}
+
+describe(`regresión contra ${CONTRATO}`, () => {
+  it("INVARIANTE · ninguna entrada cambia de dueño sin emitir Revendida",
+     async () => {
+    const { entradas, atacante, atacanteEOA, comprador } = await montar();
+    await atacante.connect(atacanteEOA).prepararEscape(1, comprador.address);
+    await atacante.connect(atacanteEOA).comprarYEscapar(2, { value: TOPE });
+
+    const movimientos = (await entradas.queryFilter(entradas.filters.Transfer()))
+      .filter((e) =&gt; e.args.from !== ethers.ZeroAddress);   // fuera las acuñaciones
+    const reventas = await entradas.queryFilter(entradas.filters.Revendida());
+    expect(movimientos.length).to.equal(reventas.length);
+  });
+});</pre>
+  <p>Y se corre así, en PowerShell:</p>
+  <pre>$env:CONTRATO = "Entradas";            npx hardhat test test/s07/&lt;equipo&gt;/Regresion.test.js
+$env:CONTRATO = "EntradasVulnerable";  npx hardhat test test/s07/&lt;equipo&gt;/Regresion.test.js
+$env:CONTRATO = $null</pre>
+  <p>En macOS o Linux: <code>CONTRATO=EntradasVulnerable npx hardhat test …</code>. <strong>Salida real</strong> de las dos corridas con el invariante de arriba:</p>
+  <pre>regresión contra Entradas
+  √ INVARIANTE · ninguna entrada cambia de dueño sin emitir Revendida
+  1 passing
+
+regresión contra EntradasVulnerable
+  1) INVARIANTE · ninguna entrada cambia de dueño sin emitir Revendida:
+     AssertionError: expected 2 to equal 1
+  1 failing</pre>
+  <p>«Expected 2 to equal 1»: dos entradas se movieron y solo una reventa quedó registrada. <strong>Ese mensaje es el fallo, dicho por una máquina.</strong></p>
+
+  <div class="caja alerta">
+    <div class="caja-et">LO QUE TIENEN QUE ESCRIBIR USTEDES</div>
+    <p>El invariante de arriba es el del docente: cópienlo, córranlo y entiéndanlo, pero <strong>su entrega tiene que comprobar un invariante distinto</strong> del mismo fallo. Tres candidatos; elijan uno o inventen otro, y cumplan el criterio (rojo contra la vulnerable, verde contra la corregida):</p>
+    <ul>
+      <li><strong>Por dueño:</strong> después del ataque, el contrato atacante sigue teniendo las entradas que compró. ¿Cuántas tiene al final en cada versión? <code>balanceOf</code> lo dice en una línea.</li>
+      <li><strong>Por dinero:</strong> la suma de todo lo acreditado en <code>saldos</code> tiene que corresponder con lo que de verdad entró al contrato. Comprueben si el escape rompe esa cuenta o no, y expliquen el resultado (ojo: puede que no la rompa, y eso también es un hallazgo sobre qué invariantes sirven).</li>
+      <li><strong>Por el propio atacante:</strong> <code>loLogro()</code> nunca debería poder ser <code>true</code>. Es el más directo, y por eso el menos interesante: si eligen este, añadan una segunda comprobación de estado del contrato de entradas, no solo del atacante.</li>
+    </ul>
+    <p>Un invariante bueno se escribe sin nombrar el ataque: habla de una propiedad que el sistema debe cumplir siempre. Por eso atrapa también los ataques que nadie imaginó.</p>
+  </div>
+</section>
+
+<!-- ============================================================ 17 -->
+<section class="sec salto">
+  <div class="sec-cab"><span class="sec-num">17</span><h2>Las familias de ataque</h2><span class="lead">LO QUE SE LLEVAN A SU CONTRATO</span></div>
+  <p>Cada intento de esta guía es un caso particular de una <strong>familia</strong>. Las familias son lo que sirve: el truco concreto no se repite nunca igual, pero la familia sí. Esta tabla es la herramienta que hay que aplicar al contrato propio.</p>
+  <table>
+    <tr><th style="width:11%">INTENTO</th><th style="width:25%">FAMILIA</th><th style="width:31%">EN QUÉ CONSISTE</th><th>LA REGLA QUE DEJA</th></tr>
+    <tr><td class="pk">1</td><td><strong>Llamada directa rodeando la interfaz</strong></td><td>El atacante no usa la app ni la web: llama al contrato desde su propio programa, con los parámetros que quiera.</td><td>Toda validación que viva solo en la interfaz <strong>no existe</strong>. Si una regla importa, está en el contrato o no está.</td></tr>
+    <tr><td class="pk">2</td><td><strong>Puerta alterna a la misma operación</strong></td><td>La misma operación tiene dos o más entradas públicas (<code>transferFrom</code> y <code>safeTransferFrom</code>) y el control se puso en una sola.</td><td><strong>El control se pone en el punto por donde pasa el estado, no en cada puerta.</strong> Por eso se controla <code>_update</code> y no cada función: un control por puerta se olvida siempre de una.</td></tr>
+    <tr><td class="pk">3</td><td><strong>Abuso de delegación de permisos</strong></td><td>El atacante delega el permiso en un cómplice: <code>approve</code>, <code>setApprovalForAll</code>, un rol, un operador.</td><td>Conceder un permiso <strong>se concede</strong>, porque conceder no mueve nada. El control va en el <strong>ejercicio</strong>. No confundan «no revirtió» con «consiguió algo».</td></tr>
+    <tr><td class="pk">4</td><td><strong>Manipulación del parámetro de entrada</strong></td><td>El atacante pasa un valor fuera de rango por una puerta legítima: un precio sobre el tope, un cero, el límite exacto.</td><td>Todo parámetro que venga de afuera se valida <strong>en el borde exacto</strong> y se prueba de los dos lados. <code>&gt;</code> y <code>&gt;=</code> no son lo mismo.</td></tr>
+    <tr><td class="pk">RETO<br>(16)</td><td><strong>Devolución del control a código ajeno en mitad de una operación</strong></td><td>La operación llama a código del atacante (aviso al receptor, <code>call</code>, envío de ether) estando a medio terminar, con una invariante abierta.</td><td><strong>Todo lo que entregue el control a código ajeno debe dejar el estado ya cerrado antes de hacerlo.</strong> Es la familia de la <em>reentrada</em>, que se ve completa en la Sesión 9.</td></tr>
+    <tr><td class="pk">5</td><td><strong>Canal lateral fuera de la cadena</strong></td><td>La operación en cadena cumple la regla; el valor real se mueve por un canal que el contrato no ve.</td><td><strong>No es un fallo: es el límite.</strong> No se arregla con código. Se enuncia, se acota y se dice en voz alta en la sustentación.</td></tr>
+    <tr><td class="pk">15.d</td><td><strong>Front-running / MEV</strong></td><td>Quien ve las transacciones pendientes y paga más gas se adelanta a la operación de otro. En este contrato, a una oferta recién publicada.</td><td>Si el orden importa, el contrato no puede dejarlo al azar del bloque. Sesión 9 y Sesión 14.</td></tr>
+  </table>
+
+  <div class="caja clave">
+    <div class="caja-et">LA REGLA GENERAL, QUE ES LO ÚNICO QUE HAY QUE MEMORIZAR</div>
+    <p style="font-size:11pt;line-height:1.35"><strong>El control se pone en el punto por donde pasa el estado, no en cada puerta; y todo lo que entregue el control a código ajeno debe dejar el estado ya cerrado antes de hacerlo.</strong></p>
+    <p>Las dos mitades son las dos mitades de esta sesión. La primera es lo que el contrato hizo <strong>bien</strong>: por eso los intentos 1 a 4 se estrellaron contra un único portero. La segunda es lo que hizo <strong>mal</strong>: la compuerta seguía abierta cuando le pasó el control al receptor. El mismo contrato, acertando en una mitad y fallando en la otra.</p>
+    <p>Llévense las dos a su proyecto. Por cada función del contrato propio: <em>¿dónde está el punto único por el que pasa este estado?</em> y <em>¿esta función llama a código que no escribí yo, y qué queda a medio camino en ese instante?</em> Esas dos preguntas están en la pasada 4 de la ficha, y no son retóricas.</p>
+  </div>
+</section>
+
+<!-- ============================================================ 18 -->
+<section class="sec">
+  <div class="sec-cab"><span class="sec-num">18</span><h2>Reto extra · su propio sexto intento</h2><span class="lead">OPCIONAL · SUMA</span></div>
+  <p>Opcional, y suma sobre la nota del laboratorio: <strong>un intento de invención propia</strong>, distinto de los cinco y distinto del de la compuerta, con una prueba que demuestre si falla o funciona.</p>
+  <pre>mkdir contracts/s07/mi-equipo
+cp contracts/s07/AtacanteTope.sol contracts/s07/mi-equipo/MiAtacante.sol</pre>
+  <p>Renombren el contrato a <code>MiAtacante</code> adentro del archivo (si dejan <code>AtacanteTope</code>, Hardhat se queja de nombre duplicado), añadan su función con un comentario de dos líneas que diga qué hipótesis prueba, y compilen con <code>npx hardhat compile</code>.</p>
+  <p>Tres sitios donde mirar. No son respuestas y no se garantiza que funcionen:</p>
+  <div class="pregunta">
+    <div class="cab"><div class="n">A</div><div class="enun"><span class="tema">IDEA 1 · EL INVENTARIO COMPLETO DE LO HEREDADO</span>¿Hay alguna forma de mover un ERC-721 que no pase por donde ustedes creen?</div></div>
+    <div class="just">Abran <code>node_modules/@openzeppelin/contracts/token/ERC721/ERC721.sol</code> y hagan el inventario de <strong>todo</strong> lo público que hereda el contrato. Por cada entrada del inventario, una pregunta: ¿acaba en <code>_update</code> o no? Lo que no acabe en <code>_update</code> no está vigilado por el portero.</div>
+  </div>
+  <div class="pregunta">
+    <div class="cab"><div class="n">B</div><div class="enun"><span class="tema">IDEA 2 · DEJEN DE MOVER LA ENTRADA Y MUEVAN OTRA COSA</span>El dueño registrado de la entrada 1 no es una persona: es un contrato.</div></div>
+    <div class="just">Lean la primera línea del estado de <code>AtacanteTope</code>: <code>address public immutable duenno</code>. Pregúntense qué cambiaría si esa palabra <code>immutable</code> no estuviera ahí, y quién controla <em>de hecho</em> una entrada cuyo dueño registrado es un programa. El gancho <code>_update</code> vigila los movimientos <strong>del token</strong>: ¿vigila algo más?</div>
+  </div>
+  <div class="pregunta">
+    <div class="cab"><div class="n">C</div><div class="enun"><span class="tema">IDEA 3 · EL RECEPTOR QUE SE NIEGA</span>La sección 16 usó un receptor que hace algo de más. ¿Y uno que no hace nada?</div></div>
+    <div class="just">¿Qué pasa si el receptor de una reventa <strong>revierte</strong> en su <code>onERC721Received</code>, o si el destinatario de un <code>retirar()</code> rechaza el envío? No van a robar nada, pero pueden <strong>estorbar</strong>: averigüen a quién y cuánto. Esa familia se llama denegación de servicio y también está en la Sesión 9. (Pista de lectura: <code>retirar()</code> tiene un <code>require(ok, "el envio fallo")</code>. ¿A quién le fastidia ese <code>require</code>?)</div>
+  </div>
+  <p>La prueba del reto extra se juzga con el mismo criterio que todo lo demás: si el intento falla, exijan el error exacto con <code>revertedWithCustomError</code>; si funciona, muestren <strong>qué cambió en el estado</strong> (dueño, saldo, evento emitido o no emitido). Recuerden el intento 3: una transacción que no revierte puede no haber conseguido nada.</p>
+</section>
+
+<!-- ============================================================ 19 -->
+<section class="sec salto">
+  <div class="sec-cab"><span class="sec-num">19</span><h2>Errores frecuentes</h2><span class="lead">CASI TODO SE RESUELVE AQUÍ</span></div>
+  <table>
+    <tr><th style="width:40%">SÍNTOMA</th><th>CAUSA Y SOLUCIÓN</th></tr>
+    <tr><td class="pk">«npx no se reconoce»</td><td>Node.js no está instalado, o la terminal es anterior a la instalación. Node 22 LTS y terminal nueva.</td></tr>
+    <tr><td class="pk">«not inside a Hardhat project»</td><td>La terminal no está en <code>laboratorios-evm</code>. Usen <code>cd</code>.</td></tr>
+    <tr><td class="pk"><code>npx hardhat test test/s07</code> no encuentra nada</td><td><code>hardhat test</code> recibe <strong>archivos</strong>, no carpetas: <code>npx hardhat test test/s07/AtaqueAlTope.test.js</code>.</td></tr>
+    <tr><td class="pk">La prueba de regresión pasa contra las dos versiones</td><td><code>CONTRATO</code> no llegó al proceso, o el invariante no distingue. Impriman <code>CONTRATO</code> con un <code>console.log</code> al principio del archivo: si dice <code>Entradas</code> las dos veces, el problema es la variable de entorno, no la prueba.</td></tr>
+    <tr><td class="pk">La variable <code>CONTRATO</code> se queda pegada entre corridas</td><td>En PowerShell, <code>$env:CONTRATO</code> vive en esa terminal hasta que la cierren. Límpienla con <code>$env:CONTRATO = $null</code> al terminar, o abran una terminal nueva.</td></tr>
+    <tr><td class="pk">Al compilar: nombre de contrato duplicado</td><td>Copiaron un contrato y dejaron el mismo nombre adentro. Renómbrenlo.</td></tr>
+    <tr><td class="pk"><code>ERC721InvalidReceiver("0x…")</code> al comprar con su contrato</td><td>Su contrato no implementa <code>onERC721Received</code>. <code>comprar()</code> usa <code>_safeMint</code>, que exige que el receptor avise que sabe recibir tokens. Copien la función del atacante original.</td></tr>
+    <tr><td class="pk"><code>NoEraElDuenno()</code> en una función propia</td><td>Desplegaron su atacante con la cuenta por defecto y lo llaman con otra. El tercer argumento de <code>deployContract</code> es quién despliega, y <code>duenno</code> queda fijado en el constructor.</td></tr>
+    <tr><td class="pk">«The given contract doesn't have a custom error named …»</td><td>Le pasaron a <code>revertedWithCustomError</code> el contrato equivocado. Los errores del tope los declara el <strong>contrato de entradas</strong>, aunque la llamada entre por su atacante: <code>revertedWithCustomError(entradas, "…")</code>.</td></tr>
+    <tr><td class="pk">El ataque de la compuerta «no hace nada»</td><td>Falta <code>prepararEscape</code> antes de <code>comprarYEscapar</code>: con <code>destino</code> en cero, el callback no intenta nada. Y se dispara una sola vez a propósito, para no entrar en bucle.</td></tr>
+    <tr><td class="pk">El ataque tumba la compra legítima entera</td><td>Le quitaron el <code>try / catch</code> al <code>onERC721Received</code>. Entonces la reversión del escape se propaga y revierte toda la transacción. Es un resultado interesante, no un error: anótenlo.</td></tr>
+    <tr><td class="pk">La prueba pasa, pero no por la razón que creen</td><td>Algo más la hace revertir (aforo, cierre, pago inexacto, permisos). Diseñen el escenario para que <strong>solo</strong> la regla que quieren probar pueda detenerla, y exijan el error exacto.</td></tr>
+    <tr><td class="pk"><code>loadFixture</code> falla con una función anónima</td><td>La fixture necesita nombre: <code>async function montar() { … }</code>, no una flecha.</td></tr>
+    <tr><td class="pk"><code>ethers is not defined</code> o <code>require is not defined</code></td><td>Código de un tutorial de Hardhat 2. Aquí se usa <code>import</code> y <code>const { ethers, networkHelpers } = await network.create();</code>.</td></tr>
+    <tr><td class="pk">«Cannot mix BigInt and other types»</td><td>Los montos y los <code>tokenId</code> son BigInt: <code>1n</code>, <code>TOPE - 1n</code>. No los mezclen con números normales.</td></tr>
+    <tr><td class="pk">No usen <code>.to.be.reverted</code> a secas</td><td>Está desaconsejado en Hardhat 3 y, peor, no dice <strong>por qué</strong> revirtió: una prueba así pasa aunque el contrato falle por otra razón. Siempre <code>revertedWithCustomError</code>.</td></tr>
+    <tr><td class="pk">Enviar ether al contrato «para ver qué pasa» y no entender el error</td><td>El contrato no tiene <code>receive</code> ni <code>fallback</code>: <code>function selector was not recognized and there's no fallback nor receive function</code>. Es el comportamiento correcto, no un fallo.</td></tr>
+    <tr><td class="pk">Pagar de más en la reventa «para forzar un precio mayor»</td><td><code>comprarReventa</code> exige <code>msg.value == oferta.precio</code>, exacto: revierte con <code>PagoIncorrecto(esperado, recibido)</code>.</td></tr>
+    <tr><td class="pk">Editaron un contrato del repositorio y ahora el ataque «funciona»</td><td>Eso no es un ataque. <code>git checkout contracts/s07/</code> y vuelvan a empezar desde afuera.</td></tr>
+    <tr><td class="pk">La prueba del tiempo no llega al segundo que quieren</td><td><code>time.increaseTo(cierre + 1)</code> para pasarse del cierre; <code>time.setNextBlockTimestamp(t)</code> para caer exactamente en <code>t</code>.</td></tr>
+  </table>
+</section>
+
+<!-- ============================================================ 20 -->
+<section class="sec">
+  <div class="sec-cab"><span class="sec-num">20</span><h2>Preguntas de cierre</h2><span class="lead">SE RESPONDEN MIRANDO EL CÓDIGO</span></div>
+  <ol>
+    <li>¿Por qué <code>_update</code> no aparece en la pasada 1, y qué les dice eso sobre leer un contrato solo por su interfaz pública?</li>
+    <li>Los cinco intentos de <code>AtaqueAlTope.test.js</code> dan <strong>el mismo resultado</strong> contra las dos versiones del contrato. ¿Por qué? ¿Qué tenía que tener un intento para distinguirlas?</li>
+    <li>La versión vulnerable pasaba las once pruebas del intento 1 al 5. Escriban en dos frases qué le diría eso a un cliente que les pide «pruebas verdes» como garantía.</li>
+    <li>El intento 3 está en verde y el ataque fracasó. Expliquen cómo una prueba en verde puede documentar un fracaso, y qué habría que mirar para no confundirse.</li>
+    <li>Argumenten, con una frase por cada uno de los cuatro argumentos de la sección 14.1, por qué el intento 5 no vuelve inútil al contrato. Después escriban la objeción más fuerte que se les ocurra <strong>contra</strong> esos argumentos.</li>
+    <li>Una oferta con precio cero es válida (sección 15.b). ¿Es un hallazgo que reportarían en una auditoría, o es una función del sistema? Justifiquen con la severidad que le pondrían según <code>material/proyecto/auditoria-cruzada.pdf</code>.</li>
+    <li>Clasifiquen el hallazgo de la sección 16 con el formato de seis campos de la auditoría cruzada: título, severidad, ubicación con línea, descripción, escenario de explotación y recomendación mínima. Es exactamente el ejercicio de la Sesión 9, hecho sobre un caso real.</li>
+    <li>Recorran la tabla de familias (sección 17) sobre <strong>su</strong> contrato de proyecto y anoten, por cada familia, si aplica o no y por qué. Las que apliquen son su lista de pruebas pendientes.</li>
+    <li>¿Dónde está la línea que hace cumplir la regla principal de <strong>su</strong> contrato? Si no la encuentran en un minuto, ese es el resultado de la pregunta, y hay que arreglarlo antes de la Sesión 8.</li>
+  </ol>
+</section>
+
+<!-- ============================================================ 21 -->
+<section class="sec">
+  <div class="sec-cab"><span class="sec-num">21</span><h2>Lista de chequeo antes de entregar</h2></div>
+  <ul style="list-style:none;padding-left:0">
+    <li>☐ <code>npx hardhat test test/s07/AtaqueAlTope.test.js</code> da <code>11 passing</code>.</li>
+    <li>☐ <code>npx hardhat test test/s07/CompuertaAbierta.test.js</code> da <code>4 passing</code>, y la salida está en el informe.</li>
+    <li>☐ La ficha de lectura está llena a mano sobre <code>EntradasVulnerable.sol</code>: las cuatro pasadas y la página de defensa.</li>
+    <li>☐ Las dos paradas están escritas en la ficha: la hipótesis de la sección 10 y la corrección de la 16.3, las dos <strong>antes</strong> de leer la respuesta.</li>
+    <li>☐ La tabla 16.6 está llena, con las dos columnas.</li>
+    <li>☐ La explicación de las tres líneas (16.5) responde las cuatro preguntas, con nuestras palabras.</li>
+    <li>☐ <code>test/s07/&lt;equipo&gt;/Regresion.test.js</code> comprueba un invariante <strong>distinto</strong> del ejemplo.</li>
+    <li>☐ Esa prueba está en <strong>rojo</strong> contra <code>EntradasVulnerable</code> y en <strong>verde</strong> contra <code>Entradas</code>, y las dos salidas están en el informe.</li>
+    <li>☐ La prueba exige el error exacto o comprueba el estado; no usa <code>.to.be.reverted</code>.</li>
+    <li>☐ Opcional: el reto extra de la sección 18, con su prueba.</li>
+    <li>☐ Los contratos del repositorio están sin modificar (<code>git status</code> no lista nada en <code>contracts/s07/</code> salvo nuestra subcarpeta).</li>
+    <li>☐ <code>git status</code> revisado: ninguna clave ni dato personal en el repositorio.</li>
+  </ul>
+</section>
+
+<!-- ============================================================ 22 -->
+<section class="sec">
+  <div class="sec-cab"><span class="sec-num">22</span><h2>Rúbrica</h2><span class="lead">LABORATORIO 07</span></div>
+  <table>
+    <tr><th style="width:18%">CRITERIO</th><th style="width:8%">PESO</th><th style="width:26%">EXCELENTE (5,0)</th><th style="width:24%">ACEPTABLE (3,5)</th><th>INSUFICIENTE (&lt; 3,0)</th></tr>
+    <tr><td class="pk">Ficha de lectura</td><td>25 %</td><td>Las cuatro pasadas llenas con precisión; la pasada 2 incluye qué pasa si se pierde cada llave; la pasada 4 recorre la lista completa, incluidas las dos preguntas sobre código ajeno.</td><td>Las cuatro pasadas llenas, algunas superficiales.</td><td>Pasadas vacías o copiadas de la especificación sin mirar el código.</td></tr>
+    <tr><td class="pk">El gancho y las tres líneas</td><td>25 %</td><td>Explican <code>_update</code>, la compuerta, el orden de <code>_update</code> y del aviso al receptor, y por qué la corrección no rompe la reventa normal. Las dos paradas están escritas antes de la respuesta.</td><td>Identifican el fallo y la corrección, con explicación parcial del orden.</td><td>Repiten que «estaba abierta» sin saber cuándo ni por qué.</td></tr>
+    <tr><td class="pk">Prueba de regresión</td><td>30 %</td><td>Invariante propio, enunciado sin nombrar el ataque; rojo contra la vulnerable con un mensaje legible y verde contra la corregida; las dos salidas en el informe.</td><td>Prueba propia que cumple el criterio, invariante muy pegado al ataque.</td><td>Sin prueba, copiada tal cual del ejemplo, o que no distingue las dos versiones.</td></tr>
+    <tr><td class="pk">Familias y límite honesto</td><td>20 %</td><td>Aplican la tabla de familias al contrato propio; distinguen fallo (sección 16) de límite (intento 5) y argumentan los dos con evidencia del código.</td><td>Distinguen fallo de límite sin aplicar las familias al proyecto.</td><td>Concluyen que el contrato es inútil, o que ya es infalible porque se corrigió.</td></tr>
+  </table>
+  <p style="font-size:9pt;color:var(--gris)">El reto extra de la sección 18, bien demostrado, suma hasta 0,5 sobre la nota final del laboratorio.</p>
+</section>
+
+<!-- ============================================================ 23 -->
+<section class="sec">
+  <div class="sec-cab"><span class="sec-num">23</span><h2>Qué sigue</h2><span class="lead">TRABAJO AUTÓNOMO PARA LA SESIÓN 8</span></div>
+  <p>Hoy leyeron un contrato ajeno y le encontraron un fallo real. El trabajo de esta semana es repetir las cuatro pasadas sobre <strong>el contrato de su proyecto</strong>, el que están escribiendo con ayuda de IA, y llenar una segunda ficha de lectura sobre él. Dos preguntas de la pasada 4 son nuevas y salen directamente de hoy: <em>¿esta función llama a código que no escribí yo?</em> y <em>si lo hace, ¿qué queda a medio camino en ese instante?</em></p>
+  <p>En la Sesión 8 cada equipo sube al frente y responde las <strong>tres preguntas de defensa</strong> de la última página de la ficha:</p>
+  <ol>
+    <li>Señalen la línea que hace cumplir su regla principal, y digan qué pasa si la borro.</li>
+    <li>¿Quién puede quedarse con el dinero o con el control si pierde o filtra su llave, y qué pasa con el sistema ese día?</li>
+    <li>Digan una cosa que su contrato <strong>no</strong> puede impedir, y por qué siguen pensando que vale la pena.</li>
+  </ol>
+  <p>Las preguntas no cambian, no son sorpresa y están impresas en la ficha. La única forma de fallarlas es no haber leído el propio contrato. En la Sesión 9 la ficha se usa una tercera vez, sobre el contrato de <strong>otro</strong> equipo, en la auditoría cruzada.</p>
+  <div class="caja clave">
+    <div class="caja-et">Y LA FRASE CON LA QUE CIERRA LA SESIÓN</div>
+    <p style="font-size:11pt;line-height:1.35"><strong>El control se pone en el punto por donde pasa el estado, no en cada puerta; y todo lo que entregue el control a código ajeno debe dejar el estado ya cerrado antes de hacerlo.</strong></p>
+    <p>Si solo se llevan una línea de esta sesión, que sea esa. Se la llevan de un contrato que acertó en la primera mitad y falló en la segunda, y que pasaba todas sus pruebas mientras fallaba.</p>
+  </div>
+</section>
+
+<!-- ============================================================ 24 -->
+<section class="sec">
+  <div class="sec-cab"><span class="sec-num">24</span><h2>Referencias</h2></div>
+  <ul>
+    <li>Los contratos del laboratorio: <code>contracts/s07/EntradasVulnerable.sol</code> y <code>contracts/s07/Entradas.sol</code> · la especificación del autor: <code>demo-entradas/ARQUITECTURA.md</code>.</li>
+    <li>OpenZeppelin Contracts 5.x · <em>ERC721</em>: el gancho <code>_update</code>, qué funciones pasan por él y en qué orden corre la comprobación del receptor. <code>https://docs.openzeppelin.com/contracts/5.x/api/token/erc721</code></li>
+    <li>EIP-721 · <em>Non-Fungible Token Standard</em> (la obligación de avisar al receptor). <code>https://eips.ethereum.org/EIPS/eip-721</code></li>
+    <li>Formato de hallazgo y severidades del curso: <code>material/proyecto/auditoria-cruzada.pdf</code>.</li>
+    <li>Ficha de lectura y defensa: <code>material/proyecto/ficha-lectura-contrato.pdf</code>.</li>
+  </ul>
+</section>
+
+</body>
+</html>

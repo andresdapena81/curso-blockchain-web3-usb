@@ -70,7 +70,8 @@ Ver [`versiones.md`](versiones.md). **No se actualizan a mitad de semestre.**
 |---|---|---|
 | 05 · EVM y gas | `guias/s05-forense-y-gas.pdf` (fuente `.html`) | `Operaciones` |
 | 06 · Solidity I · Remix | `guias/s06-certificados-remix.pdf` (fuente `.html`) | `CertificadosUSB` |
-| 07 · Solidity II · subasta y patrones | `guias/s07-subasta-patrones.pdf` (fuente `.html`) | `Subasta`, `ISubasta`, `Porcentajes`, `SubastaPush`, `SubastaPullMinima`, `PostorHostil`, `Empaquetado` |
+| 07 · Leer un contrato ajeno · ataque al tope | [`guias/s07-ataque-al-tope.pdf`](guias/s07-ataque-al-tope.pdf) | `Entradas`, `EntradasVulnerable`, `AtacanteTope`, `AtacanteCompuerta` · 15 pruebas |
+| 07 · Solidity II · subasta y patrones (trabajo autónomo) | `guias/s07-subasta-patrones.pdf` (fuente `.html`) | `Subasta`, `ISubasta`, `Porcentajes`, `SubastaPush`, `SubastaPullMinima`, `PostorHostil`, `Empaquetado` |
 | 08 · Hardhat · pruebas y mutantes | `guias/s08-pruebas-y-mutantes.pdf` (fuente `.html`) | `Recaudo` (+ 3 mutantes), `ignition/modules/Recaudo.js` |
 | 09 · Seguridad · Ethernaut y auditoría | `guias/s09-seguridad-ethernaut.pdf` (fuente `.html`) | `BancoVulnerable`, `Atacante`, `BancoSeguro` |
 | 10 · Tokens fungibles · ERC-20 | `guias/s10-token-erc20.pdf` (fuente `.html`) | `FichaUSB`, `Canje`, `ignition/modules/s10-FichaCanje.js` |

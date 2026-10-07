@@ -1,0 +1,336 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<title>Ficha de lectura y defensa de un contrato</title>
+<!--ESTILOS-->
+<style>
+  body{ font-size:8.5pt; line-height:1.28; }
+  .hoja{ break-after:page; }
+  .hoja:last-child{ break-after:auto; }
+
+  .cab{ display:flex; justify-content:space-between; align-items:flex-end; background:var(--tinta); color:var(--blanco); padding:2.8mm 5mm; margin-bottom:2.5mm; }
+  .cab h1{ color:var(--blanco); font-size:12.5pt; }
+  .cab h1 em{ font-style:normal; color:var(--naranja); }
+  .cab .k{ font-family:"Courier New",monospace; font-size:7pt; letter-spacing:.14em; color:var(--naranja); margin-bottom:1.5mm; }
+  .cab .der{ font-family:"Courier New",monospace; font-size:7pt; color:#B9B4C4; text-align:right; letter-spacing:.08em; }
+
+  .campos{ display:grid; grid-template-columns:repeat(6,1fr); gap:0 4mm; margin-bottom:2.5mm; }
+  .campo{ border-bottom:1.5px solid var(--tinta); padding-top:4.2mm; font-family:"Courier New",monospace; font-size:6.5pt; color:var(--gris); letter-spacing:.08em; }
+  .c2{ grid-column:span 2; } .c3{ grid-column:span 3; } .c4{ grid-column:span 4; } .c6{ grid-column:span 6; }
+
+  .et{ font-family:"Courier New",monospace; font-size:6.8pt; font-weight:bold; letter-spacing:.1em; color:var(--tinta); margin:2.6mm 0 1.2mm; }
+  .et span{ font-weight:normal; color:var(--gris); letter-spacing:.04em; }
+
+  table{ margin:1mm 0 2.2mm; font-size:7.6pt; }
+  th{ padding:1.2mm 2mm; font-size:6.3pt; }
+  td{ padding:0.9mm 2mm; vertical-align:top; }
+  td.pk{ font-size:7.2pt; line-height:1.22; font-family:Arial,Helvetica,sans-serif; color:var(--tinta); font-weight:normal; }
+  td.pk code{ font-size:7pt; }
+  .alto td{ height:8mm; }
+  .alto2 td{ height:10.5mm; }
+  .bajo td{ height:6mm; }
+
+  .sn{ white-space:nowrap; text-align:center; }
+  .sn span{ display:inline-block; width:5mm; height:5mm; border:1.5px solid var(--tinta); margin:0 .4mm; font-family:"Arial Black",Arial,sans-serif; font-size:6pt; line-height:4.6mm; text-align:center; color:var(--gris); }
+  .chk span{ display:inline-block; width:3.4mm; height:3.4mm; border:1.5px solid var(--tinta); margin-right:1.5mm; vertical-align:-0.6mm; }
+  .chk{ font-size:7.4pt; margin-right:3.2mm; white-space:nowrap; display:inline-block; }
+  .fila{ display:flex; flex-wrap:wrap; gap:1.2mm 0; margin-bottom:1.5mm; }
+
+  .linea{ border-bottom:1px solid var(--gris-claro); height:5.6mm; }
+  .linea.g{ height:6.8mm; }
+
+  .caja{ margin:1.8mm 0 2.2mm; padding:2.4mm 4mm; box-shadow:3px 3px 0 var(--tinta); }
+  .caja.alerta{ box-shadow:3px 3px 0 var(--naranja); }
+  .caja.clave{ box-shadow:3px 3px 0 var(--violeta); }
+  .caja.peligro{ box-shadow:3px 3px 0 var(--rojo); }
+  .caja p{ margin-bottom:1.2mm; font-size:7.9pt; }
+  .caja-et{ font-size:6.8pt; margin-bottom:1.6mm; }
+
+  .hall{ border:2px solid var(--tinta); margin-bottom:2.6mm; }
+  .hall .hcab{ background:var(--tinta); color:var(--blanco); font-family:"Courier New",monospace; font-size:6.6pt; letter-spacing:.12em; padding:1.4mm 3mm; display:flex; justify-content:space-between; }
+  .hall .hcab .sev{ color:var(--naranja); }
+  .hall .hcu{ padding:2mm 3mm 2.4mm; }
+  .hall .hf{ font-family:"Courier New",monospace; font-size:6.4pt; letter-spacing:.08em; color:var(--gris); margin-top:1.4mm; }
+  .hall .hf:first-child{ margin-top:0; }
+
+  .firma{ display:grid; grid-template-columns:2fr 2fr 1fr; gap:4mm; margin:3mm 0 0; }
+  .firma div{ border-bottom:1.5px solid var(--tinta); padding-top:6mm; font-family:"Courier New",monospace; font-size:6.5pt; color:var(--gris); letter-spacing:.1em; }
+
+  .nota{ font-size:7.2pt; color:var(--gris); margin:1.5mm 0 0; }
+  h2.p{ font-family:"Arial Black",Arial,sans-serif; font-size:12pt; color:var(--tinta); margin:0; }
+  .pcab{ display:flex; align-items:baseline; gap:3mm; border-bottom:2.5px solid var(--tinta); padding-bottom:1.6mm; margin-bottom:2.2mm; }
+  .pnum{ font-family:"Arial Black",Arial,sans-serif; font-size:14pt; color:var(--naranja); }
+  .pcab .lead{ margin-left:auto; font-family:"Courier New",monospace; font-size:7pt; letter-spacing:.12em; color:var(--gris); }
+</style>
+</head>
+<body>
+
+<!-- ================================================================ HOJA 1 -->
+<section class="hoja">
+  <div class="cab">
+    <div><div class="k">PROYECTO INTEGRADOR · SESIONES 7, 8 Y 9 · IMPRIMIR Y LLENAR A MANO</div>
+      <h1>FICHA DE LECTURA Y <em>DEFENSA</em><br>DE UN CONTRATO</h1></div>
+    <div class="der">6 PÁGINAS<br>UNA COPIA POR CONTRATO</div>
+  </div>
+
+  <div class="campos">
+    <div class="campo c2">EQUIPO</div>
+    <div class="campo c3">CONTRATO QUE SE LEE (ARCHIVO .SOL)</div>
+    <div class="campo">FECHA</div>
+    <div class="campo c3">QUIÉNES LO LEEN (NOMBRES)</div>
+    <div class="campo c2">¿DE QUIÉN ES EL CONTRATO?</div>
+    <div class="campo">N.º DE LÍNEAS</div>
+  </div>
+
+  <div class="et">PARA QUÉ SE ESTÁ LLENANDO ESTA COPIA · MARCAR UNA</div>
+  <div class="fila">
+    <span class="chk"><span></span>S7 · laboratorio, contrato del docente</span>
+    <span class="chk"><span></span>S7 · bloque C, nuestro propio contrato</span>
+    <span class="chk"><span></span>S8 · preparar la defensa</span>
+    <span class="chk"><span></span>S9 · auditoría cruzada (contrato ajeno)</span>
+    <span class="chk"><span></span>Otro</span>
+  </div>
+
+  <div class="caja clave">
+    <div class="caja-et">LA REGLA DE ORO</div>
+    <p style="font-size:9pt"><strong>Si no pueden responder las cuatro pasadas sobre su propio contrato, ese contrato todavía no es suyo.</strong> Da igual quién escribió las líneas: si nadie del equipo sabe por qué una línea está ahí, el equipo no controla el sistema que está construyendo.</p>
+    <p>Un contrato no se lee de arriba abajo como una novela: se lee cuatro veces, buscando una cosa distinta cada vez, <strong>una página de esta ficha por pasada</strong>. <strong>1 · ¿Qué promete?</strong> solo nombres, sin abrir ningún cuerpo. <strong>2 · ¿Quién manda?</strong> direcciones privilegiadas y qué puede cada una. <strong>3 · ¿Por dónde entra y sale el dinero?</strong> <code>payable</code>, <code>msg.value</code>, saldos y envíos. <strong>4 · ¿Qué pasa si…?</strong> la pasada del adversario, que es la que encuentra los fallos. Las tres primeras son inventario y se hacen con lápiz, sin correr nada.</p>
+  </div>
+
+  <div class="pcab"><span class="pnum">01</span><h2 class="p">¿Qué promete?</h2><span class="lead">SOLO NOMBRES · NO SE LEEN LOS CUERPOS</span></div>
+
+  <div class="et">FUNCIONES PÚBLICAS Y EXTERNAS <span>· incluyan también las HEREDADAS (ERC-20, ERC-721, Ownable, AccessControl…): un contrato responde por lo que hereda</span></div>
+  <table>
+    <tr><th style="width:30%">FUNCIÓN (FIRMA)</th><th style="width:9%">¿GASTA<br>GAS?</th><th style="width:9%">¿PAY­ABLE?</th><th style="width:9%">¿HERE­DADA?</th><th>SOLO POR EL NOMBRE, ¿QUÉ PROMETE QUE HACE?</th></tr>
+    <tr><td class="pk">&nbsp;</td><td class="sn"><span>S</span><span>N</span></td><td class="sn"><span>S</span><span>N</span></td><td class="sn"><span>S</span><span>N</span></td><td></td></tr>
+    <tr><td class="pk">&nbsp;</td><td class="sn"><span>S</span><span>N</span></td><td class="sn"><span>S</span><span>N</span></td><td class="sn"><span>S</span><span>N</span></td><td></td></tr>
+    <tr><td class="pk">&nbsp;</td><td class="sn"><span>S</span><span>N</span></td><td class="sn"><span>S</span><span>N</span></td><td class="sn"><span>S</span><span>N</span></td><td></td></tr>
+    <tr><td class="pk">&nbsp;</td><td class="sn"><span>S</span><span>N</span></td><td class="sn"><span>S</span><span>N</span></td><td class="sn"><span>S</span><span>N</span></td><td></td></tr>
+    <tr><td class="pk">&nbsp;</td><td class="sn"><span>S</span><span>N</span></td><td class="sn"><span>S</span><span>N</span></td><td class="sn"><span>S</span><span>N</span></td><td></td></tr>
+    <tr><td class="pk">&nbsp;</td><td class="sn"><span>S</span><span>N</span></td><td class="sn"><span>S</span><span>N</span></td><td class="sn"><span>S</span><span>N</span></td><td></td></tr>
+    <tr><td class="pk">&nbsp;</td><td class="sn"><span>S</span><span>N</span></td><td class="sn"><span>S</span><span>N</span></td><td class="sn"><span>S</span><span>N</span></td><td></td></tr>
+  </table>
+
+  <div class="et">EVENTOS Y ERRORES DECLARADOS</div>
+  <table class="bajo">
+    <tr><th style="width:50%">EVENTOS (QUÉ DEJA POR ESCRITO)</th><th>ERRORES (QUÉ PROMETE RECHAZAR)</th></tr>
+    <tr><td></td><td></td></tr>
+    <tr><td></td><td></td></tr>
+    <tr><td></td><td></td></tr>
+  </table>
+
+  <div class="et">LAS TRES PREGUNTAS QUE CIERRAN LA PASADA 1 <span>· una línea cada una</span></div>
+  <div class="fila"><span class="chk"><span></span><strong>a ·</strong> ¿Alguna función cambia el estado y NO emite ningún evento? ¿Cuál?</span></div>
+  <div class="linea"></div>
+  <div class="fila" style="margin-top:1mm"><span class="chk"><span></span><strong>b ·</strong> ¿Hay algún error declarado que NINGUNA función pública parezca poder lanzar? Ese es el cabo suelto: alguien lo lanza desde adentro.</span></div>
+  <div class="linea"></div>
+  <div class="fila" style="margin-top:1mm"><span class="chk"><span></span><strong>c ·</strong> ¿Qué promete el contrato que NO aparece en ninguna firma? La regla principal suele vivir en un <code>modifier</code> o en un <code>override</code>.</span></div>
+  <div class="linea"></div>
+</section>
+
+<!-- ================================================================ HOJA 2 -->
+<section class="hoja">
+  <div class="cab">
+    <div><div class="k">FICHA DE LECTURA · PÁGINA 2 DE 6</div><h1>PASADA 2 · <em>¿QUIÉN MANDA?</em></h1></div>
+    <div class="der">CONTRATO: ____________________<br>EQUIPO: ____________________</div>
+  </div>
+
+  <p style="font-size:8.4pt">Recorran el estado buscando <strong>todas</strong> las direcciones guardadas y <strong>todos</strong> los controles de acceso (<code>onlyOwner</code>, roles, comparaciones con <code>msg.sender</code>). Una fila por cada poder. La última columna es la que casi nadie llena y la que más pesa en la defensa.</p>
+
+  <table class="alto2">
+    <tr><th style="width:17%">QUIÉN (ROL O DIRECCIÓN)</th><th style="width:15%">DÓNDE SE GUARDA / CÓMO SE COMPRUEBA</th><th style="width:23%">QUÉ PUEDE HACER (FUNCIONES EXACTAS)</th><th style="width:20%">QUÉ NO PUEDE HACER</th><th>SI ESA LLAVE SE PIERDE O SE FILTRA, ¿QUÉ PASA?</th></tr>
+    <tr><td class="pk">&nbsp;</td><td></td><td></td><td></td><td></td></tr>
+    <tr><td class="pk">&nbsp;</td><td></td><td></td><td></td><td></td></tr>
+    <tr><td class="pk">&nbsp;</td><td></td><td></td><td></td><td></td></tr>
+    <tr><td class="pk">&nbsp;</td><td></td><td></td><td></td><td></td></tr>
+    <tr><td class="pk">&nbsp;</td><td></td><td></td><td></td><td></td></tr>
+  </table>
+
+  <div class="et">QUIÉN PUEDE CAMBIAR QUIÉN MANDA</div>
+  <table class="bajo">
+    <tr><th style="width:46%">PREGUNTA</th><th style="width:12%">SÍ / NO</th><th>FUNCIÓN Y LÍNEA · QUÉ IMPLICA</th></tr>
+    <tr><td class="pk">¿Se puede traspasar el mando? (<code>transferOwnership</code>, cambio de rol)</td><td class="sn"><span>S</span><span>N</span></td><td></td></tr>
+    <tr><td class="pk">¿Se puede renunciar al mando? (<code>renounceOwnership</code>) ¿Qué queda sin dueño si se llama?</td><td class="sn"><span>S</span><span>N</span></td><td></td></tr>
+    <tr><td class="pk">¿El traspaso es en dos pasos (el nuevo acepta) o en uno solo?</td><td class="sn"><span>S</span><span>N</span></td><td></td></tr>
+    <tr><td class="pk">¿Hay pausa, rescate de fondos, lista negra o actualización del código?</td><td class="sn"><span>S</span><span>N</span></td><td></td></tr>
+    <tr><td class="pk">¿Algún privilegiado puede tocar bienes o dinero de otros?</td><td class="sn"><span>S</span><span>N</span></td><td></td></tr>
+  </table>
+
+  <div class="et">LA PREGUNTA QUE CASI NADIE SE HACE · ¿QUÉ COSAS NO PUEDE HACER NADIE, NUNCA, NI SIQUIERA EL DUEÑO?</div>
+  <p class="nota" style="margin:0 0 1.2mm">Parámetros <code>immutable</code>, reglas sin función de cambio, registros que no se pueden corregir. La inmutabilidad corta para los dos lados y hay que poder decirlo en voz alta.</p>
+  <div class="linea g"></div><div class="linea g"></div><div class="linea g"></div>
+
+  <div class="et">EL DÍA MALO · ESCRIBAN EL ESCENARIO COMPLETO DE LA LLAVE PERDIDA</div>
+  <p class="nota" style="margin:0 0 1.2mm">Elijan la llave más poderosa de la tabla de arriba y cuenten qué pasa exactamente ese día: qué deja de funcionar, qué dinero queda inmovilizado, a quién hay que avisar, y si existe alguna salida. Si la respuesta es «se acabó», escríbanlo tal cual: es una respuesta válida y es lo que el docente pregunta en la defensa.</p>
+  <div class="linea g"></div><div class="linea g"></div><div class="linea g"></div><div class="linea g"></div><div class="linea g"></div><div class="linea g"></div>
+</section>
+
+<!-- ================================================================ HOJA 3 -->
+<section class="hoja">
+  <div class="cab">
+    <div><div class="k">FICHA DE LECTURA · PÁGINA 3 DE 6</div><h1>PASADA 3 · <em>¿POR DÓNDE ENTRA Y SALE EL DINERO?</em></h1></div>
+    <div class="der">CONTRATO: ____________________<br>EQUIPO: ____________________</div>
+  </div>
+
+  <p style="font-size:8.4pt">Busquen <code>payable</code>, <code>msg.value</code>, los mapas de saldos y todos los envíos (<code>transfer</code>, <code>send</code>, <code>call{value:}</code>, transferencias de tokens). Si el contrato no mueve valor, escriban «no mueve valor» y expliquen en una línea qué <strong>otro</strong> bien custodia: un registro, una identidad, un permiso. Esa cosa tiene las mismas preguntas.</p>
+
+  <table class="alto2">
+    <tr><th style="width:20%">PUERTA (FUNCIÓN)</th><th style="width:11%">ENTRA / SALE</th><th style="width:22%">¿CUÁNTO, Y QUÉ LO VALIDA?</th><th style="width:22%">¿DÓNDE QUEDA ANOTADO?</th><th>¿QUIÉN LO PUEDE SACAR, Y CÓMO?</th></tr>
+    <tr><td class="pk">&nbsp;</td><td></td><td></td><td></td><td></td></tr>
+    <tr><td class="pk">&nbsp;</td><td></td><td></td><td></td><td></td></tr>
+    <tr><td class="pk">&nbsp;</td><td></td><td></td><td></td><td></td></tr>
+    <tr><td class="pk">&nbsp;</td><td></td><td></td><td></td><td></td></tr>
+    <tr><td class="pk">&nbsp;</td><td></td><td></td><td></td><td></td></tr>
+  </table>
+
+  <div class="et">EL BALANCE · TODO LO QUE ENTRA TIENE QUE TENER UNA SALIDA CON NOMBRE Y DUEÑO</div>
+  <table class="bajo">
+    <tr><th style="width:46%">PREGUNTA</th><th style="width:12%">SÍ / NO</th><th>DÓNDE SE VE · QUÉ IMPLICA</th></tr>
+    <tr><td class="pk">¿Cada wei que entra queda anotado a nombre de alguien?</td><td class="sn"><span>S</span><span>N</span></td><td></td></tr>
+    <tr><td class="pk">¿Hay dinero que puede entrar y no salir nunca? ¿Cuánto, y en qué caso?</td><td class="sn"><span>S</span><span>N</span></td><td></td></tr>
+    <tr><td class="pk">¿Hay <code>receive</code> o <code>fallback</code>? ¿Qué pasa si llega ether a secas?</td><td class="sn"><span>S</span><span>N</span></td><td></td></tr>
+    <tr><td class="pk">¿Se usa el patrón de retiro (acreditar y que el titular reclame) o se envía dentro de la operación?</td><td class="sn"><span>S</span><span>N</span></td><td></td></tr>
+    <tr><td class="pk">¿Se comprueba el valor que devuelve cada envío?</td><td class="sn"><span>S</span><span>N</span></td><td></td></tr>
+    <tr><td class="pk">¿El pago exigido es exacto, mínimo o libre? ¿Qué pasa si pagan de más?</td><td class="sn"><span>S</span><span>N</span></td><td></td></tr>
+  </table>
+
+  <div class="caja alerta">
+    <div class="caja-et">EL ORDEN DE LAS LÍNEAS, QUE AQUÍ ES TODO</div>
+    <p>Por cada función que envíe valor o llame a código ajeno, comprueben el orden: <strong>primero las comprobaciones, después los cambios de estado, y de últimas la llamada hacia afuera</strong> (<em>checks-effects-interactions</em>). Escriban abajo, para la función que más valor mueve, las líneas en el orden en que aparecen, y señalen cuál es la llamada hacia afuera.</p>
+  </div>
+  <div class="linea g"></div><div class="linea g"></div><div class="linea g"></div>
+
+  <div class="et">SI EL CONTRATO NO MUEVE DINERO · ¿QUÉ BIEN CUSTODIA, Y QUIÉN SE PERJUDICA SI SE PIERDE O SE FALSIFICA?</div>
+  <div class="linea g"></div><div class="linea g"></div><div class="linea g"></div>
+</section>
+
+<!-- ================================================================ HOJA 4 -->
+<section class="hoja">
+  <div class="cab">
+    <div><div class="k">FICHA DE LECTURA · PÁGINA 4 DE 6 · LA PASADA DEL ADVERSARIO</div><h1>PASADA 4 · <em>¿QUÉ PASA SI…?</em></h1></div>
+    <div class="der">CONTRATO: ____________________<br>EQUIPO: ____________________</div>
+  </div>
+
+  <p style="font-size:8pt">Esta lista sirve para <strong>cualquier</strong> contrato. Recórranla entera, una pregunta por fila. «No aplica» es una respuesta válida <strong>si se justifica</strong>; «no se me ocurrió» no lo es. Lo que encuentren se pasa a la página 5 con el formato de hallazgo.</p>
+
+  <table>
+    <tr><th style="width:4%">#</th><th style="width:29%">LA PREGUNTA</th><th style="width:8%">¿APLI­CA?</th><th style="width:19%">¿EN QUÉ FUNCIÓN?</th><th>QUÉ PASA · Y CÓMO LO COMPROBÉ</th></tr>
+    <tr><td class="pk">1</td><td class="pk">¿Y si <strong>el receptor revierte</strong>? ¿Queda bloqueado el atacante o una víctima?</td><td class="sn"><span>S</span><span>N</span></td><td></td><td></td></tr>
+    <tr><td class="pk">2</td><td class="pk">¿Y si <strong>lo llamo dos veces</strong>? ¿Qué impide la segunda: la regla, o algo accidental?</td><td class="sn"><span>S</span><span>N</span></td><td></td><td></td></tr>
+    <tr><td class="pk">3</td><td class="pk">¿Y si <strong>lo llamo desde otro contrato</strong>, sin usar la interfaz oficial?</td><td class="sn"><span>S</span><span>N</span></td><td></td><td></td></tr>
+    <tr><td class="pk">4</td><td class="pk">¿Y si <strong>el plazo ya pasó</strong>? ¿Y un segundo antes? ¿Y en el segundo exacto?</td><td class="sn"><span>S</span><span>N</span></td><td></td><td></td></tr>
+    <tr><td class="pk">5</td><td class="pk">¿Y si <strong>quien llama no es quien creo</strong>? (permiso delegado, operador, <code>tx.origin</code>)</td><td class="sn"><span>S</span><span>N</span></td><td></td><td></td></tr>
+    <tr><td class="pk">6</td><td class="pk">¿Y si <strong>el monto es cero</strong>? ¿Y el límite exacto? ¿Y uno más que el límite?</td><td class="sn"><span>S</span><span>N</span></td><td></td><td></td></tr>
+    <tr><td class="pk">7</td><td class="pk">¿Y si <strong>la llave del dueño se pierde</strong> o se filtra? (viene de la pasada 2)</td><td class="sn"><span>S</span><span>N</span></td><td></td><td></td></tr>
+    <tr><td class="pk">8</td><td class="pk">¿Esta función <strong>llama a código que no escribí yo</strong>? (envío de ether, aviso a un receptor, token ajeno, oráculo)</td><td class="sn"><span>S</span><span>N</span></td><td></td><td></td></tr>
+    <tr><td class="pk">9</td><td class="pk">Si lo hace: <strong>¿qué queda a medio camino en ese instante?</strong> ¿Qué variable abierta, qué saldo sin descontar, qué bandera encendida?</td><td class="sn"><span>S</span><span>N</span></td><td></td><td></td></tr>
+    <tr><td class="pk">10</td><td class="pk">¿Y si alguien <strong>se adelanta</strong> a mi transacción viéndola pendiente?</td><td class="sn"><span>S</span><span>N</span></td><td></td><td></td></tr>
+    <tr><td class="pk">11</td><td class="pk">¿Y si <strong>no existe o está vacío</strong>? (un id que nadie creó, la dirección cero)</td><td class="sn"><span>S</span><span>N</span></td><td></td><td></td></tr>
+    <tr><td class="pk">12</td><td class="pk">¿Y si <strong>crece sin límite</strong>? (un bucle sobre una lista que cualquiera alarga)</td><td class="sn"><span>S</span><span>N</span></td><td></td><td></td></tr>
+  </table>
+
+  <div class="caja peligro">
+    <div class="caja-et">LAS PREGUNTAS 8 Y 9 SON LAS QUE MÁS FALLOS ENCUENTRAN</div>
+    <p>Salieron del laboratorio de la Sesión 7, donde un contrato con pruebas verdes y especificación escrita se rompió exactamente ahí. La regla que dejó: <strong>el control se pone en el punto por donde pasa el estado, no en cada puerta; y todo lo que entregue el control a código ajeno debe dejar el estado ya cerrado antes de hacerlo.</strong></p>
+  </div>
+
+  <div class="et">LA REGLA PRINCIPAL · ¿DÓNDE ESTÁ LA LÍNEA QUE LA HACE CUMPLIR (ARCHIVO, FUNCIÓN, LÍNEA), Y QUÉ PASA SI LA BORRO?</div>
+  <div class="linea g"></div><div class="linea g"></div><div class="linea g"></div>
+</section>
+
+<!-- ================================================================ HOJA 5 -->
+<section class="hoja">
+  <div class="cab">
+    <div><div class="k">FICHA DE LECTURA · PÁGINA 5 DE 6 · MISMO FORMATO QUE LA AUDITORÍA CRUZADA</div><h1>HALLAZGOS <em>DE LA PASADA 4</em></h1></div>
+    <div class="der">SE COPIAN TAL CUAL AL<br>INFORME DE LA SESIÓN 9</div>
+  </div>
+
+  <p style="font-size:8pt">Un hallazgo sin <strong>ubicación</strong> y sin <strong>recomendación</strong> está incompleto. Las severidades y los seis campos son los mismos de <code>auditoria-cruzada.pdf</code>: <strong>Crítica</strong> (pérdida directa de fondos o control, fácil de explotar) · <strong>Alta</strong> (pérdida con alguna condición) · <strong>Media</strong> (impacto acotado) · <strong>Baja</strong> (riesgo menor) · <strong>Informativa</strong> (calidad o gas, no explotable). Clasificar bien una cosa que <em>no</em> es vulnerable vale tanto como encontrar un fallo; inflar severidades resta credibilidad. <strong>Si encuentran más de dos, impriman otra copia de esta página.</strong></p>
+
+  <div class="hall">
+    <div class="hcab"><span>HALLAZGO 1 · TÍTULO</span><span class="sev">SEVERIDAD: CRÍTICA · ALTA · MEDIA · BAJA · INFORMATIVA</span></div>
+    <div class="hcu">
+      <div class="linea"></div>
+      <div class="hf">UBICACIÓN · ARCHIVO, FUNCIÓN Y LÍNEA EXACTA</div><div class="linea"></div>
+      <div class="hf">DESCRIPCIÓN · QUÉ ESTÁ MAL Y POR QUÉ, EN DOS O TRES FRASES</div><div class="linea"></div><div class="linea"></div>
+      <div class="hf">ESCENARIO DE EXPLOTACIÓN · LOS PASOS CONCRETOS (O, SI ES INFORMATIVO, POR QUÉ NO ES EXPLOTABLE)</div><div class="linea"></div><div class="linea"></div>
+      <div class="hf">RECOMENDACIÓN · LA CORRECCIÓN MÍNIMA, NO UNA REESCRITURA</div><div class="linea"></div>
+    </div>
+  </div>
+
+  <div class="hall">
+    <div class="hcab"><span>HALLAZGO 2 · TÍTULO</span><span class="sev">SEVERIDAD: CRÍTICA · ALTA · MEDIA · BAJA · INFORMATIVA</span></div>
+    <div class="hcu">
+      <div class="linea"></div>
+      <div class="hf">UBICACIÓN · ARCHIVO, FUNCIÓN Y LÍNEA EXACTA</div><div class="linea"></div>
+      <div class="hf">DESCRIPCIÓN</div><div class="linea"></div><div class="linea"></div>
+      <div class="hf">ESCENARIO DE EXPLOTACIÓN</div><div class="linea"></div><div class="linea"></div>
+      <div class="hf">RECOMENDACIÓN</div><div class="linea"></div>
+    </div>
+  </div>
+
+  <div class="et">LÍMITES, QUE NO SON HALLAZGOS <span>· cosas que el contrato NO puede impedir por su naturaleza, no por un error: pagos por fuera de la cadena, acuerdos entre personas, lo que pase con el dispositivo del usuario. No se corrigen con código; se enuncian.</span></div>
+  <div class="linea"></div><div class="linea"></div><div class="linea"></div>
+
+  <div class="et">CONCLUSIÓN DE LA LECTURA, EN UNA LÍNEA <span>· «no hallamos vulnerabilidades explotables; revisamos esto y esto» es una conclusión válida y vale</span></div>
+  <div class="linea"></div>
+
+  <div class="et">LA PREGUNTA QUE CIERRA TODO</div>
+  <div class="fila">
+    <span class="chk" style="font-size:8pt">Con lo que sabemos hoy, ¿pondríamos dinero propio en este contrato?</span>
+    <span class="chk"><span></span>Sí</span>
+    <span class="chk"><span></span>Sí, con las correcciones de arriba</span>
+    <span class="chk"><span></span>No</span>
+    <span class="chk"><span></span>No sabemos todavía</span>
+  </div>
+  <p class="nota" style="margin-top:0">Por qué:</p>
+  <div class="linea"></div><div class="linea"></div>
+</section>
+
+<!-- ================================================================ HOJA 6 -->
+<section class="hoja">
+  <div class="cab">
+    <div><div class="k">FICHA DE LECTURA · PÁGINA 6 DE 6 · SE RESPONDE EN VOZ ALTA EN LA SESIÓN 8</div><h1>LA <em>DEFENSA</em></h1></div>
+    <div class="der">TRES PREGUNTAS FIJAS<br>NO CAMBIAN NUNCA</div>
+  </div>
+
+  <p style="font-size:8pt">Estas tres preguntas se hacen <strong>siempre</strong>, a todos los equipos, sobre cualquier contrato. Están impresas aquí porque no son una sorpresa: la única forma de fallarlas es no haber leído el contrato propio. Preparen la respuesta por escrito y después díganla sin leer.</p>
+
+  <div class="et">PREGUNTA 1 · SEÑALEN LA LÍNEA QUE HACE CUMPLIR SU REGLA PRINCIPAL, Y DIGAN QUÉ PASA SI LA BORRO</div>
+  <p class="nota" style="margin:0 0 1.2mm"><strong>Buena:</strong> archivo, función y línea; qué comprueba; qué deja de ser cierto sin ella; la prueba que lo demuestra. · <strong>Mala:</strong> «está protegido con OpenZeppelin».</p>
+  <div class="linea g"></div><div class="linea g"></div><div class="linea g"></div><div class="linea g"></div><div class="linea g"></div>
+
+  <div class="et">PREGUNTA 2 · ¿QUIÉN PUEDE QUEDARSE CON EL DINERO O CON EL CONTROL SI PIERDE O FILTRA SU LLAVE, Y QUÉ PASA CON EL SISTEMA ESE DÍA?</div>
+  <p class="nota" style="margin:0 0 1.2mm"><strong>Buena:</strong> nombra el rol, el monto o el poder en juego, y cuenta el día malo completo, incluida la salida si la hay. · <strong>Mala:</strong> «guardamos bien las claves».</p>
+  <div class="linea g"></div><div class="linea g"></div><div class="linea g"></div><div class="linea g"></div><div class="linea g"></div>
+
+  <div class="et">PREGUNTA 3 · DIGAN UNA COSA QUE SU CONTRATO NO PUEDE IMPEDIR, Y POR QUÉ SIGUEN PENSANDO QUE VALE LA PENA</div>
+  <p class="nota" style="margin:0 0 1.2mm"><strong>Buena:</strong> enuncia el límite sin exagerarlo ni minimizarlo, y argumenta qué se gana igual. · <strong>Mala:</strong> «no se nos ocurre ninguna», o «entonces no sirve para nada». Las dos dicen que no se pensó.</p>
+  <div class="linea g"></div><div class="linea g"></div><div class="linea g"></div><div class="linea g"></div><div class="linea g"></div>
+
+  <div class="caja clave">
+    <div class="caja-et">CONTRATOS ESCRITOS CON AYUDA DE IA</div>
+    <p>Usar una IA para escribir el contrato está bien y no hay que esconderlo. El problema no es usarla: el problema es <strong>no poder defender lo que produjo</strong>. En la sustentación nadie va a preguntar quién tecleó; van a preguntar por qué esa línea está ahí, y la respuesta «la puso la IA» es la misma respuesta que «no sé».</p>
+    <p><strong>La regla práctica, y es solo una:</strong> si nadie del equipo sabe por qué una línea está ahí, <strong>esa línea se borra o se entiende</strong>. No hay tercera opción. Un contrato con diez líneas menos que el equipo domina es mejor que uno con cien que nadie puede explicar, porque lo que no se entiende no se puede probar, y lo que no se prueba falla donde nadie mira.</p>
+    <p>Y una advertencia de oficio: una IA escribe código que compila, que suena razonable y que viene con una explicación convincente. Eso no es lo mismo que código que hace lo que ustedes creen. El contrato del laboratorio de la Sesión 7 estaba escrito a mano, revisado, documentado y con todas sus pruebas en verde, y aun así tenía un fallo que dejaba salir una entrada por fuera del tope. <strong>Lo que protege no es quién escribió: es haber leído en cuatro pasadas y haber probado.</strong></p>
+  </div>
+
+  <div class="et">ANTES DE SUSTENTAR · MARCAR LO QUE SEA CIERTO</div>
+  <div class="fila">
+    <span class="chk"><span></span>Recorrimos el contrato línea por línea y no quedó ninguna que no sepamos explicar.</span>
+    <span class="chk"><span></span>Sabemos qué trae cada <code>import</code> y por qué está.</span>
+  </div>
+  <div class="fila">
+    <span class="chk"><span></span>Cada función tiene al menos una prueba escrita por nosotros.</span>
+    <span class="chk"><span></span>Comprobamos lo que la herramienta afirmó, en vez de creerle.</span>
+    <span class="chk"><span></span>Las cuatro pasadas de esta ficha están llenas.</span>
+  </div>
+
+  <div class="firma">
+    <div>QUIÉN RESPONDE CADA PREGUNTA (1 · 2 · 3)</div><div>FIRMA DEL EQUIPO</div><div>FECHA</div>
+  </div>
+</section>
+
+</body>
+</html>
