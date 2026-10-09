@@ -96,11 +96,11 @@ async function construir() {
   await D.agenda({
     intro: "Cinco minutos de apertura, tres bloques y una pausa de 10 minutos entre B y C. Hoy no se escribe un contrato nuevo: se lee uno ajeno, se intenta romper —y se rompe— y después cada equipo lee el suyo.",
     bloques: [
-      ["A", "LAS CUATRO PASADAS", "Leer en vivo Entradas.sol, el contrato del proyecto del docente: qué promete, quién manda, por dónde entra y sale el dinero, qué pasa si…", "~55 min"],
-      ["B", "LABORATORIO DE ATAQUE", "Un encargo de una línea: revendan una entrada por encima del tope. Seis ataques, una vulnerabilidad real y los cinco tipos que hay detrás.", "~70 min"],
-      ["C", "SU PROPIO CONTRATO", "Las cuatro pasadas aplicadas al contrato del proyecto, aquí, con la ficha de lectura en la mano.", "~40 min"],
+      ["A", "EL CASO Y LAS CUATRO PASADAS", "El problema de la reventa, el contrato del docente pieza por pieza con sus decisiones de diseño, y después el método: qué promete, quién manda, el dinero, qué pasa si…", "~75 min"],
+      ["B", "LABORATORIO DE ATAQUE", "Un encargo de una línea: revendan una entrada por encima del tope. Seis ataques, una vulnerabilidad real y los cinco tipos que hay detrás.", "~60 min"],
+      ["C", "SU PROPIO CONTRATO", "Las cuatro pasadas aplicadas al contrato del proyecto, aquí, con la ficha de lectura en la mano.", "~30 min"],
     ],
-    notas: "5 + 55 + 70 + 10 de pausa + 40 = 180 minutos. Si algo se alarga, se recorta del bloque A (las láminas de gas y de errores se pueden dejar para la guía), nunca del clímax del bloque B ni del bloque C: los equipos exponen en la S8 y la ficha de lectura se llena HOY, en el salón, con el docente disponible. Avisar ya que el laboratorio de la subasta pasa a trabajo autónomo y sigue siendo evidencia evaluable.",
+    notas: "5 + 75 + 60 + 10 de pausa + 30 = 180 minutos. El bloque A trae primero el caso y el contrato entero (A.1, nueve láminas) y después las cuatro pasadas: está pensado para poder dictarse sin haber estudiado el contrato de antemano, leyendo las láminas en orden. Si algo se alarga, se recorta del bloque A (las láminas de gas y de errores se pueden dejar para la guía), nunca del clímax del bloque B ni del bloque C: los equipos exponen en la S8 y la ficha de lectura se llena HOY, en el salón, con el docente disponible. Avisar ya que el laboratorio de la subasta pasa a trabajo autónomo y sigue siendo evidencia evaluable.",
   });
 
   await D.objetivo({
@@ -137,7 +137,7 @@ async function construir() {
     const s = await D.divisor({
       letra: "A", titulo: "Leer un contrato que no escribiste",
       sub: "Cuatro pasadas, en orden, sobre un contrato real de 254 líneas. En pantalla, en vivo, y sin que nadie lo haya escrito en esta clase.",
-      minutos: "APROXIMADAMENTE 55 MINUTOS · EN VIVO",
+      minutos: "APROXIMADAMENTE 75 MINUTOS · EN VIVO",
       ic: "lupa",
     });
     s.addNotes("Transición (30 s). Abrir el archivo real en el editor y dejarlo en pantalla todo el bloque: material/laboratorios-evm/contracts/s07/Entradas.sol. El deck acompaña; el protagonista es el archivo. Decirles que no tomen apuntes del contrato: tomen apuntes del MÉTODO, porque el método se lo van a aplicar a su contrato en el bloque C. Importante para el docente: en este bloque NO se abre _update. Esa función se reserva para el bloque B.");
@@ -177,6 +177,155 @@ async function construir() {
     D.nodo(s, { x: c2 - 3.55, y: 4.65, w: 7.1, h: 0.95, titulo: "CONTRATO  Entradas", sub: "ERC-721 · 254 líneas · transferencia directa BLOQUEADA", fill: C.tinta, line: C.naranja, color: C.naranja, subColor: "B9B4C4", subSize: 11 });
     D.parrafo(s, "Es la entrega 2 del proyecto del docente, publicada en github.com/andresdapena81/entradas-reventa-controlada. Hoy es el paciente: se lee en pantalla y no se toca.", { y: 5.75, h: 0.55, size: 12.5, color: C.gris });
     s.addNotes("3 minutos. Contar el problema en dos frases: las entradas se revenden a cuatro veces su precio y los términos y condiciones no lo impiden porque nadie los hace cumplir. Este contrato intenta que la regla se cumpla sola. Señalar los tres actores del diagrama y decir que la pasada 2 va a mirar con lupa al de la derecha. El diagrama sale de demo-entradas/ARQUITECTURA.md, sección 1.");
+  }
+
+  /* ------------------------------------- A.1 · el caso y el contrato entero */
+
+  {
+    const s = await D.lamina({ kicker: "A.1 · el caso", titulo: "El problema que este contrato ataca", ic: "diana", tituloSize: 28 });
+    D.enunciado(s, "Una entrada de 80 000 pesos aparece a 400 000 el día del evento. El reglamento lo prohíbe, y no pasa nada: una regla que nadie hace cumplir no es una regla.", { y: 1.85, h: 1.3, size: 17, line: C.naranja });
+    D.dosColumnas(s,
+      { et: "Lo que se intenta hoy", items: [
+        "Prohibir la reventa en los términos y condiciones.",
+        "Entradas nominativas y cédula en la puerta: lento, y castiga a quien de verdad no puede ir.",
+        "Una plataforma oficial de reventa, que cobra comisión por hacer de árbitro.",
+      ] },
+      { et: "Lo que ninguna de las tres logra", items: [
+        "La reventa ocurre igual, por fuera y sin protección para el comprador.",
+        "Si el evento se cancela o la entrada es falsa, no hay a quién reclamarle.",
+        "El árbitro cobra, y hay que confiar en él. Si decide no devolver, no devuelve.",
+      ] },
+      { y: 3.30, h: 2.60, size: 12 });
+    D.parrafo(s, "La apuesta del contrato: que el tope de reventa no dependa de que alguien quiera hacerlo cumplir.", { y: 6.02, h: 0.5, size: 13.5, color: C.ocre });
+    s.addNotes("4 minutos. Este es el gancho de la sesión y conviene contarlo con un caso que ellos hayan vivido: cualquier concierto reciente en Medellín sirve. La pregunta para el grupo, si hay tiempo: ¿quién pierde con la reventa abusiva? No es solo el comprador: el organizador pierde la relación con su público y la reputación del evento. Si alguien pregunta por qué no basta una plataforma oficial, esa es exactamente la discusión del curso y se retoma al cierre del bloque B.");
+  }
+
+  {
+    const s = await D.lamina({ kicker: "A.1 · el recorrido", titulo: "La vida de una entrada, de punta a punta", ic: "capas", tituloSize: 27 });
+    D.pasos(s, [
+      ["COMPRAR", "Alguien paga el precio oficial y el contrato le acuña una entrada a su nombre. El dinero queda acreditado al organizador, no enviado."],
+      ["NO PUEDE IR", "Pone su entrada en venta. El contrato no la deja ofrecer por encima del tope: ahí la regla se hace cumplir sola."],
+      ["REVENDER", "Otro la compra pagando el precio exacto de la oferta. La entrada cambia de dueño y el vendedor queda con saldo a favor."],
+      ["RETIRAR", "Vendedor y organizador reclaman su dinero cuando quieran. El contrato nunca envía por su cuenta."],
+      ["CERRAR LA REVENTA", "Unas horas antes del evento se congela: la lista de dueños deja de cambiar, y la puerta puede validar sin conexión."],
+      ["ENTRAR", "En la puerta se consulta esValida y se marca la entrada como usada. Una entrada usada ya no vale ni se puede revender."],
+    ], { y: 1.95, alto: 0.73, gap: 0.08, anchoEt: 2.6, size: 12 });
+    s.addNotes("4 minutos. Recorrer el ciclo con el dedo sobre la lámina, sin abrir código todavía: esto es el QUÉ, el código es el CÓMO. Dato útil si preguntan: el cierre de la reventa es lo que permite que la puerta funcione con una lista descargada; si la reventa siguiera abierta, habría que consultar la cadena en vivo justo donde peor señal hay.");
+  }
+
+  {
+    const s = await D.lamina({ kicker: "A.1 · el estado", titulo: "Qué recuerda el contrato", ic: "rejilla", tituloSize: 30 });
+    D.tabla(s, ["variable", "qué guarda", "detalle que importa"], [
+      ["evento · aforo", "Nombre del evento y cuántas entradas existen.", "El aforo es immutable: ni el organizador puede imprimir una entrada de más."],
+      ["precioOriginal · topeReventa", "Precio de emisión y precio máximo de reventa.", "También immutable. El tope es público: cualquiera lo puede verificar."],
+      ["cierreReventa", "Momento tras el cual no se revende.", "Una marca de tiempo. Después de esa hora, las ofertas dejan de poder comprarse."],
+      ["emitidas", "Cuántas se han vendido.", "Los identificadores empiezan en 1, así que el 0 significa «no existe»."],
+      ["validador", "Quién valida en la puerta.", "Lo asigna el organizador y lo puede cambiar. Es el único rol que cambia."],
+      ["ofertas · usada", "Qué entrada está en venta y cuál ya entró.", "Dos mappings por identificador de entrada."],
+      ["saldos", "Lo que el contrato le debe a cada quien.", "El corazón del patrón de retiro: aquí se anota, y cada uno reclama."],
+    ], { y: 1.9, h: 4.4, colW: [3.0, 3.9, 5.193], size: 11.5 });
+    D.parrafo(s, "Hay una octava, privada, que aparece en el bloque B y que es el centro de todo lo de hoy.", { y: 6.45, h: 0.4, size: 12.5, color: C.gris });
+    s.addNotes("4 minutos. Esta tabla sale de ARQUITECTURA.md, sección 2. No hay que leerla entera: señalar los tres immutable (son las reglas que nadie puede cambiar, ni el dueño) y el mapping saldos, que es el que explica por qué el contrato no envía dinero. La octava variable es `_transferenciaAbierta`: NO nombrarla todavía, está puesta ahí como anzuelo para el bloque B.");
+  }
+
+  {
+    const s = await D.lamina({ kicker: "A.1 · la interfaz · 1 de 2", titulo: "Las funciones que mueven entradas", ic: "lista", tituloSize: 28 });
+    D.tabla(s, ["función", "quién la llama", "qué hace, y cuándo se niega"], [
+      ["comprar()", "cualquiera", "Vende una entrada del lote original al precio exacto. Se niega si se agotó el aforo o si el pago no es exacto."],
+      ["ponerEnVenta(id, precio)", "el dueño de esa entrada", "Publica una oferta. Se niega si no es suya, si el precio supera el tope, si la reventa ya cerró o si la entrada ya se usó."],
+      ["quitarDeVenta(id)", "el dueño de esa entrada", "Retira la oferta. Sin ceremonia: borra la oferta y emite el evento."],
+      ["comprarReventa(id)", "cualquiera menos el vendedor", "La ÚNICA puerta por la que una entrada cambia de dueño. Exige el precio exacto de la oferta."],
+    ], { y: 1.9, h: 3.2, colW: [3.1, 2.6, 6.393], size: 12 });
+    await D.ficha(s, {
+      tipo: "termino", etiqueta: "Lo que ya se puede deducir sin leer un solo cuerpo de función",
+      x: M, y: 5.25, w: CW, h: 1.45,
+      texto: "Hay exactamente una forma de que una entrada cambie de manos, y tiene el tope adentro. Si eso es verdad, la promesa del contrato se sostiene. Comprobarlo es el trabajo del bloque B.",
+      size: 13,
+    });
+    s.addNotes("5 minutos. Leer la tabla de izquierda a derecha, columna «quién la llama» primero: es la que más información da. La última fila es la importante y conviene decirla despacio: UNA sola puerta. Si alguien pregunta «¿y transferFrom, que todo ERC-721 tiene?», es la mejor pregunta posible: anotarla en el tablero con el nombre de quien la hizo y contestar que se responde en el bloque B.");
+  }
+
+  {
+    const s = await D.lamina({ kicker: "A.1 · la interfaz · 2 de 2", titulo: "El dinero, la puerta y la administración", ic: "llave", tituloSize: 28 });
+    D.tabla(s, ["función", "quién la llama", "qué hace, y cuándo se niega"], [
+      ["retirar()", "quien tenga saldo", "Envía a quien llama lo que el contrato le debe. Se niega si su saldo es cero."],
+      ["esValida(id, portador)", "la app de puerta", "¿Puede entrar esa persona con esa entrada? Es una consulta: no cuesta gas y no deja rastro."],
+      ["marcarUsada(id)", "validador u organizador", "Marca la entrada como usada y borra su oferta. Nadie más puede llamarla."],
+      ["asignarValidador(dir)", "solo el organizador", "Cambia quién valida en la puerta. El dispositivo se presta y se pierde: por eso el rol es reemplazable."],
+      ["quedanDisponibles() · reventaAbierta()", "cualquiera", "Consultas de conveniencia para la interfaz. Gratis."],
+    ], { y: 1.9, h: 3.5, colW: [3.5, 2.5, 6.093], size: 12 });
+    D.parrafo(s, "Fíjense en el reparto: el organizador cobra y administra, el validador solo marca, y el dinero sale únicamente por retirar(), llamado por su dueño. Ningún rol puede mover una entrada ajena.", { y: 5.6, h: 0.9, size: 13.5 });
+    s.addNotes("4 minutos. Esta lámina ya es media pasada 2, y está bien: sirve de preparación. Señalar que esValida es una consulta y que por eso la puerta puede funcionar con un teléfono prestado y sin gastar un peso. marcarUsada sí es transacción, y la decisión de cuándo usarla está en las decisiones de diseño de la lámina siguiente.");
+  }
+
+  {
+    const s = await D.lamina({ kicker: "A.1 · el flujo crítico", titulo: "comprarReventa, por dentro", ic: "engranaje", tituloSize: 29 });
+    D.pasos(s, [
+      ["COMPRUEBA", "Que la oferta exista, que la reventa no haya cerrado, que la entrada no esté usada y que el pago sea exactamente el de la oferta."],
+      ["Y COMPRUEBA MÁS", "Que quien compra no sea el mismo que vende. Sin eso, un vendedor podría simular ventas consigo mismo."],
+      ["CAMBIA SU ESTADO", "Borra la oferta y le acredita el dinero al vendedor. Esto ocurre ANTES de mover nada hacia afuera: es checks-effects-interactions."],
+      ["MUEVE LA ENTRADA", "Abre una compuerta, transfiere la entrada al comprador y la vuelve a cerrar."],
+      ["AVISA", "Emite Revendida con el antes, el después y el precio. Esa es la huella que queda para cualquiera que audite."],
+    ], { y: 1.95, alto: 0.8, gap: 0.1, anchoEt: 2.9, size: 12.5 });
+    await D.ficha(s, {
+      tipo: "pregunta", etiqueta: "El paso 4 tiene una palabra rara, y es deliberada",
+      x: M, y: 5.92, w: CW, h: 0.95,
+      texto: "¿Qué es esa compuerta, y qué pasa en el instante en que está abierta? Esa pregunta es el bloque B entero.",
+      size: 12.5,
+    });
+    s.addNotes("5 minutos. Es el flujo de ARQUITECTURA.md sección 5. Dos cosas que decir sí o sí: (1) el orden —comprobar, cambiar lo propio, y solo al final tocar afuera— tiene nombre y es la defensa principal contra la reentrada, que se ve completa en la S9; (2) la compuerta queda deliberadamente sin explicar. Si insisten, contestar: «lo van a encontrar ustedes dentro de una hora, y les va a gustar más así».");
+  }
+
+  {
+    const s = await D.lamina({ kicker: "A.1 · decisiones de diseño", titulo: "Seis decisiones, y lo que se descartó", ic: "balanza", tituloSize: 28 });
+    D.tabla(s, ["la decisión", "por qué", "qué se descartó"], [
+      ["Tope de reventa, no prohibición", "Prohibir castiga a quien de verdad no puede ir y empuja la venta a un canal sin protección.", "La entrada intransferible: hostil con el usuario honesto."],
+      ["Bloquear la transferencia directa", "Es lo único que vuelve real el tope. Si la entrada se mueve por fuera, la regla es otra vez una promesa.", "Cobrar un porcentaje: no pone techo al precio, solo lo grava, y el revendedor lo traslada."],
+      ["Cerrar la reventa antes del evento", "Permite validar en la puerta sin conexión: la lista de dueños deja de cambiar.", "Reventa hasta el último minuto: obliga a consultar la cadena donde peor señal hay."],
+      ["Marcar usada fuera de cadena", "Registrarlo en cadena haría esperar a la fila una confirmación.", "Marcar siempre en cadena: más puro, y una fila más lenta."],
+      ["Dos interfaces separadas", "El dispositivo de la puerta se presta y se pierde; si firmara transacciones de valor sería el punto más débil.", "Una sola app con permisos por rol."],
+      ["Patrón de retiro", "Si el destinatario rechaza un envío, la venta entera fallaría. Y enviar abre un camino de reentrada.", "Enviar el dinero dentro de la misma operación."],
+    ], { y: 1.9, h: 4.55, colW: [3.2, 4.85, 4.043], size: 10.5 });
+    D.parrafo(s, "Ninguna de estas seis es obvia, y cada una se pudo decidir al revés. Eso es diseñar: elegir, y saber qué se está perdiendo.", { y: 6.6, h: 0.4, size: 12.5, color: C.ocre });
+    s.addNotes("6 minutos, y es la lámina más valiosa del bloque A para el proyecto de ellos. Sale de ARQUITECTURA.md sección 6. No leerla entera: elegir dos, la primera y la que más les toque según sus proyectos, y preguntarles qué habrían decidido ellos. Decir explícitamente que esta tabla —decisión, por qué, alternativa descartada— es lo que se les va a pedir en la defensa de la S8: un contrato sin decisiones explicadas es un contrato que nadie pensó.");
+  }
+
+  {
+    const s = await D.lamina({ kicker: "A.1 · el precio de las decisiones", titulo: "Lo que se gana y lo que cuesta", ic: "balanza", tituloSize: 29 });
+    D.dosColumnas(s,
+      { et: "Lo que gano", items: [
+        "La regla se cumple sola, sin depender de que alguien quiera aplicarla.",
+        "Nadie revende por encima del tope a través del contrato.",
+        "La puerta funciona sin conexión.",
+        "Todo movimiento queda registrado y cualquiera lo puede auditar.",
+        "El organizador no puede alterar el registro.",
+      ] },
+      { et: "Lo que cuesta", items: [
+        "Quien no tiene billetera no puede comprar.",
+        "Quien pierde su billetera pierde la entrada, y no hay a quién reclamarle.",
+        "Nadie vende su entrada en las últimas horas.",
+        "El tope es público: el organizador pierde margen comercial.",
+        "Tampoco se puede corregir un error de emisión. La inmutabilidad corta para los dos lados.",
+      ] },
+      { y: 1.95, h: 3.5, size: 12.5 });
+    await D.ficha(s, {
+      tipo: "alerta", etiqueta: "La pregunta del curso, aplicada a este contrato",
+      x: M, y: 5.60, w: CW, h: 1.25,
+      texto: "¿Esto necesitaba una blockchain? Solo si el organizador no quiere —o no puede— ser el árbitro de su propia regla. Si el público confía en él, una base de datos hace lo mismo más barato.",
+      size: 13,
+    });
+    s.addNotes("4 minutos. Sale de ARQUITECTURA.md sección 7. Es la lámina honesta del bloque: se proyecta entera y se lee la columna derecha en voz alta, que es la que casi nadie escribe en su propio proyecto. Cerrar con la pregunta de la ficha y NO responderla del todo: se retoma al final del bloque B, cuando ya sepan dónde termina el poder del contrato.");
+  }
+
+  {
+    const s = await D.lamina({ kicker: "A.1 → pasada 1", titulo: "Ya saben qué hace. Ahora léanlo con método", ic: "lupa", tituloSize: 27 });
+    D.parrafo(s, "Lo anterior es el recorrido que haría cualquiera que le explique su contrato. A partir de aquí hacemos lo contrario: nadie nos lo explica. Leemos el archivo, en pantalla, en el orden de las cuatro pasadas, y sacamos las conclusiones nosotros.", { y: 1.95, h: 1.0, size: 15 });
+    D.dosColumnas(s,
+      { et: "Lo que acaban de recibir", texto: "Una explicación. Cómoda, ordenada y escrita por el autor del contrato, que cuenta lo que él cree que su contrato hace." },
+      { et: "Lo que van a hacer ahora", texto: "Una lectura. Incómoda, en desorden aparente, y que puede terminar contradiciendo al autor. Hoy, de hecho, lo contradice." },
+      { y: 3.2, h: 1.9, size: 13.5 });
+    D.parrafo(s, "En la Sesión 8 ustedes van a estar del otro lado: explicando su contrato a un grupo que lo va a leer con este método.", { y: 5.35, h: 0.6, size: 14, color: C.ocre });
+    s.addNotes("2 minutos. Es la bisagra del bloque y conviene no saltársela: marca que la explicación del autor y la lectura del auditor son dos cosas distintas, y que hoy la segunda le va a encontrar algo a la primera. No adelantar qué.");
   }
 
   /* ---------------------------------------------- pasada 1 · ¿qué promete? */
@@ -410,7 +559,7 @@ if (precio > topeReventa) revert PrecioSobreTope(topeReventa, precio);`, { x: M,
     const s = await D.divisor({
       letra: "B", titulo: "El laboratorio de ataque",
       sub: "Un encargo de una sola línea: revendan una entrada por encima del tope. Seis ataques, una vulnerabilidad real encontrada esta semana, y los cinco tipos que hay detrás.",
-      minutos: "APROXIMADAMENTE 70 MINUTOS · EN PAREJAS",
+      minutos: "APROXIMADAMENTE 60 MINUTOS · EN PAREJAS",
       ic: "bicho",
     });
     s.addNotes("Transición (30 s). Avisar aquí que el laboratorio de la subasta (laboratorios-evm/guias/s07-subasta-patrones.pdf, 16 páginas) pasa a trabajo autónomo y sigue siendo evidencia evaluable: el tiempo de clase se va en esto, porque esto no se puede hacer solo. El docente circula; no dicta comandos. Reparto del tiempo: 15 minutos de correr y leer, 25 de los seis ataques, 10 de los tipos y la regla general, 12 del sexto intento propio, 3 de verificación.");
@@ -702,7 +851,7 @@ await expect(atacante.intentoPrecioSobreTope(tokenId, abusivo))
     const s = await D.divisor({
       letra: "C", titulo: "Su propio contrato",
       sub: "Las cuatro pasadas, aplicadas aquí y ahora al contrato que su equipo expone en la Sesión 8. Con la ficha de lectura en la mano.",
-      minutos: "APROXIMADAMENTE 40 MINUTOS · POR EQUIPO",
+      minutos: "APROXIMADAMENTE 30 MINUTOS · POR EQUIPO",
       ic: "diana",
     });
     s.addNotes("Transición después de la pausa (30 s). Repartir la ficha de lectura impresa: material/proyecto/ficha-lectura-contrato.pdf. Decir de entrada que esto no es una tarea para la casa: se hace aquí, con el docente en el salón, porque la mitad de los equipos va a descubrir que no puede responder la pasada 2 de su propio contrato y es mejor que lo descubran ahora. Y recordar lo que acabó de pasar en el bloque B: el contrato del docente tenía un hueco, así que nadie en este salón está por encima del método.");
