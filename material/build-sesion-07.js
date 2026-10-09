@@ -100,7 +100,7 @@ async function construir() {
       ["B", "LABORATORIO DE ATAQUE", "Un encargo de una línea: revendan una entrada por encima del tope. Seis ataques, una vulnerabilidad real y los cinco tipos que hay detrás.", "~60 min"],
       ["C", "SU PROPIO CONTRATO", "Las cuatro pasadas aplicadas al contrato del proyecto, aquí, con la ficha de lectura en la mano.", "~30 min"],
     ],
-    notas: "5 + 75 + 60 + 10 de pausa + 30 = 180 minutos. El bloque A trae primero el caso y el contrato entero (A.1, nueve láminas) y después las cuatro pasadas: está pensado para poder dictarse sin haber estudiado el contrato de antemano, leyendo las láminas en orden. Si algo se alarga, se recorta del bloque A (las láminas de gas y de errores se pueden dejar para la guía), nunca del clímax del bloque B ni del bloque C: los equipos exponen en la S8 y la ficha de lectura se llena HOY, en el salón, con el docente disponible. Avisar ya que el laboratorio de la subasta pasa a trabajo autónomo y sigue siendo evidencia evaluable.",
+    notas: "5 + 75 + 60 + 10 de pausa + 30 = 180 minutos. El bloque A trae primero el caso y el contrato entero (A.1, catorce láminas, con el código en pantalla) y después las cuatro pasadas. Está pensado para dictarse SIN haber estudiado el contrato: el código que hay que mostrar ya está en las láminas, así que no hace falta alternar con el editor. Si el tiempo aprieta, las láminas de código del constructor y de la puerta se pueden pasar de largo; las de ponerEnVenta y comprarReventa, no. Si algo se alarga, se recorta del bloque A (las láminas de gas y de errores se pueden dejar para la guía), nunca del clímax del bloque B ni del bloque C: los equipos exponen en la S8 y la ficha de lectura se llena HOY, en el salón, con el docente disponible. Avisar ya que el laboratorio de la subasta pasa a trabajo autónomo y sigue siendo evidencia evaluable.",
   });
 
   await D.objetivo({
@@ -229,6 +229,49 @@ async function construir() {
   }
 
   {
+    const s = await D.lamina({ kicker: "A.1 · el estado, en código", titulo: "Las mismas variables, tal como están escritas", ic: "codigo", tituloSize: 26 });
+    D.codigo(s, `contract Entradas is ERC721, Ownable {
+
+    string  public evento;
+    uint256 public immutable aforo;            // nadie imprime una de más
+    uint256 public immutable precioOriginal;
+    uint256 public immutable topeReventa;      // <- la regla de hoy
+    uint256 public immutable cierreReventa;    // marca temporal
+    uint256 public emitidas;
+
+    address public validador;                  // valida en la puerta
+
+    struct Oferta { uint256 precio; bool activa; }
+
+    mapping(uint256 tokenId => Oferta)  public ofertas;
+    mapping(uint256 tokenId => bool)    public usada;
+    mapping(address titular => uint256) public saldos;   // patrón de retiro`, { x: M, y: 1.85, w: CW, h: 4.25, size: 12 });
+    D.parrafo(s, "Falta una línea más, privada, que está justo debajo de esta última. Es la que explica todo lo de hoy, y la vamos a ver en el bloque B.", { y: 6.2, h: 0.6, size: 13.5, color: C.ocre });
+    s.addNotes("3 minutos. Leer en voz alta solo los cuatro immutable y el mapping saldos. Lo demás se ve. La línea que falta es `bool private _transferenciaAbierta;`: si alguien abre el archivo y la ve, perfecto, se le dice que anote la pregunta y que la respuesta es el bloque B. Nota de estilo que vale la pena señalar: `public` en una variable genera gratis su función de lectura, por eso el contrato tiene menos funciones de las que parece.");
+  }
+
+  {
+    const s = await D.lamina({ kicker: "A.1 · el constructor", titulo: "Lo que se decide una sola vez", ic: "candado", tituloSize: 28 });
+    D.codigo(s, `constructor(
+    string memory nombreEvento,
+    uint256 aforo_,
+    uint256 precioOriginal_,
+    uint256 topeReventa_,
+    uint256 cierreReventa_
+) ERC721("Entrada USB", "ENT") Ownable(msg.sender) {
+    require(aforo_ > 0, "aforo debe ser mayor que cero");
+    require(topeReventa_ >= precioOriginal_, "el tope no puede ser menor que el precio original");
+    evento = nombreEvento;
+    aforo = aforo_;
+    precioOriginal = precioOriginal_;
+    topeReventa = topeReventa_;
+    cierreReventa = cierreReventa_;
+}`, { x: M, y: 1.85, w: CW, h: 4.0, size: 11.5 });
+    D.parrafo(s, "Tres cosas pasan aquí y solo aquí: se le pone nombre y símbolo al token, el que despliega queda como organizador, y las cuatro reglas quedan grabadas. Después de esta función, ni el dueño puede cambiarlas.", { y: 5.95, h: 0.85, size: 13.5 });
+    s.addNotes("3 minutos. Señalar `Ownable(msg.sender)`: así se le dice al contrato heredado quién manda, y es obligatorio en OpenZeppelin 5. Las dos validaciones del constructor son la única vez en todo el contrato que se usa require con texto en vez de un error propio; si alguien lo nota, es una observación excelente: en el constructor el texto se paga una sola vez y no en cada llamada.");
+  }
+
+  {
     const s = await D.lamina({ kicker: "A.1 · la interfaz · 1 de 2", titulo: "Las funciones que mueven entradas", ic: "lista", tituloSize: 28 });
     D.tabla(s, ["función", "quién la llama", "qué hace, y cuándo se niega"], [
       ["comprar()", "cualquiera", "Vende una entrada del lote original al precio exacto. Se niega si se agotó el aforo o si el pago no es exacto."],
@@ -259,6 +302,26 @@ async function construir() {
   }
 
   {
+    const s = await D.lamina({ kicker: "A.1 · poner en venta, en código", titulo: "Cuatro guardias antes de publicar una oferta", ic: "escudo", tituloSize: 26 });
+    D.codigo(s, `function ponerEnVenta(uint256 tokenId, uint256 precio) external {
+    if (ownerOf(tokenId) != msg.sender)   revert NoEsPropietario();
+    if (block.timestamp >= cierreReventa) revert ReventaCerrada();
+    if (precio > topeReventa)             revert PrecioSobreTope(topeReventa, precio);
+    if (usada[tokenId])                   revert EntradaYaUsada();
+
+    ofertas[tokenId] = Oferta({precio: precio, activa: true});
+    emit PuestaEnVenta(tokenId, precio);
+}`, { x: M, y: 1.85, w: CW, h: 2.75, size: 12 });
+    D.tabla(s, ["la guardia", "qué impide"], [
+      ["ownerOf != msg.sender", "Que alguien ponga en venta una entrada que no es suya."],
+      ["block.timestamp >= cierreReventa", "Que se publiquen ofertas cuando la puerta ya descargó la lista de dueños."],
+      ["precio > topeReventa", "La reventa abusiva. Es la línea que sostiene toda la promesa del contrato."],
+      ["usada[tokenId]", "Que se venda una entrada con la que alguien ya entró al evento."],
+    ], { y: 4.75, h: 1.95, colW: [4.2, 7.893], size: 11.5 });
+    s.addNotes("4 minutos. Es la mejor lámina del bloque para mostrar el estilo: cuatro guardias alineadas, cada una con su error propio, y después el cambio de estado. Preguntar qué pasa si se quitan en otro orden: no cambia la seguridad, pero sí el mensaje de error que recibe el usuario, y eso también es diseño. Ojo: el tope se comprueba aquí, al publicar, no al comprar. Si alguien pregunta si eso es suficiente, excelente pregunta: es exactamente lo que el bloque B pone a prueba.");
+  }
+
+  {
     const s = await D.lamina({ kicker: "A.1 · el flujo crítico", titulo: "comprarReventa, por dentro", ic: "engranaje", tituloSize: 29 });
     D.pasos(s, [
       ["COMPRUEBA", "Que la oferta exista, que la reventa no haya cerrado, que la entrada no esté usada y que el pago sea exactamente el de la oferta."],
@@ -274,6 +337,54 @@ async function construir() {
       size: 12.5,
     });
     s.addNotes("5 minutos. Es el flujo de ARQUITECTURA.md sección 5. Dos cosas que decir sí o sí: (1) el orden —comprobar, cambiar lo propio, y solo al final tocar afuera— tiene nombre y es la defensa principal contra la reentrada, que se ve completa en la S9; (2) la compuerta queda deliberadamente sin explicar. Si insisten, contestar: «lo van a encontrar ustedes dentro de una hora, y les va a gustar más así».");
+  }
+
+  {
+    const s = await D.lamina({ kicker: "A.1 · el flujo crítico, en código", titulo: "comprarReventa, línea por línea", ic: "codigo", tituloSize: 27 });
+    D.codigo(s, `function comprarReventa(uint256 tokenId) external payable {
+    Oferta memory oferta = ofertas[tokenId];
+    if (!oferta.activa)                   revert NoEstaEnVenta();
+    if (block.timestamp >= cierreReventa) revert ReventaCerrada();
+    if (usada[tokenId])                   revert EntradaYaUsada();
+    if (msg.value != oferta.precio)       revert PagoIncorrecto(oferta.precio, msg.value);
+
+    address vendedor = ownerOf(tokenId);
+    if (vendedor == msg.sender) revert NoSePuedeComprarASiMismo();
+
+    delete ofertas[tokenId];              // EFECTOS: primero lo propio
+    saldos[vendedor] += msg.value;        // se acredita, NO se envía
+
+    _transferenciaAbierta = true;         // ← ¿y esto qué es?
+    _safeTransfer(vendedor, msg.sender, tokenId, "");
+    _transferenciaAbierta = false;
+
+    emit Revendida(tokenId, vendedor, msg.sender, msg.value);
+}`, { x: M, y: 1.82, w: CW, h: 4.35, size: 11 });
+    D.parrafo(s, "Esas tres líneas del medio son el contrato entero de hoy: una abre algo, otra mueve la entrada, la tercera cierra. En el bloque B averiguamos qué ocurre entre la primera y la tercera.", { y: 6.25, h: 0.55, size: 12.5, color: C.ocre });
+    s.addNotes("5 minutos, y es la lámina que más conviene leer despacio. Recorrer el orden en voz alta: cuatro comprobaciones, una más sobre quién compra, el cambio del estado propio y, solo al final, la interacción hacia afuera. Ese orden tiene nombre (checks-effects-interactions) y es lo que impide que alguien cobre dos veces. NO explicar la compuerta: dejar la pregunta en el aire, está puesta en el comentario del código a propósito. Si alguien pregunta por qué el contrato no envía el dinero al vendedor aquí mismo, contestar con el patrón de retiro, que ya se vio en la lámina del estado.");
+  }
+
+  {
+    const s = await D.lamina({ kicker: "A.1 · la puerta, en código", titulo: "Consultar es gratis; marcar, no", ic: "pantalla", tituloSize: 28 });
+    D.codigo(s, `function esValida(uint256 tokenId, address portador) external view returns (bool) {
+    if (tokenId == 0 || tokenId > emitidas) return false;
+    if (usada[tokenId])                     return false;
+    return _ownerOf(tokenId) == portador;
+}
+
+function marcarUsada(uint256 tokenId) external {
+    if (msg.sender != validador && msg.sender != owner()) revert NoAutorizado();
+    if (usada[tokenId]) revert EntradaYaUsada();
+
+    usada[tokenId] = true;
+    delete ofertas[tokenId];          // una entrada usada ya no se revende
+    emit EntradaUsada(tokenId, _ownerOf(tokenId));
+}`, { x: M, y: 1.82, w: CW, h: 3.5, size: 11 });
+    D.dosColumnas(s,
+      { et: "esValida · view", texto: "Una consulta: no cuesta gas ni deja rastro. Por eso la puerta puede ser un teléfono prestado y sin un peso." },
+      { et: "marcarUsada · transacción", texto: "Cambia el estado: cuesta gas y alguien la firma. Solo validador u organizador." },
+      { y: 5.45, h: 1.42, size: 11.5 });
+    s.addNotes("4 minutos. El contraste de las dos columnas es el punto: la misma información, una leída y otra escrita, y la diferencia de costo y de permisos que eso implica. Si queda tiempo, la pregunta buena es por qué esValida devuelve false en vez de revertir cuando la entrada no existe: porque la puerta la llama miles de veces y necesita una respuesta, no una excepción. Es la decisión contraria a la que se tomó en el laboratorio de la clase pasada, y las dos son correctas en su contexto.");
   }
 
   {
