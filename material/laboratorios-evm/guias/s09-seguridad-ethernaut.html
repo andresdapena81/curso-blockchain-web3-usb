@@ -203,6 +203,9 @@ solc-select use 0.8.34</pre>
 
   <p>Corre Slither sobre el banco vulnerable (desde <code>material/laboratorios-evm</code> o tu copia):</p>
   <pre>slither contracts/s09/BancoVulnerable.sol</pre>
+  <p>Y sobre el banco <strong>corregido</strong>, para ver el antes y el después. Ojo: ese sí importa OpenZeppelin, y Slither no busca en <code>node_modules</code> por su cuenta, así que hay que decirle dónde:</p>
+  <pre>slither contracts/s09/BancoSeguro.sol \n        --solc-remaps "@openzeppelin=node_modules/@openzeppelin" \n        --filter-paths node_modules</pre>
+  <p>El vulnerable cierra con <code>2 result(s) found</code> —la reentrada en ALTA y una llamada de bajo nivel informativa—; el corregido, con <code>1 result(s) found</code>: queda solo la informativa. Esa diferencia es el valor de la herramienta en una línea.</p>
 
   <p>Esta es la <strong>salida real</strong> (se ejecutó con Slither 0.11.6 + solc 0.8.34):</p>
   <pre>INFO:Detectors:
@@ -260,6 +263,7 @@ INFO:Slither: analyzed (1 contracts with 102 detectors), 2 result(s) found</pre>
     <tr><td class="pk">El exploit de Re-entrancy no vacía todo</td><td>Depositaste/donaste menos que el balance de la instancia, o tu <code>receive()</code> no vuelve a llamar mientras quede balance. Revisa la condición.</td></tr>
     <tr><td class="pk">Force: «no puedo enviarle ETH»</td><td>Exacto: por eso hay que forzarlo con <code>selfdestruct</code> desde otro contrato, no con un envío normal.</td></tr>
     <tr><td class="pk">Slither: «solc not found» o versión equivocada</td><td>Instala y fija la versión con <code>solc-select install 0.8.34</code> y <code>solc-select use 0.8.34</code>.</td></tr>
+    <tr><td class="pk">Slither: <code>Source "@openzeppelin/…" not found</code></td><td>El contrato importa OpenZeppelin y Slither no lee <code>node_modules</code> solo. Agrega <code>--solc-remaps "@openzeppelin=node_modules/@openzeppelin"</code>, desde la raíz del proyecto.</td></tr>
     <tr><td class="pk">Slither marca decenas de cosas de OpenZeppelin</td><td>Es ruido de las dependencias. Filtra con <code>--filter-paths node_modules</code>.</td></tr>
   </table>
 </section>
