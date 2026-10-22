@@ -20,7 +20,7 @@ doble clic en el navegador); este README es solo el instructivo del paquete.
   tocan: son tu calificación.
 - `actividad.html` — la guía de la actividad (teoría, los tres retos con pistas
   escalonadas, Slither, rúbrica y preguntas de reflexión).
-- `rubrica.html` / `rubrica.pdf` — la rúbrica de calificación.
+- `rubrica.pdf` — la rúbrica de calificación.
 - La configuración de Hardhat y el `package.json` del proyecto.
 
 ---
