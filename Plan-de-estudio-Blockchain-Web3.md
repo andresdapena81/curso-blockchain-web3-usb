@@ -34,10 +34,10 @@ Al finalizar el curso, el estudiante estará en capacidad de:
 
 | # | Resultado de aprendizaje | Nivel (Bloom) | Se evalúa en |
 |---|---|---|---|
-| **RA1** | Explicar los fundamentos criptográficos (hash, firma digital, árboles de Merkle) que sustentan la integridad de un registro distribuido. | Comprender | Quiz 1, Lab S2–S3 |
-| **RA2** | Comparar mecanismos de consenso y justificar la elección de una arquitectura (pública, privada, permisionada) frente a un problema concreto. | Analizar | Quiz 1, Anteproyecto |
+| **RA1** | Explicar los fundamentos criptográficos (hash, firma digital, árboles de Merkle) que sustentan la integridad de un registro distribuido. | Comprender | Lab S2–S3 |
+| **RA2** | Comparar mecanismos de consenso y justificar la elección de una arquitectura (pública, privada, permisionada) frente a un problema concreto. | Analizar | Actividad Estonia, Anteproyecto |
 | **RA3** | Programar contratos inteligentes en Solidity aplicando patrones de diseño y estándares de la industria (ERC-20, ERC-721, OpenZeppelin). | Aplicar / Crear | Labs S6–S11, Proyecto |
-| **RA4** | Construir una suite de pruebas automatizadas y desplegar contratos verificados en una red de prueba usando un entorno profesional (Hardhat/Foundry). | Aplicar | Parcial práctico, Proyecto |
+| **RA4** | Construir una suite de pruebas automatizadas y desplegar contratos verificados en una red de prueba usando un entorno profesional (Hardhat/Foundry). | Aplicar | Actividad de seguridad, Proyecto |
 | **RA5** | Identificar y remediar vulnerabilidades típicas de contratos inteligentes mediante análisis manual y herramientas automatizadas. | Evaluar | Ethernaut, Auditoría cruzada |
 | **RA6** | Integrar una interfaz Web 3.0 con contratos on-chain y almacenamiento descentralizado, gestionando wallets, eventos y estados de transacción. | Crear | Proyecto final |
 | **RA7** | Evaluar críticamente las implicaciones económicas, regulatorias, éticas y ambientales de una solución basada en blockchain, con referencia al marco colombiano. | Evaluar | Ensayo, Sustentación |
@@ -190,7 +190,7 @@ Se recorre la solución función por función —hash y efecto avalancha, la lí
 - Taller comparativo: dado un caso (trazabilidad de café, historia clínica, votación gremial), justificar arquitectura y consenso.
 
 **Trabajo autónomo:** preparar la propuesta de proyecto.
-**📌 Evaluación:** **Quiz 1 (Unidad I)** — 30 min al cierre.
+**📌 Repaso interactivo (sin nota):** **Quiz 1 (Unidad I)** — actividad de autoevaluación sobre los temas de la unidad, para que cada quien mida qué le quedó claro. No se califica.
 
 ---
 
@@ -305,7 +305,7 @@ Se recorre la solución función por función —hash y efecto avalancha, la lí
 - Análisis estático con Slither sobre el contrato propio.
 - **Auditoría cruzada #1:** cada equipo audita el contrato de otro equipo y entrega hallazgos clasificados por severidad.
 
-**📌 Evaluación:** **Parcial práctico** — dado un contrato vulnerable, identificar el fallo, explotarlo y entregar la versión corregida (90 min, en máquina, libro abierto).
+**📌 Evaluación:** **Actividad práctica de seguridad (CTF)** — tres contratos vulnerables (control de acceso, azar en cadena, reentrada); por cada uno, escribir el exploit que lo rompe hasta que su prueba automática pase, y explicar por qué era vulnerable y cómo se corrige. Se hace fuera de clase, a libro abierto, con repositorio y pruebas autocalificables. El CTF se autoverifica: cada prueba pasa solo cuando el ataque funciona.
 
 ---
 
@@ -523,12 +523,12 @@ Propuesta ajustable al esquema de cortes del reglamento institucional.
 
 | Corte | Sesiones | Componente | Peso parcial | Peso total |
 |---|---|---|---|---|
-| **Primer corte (30 %)** | S1–S6 | Quiz 1 (Unidad I) | 40 % | 12 % |
-| | | Laboratorios S2–S5 (4 evidencias) | 40 % | 12 % |
+| **Primer corte (30 %)** | S1–S6 | Laboratorios S2–S5 (4 evidencias) | 55 % | 16,5 % |
+| | | Actividad caso Estonia (Unidad I) | 25 % | 7,5 % |
 | | | Anteproyecto | 20 % | 6 % |
-| **Segundo corte (30 %)** | S7–S12 | Parcial práctico de seguridad (S9) | 45 % | 13,5 % |
+| **Segundo corte (30 %)** | S7–S12 | Actividad práctica de seguridad (CTF, S9) | 45 % | 13,5 % |
 | | | Laboratorios S7–S12 (6 evidencias) | 35 % | 10,5 % |
-| | | Ethernaut + auditoría cruzada #1 | 20 % | 6 % |
+| | | Auditoría cruzada #1 | 20 % | 6 % |
 | **Tercer corte (40 %)** | S13–S17 | Proyecto final (avances + entrega + sustentación) | 70 % | 28 % |
 | | | Ensayo individual (RA7) | 20 % | 8 % |
 | | | Laboratorios S14–S16 | 10 % | 4 % |
@@ -665,7 +665,7 @@ Se desarrolló el material completo de las 17 sesiones (presentaciones, laborato
 - **Presentaciones:** 17 decks PPTX (S1–S17), todos validados sin desbordes de maqueta.
 - **Motor de decks:** `material/lib/sistema.js` (sistema de diseño compartido con validación automática de geometría) y `material/lib/qa_deck.py` (control de calidad por render).
 - **Laboratorios con código probado:** S2 y S3 (Merkle, firmas, mini-blockchain, Python + JS); S4 (consenso, Python); S5–S16 en `laboratorios-evm` (81 pruebas de contrato, todas en verde, con Hardhat 3.16 / Solidity 0.8.28 / OpenZeppelin 5.6.1).
-- **Evaluaciones:** Quiz 1 (estudiante + clave, generados de un solo banco) y Parcial práctico de la S9 (contrato vulnerable + solucionario, exploit y corrección verificados).
+- **Evaluaciones prácticas:** actividad CTF de la S9 (tres contratos vulnerables, andamiaje de atacantes y pruebas autocalificables; solución docente en el repositorio privado). El Quiz 1 se conserva como repaso interactivo sin nota.
 - **dApp de referencia:** `material/dapp-ficha` (frontend de un archivo, ethers v6, con los cuatro estados de error).
 - **Proyecto del docente:** contrato de entradas con reventa controlada (`demo-entradas`, 28 pruebas) y deck de alcance.
 

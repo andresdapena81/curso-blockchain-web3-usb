@@ -1,0 +1,110 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<title>Rúbrica · Actividad 09 · Reto de seguridad</title>
+<!--ESTILOS-->
+</head>
+<body>
+
+<section class="barra">
+  <div class="kicker">ACTIVIDAD 09 · SESIÓN DE SEGURIDAD · TRABAJO EN CASA · INDIVIDUAL</div>
+  <h1>RÚBRICA DEL<br>RETO DE <em>SEGURIDAD</em></h1>
+  <div class="sub">CTF local: tres contratos vulnerables, tres exploits, Slither sobre tu propio proyecto<br>y preguntas de reflexión. Autocalificable: la prueba en verde es parte de tu nota.</div>
+</section>
+
+<dl class="datos">
+  <div><dt>MODALIDAD</dt><dd>Individual · en casa<br>sin profesor</dd></div>
+  <div><dt>ENTREGA</dt><dd>Atacantes.sol · capturas<br>Slither · reflexión</dd></div>
+  <div><dt>ESCALA</dt><dd>100 puntos<br>(= nota de la actividad)</dd></div>
+  <div><dt>FECHA</dt><dd>__________________<br>(la fija el docente)</dd></div>
+</dl>
+
+<div class="caja peligro">
+  <div class="caja-et">CÓMO FUNCIONA ESTA RÚBRICA</div>
+  <p>Cada reto vale <strong>25 puntos</strong>: <strong>20</strong> son automáticos (la prueba del CTF pasa o no pasa) y <strong>5</strong> son por explicar, con tus palabras, por qué el contrato era vulnerable y cómo se arreglaría. Slither sobre tu propio contrato vale <strong>10</strong> y las preguntas de reflexión <strong>15</strong>. Total: <strong>100</strong>. La prueba en verde la puedes verificar tú mismo antes de entregar con <code>npx hardhat test test/s09/ctf/CTF.test.js</code>.</p>
+</div>
+
+<!-- resumen -->
+<section class="sec">
+  <div class="sec-cab"><span class="sec-num">01</span><h2>Resumen de pesos</h2><span class="lead">100 PUNTOS</span></div>
+  <table>
+    <tr><th style="width:40%">COMPONENTE</th><th style="width:20%">PUNTOS</th><th>REPARTO INTERNO</th></tr>
+    <tr><td class="pk">Reto 1 · control de acceso (tx.origin)</td><td>25</td><td>Prueba en verde 20 · explicación 5</td></tr>
+    <tr><td class="pk">Reto 2 · azar en cadena</td><td>25</td><td>Prueba en verde 20 · explicación 5</td></tr>
+    <tr><td class="pk">Reto 3 · reentrada</td><td>25</td><td>Prueba en verde 20 · explicación 5</td></tr>
+    <tr><td class="pk">Slither sobre tu proyecto</td><td>10</td><td>Ejecución 5 · lectura de hallazgos 5</td></tr>
+    <tr><td class="pk">Preguntas de reflexión</td><td>15</td><td>4 preguntas, ver sección 04</td></tr>
+  </table>
+</section>
+
+<!-- retos -->
+<section class="sec salto">
+  <div class="sec-cab"><span class="sec-num">02</span><h2>Los tres retos · 75 puntos</h2><span class="lead">20 AUTO + 5 ARGUMENTO</span></div>
+
+  <p>Las tres filas aplican igual a cada reto (1, 2 y 3). La parte automática es la prueba del archivo <code>test/s09/ctf/CTF.test.js</code>; la parte de argumento son las 3 a 5 líneas que entregas por cada reto.</p>
+
+  <table>
+    <tr><th style="width:22%">CRITERIO</th><th style="width:14%">PUNTOS</th><th>QUÉ SE ESPERA</th></tr>
+    <tr><td class="pk">Exploit funciona</td><td>20</td><td>La prueba del reto queda <strong>en verde</strong> (<code>passing</code>). Es automático: pasa (20) o no pasa (0). A juicio del docente, un exploit casi correcto que falla por un detalle menor puede recibir crédito parcial (hasta 12).</td></tr>
+    <tr><td class="pk">Explica el porqué</td><td>3</td><td>Nombra la causa <strong>exacta</strong> del fallo (la línea o el patrón: <code>tx.origin</code>, el número recalculable, el envío antes de poner el saldo en cero), no una frase genérica.</td></tr>
+    <tr><td class="pk">Propone la defensa</td><td>2</td><td>Dice <strong>cómo se arreglaría</strong> de forma correcta (usar <code>msg.sender</code>; oráculo de azar / commit–reveal; Checks–Effects–Interactions o <code>ReentrancyGuard</code>).</td></tr>
+  </table>
+
+  <div class="caja clave">
+    <div class="caja-et">BANDAS PARA LA PARTE DE ARGUMENTO (5 PUNTOS POR RETO)</div>
+    <table style="margin-bottom:0">
+      <tr><th style="width:26%">NIVEL</th><th style="width:14%">PUNTOS</th><th>DESCRIPCIÓN</th></tr>
+      <tr><td class="pk">Completo</td><td>5</td><td>Identifica la causa exacta y da una defensa correcta y concreta.</td></tr>
+      <tr><td class="pk">Parcial</td><td>2–3</td><td>Ve el fallo pero la defensa es vaga, incompleta o solo «parchada».</td></tr>
+      <tr><td class="pk">Insuficiente</td><td>0–1</td><td>Explicación genérica, copiada o incorrecta; no demuestra haber entendido.</td></tr>
+    </table>
+  </div>
+</section>
+
+<!-- slither -->
+<section class="sec">
+  <div class="sec-cab"><span class="sec-num">03</span><h2>Slither sobre tu proyecto · 10 puntos</h2><span class="lead">TU CONTRATO, NO LOS RETOS</span></div>
+  <table>
+    <tr><th style="width:26%">CRITERIO</th><th style="width:14%">PUNTOS</th><th>QUÉ SE ESPERA</th></tr>
+    <tr><td class="pk">Ejecución</td><td>5</td><td>Captura de Slither corrido sobre el contrato principal de <strong>tu</strong> proyecto del curso, con la línea <code>N result(s) found</code>. Si importa OpenZeppelin, se ve el uso de <code>--solc-remaps</code>.</td></tr>
+    <tr><td class="pk">Lectura</td><td>5</td><td>Por cada hallazgo: nombre, severidad y si es real o falso positivo <strong>en tu caso</strong>, con una frase que lo justifique. Separar señal de ruido es el punto.</td></tr>
+  </table>
+  <p class="mono" style="font-size:8.5pt; color:var(--gris)">Si tu sala no permite instalar Python, se acepta la extensión de VS Code de Slither o una alternativa web, dejándolo dicho en la evidencia.</p>
+</section>
+
+<!-- reflexion -->
+<section class="sec">
+  <div class="sec-cab"><span class="sec-num">04</span><h2>Preguntas de reflexión · 15 puntos</h2><span class="lead">MIRA TU CÓDIGO REAL</span></div>
+  <table>
+    <tr><th style="width:60%">PREGUNTA</th><th style="width:14%">PUNTOS</th><th>SE EVALÚA</th></tr>
+    <tr><td>1 · tx.origin vs msg.sender: qué línea cambiar para romper tu ataque del reto 1 y por qué.</td><td>4</td><td>Correcta y concreta.</td></tr>
+    <tr><td>2 · Por qué ningún dato en cadena da azar real, y de dónde debería venir.</td><td>4</td><td>Argumento, no definición.</td></tr>
+    <tr><td>3 · La única línea a mover en <code>retirar()</code> y su costo en gas, atado a C-E-I.</td><td>4</td><td>Exactitud.</td></tr>
+    <tr><td>4 · Cuál de las tres familias podría sufrir tu propio proyecto, señalando la función.</td><td>3</td><td>Mira su propio código.</td></tr>
+  </table>
+  <div class="caja alerta">
+    <div class="caja-et">RESPUESTAS GENÉRICAS = 0 EN LA PREGUNTA</div>
+    <p>Estas preguntas se responden mirando <strong>tu</strong> contrato y <strong>tu</strong> exploit. Una respuesta que valdría igual para cualquier curso —la que produce un asistente sin tu código— no recibe puntos, aunque esté «bien escrita».</p>
+  </div>
+</section>
+
+<!-- honestidad -->
+<section class="sec">
+  <div class="sec-cab"><span class="sec-num">05</span><h2>Declaración de uso de IA y honestidad</h2></div>
+  <p>Puedes usar asistentes de IA, pero debes <strong>declararlo</strong>. Estos retos no se ganan pegando una respuesta que no entiendes: la parte de argumento y la reflexión miden tu criterio de seguridad, que es justo lo que un asistente taparía. Entregar algo que no comprendes —aunque la prueba pase— y no poder sostener el porqué es motivo de anulación de los puntos de argumento y reflexión.</p>
+  <div class="caja">
+    <div class="caja-et">COMPLETA Y FIRMA AL ENTREGAR</div>
+    <p>Declaro que este trabajo es mío. Usé asistentes de IA de la siguiente manera (herramienta y para qué; escribe «no usé» si aplica):</p>
+    <p class="mono">_______________________________________________________________________________</p>
+    <p class="mono">_______________________________________________________________________________</p>
+    <div class="firma">
+      <div>NOMBRE Y APELLIDO</div>
+      <div>CÓDIGO</div>
+      <div>FECHA</div>
+    </div>
+  </div>
+</section>
+
+</body>
+</html>

@@ -1,0 +1,469 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Actividad 09 · Reto de seguridad</title>
+<!--
+  Actividad 09 · Reto de seguridad (CTF local) · Blockchain y Web 3.0 · USB Medellín
+
+  Página web autocontenida para trabajo en casa, sin profesor. Se abre con doble
+  clic en el navegador. No necesita internet ni servidor: todo el CSS y el
+  JavaScript están embebidos en este archivo. Sin librerías externas.
+
+  Interactiva: secciones plegables por reto, pistas escalonadas (una a una),
+  casillas de autochequeo y barra de progreso. El estado se guarda en el propio
+  navegador (si está disponible); borrarlo no afecta la calificación.
+-->
+<style>
+  :root{
+    --naranja:#F07F06; --ocre:#A35604; --violeta:#7152E9; --violeta-os:#4A32B0;
+    --tinta:#0F0F11; --tinta2:#2B2A31; --gris:#6F6B80; --superf:#F4F2F7; --blanco:#fff;
+    --verde:#1F7A4D; --rojo:#B3261E; --amarillo:#B26B00; --gris-claro:#D9D6E0;
+    color-scheme: light;
+  }
+  *{ box-sizing:border-box; }
+  html{ scroll-behavior:smooth; }
+  body{ margin:0; font-family:Arial,Helvetica,sans-serif; background:var(--superf); color:var(--tinta2); line-height:1.55; }
+
+  /* barra de progreso fija arriba */
+  #barra{ position:sticky; top:0; z-index:50; background:var(--tinta); color:var(--blanco);
+    border-bottom:4px solid var(--naranja); padding:10px 16px; display:flex; align-items:center; gap:14px; flex-wrap:wrap; }
+  #barra .tit{ font-size:13px; font-family:"Courier New",monospace; letter-spacing:.08em; color:var(--naranja); white-space:nowrap; }
+  #barraExt{ flex:1; min-width:160px; height:14px; background:#2b2a31; border:1px solid #4a4857; }
+  #barraInt{ height:100%; width:0%; background:var(--naranja); transition:width .3s; }
+  #barraPct{ font-family:"Courier New",monospace; font-size:13px; min-width:42px; text-align:right; }
+
+  header{ background:var(--tinta); color:var(--blanco); padding:34px 24px 40px; }
+  header .kick{ font-family:"Courier New",monospace; font-size:12px; letter-spacing:.18em; color:var(--naranja); }
+  header h1{ margin:10px 0 0; font-size:30px; letter-spacing:-.01em; line-height:1.1; }
+  header h1 em{ font-style:normal; color:var(--naranja); }
+  header .sub{ margin:12px 0 0; color:#B9B4C4; font-size:15px; max-width:740px; }
+  /* en cualquier zona de fondo oscuro, strong/b no pueden heredar el color tinta */
+  header strong, header b, #barra strong, #barra b,
+  .oscuro strong, .oscuro b{ color:#fff; }
+
+  main{ max-width:820px; margin:0 auto; padding:24px 16px 80px; display:grid; gap:18px; }
+
+  .tarjeta{ background:var(--blanco); border:2px solid var(--tinta); box-shadow:5px 5px 0 var(--tinta); }
+  .tarjeta>.cuerpo{ padding:18px 22px; }
+  h2.sec{ margin:0; font-size:12px; font-family:"Courier New",monospace; letter-spacing:.12em; text-transform:uppercase; color:var(--ocre); }
+
+  /* secciones plegables */
+  details.plegable{ background:var(--blanco); border:2px solid var(--tinta); box-shadow:5px 5px 0 var(--tinta); }
+  details.plegable>summary{ list-style:none; cursor:pointer; padding:16px 22px; display:flex; align-items:center; gap:14px;
+    font-weight:bold; font-size:17px; color:var(--tinta); }
+  details.plegable>summary::-webkit-details-marker{ display:none; }
+  details.plegable>summary .chev{ margin-left:auto; font-family:"Courier New",monospace; color:var(--violeta); font-size:20px; transition:transform .2s; }
+  details.plegable[open]>summary .chev{ transform:rotate(90deg); }
+  details.plegable>summary .num{ background:var(--tinta); color:var(--naranja); font-family:"Arial Black",Arial,sans-serif;
+    font-size:16px; min-width:34px; height:34px; display:flex; align-items:center; justify-content:center; }
+  details.plegable>summary .fam{ display:block; font-family:"Courier New",monospace; font-size:11px; letter-spacing:.08em; color:var(--gris); font-weight:normal; margin-bottom:2px; }
+  details.plegable .interior{ padding:4px 22px 22px; border-top:1px solid var(--gris-claro); }
+
+  h3{ font-size:15px; margin:18px 0 6px; color:var(--tinta); }
+  p{ margin:0 0 10px; } ul,ol{ margin:0 0 10px; padding-left:22px; } li{ margin-bottom:5px; }
+  code{ font-family:"Courier New",monospace; background:var(--superf); padding:1px 5px; font-size:13.5px; border:1px solid var(--gris-claro); }
+  pre{ background:#16151B; color:#F4F2F7; font-family:"Courier New",monospace; font-size:13px; line-height:1.45;
+    padding:14px 16px; margin:10px 0; overflow:auto; border-left:4px solid var(--naranja); }
+  pre.sol{ border-left-color:var(--violeta); }
+  a{ color:var(--violeta-os); }
+  strong{ color:var(--tinta); }
+
+  .caja{ border:2px solid var(--tinta); box-shadow:4px 4px 0 var(--tinta); padding:14px 18px; margin:14px 0; }
+  .caja .et{ font-family:"Courier New",monospace; font-size:12px; font-weight:bold; letter-spacing:.1em; margin-bottom:8px; }
+  .caja.peligro{ border-color:var(--rojo); box-shadow:4px 4px 0 var(--rojo); } .caja.peligro .et{ color:var(--rojo); }
+  .caja.clave{ border-color:var(--violeta); box-shadow:4px 4px 0 var(--violeta); } .caja.clave .et{ color:var(--violeta-os); }
+  .caja.ok{ border-color:var(--verde); box-shadow:4px 4px 0 var(--verde); } .caja.ok .et{ color:var(--verde); }
+  .caja.ia{ border-color:var(--ocre); box-shadow:4px 4px 0 var(--ocre); } .caja.ia .et{ color:var(--ocre); }
+  .caja p:last-child{ margin-bottom:0; }
+
+  table{ width:100%; border-collapse:collapse; margin:10px 0; font-size:13.5px; }
+  th{ background:var(--tinta); color:#fff; font-family:"Courier New",monospace; font-size:11.5px; letter-spacing:.06em; text-align:left; padding:8px 10px; }
+  td{ border-bottom:1px solid var(--gris-claro); padding:8px 10px; vertical-align:top; }
+  td.pk{ font-family:"Courier New",monospace; color:var(--ocre); font-weight:bold; font-size:12.5px; }
+
+  /* botones de pista */
+  .pistas{ margin:14px 0; }
+  .pista{ background:var(--superf); border-left:3px solid var(--violeta); padding:10px 14px; margin:8px 0; font-size:14px; }
+  .pista .lbl{ font-family:"Courier New",monospace; font-size:11px; letter-spacing:.08em; color:var(--violeta-os); display:block; margin-bottom:4px; }
+  button.btn{ font-family:inherit; font-size:14px; font-weight:bold; padding:10px 18px; border:2px solid var(--tinta);
+    background:var(--naranja); color:var(--tinta); cursor:pointer; box-shadow:3px 3px 0 var(--tinta); }
+  button.btn:active{ transform:translate(2px,2px); box-shadow:1px 1px 0 var(--tinta); }
+  button.btn:disabled{ background:#d8d5de; color:var(--gris); cursor:not-allowed; box-shadow:none; }
+  button.btn.sec{ background:var(--blanco); }
+
+  /* autochequeo */
+  .check{ display:flex; align-items:flex-start; gap:12px; background:var(--superf); border:2px solid var(--gris-claro);
+    padding:12px 16px; margin-top:16px; cursor:pointer; }
+  .check input{ width:22px; height:22px; margin-top:2px; accent-color:var(--verde); cursor:pointer; flex-shrink:0; }
+  .check.hecho{ border-color:var(--verde); background:#e9f6ef; }
+  .check .txt{ font-size:14px; }
+  .check .txt b{ color:var(--tinta); }
+
+  .meta{ font-size:12.5px; color:var(--gris); }
+  .indice{ display:flex; flex-wrap:wrap; gap:8px; margin-top:8px; }
+  .indice a{ font-family:"Courier New",monospace; font-size:12.5px; text-decoration:none; border:1.5px solid var(--gris-claro);
+    padding:5px 10px; color:var(--tinta2); background:var(--blanco); }
+  .indice a:hover{ border-color:var(--violeta); }
+  footer{ max-width:820px; margin:0 auto; padding:0 16px 60px; color:var(--gris); font-size:12.5px; }
+  .reset{ background:none; border:none; color:var(--gris); font-size:12px; text-decoration:underline; cursor:pointer; padding:0; font-family:inherit; }
+</style>
+</head>
+<body>
+
+<div id="barra">
+  <span class="tit">TU PROGRESO</span>
+  <div id="barraExt"><div id="barraInt"></div></div>
+  <span id="barraPct">0 / 4</span>
+</div>
+
+<header>
+  <div class="kick">ACTIVIDAD 09 · SESIÓN DE SEGURIDAD · TRABAJO EN CASA</div>
+  <h1>ROMPE TRES CONTRATOS<br>PARA ENTENDER <em>POR QUÉ SE ROMPEN</em></h1>
+  <p class="sub">Un CTF local: tres contratos del semillero guardan plata y los tres se pueden vaciar.
+  Tu trabajo no es arreglarlos, es <strong>demostrar que están rotos</strong> escribiendo el atacante de cada uno.
+  Cuando tu exploit funciona de verdad, la prueba pasa sola. Todo corre en la red local de Hardhat: no hay dinero real ni ETH de prueba.</p>
+</header>
+
+<main>
+
+  <!-- ====================== PORTADA / INFO ====================== -->
+  <section class="tarjeta" id="inicio"><div class="cuerpo">
+    <h2 class="sec">0 · De qué va esta actividad</h2>
+    <p>Esta es una <strong>actividad práctica evaluable que haces solo, en tu casa</strong>. No hay clase ni examen presencial para esta sesión: la página que estás leyendo es toda la guía que necesitas. Es autocontenida y <strong>autocalificable</strong>: cada reto tiene una prueba que pasa cuando tu ataque es correcto, así que sabes tu nota antes de entregar.</p>
+    <table>
+      <tr><th style="width:34%">DATO</th><th>VALOR</th></tr>
+      <tr><td class="pk">Modalidad</td><td>Individual, en casa, sin profesor. Libro abierto (ver la caja de honestidad sobre IA más abajo).</td></tr>
+      <tr><td class="pk">Qué entregas</td><td>Tu archivo de atacantes, las capturas de las pruebas en verde, la salida de Slither y las preguntas de reflexión. Detalle en la sección 5.</td></tr>
+      <tr><td class="pk">Cuánto vale</td><td><strong>100 %</strong> de la actividad: tres retos 25 % cada uno (75 %), Slither 10 %, reflexión 15 %. Rúbrica completa en la sección 5 y en el documento <code>rubrica.pdf</code>.</td></tr>
+      <tr><td class="pk">Fecha de entrega</td><td><strong>[FECHA]</strong> &nbsp;<span class="meta">(la fija el docente)</span></td></tr>
+      <tr><td class="pk">Resultado de aprendizaje</td><td>RA5 · identificar y explotar vulnerabilidades típicas de contratos, y argumentar la defensa.</td></tr>
+    </table>
+    <div class="indice">
+      <a href="#reglas">reglas</a><a href="#montar">montar el proyecto</a><a href="#entender">entender los ataques</a>
+      <a href="#reto1">reto 1</a><a href="#reto2">reto 2</a><a href="#reto3">reto 3</a>
+      <a href="#slither">slither</a><a href="#entrega">entrega y rúbrica</a><a href="#reflexion">reflexión</a>
+    </div>
+  </div></section>
+
+  <!-- ====================== REGLAS DE SEGURIDAD ====================== -->
+  <section class="tarjeta" id="reglas"><div class="cuerpo">
+    <div class="caja peligro" style="margin:0">
+      <div class="et">LAS REGLAS DE SEGURIDAD DEL CURSO (VALEN TAMBIÉN AQUÍ)</div>
+      <ul style="margin-bottom:0">
+        <li>Todo ocurre en la <strong>red local de Hardhat</strong>, nunca con dinero real y sin ETH de prueba de ninguna red pública.</li>
+        <li>Estos contratos son <strong>material de clase sin auditar</strong>: existen para romperlos y entenderlos, jamás para custodiar valor.</li>
+        <li>La frase de recuperación de cualquier billetera <strong>no se comparte con nadie</strong>, tampoco con el docente.</li>
+        <li>Lo que aprendes a atacar aquí es para <strong>defender</strong>. Usarlo contra un contrato ajeno en una red real es un delito, no una tarea.</li>
+      </ul>
+    </div>
+  </div></section>
+
+  <!-- ====================== 1 · MONTAR ====================== -->
+  <details class="plegable" id="montar" open>
+    <summary><span class="num">1</span><span><span class="fam">PREPARACIÓN</span>Montar el proyecto</span><span class="chev">›</span></summary>
+    <div class="interior">
+      <p>Necesitas <strong>Node 22 LTS</strong> instalado (compruébalo con <code>node --version</code>). Lo demás viene en el paquete.</p>
+      <ol>
+        <li>Descarga el paquete <a href="Actividad-09-seguridad.zip" download><strong>Actividad-09-seguridad.zip</strong></a> y descomprímelo en una carpeta tuya.</li>
+        <li>Abre una terminal dentro de esa carpeta e instala las dependencias:
+          <pre>npm install</pre></li>
+        <li>Corre las pruebas del reto. <strong>Las tres fallan a propósito</strong>: el andamiaje de los atacantes viene vacío.
+          <pre>npx hardhat test test/s09/ctf/CTF.test.js</pre></li>
+      </ol>
+      <div class="caja clave">
+        <div class="et">ESTO ES LO QUE DEBES VER AL EMPEZAR (ES CORRECTO)</div>
+        <p>Las tres pruebas en rojo, cada una revienta con <code>reverted with reason string 'sin implementar'</code>. Ese mensaje sale del <code>revert("sin implementar")</code> que trae el andamiaje. Al terminar la actividad, esas tres líneas estarán en verde:</p>
+        <pre>  CTF · Reto 1 · control de acceso (tx.origin)
+    1) ★ el tesorero cae en la trampa y la caja se vacía
+  CTF · Reto 2 · azar en cadena
+    2) ★ el atacante adivina el secreto ...
+  CTF · Reto 3 · reentrada
+    3) ★ con 1 ETH de cebo, el atacante drena la bóveda ...
+
+  3 failing</pre>
+      </div>
+      <p>Tu único archivo de trabajo es <code>contracts/s09/ctf/Atacantes.sol</code>. <strong>No toques</strong> <code>contracts/s09/ctf/Retos.sol</code> (los contratos vulnerables) ni la prueba <code>test/s09/ctf/CTF.test.js</code>: el reto es atacar desde afuera, no cambiar el objetivo ni la prueba.</p>
+    </div>
+  </details>
+
+  <!-- ====================== 2 · ENTENDER ====================== -->
+  <details class="plegable" id="entender">
+    <summary><span class="num">2</span><span><span class="fam">TEORÍA MÍNIMA</span>Antes de atacar, entiende las tres familias</span><span class="chev">›</span></summary>
+    <div class="interior">
+      <p>Un fallo de un contrato no es como un bug de una app web: el código es <strong>inmutable</strong> (no hay parche), <strong>público</strong> (cualquiera lo estudia) y <strong>custodia valor</strong>. Para defender hay que saber atacar. Estos son los tres fallos que vas a explotar.</p>
+
+      <h3>A · Control de acceso con <code>tx.origin</code></h3>
+      <p>En Solidity hay dos «quién me llamó» distintos:</p>
+      <ul>
+        <li><code>msg.sender</code> — quien hizo <strong>esta</strong> llamada (el de un paso antes en la cadena).</li>
+        <li><code>tx.origin</code> — la cuenta de persona (EOA) que <strong>inició toda la transacción</strong>, al principio de la cadena.</li>
+      </ul>
+      <p>Si un contrato comprueba la identidad con <code>tx.origin</code>, basta con que el dueño legítimo, <strong>sin darse cuenta</strong>, firme una transacción que pase por un contrato del atacante: a lo largo de toda esa cadena de llamadas, <code>tx.origin</code> sigue siendo el dueño, así que la comprobación pasa. Es el mismo engaño que un correo de phishing, pero en cadena. <strong>La defensa:</strong> autenticar siempre con <code>msg.sender</code>, nunca con <code>tx.origin</code>.</p>
+
+      <h3>B · Azar «en cadena»</h3>
+      <p>La EVM es <strong>determinista</strong>: todos los nodos tienen que llegar al mismo resultado, así que no existe un azar de verdad dentro de un contrato. Cuando un contrato fabrica un número «aleatorio» con datos del bloque (<code>block.timestamp</code>, <code>block.prevrandao</code>, <code>blockhash</code>, la dirección de quien llama…), ese número es <strong>público y recalculable</strong>. Otro contrato puede leer los mismos datos, hacer la misma cuenta <strong>en la misma transacción</strong> y responder justo lo que toca. <strong>La defensa:</strong> un oráculo de aleatoriedad verificable (p. ej. Chainlink VRF) o un esquema commit–reveal; nunca datos del bloque para decidir dinero.</p>
+
+      <h3>C · Reentrada</h3>
+      <p>Cuando un contrato te <strong>envía ETH</strong> con <code>call</code>, el control pasa a tu código (tu función <code>receive</code>/<code>fallback</code>) <strong>antes</strong> de que la transacción termine. Si el contrato te paga <em>antes</em> de actualizar tu saldo, tu <code>receive</code> puede volver a llamar a la función de retiro mientras tu saldo todavía figura intacto, y cobrar otra vez… y otra. Así se vació The DAO en junio de 2016 (unos 3,6 millones de ETH). <strong>La defensa:</strong> el patrón <strong>Checks–Effects–Interactions</strong> (primero compruebas, luego actualizas el estado, y la llamada externa de última) y/o un <code>ReentrancyGuard</code>.</p>
+
+      <div class="caja clave">
+        <div class="et">LA IDEA QUE CONECTA LAS TRES</div>
+        <p>Cada contrato confía en una suposición que el atacante rompe: «quien me llama es la persona dueña», «nadie puede ver mi número», «cuando pago, el que recibe no hace nada raro». Atacar es encontrar esa suposición. Mientras lees cada reto, pregúntate: <strong>¿en qué está confiando este contrato que yo puedo falsear?</strong></p>
+      </div>
+    </div>
+  </details>
+
+  <!-- ====================== RETO 1 ====================== -->
+  <details class="plegable" id="reto1">
+    <summary><span class="num">R1</span><span><span class="fam">FAMILIA · CONTROL DE ACCESO (tx.origin)</span>Reto 1 · La caja del semillero</span><span class="chev">›</span></summary>
+    <div class="interior">
+      <h3>El contrato vulnerable</h3>
+      <p>Guarda la plata del semillero. Solo el tesorero puede sacarla, y el contrato lo comprueba. Parece bien hecho:</p>
+      <pre>contract CajaDelSemillero {
+    address public tesorero;
+    constructor() { tesorero = msg.sender; }
+    receive() external payable {}
+
+    /// Envía TODO el saldo a donde diga quien autoriza.
+    function sacarTodo(address payable destino) external {
+        if (tx.origin != tesorero) revert NoAutorizado();   // &lt;-- la comprobación
+        destino.transfer(address(this).balance);
+    }
+}</pre>
+
+      <h3>Qué tienes que lograr</h3>
+      <p>Que la caja (con 5 ETH dentro) quede en cero y los 5 ETH terminen en tu cuenta de ladrón. En la prueba, <strong>el tesorero firma una transacción contra tu contrato</strong> creyendo que reclama un premio: ese es el engaño.</p>
+
+      <h3>Dónde escribes</h3>
+      <p>En <code>contracts/s09/ctf/Atacantes.sol</code>, dentro de <code>AtacanteReto1</code>, en el cuerpo de <code>reclamar()</code> (busca el <code>// TODO · reto 1</code>). Tu contrato ya tiene la dirección de la caja y la del ladrón.</p>
+      <pre>function reclamar() external {
+    // TODO · reto 1
+    //  1. pídanle a la caja que les mande TODO a este contrato
+    //  2. reenvíen el botín al ladron
+    revert("sin implementar");   // &lt;-- borra esto cuando lo resuelvas
+}</pre>
+
+      <h3>Cómo lo pruebas</h3>
+      <pre>npx hardhat test test/s09/ctf/CTF.test.js</pre>
+
+      <div class="pistas" data-reto="1">
+        <button class="btn sec" onclick="pista(this)">Mostrar pista</button>
+        <div class="pista" hidden><span class="lbl">PISTA 1 de 3</span>¿Quién es <code>tx.origin</code> cuando el tesorero firma una transacción que llama a <em>tu</em> contrato, y tu contrato llama a la caja? Sigue siendo el tesorero, de principio a fin de la cadena.</div>
+        <div class="pista" hidden><span class="lbl">PISTA 2 de 3</span>Entonces, desde <code>reclamar()</code>, si tú llamas a <code>caja.sacarTodo(...)</code>, la comprobación <code>tx.origin != tesorero</code> será <strong>falsa</strong> (pasará), porque el tesorero fue quien originó todo. ¿A qué <code>destino</code> le pides que mande el dinero?</div>
+        <div class="pista" hidden><span class="lbl">PISTA 3 de 3</span>Pídele a la caja que mande todo a <code>address(this)</code> (tu propio contrato, que tiene <code>receive()</code>). Ya con el ETH adentro, reenvíalo a <code>ladron</code> con una llamada de bajo nivel y comprueba que no falló. Son dos líneas.</div>
+      </div>
+
+      <label class="check" data-k="r1"><input type="checkbox"><span class="txt"><b>Reto 1 resuelto</b> — la prueba «el tesorero cae en la trampa y la caja se vacía» está en verde.</span></label>
+    </div>
+  </details>
+
+  <!-- ====================== RETO 2 ====================== -->
+  <details class="plegable" id="reto2">
+    <summary><span class="num">R2</span><span><span class="fam">FAMILIA · AZAR EN CADENA</span>Reto 2 · La lotería del semillero</span><span class="chev">›</span></summary>
+    <div class="interior">
+      <h3>El contrato vulnerable</h3>
+      <p>Quien quiera deposita en el bote. El que adivine el número secreto (0 a 99) se lo lleva entero. El número sale de datos del bloque que —según el autor— nadie puede controlar:</p>
+      <pre>function probar(uint256 intento) external {
+    uint256 secreto = uint256(
+        keccak256(abi.encodePacked(block.timestamp, msg.sender))
+    ) % 100;
+    if (intento != secreto) revert NumeroEquivocado();
+    (bool ok, ) = payable(msg.sender).call{value: address(this).balance}("");
+    require(ok, "pago fallido");
+}</pre>
+
+      <h3>Qué tienes que lograr</h3>
+      <p>Adivinar el secreto «a la primera» y llevarte todo el bote (3 ETH) a tu cuenta de ladrón, en una sola transacción.</p>
+
+      <h3>Dónde escribes</h3>
+      <p>En <code>AtacanteReto2</code>, en el cuerpo de <code>robar()</code> (<code>// TODO · reto 2</code>).</p>
+
+      <h3>Cómo lo pruebas</h3>
+      <pre>npx hardhat test test/s09/ctf/CTF.test.js</pre>
+
+      <div class="pistas" data-reto="2">
+        <button class="btn sec" onclick="pista(this)">Mostrar pista</button>
+        <div class="pista" hidden><span class="lbl">PISTA 1 de 3</span>El «secreto» no es secreto: es una cuenta pública sobre <code>block.timestamp</code> y <code>msg.sender</code>. Tu contrato puede hacer <strong>exactamente la misma cuenta</strong> antes de responder.</div>
+        <div class="pista" hidden><span class="lbl">PISTA 2 de 3</span>Ojo con <code>msg.sender</code>: dentro de <code>probar</code>, quien llama es <em>tu contrato</em>. Así que cuando calcules el secreto por tu cuenta, usa <code>address(this)</code> donde el contrato usa <code>msg.sender</code>, y el mismo <code>block.timestamp</code> (es el mismo bloque, la misma transacción).</div>
+        <div class="pista" hidden><span class="lbl">PISTA 3 de 3</span>Copia la fórmula del contrato cambiando <code>msg.sender</code> por <code>address(this)</code>, llama a <code>loteria.probar(secreto)</code>, y al recibir el bote reenvíalo al <code>ladron</code>. Necesitas un <code>receive()</code> para poder cobrar.</div>
+      </div>
+
+      <label class="check" data-k="r2"><input type="checkbox"><span class="txt"><b>Reto 2 resuelto</b> — la prueba «el atacante adivina el secreto y se lleva el bote» está en verde.</span></label>
+    </div>
+  </details>
+
+  <!-- ====================== RETO 3 ====================== -->
+  <details class="plegable" id="reto3">
+    <summary><span class="num">R3</span><span><span class="fam">FAMILIA · REENTRADA</span>Reto 3 · La bóveda del semillero</span><span class="chev">›</span></summary>
+    <div class="interior">
+      <h3>El contrato vulnerable</h3>
+      <p>Cada quien deposita y retira lo suyo. El contrato es «cortés»: primero entrega el dinero y <strong>después</strong> pone el saldo en cero. En ese orden:</p>
+      <pre>function retirar() external {
+    uint256 monto = saldos[msg.sender];
+    if (monto == 0) revert SinSaldo();
+
+    (bool ok, ) = payable(msg.sender).call{value: monto}("");   // interacción...
+    require(ok, "envio fallido");
+
+    saldos[msg.sender] = 0;                                      // ...y el efecto, tarde
+}</pre>
+
+      <h3>Qué tienes que lograr</h3>
+      <p>Tres personas honestas depositan 1 ETH cada una (3 ETH en la bóveda). Con <strong>1 ETH de cebo</strong>, tu atacante tiene que drenar la bóveda hasta cero y robarse los 3 ETH de los demás (sales con 3: el cebo vuelve, más 2 ajenos… en total la bóveda queda en 0 y tú ganas 3).</p>
+
+      <h3>Dónde escribes</h3>
+      <p>En <code>AtacanteReto3</code> hay <strong>dos huecos</strong>: <code>atacar()</code> (parte A, arranca la cadena) y <code>receive()</code> (parte B, la reentrada). Los dos <code>// TODO</code> explican cada paso.</p>
+
+      <h3>Cómo lo pruebas</h3>
+      <pre>npx hardhat test test/s09/ctf/CTF.test.js</pre>
+
+      <div class="pistas" data-reto="3">
+        <button class="btn sec" onclick="pista(this)">Mostrar pista</button>
+        <div class="pista" hidden><span class="lbl">PISTA 1 de 3</span>El fallo está en el <strong>orden</strong>: la bóveda paga antes de poner tu saldo en cero. Mientras te paga, el control vuelve a tu <code>receive()</code>, y para la bóveda tu saldo <em>sigue</em> siendo 1 ETH.</div>
+        <div class="pista" hidden><span class="lbl">PISTA 2 de 3</span>En <code>atacar()</code>: guarda el cebo, deposítalo con <code>boveda.depositar{value: ...}()</code> y llama a <code>boveda.retirar()</code> para arrancar. Cuando la cadena termine, reenvía todo lo que juntaste al <code>ladron</code>.</div>
+        <div class="pista" hidden><span class="lbl">PISTA 3 de 3</span>En <code>receive()</code>: mientras la bóveda <strong>todavía tenga con qué pagar</strong> (<code>address(boveda).balance &gt;= cebo</code>), vuelve a llamar a <code>boveda.retirar()</code>. Esa condición de parada evita que la última llamada reviente cuando ya no queda saldo.</div>
+      </div>
+
+      <label class="check" data-k="r3"><input type="checkbox"><span class="txt"><b>Reto 3 resuelto</b> — la prueba «el atacante drena la bóveda y roba los 3 de los demás» está en verde.</span></label>
+    </div>
+  </details>
+
+  <!-- ====================== SLITHER ====================== -->
+  <details class="plegable" id="slither">
+    <summary><span class="num">S</span><span><span class="fam">ANÁLISIS ESTÁTICO · 10 %</span>Pasa Slither sobre tu propio proyecto</span><span class="chev">›</span></summary>
+    <div class="interior">
+      <p><strong>Slither</strong> revisa el código <em>sin ejecutarlo</em> y marca patrones peligrosos en segundos. Es el primer filtro, no el último: no entiende la lógica de negocio. Aquí lo corres sobre el <strong>contrato principal de tu proyecto del curso</strong> (el que ya vienes construyendo), no sobre los retos.</p>
+
+      <h3>Instalación (requiere Python 3.10 o superior)</h3>
+      <pre>python --version
+python -m pip install slither-analyzer
+
+python -m pip install solc-select
+solc-select install 0.8.34
+solc-select use 0.8.34</pre>
+
+      <h3>Correrlo sobre tu contrato</h3>
+      <p>Si tu contrato <strong>no</strong> importa OpenZeppelin:</p>
+      <pre>slither contracts/TuContrato.sol</pre>
+      <div class="caja clave">
+        <div class="et">EL TRUCO QUE TE VA A HACER FALTA</div>
+        <p>Si tu contrato importa OpenZeppelin, Slither no busca en <code>node_modules</code> por su cuenta y falla con <code>Source "@openzeppelin/…" not found</code>. Dile dónde está, desde la raíz del proyecto:</p>
+        <pre>slither contracts/TuContrato.sol \
+        --solc-remaps "@openzeppelin=node_modules/@openzeppelin" \
+        --filter-paths node_modules</pre>
+        <p><code>--filter-paths node_modules</code> esconde el ruido de las dependencias para que solo veas tus propios hallazgos.</p>
+      </div>
+      <p>Slither cierra con una línea del tipo <code>N result(s) found</code>. <strong>Anota cada hallazgo</strong>: su nombre (p. ej. <code>reentrancy-eth</code>), su severidad y si crees que es real o un falso positivo en tu caso, con una frase que lo justifique. Un hallazgo puede ser cierto (p. ej. <code>low-level-calls</code>) y aun así no ser una vulnerabilidad: saber separar señal de ruido es justo lo que se evalúa.</p>
+
+      <label class="check" data-k="sl"><input type="checkbox"><span class="txt"><b>Slither hecho</b> — corriste Slither sobre tu contrato y anotaste los hallazgos con su lectura.</span></label>
+    </div>
+  </details>
+
+  <!-- ====================== ENTREGA + RÚBRICA ====================== -->
+  <details class="plegable" id="entrega">
+    <summary><span class="num">5</span><span><span class="fam">CIERRE</span>Qué entregas y cómo se califica</span><span class="chev">›</span></summary>
+    <div class="interior">
+      <h3>Qué entregas (un solo .zip o carpeta)</h3>
+      <ol>
+        <li><code>Atacantes.sol</code> completo, con tus tres exploits.</li>
+        <li><strong>Captura</strong> de la terminal con las <strong>tres pruebas en verde</strong> (<code>3 passing</code>).</li>
+        <li>Por cada reto, <strong>3 a 5 líneas con tus palabras</strong>: por qué el contrato era vulnerable y cómo se arreglaría (no el ataque: la <em>defensa</em>).</li>
+        <li>Captura de la salida de <strong>Slither</strong> sobre tu contrato + tu lectura de los hallazgos.</li>
+        <li>Las <strong>preguntas de reflexión</strong> de la sección 6 respondidas.</li>
+      </ol>
+
+      <h3>Cómo se califica (resumen · detalle en <code>rubrica.pdf</code>)</h3>
+      <table>
+        <tr><th>COMPONENTE</th><th style="width:16%">PESO</th><th>CÓMO SE GANA</th></tr>
+        <tr><td class="pk">Reto 1</td><td>25 %</td><td>Prueba en verde (20) + explicar por qué y la defensa (5).</td></tr>
+        <tr><td class="pk">Reto 2</td><td>25 %</td><td>Prueba en verde (20) + explicar por qué y la defensa (5).</td></tr>
+        <tr><td class="pk">Reto 3</td><td>25 %</td><td>Prueba en verde (20) + explicar por qué y la defensa (5).</td></tr>
+        <tr><td class="pk">Slither</td><td>10 %</td><td>Corrido sobre tu contrato + hallazgos leídos con criterio.</td></tr>
+        <tr><td class="pk">Reflexión</td><td>15 %</td><td>Respuestas argumentadas, mirando el código real.</td></tr>
+      </table>
+      <p class="meta">La prueba en verde es automática: o pasa o no pasa. La parte de explicación es la que mide que entendiste, no que copiaste.</p>
+    </div>
+  </details>
+
+  <!-- ====================== REFLEXIÓN ====================== -->
+  <details class="plegable" id="reflexion">
+    <summary><span class="num">6</span><span><span class="fam">15 % · PIENSA, NO BUSQUES</span>Preguntas de reflexión</span><span class="chev">›</span></summary>
+    <div class="interior">
+      <p>Estas preguntas se responden mirando <strong>tu</strong> código y <strong>tu</strong> proyecto, no en abstracto. Una respuesta genérica (la que da un buscador o un asistente sin contexto) no suma.</p>
+      <ol>
+        <li><strong>tx.origin vs msg.sender.</strong> Reescribe mentalmente la línea <code>if (tx.origin != tesorero)</code> de la caja para que tu ataque del reto 1 <em>deje de funcionar</em>. ¿Qué cambia exactamente, y por qué eso corta el engaño? ¿Hay algún caso legítimo en el que <code>tx.origin</code> sí sirva?</li>
+        <li><strong>Azar.</strong> La lotería del reto 2 quiere un número que nadie pueda predecir. Explica por qué <em>ningún</em> dato que esté dentro de la cadena puede darte eso, y nombra dónde tendría que venir el azar. Si tu proyecto necesitara un sorteo, ¿cómo lo harías?</li>
+        <li><strong>Orden.</strong> Señala la <strong>única</strong> línea que hay que mover en <code>retirar()</code> de la bóveda para que tu ataque del reto 3 falle. ¿Cuánto gas extra cuesta esa corrección? Relaciónalo con el patrón Checks–Effects–Interactions.</li>
+        <li><strong>Tu proyecto.</strong> De las tres familias de hoy, ¿cuál es la que tu propio contrato del curso podría sufrir? Justifícalo señalando la función concreta de tu código, no en general.</li>
+      </ol>
+    </div>
+  </details>
+
+  <!-- ====================== HONESTIDAD / IA ====================== -->
+  <section class="tarjeta"><div class="cuerpo">
+    <div class="caja ia" style="margin:0">
+      <div class="et">HONESTIDAD ACADÉMICA Y USO DE IA</div>
+      <p>Puedes usar asistentes de IA, <strong>declarándolo</strong>: en tu entrega anota qué herramienta usaste y para qué. Pero ten claro algo: estos tres retos <strong>no se ganan pidiéndole la respuesta a una IA sin entender por qué</strong>. El andamiaje y las pruebas están hechos para que, si pegas código que no comprendes, o no compila, o no pasa, o no sabrás defender tu explicación de «por qué era vulnerable» —que es la parte que un asistente no puede firmar por ti—. La reflexión se califica por tu criterio, no por la prosa.</p>
+      <p style="margin-bottom:0">La trampa no es usar la IA: es entregar algo que no entiendes. En esta carrera, el valor no está en escribir el exploit; está en saber <strong>cuándo un contrato es inseguro y cómo argumentarlo</strong>. Eso es lo que esta actividad mide.</p>
+    </div>
+  </div></section>
+
+</main>
+
+<footer>
+  <p>Blockchain y Web 3.0 · USB Medellín · Actividad 09 · CTF local de seguridad. Material de clase sin auditar.
+  Tu progreso se guarda en este navegador. <button class="reset" onclick="reiniciar()">Reiniciar progreso</button></p>
+</footer>
+
+<script>
+/* ===== pistas escalonadas: cada clic revela la siguiente ===== */
+function pista(btn){
+  const cont = btn.parentElement;
+  const ocultas = [...cont.querySelectorAll('.pista[hidden]')];
+  if(ocultas.length){
+    ocultas[0].hidden = false;
+    if(ocultas.length === 1){ btn.disabled = true; btn.textContent = 'No quedan más pistas'; }
+  }
+}
+
+/* ===== autochequeo + barra de progreso (persistido si se puede) ===== */
+const CLAVE = 'actividad09-seguridad';
+const checks = [...document.querySelectorAll('.check')];
+const total = checks.length;
+
+function leerEstado(){
+  try{ return JSON.parse(localStorage.getItem(CLAVE)) || {}; }catch(e){ return {}; }
+}
+function guardarEstado(est){
+  try{ localStorage.setItem(CLAVE, JSON.stringify(est)); }catch(e){ /* sin persistencia: no pasa nada */ }
+}
+function pintar(){
+  const hechos = checks.filter(c => c.querySelector('input').checked).length;
+  const pct = total ? Math.round(hechos/total*100) : 0;
+  document.getElementById('barraInt').style.width = pct + '%';
+  document.getElementById('barraPct').textContent = hechos + ' / ' + total;
+}
+
+const estado = leerEstado();
+checks.forEach(c => {
+  const k = c.dataset.k;
+  const inp = c.querySelector('input');
+  if(estado[k]){ inp.checked = true; c.classList.add('hecho'); }
+  inp.addEventListener('change', () => {
+    c.classList.toggle('hecho', inp.checked);
+    const e = leerEstado(); e[k] = inp.checked; guardarEstado(e);
+    pintar();
+  });
+});
+pintar();
+
+function reiniciar(){
+  try{ localStorage.removeItem(CLAVE); }catch(e){}
+  checks.forEach(c => { c.querySelector('input').checked = false; c.classList.remove('hecho'); });
+  pintar();
+}
+</script>
+</body>
+</html>
