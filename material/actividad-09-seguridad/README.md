@@ -7,6 +7,20 @@ evaluable y autocalificable: cada reto trae una prueba que pasa cuando tu
 ataque funciona. La guía completa es la página `actividad.html` (ábrela con
 doble clic en el navegador); este README es solo el instructivo del paquete.
 
+**Entrega: viernes 30 de octubre de 2026.**
+
+## De dónde se descarga
+
+Paquete completo (este archivo y todo el código):
+
+```
+https://github.com/andresdapena81/curso-blockchain-web3-usb/raw/main/material/Actividad-09-seguridad.zip
+```
+
+Si prefieren el repositorio entero del curso, está en
+<https://github.com/andresdapena81/curso-blockchain-web3-usb> y esta actividad
+vive en `material/actividad-09-seguridad/` y `material/laboratorios-evm/`.
+
 ---
 
 ## Qué trae el paquete
