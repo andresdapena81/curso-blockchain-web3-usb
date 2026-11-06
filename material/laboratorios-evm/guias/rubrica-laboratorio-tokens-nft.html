@@ -1,0 +1,107 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<title>Guía y rúbrica · Laboratorio Tokens y NFT</title>
+<!--ESTILOS-->
+</head>
+<body>
+
+<section class="barra">
+  <div class="kicker">LABORATORIO · UNIDAD III · TOKENS Y NFT · S10 + S11 · EN GRUPOS</div>
+  <h1>GUÍA Y RÚBRICA DEL<br>LABORATORIO DE <em>TOKENS Y NFT</em></h1>
+  <div class="sub">Dos laboratorios encadenados en red local de Hardhat: un token fungible (ERC-20) y una credencial no fungible (ERC-721), con su variante intransferible (SBT). Autocalificable: cada prueba en verde es parte de la nota.</div>
+</section>
+
+<dl class="datos">
+  <div><dt>MODALIDAD</dt><dd>En grupos de trabajo<br>(los del proyecto)</dd></div>
+  <div><dt>ENTREGA</dt><dd>Contratos · capturas<br>de pruebas · informe</dd></div>
+  <div><dt>ESCALA</dt><dd>100 puntos<br>(= nota del laboratorio)</dd></div>
+  <div><dt>FECHA</dt><dd>La que fije el docente</dd></div>
+</dl>
+
+<div class="caja peligro">
+  <div class="caja-et">CÓMO FUNCIONA ESTE LABORATORIO</div>
+  <p>Todo corre en la <strong>red local de Hardhat</strong>: no se necesita ETH, ni red pública, ni IPFS. El trabajo es <strong>completar los <code>// TODO</code></strong> de cada contrato hasta que las pruebas pasen. Lo verifican ustedes mismos con <code>npm run ficha</code> (Lab 1) y <code>npm run diploma</code> (Lab 2). <strong>No se modifican los archivos de <code>test/</code></strong>: son la calificación. La parte automática (58 de 100 puntos) es objetiva: la prueba pasa o no pasa.</p>
+</div>
+
+<!-- qué se construye -->
+<section class="sec">
+  <div class="sec-cab"><span class="sec-num">01</span><h2>Qué se construye</h2><span class="lead">2 LABS</span></div>
+  <table>
+    <tr><th style="width:26%">PARTE</th><th style="width:44%">QUÉ HACE</th><th>META</th></tr>
+    <tr><td class="pk">Lab 1 · FichaUSB + Canje</td><td>Token de puntos con tope y quema (ERC-20) y un puesto que lo cobra con el patrón <code>approve</code> + <code>transferFrom</code>.</td><td>12 pruebas en verde</td></tr>
+    <tr><td class="pk">Lab 2 · DiplomaUSB</td><td>Credencial única (ERC-721) con control de suministro y <code>tokenURI</code>.</td><td>11 pruebas en verde</td></tr>
+    <tr><td class="pk">Lab 2b · DiplomaSBT</td><td>El mismo diploma, pero <strong>intransferible</strong> (ERC-5192): un <code>if</code> en <code>_update</code> bloquea la transferencia.</td><td>9 pruebas en verde</td></tr>
+  </table>
+</section>
+
+<!-- qué se entrega -->
+<section class="sec">
+  <div class="sec-cab"><span class="sec-num">02</span><h2>Qué se entrega</h2><span class="lead">POR GRUPO</span></div>
+  <p>Una sola carpeta o <code>.zip</code> por grupo con:</p>
+  <table>
+    <tr><th style="width:34%">EVIDENCIA</th><th>DETALLE</th></tr>
+    <tr><td class="pk">Contratos completos</td><td><code>FichaUSB.sol</code>, <code>Canje.sol</code>, <code>DiplomaUSB.sol</code> y <code>DiplomaSBT.sol</code>, con los <code>// TODO</code> resueltos.</td></tr>
+    <tr><td class="pk">Capturas de pruebas</td><td>Terminal con <strong>12 passing</strong> (Lab 1) y <strong>20 passing</strong> (Lab 2) a la vista.</td></tr>
+    <tr><td class="pk">Informe corto</td><td>Las cuatro preguntas de la sección 04, respondidas con sus palabras (3–5 líneas cada una).</td></tr>
+  </table>
+</section>
+
+<!-- rúbrica -->
+<section class="sec salto">
+  <div class="sec-cab"><span class="sec-num">03</span><h2>Rúbrica · 100 puntos</h2><span class="lead">58 AUTO + 42 ARGUMENTO</span></div>
+  <table>
+    <tr><th style="width:36%">COMPONENTE</th><th style="width:14%">PUNTOS</th><th>REPARTO INTERNO</th></tr>
+    <tr><td class="pk">Lab 1 · Token (FichaUSB + Canje)</td><td>30</td><td>Pruebas en verde 22 (las 12) · explican los 4 TODO 8</td></tr>
+    <tr><td class="pk">Lab 2 · Diploma NFT (DiplomaUSB)</td><td>30</td><td>Pruebas en verde 22 (las 11) · checks-effects-interaction y los override 8</td></tr>
+    <tr><td class="pk">Lab 2b · SBT intransferible (DiplomaSBT)</td><td>20</td><td>Pruebas en verde 14 (las 9) · el <code>if</code> en <code>_update</code> y su trade-off 6</td></tr>
+    <tr><td class="pk">Informe y reflexión</td><td>20</td><td>Las 4 preguntas de la sección 04</td></tr>
+  </table>
+  <div class="caja clave">
+    <div class="caja-et">BANDAS PARA LA PARTE DE ARGUMENTO</div>
+    <table style="margin-bottom:0">
+      <tr><th style="width:26%">NIVEL</th><th style="width:14%">PROPORCIÓN</th><th>DESCRIPCIÓN</th></tr>
+      <tr><td class="pk">Completo</td><td>100 %</td><td>Nombra la causa exacta (la línea o el patrón) y explica el porqué con sus palabras.</td></tr>
+      <tr><td class="pk">Parcial</td><td>40–70 %</td><td>Ve el mecanismo pero la explicación es vaga, incompleta o solo descriptiva.</td></tr>
+      <tr><td class="pk">Insuficiente</td><td>0–30 %</td><td>Explicación genérica, copiada o incorrecta; no demuestra haber entendido el código.</td></tr>
+    </table>
+  </div>
+  <p class="mono" style="font-size:8.5pt; color:var(--gris)">Crédito parcial en lo automático: a juicio del docente, una pareja con casi todas las pruebas en verde y un solo TODO mal puede recibir parte del puntaje de esa parte.</p>
+</section>
+
+<!-- reflexión -->
+<section class="sec">
+  <div class="sec-cab"><span class="sec-num">04</span><h2>Preguntas de reflexión · 20 puntos</h2><span class="lead">MIRA TU CÓDIGO</span></div>
+  <table>
+    <tr><th style="width:62%">PREGUNTA</th><th style="width:12%">PUNTOS</th><th>SE EVALÚA</th></tr>
+    <tr><td>1 · ¿Qué evento estándar de ERC-721 emite <code>emitir()</code> además de <code>DiplomaEmitido</code>, y con qué dirección de origen?</td><td>5</td><td>Exactitud</td></tr>
+    <tr><td>2 · ¿Por qué <code>canjear()</code> no necesita un <code>require</code> sobre la allowance? (pruébenlo sin aprobar y miren el error).</td><td>5</td><td>Lo probaron</td></tr>
+    <tr><td>3 · ¿Por qué el contrato no compila sin los <code>override</code> de <code>tokenURI</code> y <code>supportsInterface</code>?</td><td>5</td><td>Entienden la herencia</td></tr>
+    <tr><td>4 · ¿Cuál de las tres familias (fungible / NFT / SBT) le aplicaría a su propio proyecto, y en qué función?</td><td>5</td><td>Mira su proyecto</td></tr>
+  </table>
+  <div class="caja alerta">
+    <div class="caja-et">RESPUESTAS GENÉRICAS = 0 EN LA PREGUNTA</div>
+    <p>Estas preguntas se responden mirando <strong>su</strong> código y <strong>su</strong> proyecto. Una respuesta que valdría igual para cualquier curso —la que produce un asistente sin ver su código— no recibe puntos, aunque esté «bien escrita».</p>
+  </div>
+</section>
+
+<!-- honestidad -->
+<section class="sec">
+  <div class="sec-cab"><span class="sec-num">05</span><h2>Uso de IA y honestidad</h2></div>
+  <p>Pueden usar asistentes de IA, pero deben <strong>declararlo</strong>. El laboratorio no se gana pegando una respuesta que no entienden: la parte de argumento y la reflexión miden su criterio. Entregar algo que no comprenden —aunque la prueba pase— y no poder sostener el porqué anula los puntos de argumento y reflexión.</p>
+  <div class="caja">
+    <div class="caja-et">COMPLETAR Y FIRMAR AL ENTREGAR</div>
+    <p>Declaramos que este trabajo es nuestro. Usamos asistentes de IA de la siguiente manera (herramienta y para qué; escriban «no usamos» si aplica):</p>
+    <p class="mono">_______________________________________________________________________________</p>
+    <p class="mono">_______________________________________________________________________________</p>
+    <div class="firma">
+      <div>INTEGRANTES DEL GRUPO</div>
+      <div>CÓDIGOS</div>
+      <div>FECHA</div>
+    </div>
+  </div>
+</section>
+
+</body>
+</html>
